@@ -1,0 +1,98 @@
+<html>
+  <head>
+    <title>Image Downloader | Options</title>
+    <style>
+      input[type=number]
+      {
+        width: 75px;
+        text-align: right;
+        margin-right: 2px;
+      }
+      
+      input[type=color]
+      {
+        width: 75px;
+      }
+      
+      select
+      {
+        width: 75px;
+      }
+      
+      #success_container
+      {
+        color: green;
+      }
+      
+      #warning_container
+      {
+        color: red;
+      }
+    </style>
+    <script src="options.js"></script>
+    <script src="jss.js"></script>
+  </head>
+  
+  <body>
+    <fieldset>
+      <legend>General</legend>
+    
+      <table>
+        <tr>
+          <td>Popup Width:</td>
+          <td><input type="number" id="body_width_numberbox" min="300" />px</td>
+        </tr>
+      </table>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Images</legend>
+      
+      <table>
+        <tr>
+          <td>Min Width:</td>
+          <td><input type="number" id="image_min_width_numberbox" min="0" />px</td>
+        </tr>
+        
+        <tr>
+          <td>Max Width:</td>
+          <td><input type="number" id="image_max_width_numberbox" min="0" />px</td>
+        </tr>
+      
+        <tr>
+          <td>Border Width:</td>
+          <td><input type="number" id="image_border_width_numberbox" min="0" max="5" />px</td>
+        </tr>
+        
+        <tr>
+          <td>Border Style:</td>
+          <td>
+            <select id="image_border_style_dropdown">
+              <option value="solid">Solid</option>
+              <option value="dotted">Dotted</option>
+              <option value="dashed">Dashed</option>
+            </select>
+          </td>
+        </tr>
+        
+        <tr>
+          <td>Border Color:</td>
+          <td><input type="color" id="image_border_color_picker" /></td>
+        </tr>
+      </table>
+      
+      <img src="icon.png" />
+      
+      <div class="clear"></div>
+      
+      <input type="checkbox" id="sort_images_checkbox" />
+      <label for="sort_images_checkbox">Sort by URL</label> 
+    </fieldset>
+    
+    <input type="button" id="save_button" value="Save" />
+    <input type="button" id="reset_button" value="Reset" />
+    
+    <div id="success_container"></div>
+    <div id="warning_container"></div>
+  </body>
+</html>
