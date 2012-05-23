@@ -100,6 +100,7 @@ function resetOptions() {
   localStorage.sort_images = localStorage.sort_images_default;
   
   initializeOptions();
+  initializeStyles();
   showNotification('The options have been reset to their default values. You can now save the changes you made or discard them by reloading this page.', 'warning_container', 'success_container');
 }
 
