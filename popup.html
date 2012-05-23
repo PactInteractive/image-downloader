@@ -2,10 +2,26 @@
   <head>
     <script src="popup.js"></script>
     <script src="jss.js"></script>
+    <style>
+      #filters_table
+      {
+        position: fixed;
+        top: 0px;
+        margin: 0px -8px;
+        padding: 8px;
+        background: #fff;
+        width: 100%;
+      }
+      
+      #images_table
+      {
+        margin-top: 56px;
+      }
+    </style>
   </head>
   
   <body>
-    <table>
+    <table id="filters_table">
       <tr valign="middle">
         <td><input type="text" id="filter_textbox" placeholder="Filter" /></td>
         <td><input type="checkbox" id="regex_checkbox" /></td>
@@ -15,11 +31,13 @@
       </tr>
     </table>
     
-    <table id="imagesTable">
+    <table id="images_table">
       <tr>
         <th><input type="checkbox" id="toggle_all_checkbox" checked /></th>
         <th align="left">All</th>
       </tr>
     </table>
+    
+    <div style="clear: both"></div>
   </body>
 </html>

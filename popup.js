@@ -25,15 +25,20 @@ function initializeStyles() {
       'border-style': localStorage.image_border_style || localStorage.image_border_style_default,
       'border-color': localStorage.image_border_color || localStorage.image_border_color_default
   });
+  jss('#filters_table', {
+    'border-bottom-width': (localStorage.image_border_width || localStorage.image_border_width_default) + 'px',
+    'border-bottom-style': localStorage.image_border_style || localStorage.image_border_style_default,
+    'border-bottom-color': localStorage.image_border_color || localStorage.image_border_color_default
+  });
 }
 
 var allImages = [];
 var visibleImages = [];
 
 function showImages() {
-  var imagesTable = document.getElementById('imagesTable');
-  while (imagesTable.children.length > 1) {
-    imagesTable.removeChild(imagesTable.children[imagesTable.children.length - 1])
+  var images_table = document.getElementById('images_table');
+  while (images_table.children.length > 1) {
+    images_table.removeChild(images_table.children[images_table.children.length - 1])
   }
   
   for (var i = 0; i < visibleImages.length; i++) {
@@ -68,7 +73,7 @@ function showImages() {
     row.appendChild(col1);
     row.appendChild(col2);
     
-    imagesTable.appendChild(row);
+    images_table.appendChild(row);
   }
 }
 
