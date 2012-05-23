@@ -1,7 +1,7 @@
 {
   "name": "Image Downloader",
   "description": "Displays all images on a web page and allows the user to choose which ones to download.",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "manifest_version": 2,
   "permissions": [
     "tabs", "http://*/*", "https://*/*"
