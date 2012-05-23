@@ -7,8 +7,13 @@
     "tabs", "http://*/*", "https://*/*"
   ],
   "browser_action": {
-    "default_icon": "icon.png",
+    "default_icon": "icon_128.png",
     "default_popup": "popup.html"
+  },
+  "icons": {
+    "16": "icon_16.png",
+    "48": "icon_48.png",
+    "128": "icon_128.png"
   },
   "background": {
     "scripts": ["defaults.js"]
