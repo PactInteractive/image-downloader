@@ -1,10 +1,10 @@
 {
   "name": "Image Downloader",
   "description": "Displays all images on a web page and allows the user to choose which ones to download.",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "manifest_version": 2,
   "permissions": [
-    "tabs", "http://*/*", "https://*/*"
+    "tabs", "notifications", "http://*/*", "https://*/*"
   ],
   "browser_action": {
     "default_icon": "icon_128.png",
@@ -15,6 +15,9 @@
     "48": "icon_48.png",
     "128": "icon_128.png"
   },
+  "web_accessible_resources": [
+    "icon_48.png"
+  ],
   "background": {
     "scripts": ["defaults.js"]
   },

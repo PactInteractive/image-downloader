@@ -25,7 +25,7 @@ function initializeStyles() {
       'border-style': localStorage.image_border_style || localStorage.image_border_style_default,
       'border-color': localStorage.image_border_color || localStorage.image_border_color_default
   });
-  jss('#filters_table', {
+  jss('#filters_container', {
     'border-bottom-width': (localStorage.image_border_width || localStorage.image_border_width_default) + 'px',
     'border-bottom-style': localStorage.image_border_style || localStorage.image_border_style_default,
     'border-bottom-color': localStorage.image_border_color || localStorage.image_border_color_default
@@ -87,12 +87,31 @@ function toggleAll() {
 
 //Download all visible checked images.
 function downloadCheckedImages() {
-  var download_container = document.getElementById('download_container');
+  var anyFilesSaved = false;
   for (var i = 0; i < visibleImages.length; i++) {
     if (document.getElementById('checkbox' + i).checked) {
+      anyFilesSaved = true;
       document.getElementById('anchor' + i).click();
     }
   }
+  
+  if (anyFilesSaved) {
+    showDownloadNotification();
+  }
+}
+
+function showDownloadNotification() {
+  if (window.webkitNotifications.checkPermission() > 0) {
+    requestNotificationPermission(showDownloadNotification);
+  }
+  else {
+    var downloadNotification = webkitNotifications.createNotification('icon_48.png', 'Image Downloader', 'Download has started. If you have set up a default download location for Chrome, the files will be saved there. Otherwise, you will have to choose the save location for each file.');
+    downloadNotification.show();
+  }
+}
+
+function requestNotificationPermission(callback) {
+  window.webkitNotifications.requestPermission(callback);
 }
 
 //Re-filter allImages into visibleImages and reshow visibleImages.
