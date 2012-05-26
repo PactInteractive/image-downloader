@@ -101,17 +101,20 @@ function downloadCheckedImages() {
 }
 
 function showDownloadNotification() {
-  var notification_container = document.createElement('div');
-  notification_container.id = 'notification_container';
+  var filters_container = document.getElementById('filters_container');
+  var notification_container = document.getElementById('notification_container');
+  if (!notification_container) {
+    notification_container = document.createElement('div');
+    notification_container.id = 'notification_container';
+    filters_container.appendChild(notification_container);
+  }
+  
   notification_container.innerHTML =
     '<div class="notification">' + localStorage.download_notification + '</div>' +
     '<input type="button" value="OK" id="okay_button" />' +
     '<input type="checkbox" id="dont_show_again_checkbox" />' +
     '<label for="dont_show_again_checkbox">Don\'t show this again</label>'
     ;
-  
-  var filters_container = document.getElementById('filters_container');
-  filters_container.appendChild(notification_container);
   
   var okay_button = document.getElementById('okay_button');
   okay_button.onclick = function() {
