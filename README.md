@@ -9,10 +9,12 @@ If you need to bulk download images from a web page, with this extension you can
 
 For questions, issues or other feedback, you can contact me here: vdsabev@gmail.com
 
-======== KNOWN ISSUES ========
+Known Issues
+================
 In the developer version of Google Chrome (v21), pressing "Download" causes a crash because of an issue in the browser itself. There is no known workaround, but only developers and experienced users should be using this version anyway. I apologize for the inconvenience.
 
-========= CHANGE LOG =========
+Change Log
+================
 1.0.7:
 - removed the desktop notification system that popped up when you press "Download" in favor of a text description that should feel easier to control (through Options) and less intrusive; this should also require less permissions for the extension
 - added an option to hide the download notification; most people should understand the download process after only reading it once
@@ -26,8 +28,8 @@ In the developer version of Google Chrome (v21), pressing "Download" causes a cr
 
 1.0.4:
 - added a notification that alerts the user when the download process has begun and explains where to look for the files
-
-==============================
+s
+================
 Image Downloader uses the tiny (and free) JSS library: https://github.com/Box9/jss
 
 Based on the Google Chrome Extension sample "Download Selected Links":
