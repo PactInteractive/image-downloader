@@ -28,7 +28,8 @@ Change Log
 
 1.0.4:
 - added a notification that alerts the user when the download process has begun and explains where to look for the files
-s
+
+References
 ================
 Image Downloader uses the tiny (and free) JSS library: https://github.com/Box9/jss
 
