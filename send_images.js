@@ -12,6 +12,8 @@ images = images.map(function(element) {
   if (element.style['background-image']) {
     return element.style['background-image'].replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
   }
+  
+  return '';
 });
 
 

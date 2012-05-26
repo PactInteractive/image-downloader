@@ -11,6 +11,11 @@ function initializeOptions() {
     jss('body', { 'width': (this.value || localStorage.body_width_default) + 'px' });
   }
   
+  var show_download_notification_checkbox = document.getElementById('show_download_notification_checkbox');
+  if ((localStorage.show_download_notification || localStorage.show_download_notification_default) == 'true') {
+    show_download_notification_checkbox.checked = true;
+  }
+  
   //Images
   var image_min_width_numberbox = document.getElementById('image_min_width_numberbox');
   image_min_width_numberbox.value = localStorage.image_min_width || localStorage.image_min_width_default;
@@ -43,7 +48,7 @@ function initializeOptions() {
   }
   
   var sort_images_checkbox = document.getElementById('sort_images_checkbox');
-  if (localStorage.sort_images == 'true') {
+  if ((localStorage.sort_images || localStorage.sort_images_default) == 'true') {
     sort_images_checkbox.checked = true;
   }
   
@@ -71,6 +76,9 @@ function saveOptions() {
   var body_width_numberbox = document.getElementById('body_width_numberbox');
   localStorage.body_width = body_width_numberbox.value;
   
+  var show_download_notification_checkbox = document.getElementById('show_download_notification_checkbox');
+  localStorage.show_download_notification = show_download_notification_checkbox.checked;
+  
   //Images
   var image_border_width_numberbox = document.getElementById('image_border_width_numberbox');
   localStorage.image_border_width = image_border_width_numberbox.value;
@@ -90,6 +98,7 @@ function saveOptions() {
 function resetOptions() {
   //General
   localStorage.body_width = localStorage.body_width_default;
+  localStorage.show_download_notification = localStorage.show_download_notification_default;
   
   //Images
   localStorage.image_min_width = localStorage.image_min_width_default;

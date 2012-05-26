@@ -77,7 +77,7 @@ function showImages() {
   }
 }
 
-//Toggle the checked state of all visible images.
+//Toggle the checked state of all visible images
 function toggleAll() {
   var checked = document.getElementById('toggle_all_checkbox').checked;
   for (var i = 0; i < visibleImages.length; i++) {
@@ -85,7 +85,7 @@ function toggleAll() {
   }
 }
 
-//Download all visible checked images.
+//Download all visible checked images
 function downloadCheckedImages() {
   var anyFilesSaved = false;
   for (var i = 0; i < visibleImages.length; i++) {
@@ -95,26 +95,33 @@ function downloadCheckedImages() {
     }
   }
   
-  if (anyFilesSaved) {
+  if (anyFilesSaved && (localStorage.show_download_notification || localStorage.show_download_notification_default) == 'true') {
     showDownloadNotification();
   }
 }
 
 function showDownloadNotification() {
-  if (window.webkitNotifications.checkPermission() > 0) {
-    requestNotificationPermission(showDownloadNotification);
-  }
-  else {
-    var downloadNotification = webkitNotifications.createNotification('icon_48.png', 'Image Downloader', 'Download has started. If you have set up a default download location for Chrome, the files will be saved there. Otherwise, you will have to choose the save location for each file.');
-    downloadNotification.show();
-  }
+  var notification_container = document.createElement('div');
+  notification_container.id = 'notification_container';
+  notification_container.innerHTML =
+    '<div class="notification">' + localStorage.download_notification + '</div>' +
+    '<input type="button" value="OK" id="okay_button" />' +
+    '<input type="checkbox" id="dont_show_again_checkbox" />' +
+    '<label for="dont_show_again_checkbox">Don\'t show this again</label>'
+    ;
+  
+  var filters_container = document.getElementById('filters_container');
+  filters_container.appendChild(notification_container);
+  
+  var okay_button = document.getElementById('okay_button');
+  okay_button.onclick = function() {
+    var dont_show_again_checkbox = document.getElementById('dont_show_again_checkbox');
+    localStorage.show_download_notification = !dont_show_again_checkbox.checked;
+    filters_container.removeChild(notification_container);
+  };
 }
 
-function requestNotificationPermission(callback) {
-  window.webkitNotifications.requestPermission(callback);
-}
-
-//Re-filter allImages into visibleImages and reshow visibleImages.
+//Re-filter allImages into visibleImages and reshow visibleImages
 function filterImages() {
   var filterValue = document.getElementById('filter_textbox').value;
   if (document.getElementById('regex_checkbox').checked) {
@@ -148,8 +155,7 @@ function filterImages() {
 }
 
 //Add images to allImages and visibleImages, sort and show them.  send_images.js is
-//injected into all frames of the active tab, so this listener may be called
-//multiple times.
+//injected into all frames of the active tab, so this listener may be called multiple times
 chrome.extension.onRequest.addListener(function(images) {
   for (var index in images) {
     allImages.push(images[index]);
