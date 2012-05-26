@@ -1,3 +1,5 @@
+Image Downloader
+================
 If you need to bulk download images from a web page, with this extension you can:
 - see all images that the page contains
 - filter them by URL; also supports regular expressions
