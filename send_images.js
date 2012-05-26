@@ -1,12 +1,20 @@
-var images = [].slice.apply(document.getElementsByTagName('img'));
+var images = [].slice.apply(document.getElementsByTagName('*'));
 images = images.map(function(element) {
-  var src = element.src;
-  var hashIndex = src.indexOf('#');
-  if (hashIndex >= 0) {
-    src = src.substr(0, hashIndex);
+  if (element.tagName.toLowerCase() == 'img') {
+    var src = element.src;
+    var hashIndex = src.indexOf('#');
+    if (hashIndex >= 0) {
+      src = src.substr(0, hashIndex);
+    }
+    return src;
   }
-  return src;
+  
+  if (element.style['background-image']) {
+    return element.style['background-image'].replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+  }
 });
+
+
 images = removeDuplicateOrEmpty(images);
 chrome.extension.sendRequest(images);
 
