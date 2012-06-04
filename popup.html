@@ -1,58 +1,58 @@
 <!doctype html>
-  <head>
-    <script src="popup.js"></script>
-    <script src="jss.js"></script>
-    <style>
-      #filters_container
-      {
-        position: fixed;
-        top: 0px;
-        margin: 0px -8px;
-        padding: 8px;
-        background: #fff;
-      }
-      
-      #filters_table
-      {
-        width: 100%;
-      }
-      
-      #filter_textbox
-      {
-        width: 100%;
-      }
-      
-      .notification
-      {
-        color: green;
-      }
-      
-      #images_table
-      {
-        margin-top: 56px;
-      }
-    </style>
-  </head>
-  
-  <body>
-    <div id="filters_container">
-      <table id="filters_table">
-        <tr valign="middle">
-          <td><input type="text" id="filter_textbox" placeholder="Filter by URL" /></td>
-          <td><input type="checkbox" id="regex_checkbox" /></td>
-          <td>Regex</td>
-          <td><input type="button" id="download_button" value="Download" /></td>
-        </tr>
-      </table>
-    </div>
-    
-    <table id="images_table">
-      <tr>
-        <th><input type="checkbox" id="toggle_all_checkbox" checked /></th>
-        <th align="left"><label for="toggle_all_checkbox">All</label></th>
-      </tr>
-    </table>
-    
-    <div style="clear: both"></div>
-  </body>
+	<head>
+		<script src="popup.js"></script>
+		<script src="jss.js"></script>
+		<style>
+			#filters_container
+			{
+				position: fixed;
+				top: 0px;
+				margin: 0px -8px;
+				padding: 8px;
+				background: #fff;
+			}
+			
+			#filters_table
+			{
+				width: 100%;
+			}
+			
+			#filter_textbox
+			{
+				width: 100%;
+			}
+			
+			.notification
+			{
+				color: green;
+			}
+			
+			#images_table
+			{
+				margin-top: 56px;
+			}
+		</style>
+	</head>
+	
+	<body>
+		<div id="filters_container">
+			<table id="filters_table">
+				<tr valign="middle">
+					<td><input type="text" id="filter_textbox" placeholder="Filter by URL" /></td>
+					<td><input type="checkbox" id="regex_checkbox" /></td>
+					<td>Regex</td>
+					<td><input type="button" id="download_button" value="Download" /></td>
+				</tr>
+			</table>
+		</div>
+		
+		<table id="images_table">
+			<tr>
+				<th><input type="checkbox" id="toggle_all_checkbox" checked /></th>
+				<th align="left"><label id="toggle_all_checkbox_label" for="toggle_all_checkbox">All (0)</label></th>
+			</tr>
+		</table>
+		
+		<div style="clear: both"></div>
+	</body>
 </html>
