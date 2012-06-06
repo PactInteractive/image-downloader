@@ -9,5 +9,6 @@ localStorage.image_border_color_default = '#adbeef';
 
 localStorage.sort_images_default = 'false';
 
-localStorage.download_notification = 'Download has started. If you have set up a default download location for Chrome, the files will be saved there. Otherwise, you will have to choose the save location for each file.';
+localStorage.download_notification = 'If you have set up a default download location for Chrome, the files will be saved there.';
+localStorage.download_warning = 'Otherwise, you will have to choose the save location for each file, which may open a lot of Save dialogs. Are you sure?';
 localStorage.show_download_notification_default = 'true';

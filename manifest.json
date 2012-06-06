@@ -1,7 +1,7 @@
 {
 	"name": "Image Downloader",
 	"description": "See all images shown or linked on a web page and download them.",
-	"version": "1.0.9",
+	"version": "1.0.10",
 	"manifest_version": 2,
 	"permissions": [
 		"tabs", "http://*/*", "https://*/*"

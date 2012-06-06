@@ -90,41 +90,56 @@ function toggleAll() {
 
 //Download all visible checked images
 function downloadCheckedImages() {
-	var anyFilesSaved = false;
-	for (var i = 0; i < visibleImages.length; i++) {
-		if (document.getElementById('checkbox' + i).checked) {
-			anyFilesSaved = true;
-			document.getElementById('anchor' + i).click();
-		}
-	}
-	
-	if (anyFilesSaved && (localStorage.show_download_notification || localStorage.show_download_notification_default) == 'true') {
-		showDownloadNotification();
-	}
+  if ((localStorage.show_download_notification || localStorage.show_download_notification_default) == 'true') {
+    showDownloadConfirmation();
+  }
+  else {
+    startDownload();
+  }
 }
 
-function showDownloadNotification() {
-	var filters_container = document.getElementById('filters_container');
-	var notification_container = document.getElementById('notification_container');
-	if (!notification_container) {
-		notification_container = document.createElement('div');
-		notification_container.id = 'notification_container';
-		filters_container.appendChild(notification_container);
-	}
-	
-	notification_container.innerHTML =
-		'<div class="notification">' + localStorage.download_notification + '</div>' +
-		'<input type="button" value="OK" id="okay_button" />' +
-		'<input type="checkbox" id="dont_show_again_checkbox" />' +
-		'<label for="dont_show_again_checkbox">Don\'t show this again</label>'
-		;
-	
-	var okay_button = document.getElementById('okay_button');
-	okay_button.onclick = function() {
-		var dont_show_again_checkbox = document.getElementById('dont_show_again_checkbox');
-		localStorage.show_download_notification = !dont_show_again_checkbox.checked;
-		filters_container.removeChild(notification_container);
-	};
+function showDownloadConfirmation() {
+  var filters_container = document.getElementById('filters_container');
+  var notification_container = document.getElementById('notification_container');
+  if (!notification_container) {
+    notification_container = document.createElement('div');
+    notification_container.id = 'notification_container';
+    filters_container.appendChild(notification_container);
+  }
+  
+  notification_container.innerHTML =
+    '<div class="notification">' + localStorage.download_notification + '</div>' +
+    '<div class="warning">' + localStorage.download_warning + '</div>' +
+    '<input type="button" value="OK" id="okay_button" />' +
+    '<input type="button" value="Cancel" id="cancel_button" />' +
+    '<input type="checkbox" id="dont_show_again_checkbox" />' +
+    '<label for="dont_show_again_checkbox">Don\'t show this again</label>'
+    ;
+  
+  var okay_button = document.getElementById('okay_button');
+  okay_button.onclick = function() {
+    startDownload();
+    closeFiltersContainer(filters_container);
+  };
+  
+  var cancel_button = document.getElementById('cancel_button');
+  cancel_button.onclick = function() {
+    closeFiltersContainer(filters_container);
+  };
+}
+
+function startDownload() {
+  for (var i = 0; i < visibleImages.length; i++) {
+    if (document.getElementById('checkbox' + i).checked) {
+      document.getElementById('anchor' + i).click();
+    }
+  }
+}
+
+function closeFiltersContainer(filters_container) {
+  var dont_show_again_checkbox = document.getElementById('dont_show_again_checkbox');
+  localStorage.show_download_notification = !dont_show_again_checkbox.checked;
+  filters_container.removeChild(notification_container);
 }
 
 //Re-filter allImages into visibleImages and reshow visibleImages
