@@ -6,6 +6,7 @@ window.onload = function () {
 function initializePopup() {
 	document.getElementById('filter_textbox').onkeyup = filterImages;
 	document.getElementById('regex_checkbox').onchange = filterImages;
+  document.getElementById('linked_images_checkbox').onchange = filterImages;
 	document.getElementById('toggle_all_checkbox').onchange = toggleAll;
 	document.getElementById('download_button').onclick = downloadCheckedImages;
 	
@@ -34,6 +35,7 @@ function initializeStyles() {
 
 var allImages = [];
 var visibleImages = [];
+var linkedImages = {};
 
 function showImages() {
 	var images_table = document.getElementById('images_table');
@@ -52,10 +54,7 @@ function showImages() {
 		var image = document.createElement('img');
 		image.src = visibleImages[i];
 		image.index = i;
-		image.onclick = function () {
-			var checkbox = document.getElementById('checkbox' + this.index);
-			checkbox.checked = !checkbox.checked;
-		};
+		image.onclick = toggleImageChecked;
 		
 		var col1 = document.createElement('td');
 		col1.appendChild(image);
@@ -74,6 +73,11 @@ function showImages() {
 	
 	var toggle_all_checkbox_label = document.getElementById('toggle_all_checkbox_label')
 	toggle_all_checkbox_label.innerHTML = 'All (' + visibleImages.length + ')';
+}
+
+function toggleImageChecked() {
+  var checkbox = document.getElementById('checkbox' + this.index);
+  checkbox.checked = !checkbox.checked;
 }
 
 //Toggle the checked state of all visible images
@@ -151,13 +155,13 @@ function closeFiltersContainer(filters_container) {
 function filterImages() {
 	var filterValue = document.getElementById('filter_textbox').value;
 	if (document.getElementById('regex_checkbox').checked) {
-		visibleImages = allImages.filter(function (image) {
-			return image.match(filterValue);
+		visibleImages = allImages.filter(function (url) {
+			return url.match(filterValue);
 		});
 	}
 	else {
 		var terms = filterValue.split(' ');
-		visibleImages = allImages.filter(function (image) {
+		visibleImages = allImages.filter(function (url) {
 			for (var i in terms) {
 				var term = terms[i];
 				if (term.length != 0) {
@@ -168,7 +172,7 @@ function filterImages() {
 							continue;
 						}
 					}
-					var found = (-1 !== image.indexOf(term));
+					var found = (-1 !== url.indexOf(term));
 					if (found != expected) {
 						return false;
 					}
@@ -177,14 +181,23 @@ function filterImages() {
 			return true;
 		});
 	}
+  
+  var linkedImagesOnly = document.getElementById('linked_images_checkbox').checked;
+  if (linkedImagesOnly) {
+    visibleImages = visibleImages.filter(function (url) {
+      return linkedImages[url];
+    });
+  }
+  
 	showImages();
 }
 
 //Add images to allImages and visibleImages, sort and show them.
 //send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
-chrome.extension.onRequest.addListener(function (images) {
-	for (var i in images) {
-		allImages.push(images[i]);
+chrome.extension.onRequest.addListener(function (result) {
+  linkedImages = result.linked_images;
+	for (var i in result.images) {
+		allImages.push(result.images[i]);
 	}
 	
 	if (localStorage.sort_images == 'true') {

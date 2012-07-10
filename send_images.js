@@ -13,6 +13,7 @@ var image_downloader = {
     if (element.tagName.toLowerCase() == 'a') {
       var href = element.href;
       if (image_downloader.image_regex.test(href)) {
+        image_downloader.linked_images[href] = true;
         return href;
       }
     }
@@ -58,7 +59,6 @@ var image_downloader = {
     
     for (var i in images) {
     	var anchor = document.createElement('a');
-    	anchor.id = 'image_downloader_anchor' + i;
     	anchor.href = images[i];
     	anchor.download = '';
     	images_container.appendChild(anchor);
@@ -69,7 +69,11 @@ var image_downloader = {
   }
 };
 
+image_downloader.linked_images = {};
 image_downloader.images = [].slice.apply(document.getElementsByTagName('*'));
 image_downloader.images = image_downloader.images.map(image_downloader.map_element);
 image_downloader.images = image_downloader.remove_duplicate_or_empty(image_downloader.images);
-chrome.extension.sendRequest(image_downloader.images);
+chrome.extension.sendRequest({ linked_images: image_downloader.linked_images, images: image_downloader.images });
+
+image_downloader.linked_images = null;
+image_downloader.images = null;

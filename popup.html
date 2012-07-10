@@ -23,6 +23,11 @@
 				width: 100%;
 			}
 			
+      #download_button
+      {
+        margin-right: 23px;
+      }
+      
 			#filter_textbox
 			{
 				width: 100%;
@@ -40,7 +45,7 @@
 			
 			#images_table
 			{
-				margin-top: 56px;
+				margin-top: 96px;
 			}
 		</style>
 	</head>
@@ -49,12 +54,20 @@
 		<div id="filters_container">
 			<table id="filters_table">
 				<tr valign="middle">
-					<td><input type="text" id="filter_textbox" placeholder="Filter by URL" /></td>
-					<td><input type="checkbox" id="regex_checkbox" /></td>
-					<td>Regex</td>
-					<td><input type="button" id="download_button" value="Download" /></td>
+					<td><input type="text" id="filter_textbox" placeholder="Filter by URL" title="Filter by parts of the URL or regular expressions." /></td>
+					<td align="right"><input type="button" id="download_button" value="Download" /></td>
 				</tr>
-			</table>
+      </table>
+      
+      <label title="Enable regular expressions.">
+        <input type="checkbox" id="regex_checkbox" />
+        Regex
+      </label>
+      <br />
+      <label title="Don't show images that are embedded in the page, only those that are linked. Useful when you want to avoid having too many images like avatars or icons.">
+        <input type="checkbox" id="linked_images_checkbox" />
+        Only show linked images
+      </label>
 		</div>
 		
 		<table id="images_table">
