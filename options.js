@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
 	initializeOptions();
 	initializeStyles();
 };
@@ -7,7 +7,7 @@ function initializeOptions() {
 	//General
 	var body_width_numberbox = document.getElementById('body_width_numberbox');
 	body_width_numberbox.value = localStorage.body_width || localStorage.body_width_default;
-	body_width_numberbox.onchange = function() {
+	body_width_numberbox.onchange = function () {
 		jss('body', { 'width': (this.value || localStorage.body_width_default) + 'px' });
 	}
 	
@@ -19,31 +19,31 @@ function initializeOptions() {
 	//Images
 	var image_min_width_numberbox = document.getElementById('image_min_width_numberbox');
 	image_min_width_numberbox.value = localStorage.image_min_width || localStorage.image_min_width_default;
-	image_min_width_numberbox.onchange = function() {
+	image_min_width_numberbox.onchange = function () {
 		jss('img', { 'min-width': (this.value || localStorage.image_min_width_default) + 'px' });
 	}
 	
 	var image_max_width_numberbox = document.getElementById('image_max_width_numberbox');
 	image_max_width_numberbox.value = localStorage.image_max_width || localStorage.image_max_width_default;
-	image_max_width_numberbox.onchange = function() {
+	image_max_width_numberbox.onchange = function () {
 		jss('img', { 'max-width': (this.value || localStorage.image_max_width_default) + 'px' });
 	}
 	
 	var image_border_width_numberbox = document.getElementById('image_border_width_numberbox');
 	image_border_width_numberbox.value = localStorage.image_border_width || localStorage.image_border_width_default;
-	image_border_width_numberbox.onchange = function() {
+	image_border_width_numberbox.onchange = function () {
 		jss('img', { 'border-width': (this.value || localStorage.image_border_width_default) + 'px' });
 	}
 	
 	var image_border_style_dropdown = document.getElementById('image_border_style_dropdown');
 	image_border_style_dropdown.value = localStorage.image_border_style || localStorage.image_border_style_default;
-	image_border_style_dropdown.onchange = function() {
+	image_border_style_dropdown.onchange = function () {
 		jss('img', { 'border-style': this.value || localStorage.image_border_style_default });
 	}
 	
 	var image_border_color_picker = document.getElementById('image_border_color_picker');
 	image_border_color_picker.value = localStorage.image_border_color || localStorage.image_border_color_default;
-	image_border_color_picker.onchange = function() {
+	image_border_color_picker.onchange = function () {
 		jss('img', { 'border-color': this.value || localStorage.image_border_color_default });
 	}
 	
@@ -121,7 +121,7 @@ function showNotification(message, active_container_id, inactive_container_id) {
 	//Show active container
 	var active_container = document.getElementById(active_container_id);
 	active_container.innerHTML = message;
-	setTimeout(function() {
+	setTimeout(function () {
 		active_container.innerHTML = '';
 	}, 10000);
 }

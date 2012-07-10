@@ -1,4 +1,4 @@
-window.onload = function() {
+window.onload = function () {
 	initializePopup();
 	initializeStyles();
 };
@@ -10,7 +10,7 @@ function initializePopup() {
 	document.getElementById('download_button').onclick = downloadCheckedImages;
 	
 	chrome.windows.getCurrent(function (currentWindow) {
-		chrome.tabs.query({ active: true, windowId: currentWindow.id }, function(activeTabs) {
+		chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
 			chrome.tabs.executeScript(activeTabs[0].id, { file: 'send_images.js', allFrames: true });
 		});
 	});
@@ -52,7 +52,7 @@ function showImages() {
 		var image = document.createElement('img');
 		image.src = visibleImages[i];
 		image.index = i;
-		image.onclick = function() {
+		image.onclick = function () {
 			var checkbox = document.getElementById('checkbox' + this.index);
 			checkbox.checked = !checkbox.checked;
 		};
@@ -65,13 +65,9 @@ function showImages() {
 		anchor.href = visibleImages[i];
 		anchor.download = '';
 		
-		var col2 = document.createElement('td');
-		col2.appendChild(anchor);
-		
 		var row = document.createElement('tr');
 		row.appendChild(col0);
 		row.appendChild(col1);
-		row.appendChild(col2);
 		
 		images_table.appendChild(row);
 	}
@@ -117,23 +113,32 @@ function showDownloadConfirmation() {
     ;
   
   var okay_button = document.getElementById('okay_button');
-  okay_button.onclick = function() {
+  okay_button.onclick = function () {
     startDownload();
     closeFiltersContainer(filters_container);
   };
   
   var cancel_button = document.getElementById('cancel_button');
-  cancel_button.onclick = function() {
+  cancel_button.onclick = function () {
     closeFiltersContainer(filters_container);
   };
 }
 
 function startDownload() {
+  var checkedImages = [];
   for (var i = 0; i < visibleImages.length; i++) {
     if (document.getElementById('checkbox' + i).checked) {
-      document.getElementById('anchor' + i).click();
+      checkedImages.push(visibleImages[i]);
     }
   }
+  chrome.windows.getCurrent(function (currentWindow) {
+		chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
+			chrome.tabs.executeScript(
+        activeTabs[0].id,
+        { code: 'image_downloader.download_images(' + JSON.stringify(checkedImages) + ');', allFrames: true }
+      );
+		});
+	});
 }
 
 function closeFiltersContainer(filters_container) {
@@ -146,13 +151,13 @@ function closeFiltersContainer(filters_container) {
 function filterImages() {
 	var filterValue = document.getElementById('filter_textbox').value;
 	if (document.getElementById('regex_checkbox').checked) {
-		visibleImages = allImages.filter(function(image) {
+		visibleImages = allImages.filter(function (image) {
 			return image.match(filterValue);
 		});
 	}
 	else {
 		var terms = filterValue.split(' ');
-		visibleImages = allImages.filter(function(image) {
+		visibleImages = allImages.filter(function (image) {
 			for (var termI = 0; termI < terms.length; termI++) {
 				var term = terms[termI];
 				if (term.length != 0) {
@@ -175,9 +180,9 @@ function filterImages() {
 	showImages();
 }
 
-//Add images to allImages and visibleImages, sort and show them.	send_images.js is
-//injected into all frames of the active tab, so this listener may be called multiple times
-chrome.extension.onRequest.addListener(function(images) {
+//Add images to allImages and visibleImages, sort and show them.
+//send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
+chrome.extension.onRequest.addListener(function (images) {
 	for (var index in images) {
 		allImages.push(images[index]);
 	}
