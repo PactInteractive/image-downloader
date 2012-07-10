@@ -41,7 +41,7 @@ function showImages() {
 		images_table.removeChild(images_table.children[images_table.children.length - 1])
 	}
 	
-	for (var i = 0; i < visibleImages.length; i++) {
+	for (var i in visibleImages) {
 		var checkbox = document.createElement('input');
 		checkbox.checked = true;
 		checkbox.type = 'checkbox';
@@ -79,7 +79,7 @@ function showImages() {
 //Toggle the checked state of all visible images
 function toggleAll() {
 	var checked = document.getElementById('toggle_all_checkbox').checked;
-	for (var i = 0; i < visibleImages.length; i++) {
+	for (var i in visibleImages) {
 		document.getElementById('checkbox' + i).checked = checked;
 	}
 }
@@ -126,7 +126,7 @@ function showDownloadConfirmation() {
 
 function startDownload() {
   var checkedImages = [];
-  for (var i = 0; i < visibleImages.length; i++) {
+  for (var i in visibleImages) {
     if (document.getElementById('checkbox' + i).checked) {
       checkedImages.push(visibleImages[i]);
     }
@@ -158,8 +158,8 @@ function filterImages() {
 	else {
 		var terms = filterValue.split(' ');
 		visibleImages = allImages.filter(function (image) {
-			for (var termI = 0; termI < terms.length; termI++) {
-				var term = terms[termI];
+			for (var i in terms) {
+				var term = terms[i];
 				if (term.length != 0) {
 					var expected = (term[0] != '-');
 					if (!expected) {
@@ -183,8 +183,8 @@ function filterImages() {
 //Add images to allImages and visibleImages, sort and show them.
 //send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
 chrome.extension.onRequest.addListener(function (images) {
-	for (var index in images) {
-		allImages.push(images[index]);
+	for (var i in images) {
+		allImages.push(images[i]);
 	}
 	
 	if (localStorage.sort_images == 'true') {

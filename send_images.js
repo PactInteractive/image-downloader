@@ -29,14 +29,13 @@ var image_downloader = {
   },
   
   remove_duplicate_or_empty: function (a) {
-    var index,
-        result = [],
+    var result = [],
         hash = {};
     
-    for (index = 0; index < a.length; index++) {
-      hash[a[index]] = 0;
+    for (var i in a) {
+      hash[a[i]] = 0;
     }
-    for (key in hash) {
+    for (var key in hash) {
       if (key != '') {
         result.push(key);
       }
@@ -57,7 +56,7 @@ var image_downloader = {
     	images_container.removeChild(images_container.children[images_container.children.length - 1])
     }
     
-    for (var i = 0; i < images.length; i++) {
+    for (var i in images) {
     	var anchor = document.createElement('a');
     	anchor.id = 'image_downloader_anchor' + i;
     	anchor.href = images[i];
