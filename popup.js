@@ -120,7 +120,7 @@ function showDownloadConfirmation() {
     );
   
   $('#okay_button, #cancel_button').on('click.removeNotification', function () {
-    localStorage.show_download_notification = !$('#dont_show_again_checkbox').is(':checked');
+    localStorage.show_download_notification = !$('#dont_show_again_checkbox').prop('checked');
     notification_container.remove();
   });
   $('#okay_button').on('click.startDownload', startDownload);
@@ -129,7 +129,7 @@ function showDownloadConfirmation() {
 function startDownload() {
   var checkedImages = [];
   for (var i in visibleImages) {
-    if ($('#checkbox' + i).is(':checked')) {
+    if ($('#checkbox' + i).prop('checked')) {
       checkedImages.push(visibleImages[i]);
     }
   }
@@ -145,7 +145,7 @@ function startDownload() {
 
 function filterImages() {
   var filterValue = $('#filter_textbox').val();
-  if ($('#regex_checkbox').is(':checked')) {
+  if ($('#regex_checkbox').prop('checked')) {
     visibleImages = allImages.filter(function (url) {
       try {
         return url.match(filterValue);
@@ -178,7 +178,7 @@ function filterImages() {
     });
   }
   
-  var linkedImagesOnly = $('#linked_images_checkbox').is(':checked');
+  var linkedImagesOnly = $('#linked_images_checkbox').prop('checked');
   if (linkedImagesOnly) {
     visibleImages = visibleImages.filter(function (url) {
       return linkedImages[url];
