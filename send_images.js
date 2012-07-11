@@ -54,14 +54,14 @@ var image_downloader = {
     document.body.appendChild(images_container);
     
     while (images_container.children.length > 0) {
-    	images_container.removeChild(images_container.children[images_container.children.length - 1])
+      images_container.removeChild(images_container.children[images_container.children.length - 1])
     }
     
     for (var i in images) {
-    	var anchor = document.createElement('a');
-    	anchor.href = images[i];
-    	anchor.download = '';
-    	images_container.appendChild(anchor);
+      var anchor = document.createElement('a');
+      anchor.href = images[i];
+      anchor.download = '';
+      images_container.appendChild(anchor);
       anchor.click();
     }
     

@@ -1,105 +1,105 @@
 <html>
-	<head>
-		<title>Image Downloader | Options</title>
-		<style>
-			input[type=number]
-			{
-				width: 75px;
-				text-align: right;
-				margin-right: 2px;
-			}
-			
-			input[type=color]
-			{
-				width: 75px;
-			}
-			
-			select
-			{
-				width: 75px;
-			}
-			
-			#success_container
-			{
-				color: green;
-			}
-			
-			#warning_container
-			{
-				color: red;
-			}
-		</style>
-		<script src="options.js"></script>
-		<script src="jss.js"></script>
-	</head>
-	
-	<body>
-		<fieldset>
-			<legend>General</legend>
-			
-			<label>
-				Popup Width:
-				<input type="number" id="body_width_numberbox" min="300" />px
-			</label>
-			
-			<br />
-			
-			<label>
-				<input type="checkbox" id="show_download_notification_checkbox" />
-				Show download confirmation
-			</label>
-		</fieldset>
-		
-		<fieldset>
-			<legend>Images</legend>
-			
-			<table>
-				<tr>
-					<td><label for="image_min_width_numberbox">Min Width:</label></td>
-					<td><input type="number" id="image_min_width_numberbox" min="0" />px</td>
-				</tr>
-				
-				<tr>
-					<td><label for="image_max_width_numberbox">Max Width:</label></td>
-					<td><input type="number" id="image_max_width_numberbox" min="0" />px</td>
-				</tr>
-			
-				<tr>
-					<td><label for="image_border_width_numberbox">Border Width:</label></td>
-					<td><input type="number" id="image_border_width_numberbox" min="0" max="5" />px</td>
-				</tr>
-				
-				<tr>
-					<td><label for="image_border_style_dropdown">Border Style:</label></td>
-					<td>
-						<select id="image_border_style_dropdown">
-							<option value="solid">Solid</option>
-							<option value="dotted">Dotted</option>
-							<option value="dashed">Dashed</option>
-						</select>
-					</td>
-				</tr>
-				
-				<tr>
-					<td><label for="image_border_color_picker">Border Color:</label></td>
-					<td><input type="color" id="image_border_color_picker" /></td>
-				</tr>
-			</table>
-			
-			<img src="icon_128.png" />
-			
-			<div class="clear"></div>
-			
-			<label>
-				<input type="checkbox" id="sort_images_checkbox" />
-				Sort by URL
-			</label> 
-		</fieldset>
-		
-		<input type="button" id="save_button" value="Save" />
-		<input type="button" id="reset_button" value="Reset" />
-		
-		<div id="success_container"></div>
-		<div id="warning_container"></div>
-	</body>
+  <head>
+    <title>Image Downloader | Options</title>
+    <style>
+      input[type=number]
+      {
+        width: 75px;
+        text-align: right;
+        margin-right: 2px;
+      }
+      
+      input[type=color]
+      {
+        width: 75px;
+      }
+      
+      select
+      {
+        width: 75px;
+      }
+      
+      #success_container
+      {
+        color: green;
+      }
+      
+      #warning_container
+      {
+        color: red;
+      }
+    </style>
+    <script src="options.js"></script>
+    <script src="jss.js"></script>
+  </head>
+  
+  <body>
+    <fieldset>
+      <legend>General</legend>
+      
+      <label>
+        Popup Width:
+        <input type="number" id="body_width_numberbox" min="300" />px
+      </label>
+      
+      <br />
+      
+      <label>
+        <input type="checkbox" id="show_download_notification_checkbox" />
+        Show download confirmation
+      </label>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Images</legend>
+      
+      <table>
+        <tr>
+          <td><label for="image_min_width_numberbox">Min Width:</label></td>
+          <td><input type="number" id="image_min_width_numberbox" min="0" />px</td>
+        </tr>
+        
+        <tr>
+          <td><label for="image_max_width_numberbox">Max Width:</label></td>
+          <td><input type="number" id="image_max_width_numberbox" min="0" />px</td>
+        </tr>
+      
+        <tr>
+          <td><label for="image_border_width_numberbox">Border Width:</label></td>
+          <td><input type="number" id="image_border_width_numberbox" min="0" max="5" />px</td>
+        </tr>
+        
+        <tr>
+          <td><label for="image_border_style_dropdown">Border Style:</label></td>
+          <td>
+            <select id="image_border_style_dropdown">
+              <option value="solid">Solid</option>
+              <option value="dotted">Dotted</option>
+              <option value="dashed">Dashed</option>
+            </select>
+          </td>
+        </tr>
+        
+        <tr>
+          <td><label for="image_border_color_picker">Border Color:</label></td>
+          <td><input type="color" id="image_border_color_picker" /></td>
+        </tr>
+      </table>
+      
+      <img src="icon_128.png" />
+      
+      <div class="clear"></div>
+      
+      <label>
+        <input type="checkbox" id="sort_images_checkbox" />
+        Sort by URL
+      </label> 
+    </fieldset>
+    
+    <input type="button" id="save_button" value="Save" />
+    <input type="button" id="reset_button" value="Reset" />
+    
+    <div id="success_container"></div>
+    <div id="warning_container"></div>
+  </body>
 </html>
