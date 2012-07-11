@@ -53,7 +53,7 @@ var image_downloader = {
     }
     document.body.appendChild(images_container);
     
-    while (images_container.children.length > 1) {
+    while (images_container.children.length > 0) {
     	images_container.removeChild(images_container.children[images_container.children.length - 1])
     }
     

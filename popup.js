@@ -139,7 +139,7 @@ function startDownload() {
 		chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
 			chrome.tabs.executeScript(
         activeTabs[0].id,
-        { code: 'image_downloader.download_images(' + JSON.stringify(checkedImages) + ');', allFrames: true }
+        { code: 'image_downloader.download_images(' + JSON.stringify(checkedImages) + ');' }
       );
 		});
 	});
