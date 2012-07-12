@@ -20,6 +20,17 @@ In the developer version of Google Chrome (v21), pressing "Download" used to cau
 
 Change Log
 ================
+1.0.13:
+- Added a notification to let the user know that download has started
+- Added some animations and polished the options notifications a bit more
+- Fixed some event handlers that were being attached multiple times
+
+1.0.12:
+- Migrated to jQuery
+- Implemented indeterminate state for "All" checkbox
+- The "Download" button will now be disabled if no images are checked
+- Fixed a bug with reseting options - now the user can choose to save the reset values or simply cancel the reset by reloading the page - just like it says in the notification
+
 1.0.11:
 - Changed the download mechanism to support Chrome v21+
 - Added an "Only show linked images" filter option that can be useful when you only want to download images that are in a URL on the page.
