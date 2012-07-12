@@ -30,6 +30,9 @@ function initializePopup() {
   
   $('#images_table')
     .on('change', 'input[type="checkbox"]', toggleCheckBox)
+    .on('click', '.image_link', function () {
+      chrome.tabs.create({ url: this.innerHTML, active: false });
+    })
     .on('click', 'img', function () {
       var checkbox = $('#checkbox' + $(this).data('index'));
       checkbox.prop('checked', !checkbox.prop('checked'));
@@ -45,17 +48,18 @@ function initializePopup() {
 
 function initializeStyles() {
   jss('body', { width: localStorage.body_width + 'px' });
+  jss('#filters_container', {
+    'border-bottom-width': localStorage.image_border_width + 'px',
+    'border-bottom-style': localStorage.image_border_style,
+    'border-bottom-color': localStorage.image_border_color
+  });
+  jss('.image_link', { width: localStorage.image_max_width + 'px' });
   jss('img', {
       'min-width': localStorage.image_min_width + 'px',
       'max-width': localStorage.image_max_width + 'px',
       'border-width': localStorage.image_border_width + 'px',
       'border-style': localStorage.image_border_style,
       'border-color': localStorage.image_border_color
-  });
-  jss('#filters_container', {
-    'border-bottom-width': localStorage.image_border_width + 'px',
-    'border-bottom-style': localStorage.image_border_style,
-    'border-bottom-color': localStorage.image_border_color
   });
 }
 
@@ -134,8 +138,12 @@ function displayImages() {
   
   for (var i in visibleImages) {
     var checkbox = '<input type="checkbox" id="checkbox' + i + '" checked />';
+    var link = '';
+    if (localStorage.show_image_url == 'true') {
+      link = '<a href="' + visibleImages[i] + '" class="image_link">' + visibleImages[i] + '</a>';
+    }
     var image = '<img src="' + visibleImages[i] + '" data-index="' + i + '" />';
-    images_table.append('<tr><td>' + checkbox + '</td><td>' + image + '</td></tr>');
+    images_table.append('<tr><td>' + checkbox + '</td><td>' + link + image + '</td></tr>');
   }
 }
 

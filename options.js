@@ -12,6 +12,9 @@ function initializeControlValues(reset) {
   }
   
   //Images
+  if ((reset ? localStorage.show_image_url_default : localStorage.show_image_url) == 'true') {
+    $('#show_image_url_checkbox').prop('checked', true);
+  }
   $('#image_min_width_numberbox').val(reset ? localStorage.image_min_width_default : localStorage.image_min_width);
   $('#image_max_width_numberbox').val(reset ? localStorage.image_max_width_default : localStorage.image_max_width);
   $('#image_border_width_numberbox').val(reset ? localStorage.image_border_width_default : localStorage.image_border_width);
@@ -75,6 +78,10 @@ function saveOptions() {
   localStorage.show_download_notification = $('#show_download_notification_checkbox').prop('checked');
   
   //Images
+  
+  localStorage.show_image_url = $('#show_image_url_checkbox').prop('checked');
+  localStorage.image_min_width = $('#image_min_width_numberbox').val();
+  localStorage.image_max_width = $('#image_max_width_numberbox').val();
   localStorage.image_border_width = $('#image_border_width_numberbox').val();
   localStorage.image_border_style = $('#image_border_style_dropdown').val();
   localStorage.image_border_color = $('#image_border_color_picker').val();

@@ -10,6 +10,12 @@ localStorage.sort_images = localStorage.sort_images || 'false';
 localStorage.body_width_default = '340';
 localStorage.body_width = localStorage.body_width || localStorage.body_width_default;
 
+localStorage.show_download_notification_default = 'true';
+localStorage.show_download_notification = localStorage.show_download_notification || localStorage.show_download_notification_default;
+
+localStorage.show_image_url_default = 'true';
+localStorage.show_image_url = localStorage.show_image_url || localStorage.show_image_url_default;
+
 localStorage.image_min_width_default = '30';
 localStorage.image_min_width = localStorage.image_min_width || localStorage.image_min_width_default;
 
@@ -24,6 +30,3 @@ localStorage.image_border_style = localStorage.image_border_style || localStorag
 
 localStorage.image_border_color_default = '#adbeef';
 localStorage.image_border_color = localStorage.image_border_color || localStorage.image_border_color_default;
-
-localStorage.show_download_notification_default = 'true';
-localStorage.show_download_notification = localStorage.show_download_notification || localStorage.show_download_notification_default;
