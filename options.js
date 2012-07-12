@@ -6,30 +6,27 @@ window.onload = function () {
 
 function initializeControlValues(reset) {
   //General
-  $('#body_width_numberbox').val(reset ? localStorage.body_width_default : localStorage.body_width || localStorage.body_width_default);
-  if ((reset ? localStorage.show_download_notification_default : localStorage.show_download_notification || localStorage.show_download_notification_default) == 'true') {
+  $('#body_width_numberbox').val(reset ? localStorage.body_width_default : localStorage.body_width);
+  if ((reset ? localStorage.show_download_notification_default : localStorage.show_download_notification) == 'true') {
     $('#show_download_notification_checkbox').prop('checked', true);
   }
   
   //Images
-  $('#image_min_width_numberbox').val(reset ? localStorage.image_min_width_default : localStorage.image_min_width || localStorage.image_min_width_default)
-  $('#image_max_width_numberbox').val(reset ? localStorage.image_max_width_default : localStorage.image_max_width || localStorage.image_max_width_default)
-  $('#image_border_width_numberbox').val(reset ? localStorage.image_border_width_default : localStorage.image_border_width || localStorage.image_border_width_default)
-  $('#image_border_style_dropdown').val(reset ? localStorage.image_border_style_default : localStorage.image_border_style || localStorage.image_border_style_default)
-  $('#image_border_color_picker').val(reset ? localStorage.image_border_color_default : localStorage.image_border_color || localStorage.image_border_color_default)
-  if ((reset ? localStorage.sort_images_default : localStorage.sort_images || localStorage.sort_images_default) == 'true') {
-    $('#sort_images_checkbox').prop('checked', true);
-  }
+  $('#image_min_width_numberbox').val(reset ? localStorage.image_min_width_default : localStorage.image_min_width);
+  $('#image_max_width_numberbox').val(reset ? localStorage.image_max_width_default : localStorage.image_max_width);
+  $('#image_border_width_numberbox').val(reset ? localStorage.image_border_width_default : localStorage.image_border_width);
+  $('#image_border_style_dropdown').val(reset ? localStorage.image_border_style_default : localStorage.image_border_style);
+  $('#image_border_color_picker').val(reset ? localStorage.image_border_color_default : localStorage.image_border_color);
 }
 
 function initializeControlStyles(reset) {
-  jss('body', { width: reset ? localStorage.body_width_default : localStorage.body_width || localStorage.body_width_default });
+  jss('body', { width: reset ? localStorage.body_width_default : localStorage.body_width });
   jss('img', {
-      'min-width': (reset ? localStorage.image_min_width_default : localStorage.image_min_width || localStorage.image_min_width_default) + 'px',
-      'max-width': (reset ? localStorage.image_max_width_default : localStorage.image_max_width || localStorage.image_max_width_default) + 'px',
-      'border-width': (reset ? localStorage.image_border_width_default : localStorage.image_border_width || localStorage.image_border_width_default) + 'px',
-      'border-style': reset ? localStorage.image_border_style_default : localStorage.image_border_style || localStorage.image_border_style_default,
-      'border-color': reset ? localStorage.image_border_color_default : localStorage.image_border_color || localStorage.image_border_color_default
+      'min-width': (reset ? localStorage.image_min_width_default : localStorage.image_min_width) + 'px',
+      'max-width': (reset ? localStorage.image_max_width_default : localStorage.image_max_width) + 'px',
+      'border-width': (reset ? localStorage.image_border_width_default : localStorage.image_border_width) + 'px',
+      'border-style': reset ? localStorage.image_border_style_default : localStorage.image_border_style,
+      'border-color': reset ? localStorage.image_border_color_default : localStorage.image_border_color
   });
 }
 
@@ -69,6 +66,7 @@ function initializeControlEvents() {
   //Buttons
   $('#save_button').on('click', saveOptions);
   $('#reset_button').on('click', resetOptions);
+  $('#clear_data_button').on('click', clearData);
 }
 
 function saveOptions() {
@@ -82,31 +80,34 @@ function saveOptions() {
   localStorage.image_border_color = $('#image_border_color_picker').val();
   localStorage.sort_images = $('#sort_images_checkbox').prop('checked');
   
-  showNotification('Options saved.', '<div class="success"></div>', '<div class="warning"></div>');
+  addNotification('Options saved.', 'success');
 }
 
 function resetOptions() {
   initializeControlValues(true);
   initializeControlStyles(true);
-  showNotification(
-    'Options have been reset to their default values. You can now save the changes you made or discard them by reloading this page.',
-    '<div class="warning"></div>',
-    '<div class="success"></div>'
-  );
+  addNotification('Options have been reset to their defaults. You can now save the changes you made or discard them by reloading the page.', 'warning');
 }
 
-function showNotification(message, active_container, inactive_container) {
-  var animation_duration = parseInt(localStorage.animation_duration_default);
-  
-  //Hide inactive container
-  if (!inactive_container.jquery) inactive_container = $(inactive_container);
-  inactive_container.fadeOut(animation_duration, function () { $(this).remove() });
-  
-  //Show active container
-  if (!active_container.jquery) active_container = $(active_container);
-  active_container.prependTo('#notifications').toggle(false).html(message).fadeIn(animation_duration, function () {
-    setTimeout(function () {
-      active_container.fadeOut(animation_duration, function () { active_container.remove() });
-    }, 10000);
-  });
+function clearData() {
+  var result = confirm('Are you sure you want to clear all data for this extension?');
+  if (result) {
+    localStorage.clear();
+    window.location.reload();
+  }
+}
+
+function addNotification(message, cssClass) {
+  var animation_duration = parseInt(localStorage.animation_duration);
+  var container =
+    $('<div></div>')
+      .prependTo('#notifications')
+      .toggle(false)
+      .html(message)
+      .addClass(cssClass)
+      .fadeIn(animation_duration, function () {
+        setTimeout(function () {
+          container.fadeOut(animation_duration, function () { container.remove() });
+        }, 10000);
+      });
 }

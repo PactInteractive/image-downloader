@@ -2,14 +2,14 @@
   <head>
     <title>Image Downloader | Options</title>
     <style>
-      input[type=number]
+      input[type="number"]
       {
         width: 75px;
         text-align: right;
         margin-right: 2px;
       }
       
-      input[type=color]
+      input[type="color"]
       {
         width: 75px;
       }
@@ -28,7 +28,21 @@
       {
         color: red;
       }
+      
+      .left
+      {
+        float: left;
+      }
+      .right
+      {
+        float: right;
+      }
+      .clear
+      {
+        clear: both;
+      }
     </style>
+    <script src="defaults.js"></script>
     <script src="options.js"></script>
     <script src="jquery-1.7.2.min.js"></script>
     <script src="jss.js"></script>
@@ -88,17 +102,20 @@
       </table>
       
       <img src="icon_128.png" />
-      
-      <div class="clear"></div>
-      
-      <label>
-        <input type="checkbox" id="sort_images_checkbox" />
-        Sort by URL
-      </label> 
     </fieldset>
     
-    <input type="button" id="save_button" value="Save" />
-    <input type="button" id="reset_button" value="Reset" />
+    <div>
+      <div class="left">
+        <input type="button" id="save_button" value="Save" title="Saves the current settings" />
+        <input type="button" id="reset_button" value="Reset" title="Resets all settings to their defaults; requires Save to preserve the changes" />
+      </div>
+      
+      <div class="right">
+        <input type="button" id="clear_data_button" value="Clear Data" title="Clears all data that this extension has stored on your machine" />
+      </div>
+      
+      <div class="clear"></div>
+    </div>
     
     <div id="notifications"></div>
   </body>

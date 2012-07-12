@@ -46,7 +46,7 @@
       
       #images_table
       {
-        margin-top: 96px;
+        margin-top: 109px;
       }
     </style>
   </head>
@@ -55,29 +55,51 @@
     <div id="filters_container">
       <table id="filters_table">
         <tr valign="middle">
-          <td><input type="text" id="filter_textbox" placeholder="Filter by URL" title="Filter by parts of the URL or regular expressions." /></td>
-          <td align="right"><input type="button" id="download_button" value="Download" /></td>
+          <td>
+            <input type="text" id="filter_textbox" placeholder="Filter by URL" title="Filter by parts of the URL or regular expressions." />
+          </td>
+          
+          <td align="right">
+            <input type="button" id="download_button" value="Download" />
+          </td>
+        </tr>
+        
+        <tr>
+          <td colspan="2">
+            Mode:
+            <label>
+              <input type="radio" name="filter_mode" value="normal" />
+              Normal
+            </label>
+            
+            <label title="* - zero or more characters &#10;? - zero or one character &#10;+ - one or more characters">
+              <input type="radio" name="filter_mode" value="wildcard" />
+              Wildcard
+            </label>
+            
+            <label title="Advanced users can filter using regular expressions">
+              <input type="radio" name="filter_mode" value="regex" />
+              Regex
+            </label>
+          </td>
+        </tr>
+        
+        <tr>
+          <td colspan="2">
+            <label title="Useful when you want to filter out things like avatars and icons.">
+              <input type="checkbox" id="only_images_from_links_checkbox" />
+              Only images from links
+            </label>
+            
+            <label title="By default, images are shown in the order they appear on the page. Check this box to sort them alphabetically by URL instead.">
+              <input type="checkbox" id="sort_by_url_checkbox" />
+              Sort by URL
+            </label>
+          </td>
         </tr>
       </table>
-      
-      <label title="Enable regular expressions.">
-        <input type="checkbox" id="regex_checkbox" />
-        Regex
-      </label>
-      <br />
-      <label title="Don't show images that are embedded in the page, only those that are linked. Useful when you want to avoid having too many images like avatars or icons.">
-        <input type="checkbox" id="linked_images_checkbox" />
-        Only show linked images
-      </label>
     </div>
     
-    <table id="images_table">
-      <tr>
-        <th><input type="checkbox" id="toggle_all_checkbox" checked /></th>
-        <th align="left"><label id="toggle_all_checkbox_label" for="toggle_all_checkbox">All (0)</label></th>
-      </tr>
-    </table>
-    
-    <div style="clear: both"></div>
+    <table id="images_table"></table>
   </body>
 </html>

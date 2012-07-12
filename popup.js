@@ -5,11 +5,37 @@ window.onload = function () {
 
 function initializePopup() {
   $('#filter_textbox').on('keyup', filterImages);
-  $('#regex_checkbox, #linked_images_checkbox').on('change', filterImages);
-  $('#download_button').on('click', downloadCheckedImages);
-  $('#images_table').on('click', 'img', toggleImageChecked);
-  $('#images_table').on('change', 'input[type=checkbox]', toggleCheckBoxes);
-
+  
+  $('input[name="filter_mode"][value="' + localStorage.filter_mode + '"]').prop('checked', true);
+  $('input[name="filter_mode"]').on('change', function () {
+    localStorage.filter_mode = this.value;
+    filterImages();
+  });
+  
+  $('#only_images_from_links_checkbox')
+    .prop('checked', localStorage.only_images_from_links == 'true')
+    .on('change', function () {
+      localStorage.only_images_from_links = this.checked;
+      filterImages();
+    });
+  
+  $('#sort_by_url_checkbox')
+    .prop('checked', localStorage.sort_by_url == 'true')
+    .on('change', function () {
+      localStorage.sort_by_url = this.checked;
+      filterImages();
+    });
+  
+  $('#download_button').on('click', downloadImages);
+  
+  $('#images_table')
+    .on('change', 'input[type="checkbox"]', toggleCheckBox)
+    .on('click', 'img', function () {
+      var checkbox = $('#checkbox' + $(this).data('index'));
+      checkbox.prop('checked', !checkbox.prop('checked'));
+      checkbox.change();
+    });
+  
   chrome.windows.getCurrent(function (currentWindow) {
     chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
       chrome.tabs.executeScript(activeTabs[0].id, { file: 'send_images.js', allFrames: true });
@@ -18,28 +44,89 @@ function initializePopup() {
 }
 
 function initializeStyles() {
-  jss('body', { width: (localStorage.body_width || localStorage.body_width_default) + 'px' });
+  jss('body', { width: localStorage.body_width + 'px' });
   jss('img', {
-      'min-width': (localStorage.image_min_width || localStorage.image_min_width_default) + 'px',
-      'max-width': (localStorage.image_max_width || localStorage.image_max_width_default) + 'px',
-      'border-width': (localStorage.image_border_width || localStorage.image_border_width_default) + 'px',
-      'border-style': localStorage.image_border_style || localStorage.image_border_style_default,
-      'border-color': localStorage.image_border_color || localStorage.image_border_color_default
+      'min-width': localStorage.image_min_width + 'px',
+      'max-width': localStorage.image_max_width + 'px',
+      'border-width': localStorage.image_border_width + 'px',
+      'border-style': localStorage.image_border_style,
+      'border-color': localStorage.image_border_color
   });
   jss('#filters_container', {
-    'border-bottom-width': (localStorage.image_border_width || localStorage.image_border_width_default) + 'px',
-    'border-bottom-style': localStorage.image_border_style || localStorage.image_border_style_default,
-    'border-bottom-color': localStorage.image_border_color || localStorage.image_border_color_default
+    'border-bottom-width': localStorage.image_border_width + 'px',
+    'border-bottom-style': localStorage.image_border_style,
+    'border-bottom-color': localStorage.image_border_color
   });
 }
+
+//Add images to allImages and visibleImages and trigger filtration
+//send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
+chrome.extension.onRequest.addListener(function (result) {
+  linkedImages = result.linked_images;
+  for (var i in result.images) {
+    allImages.push(result.images[i]);
+  }
+  filterImages();
+});
 
 var allImages = [];
 var visibleImages = [];
 var linkedImages = {};
 
-function showImages() {
-  var images_table = $('#images_table');
-  images_table.empty();
+function filterImages() {
+  var filterValue = $('#filter_textbox').val();
+  switch (localStorage.filter_mode) {
+    case 'normal':
+      var terms = filterValue.split(' ');
+      visibleImages = allImages.filter(function (url) {
+        for (var i in terms) {
+          var term = terms[i];
+          if (term.length != 0) {
+            var expected = (term[0] != '-');
+            if (!expected) {
+              term = term.substr(1);
+              if (term.length == 0) {
+                continue;
+              }
+            }
+            var found = (-1 !== url.indexOf(term));
+            if (found != expected) {
+              return false;
+            }
+          }
+        }
+        return true;
+      });
+      break;
+    case 'wildcard':
+      filterValue = filterValue.replace(/([.^$[\]\\(){}|-])/g, '\\$1').replace(/([?*+])/, '.\$1');
+    case 'regex':
+      visibleImages = allImages.filter(function (url) {
+        try {
+          return url.match(filterValue);
+        }
+        catch (e) {
+          return false;
+        }
+      });
+      break;
+  }
+  
+  if (localStorage.only_images_from_links == 'true') {
+    visibleImages = visibleImages.filter(function (url) {
+      return linkedImages[url];
+    });
+  }
+  
+  if (localStorage.sort_by_url == 'true') {
+    visibleImages.sort();
+  }
+  
+  displayImages();
+}
+
+function displayImages() {
+  var images_table = $('#images_table').empty();
   
   var toggle_all_checkbox = '<input type="checkbox" id="toggle_all_checkbox" checked />';
   var toggle_all_checkbox_label = '<label id="toggle_all_checkbox_label" for="toggle_all_checkbox">All (' + visibleImages.length + ')</label>';
@@ -52,13 +139,7 @@ function showImages() {
   }
 }
 
-function toggleImageChecked() {
-  var checkbox = $('#checkbox' + $(this).data('index'));
-  checkbox.prop('checked', !checkbox.prop('checked'));
-  checkbox.change();
-}
-
-function toggleCheckBoxes() {
+function toggleCheckBox() {
   if (this.id == 'toggle_all_checkbox') {
     $('#download_button').prop('disabled', !this.checked);
     for (var i in visibleImages) {
@@ -67,7 +148,7 @@ function toggleCheckBoxes() {
     return;
   }
   
-  var checkboxes = $('#images_table input[type=checkbox]:not(#toggle_all_checkbox)');
+  var checkboxes = $('#images_table input[type="checkbox"]:not(#toggle_all_checkbox)');
   checkboxes.each(function () {
     if (this.checked) {
       $('#download_button').prop('disabled', false);
@@ -98,8 +179,8 @@ function toggleCheckBoxes() {
   }
 }
 
-function downloadCheckedImages() {
-  if ((localStorage.show_download_notification || localStorage.show_download_notification_default) == 'true') {
+function downloadImages() {
+  if (localStorage.show_download_notification == 'true') {
     showDownloadConfirmation();
   }
   else {
@@ -110,8 +191,8 @@ function downloadCheckedImages() {
 function showDownloadConfirmation() {
   var notification_container =
     $('<div>' +
-        '<div class="notification">' + localStorage.download_notification + '</div>' +
-        '<div class="warning">' + localStorage.download_warning + '</div>' +
+        '<div class="notification">If you have set up a default download location for Chrome, the files will be saved there.</div>' +
+        '<div class="warning">Otherwise, you will have to choose the save location for each file, which might open a lot of Save dialogs. Are you sure you want to do this?</div>' +
         '<input type="button" value="OK" id="okay_button" />' +
         '<input type="button" value="Cancel" id="cancel_button" />' +
         '<label><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>' +
@@ -132,7 +213,7 @@ function startDownload() {
       checkedImages.push(visibleImages[i]);
     }
   }
-
+  
   chrome.windows.getCurrent(function (currentWindow) {
     chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
       chrome.tabs.executeScript(
@@ -143,13 +224,12 @@ function startDownload() {
   });
   
   var downloading_notification = $('<div class="notification">Downloading ' + checkedImages.length + ' images...</div>').appendTo('#filters_container');
-  
   flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove() });
 }
 
 function flash(element, flashes, interval, callback) {
   if (!element.jquery) element = $(element);
-  if (!interval) interval = parseInt(localStorage.animation_duration_default);
+  if (!interval) interval = parseInt(localStorage.animation_duration);
   
   var fade = function (fadeIn) {
     if (flashes > 0) {
@@ -167,64 +247,3 @@ function flash(element, flashes, interval, callback) {
   };
   fade(false);
 }
-
-function filterImages() {
-  var filterValue = $('#filter_textbox').val();
-  if ($('#regex_checkbox').prop('checked')) {
-    visibleImages = allImages.filter(function (url) {
-      try {
-        return url.match(filterValue);
-      }
-      catch (e) {
-        return false;
-      }
-    });
-  }
-  else {
-    var terms = filterValue.split(' ');
-    visibleImages = allImages.filter(function (url) {
-      for (var i in terms) {
-        var term = terms[i];
-        if (term.length != 0) {
-          var expected = (term[0] != '-');
-          if (!expected) {
-            term = term.substr(1);
-            if (term.length == 0) {
-              continue;
-            }
-          }
-          var found = (-1 !== url.indexOf(term));
-          if (found != expected) {
-            return false;
-          }
-        }
-      }
-      return true;
-    });
-  }
-  
-  var linkedImagesOnly = $('#linked_images_checkbox').prop('checked');
-  if (linkedImagesOnly) {
-    visibleImages = visibleImages.filter(function (url) {
-      return linkedImages[url];
-    });
-  }
-  
-  showImages();
-}
-
-//Add images to allImages and visibleImages, sort and show them.
-//send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
-chrome.extension.onRequest.addListener(function (result) {
-  linkedImages = result.linked_images;
-  for (var i in result.images) {
-    allImages.push(result.images[i]);
-  }
-  
-  if (localStorage.sort_images == 'true') {
-    allImages.sort();
-  }
-  
-  visibleImages = allImages;
-  showImages();
-});

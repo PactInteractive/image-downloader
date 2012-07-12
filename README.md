@@ -20,6 +20,13 @@ In the developer version of Google Chrome (v21), pressing "Download" used to cau
 
 Change Log
 ================
+1.1:
+- Added wildcard filter mode (alongside normal and regex)
+- The state of the selected filters will now be saved
+- Moved the "Sort by URL" option to the filters
+- Added a "Clear Data" button to options page. While the extension does not use a lot of local storage yet, someone might appreciate the option.
+- Refactored a lot of code, especially the use of local storage
+
 1.0.13:
 - Added a notification to let the user know that download has started
 - Added some animations and polished the options notifications a bit more
