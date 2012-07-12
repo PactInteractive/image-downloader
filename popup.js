@@ -108,22 +108,21 @@ function downloadCheckedImages() {
 }
 
 function showDownloadConfirmation() {
-  var filters_container = $('#filters_container');
-  var notification_container = $('<div></div>').appendTo(filters_container);
-  notification_container.html(
-    '<div class="notification">' + localStorage.download_notification + '</div>' +
-    '<div class="warning">' + localStorage.download_warning + '</div>' +
-    '<input type="button" value="OK" id="okay_button" />' +
-    '<input type="button" value="Cancel" id="cancel_button" />' +
-    '<input type="checkbox" id="dont_show_again_checkbox" />' +
-    '<label for="dont_show_again_checkbox">Don\'t show this again</label>'
-    );
+  var notification_container =
+    $('<div>' +
+        '<div class="notification">' + localStorage.download_notification + '</div>' +
+        '<div class="warning">' + localStorage.download_warning + '</div>' +
+        '<input type="button" value="OK" id="okay_button" />' +
+        '<input type="button" value="Cancel" id="cancel_button" />' +
+        '<label><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>' +
+      '</div>')
+    .appendTo('#filters_container');
   
-  $('#okay_button, #cancel_button').on('click.removeNotification', function () {
+  $('#okay_button, #cancel_button').on('click', function () {
     localStorage.show_download_notification = !$('#dont_show_again_checkbox').prop('checked');
     notification_container.remove();
   });
-  $('#okay_button').on('click.startDownload', startDownload);
+  $('#okay_button').on('click', startDownload);
 }
 
 function startDownload() {
@@ -133,6 +132,7 @@ function startDownload() {
       checkedImages.push(visibleImages[i]);
     }
   }
+
   chrome.windows.getCurrent(function (currentWindow) {
     chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
       chrome.tabs.executeScript(
@@ -141,6 +141,31 @@ function startDownload() {
       );
     });
   });
+  
+  var downloading_notification = $('<div class="notification">Downloading ' + checkedImages.length + ' images...</div>').appendTo('#filters_container');
+  
+  flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove() });
+}
+
+function flash(element, flashes, interval, callback) {
+  if (!element.jquery) element = $(element);
+  if (!interval) interval = parseInt(localStorage.animation_duration_default);
+  
+  var fade = function (fadeIn) {
+    if (flashes > 0) {
+      flashes -= 0.5;
+      if (fadeIn) {
+        element.fadeIn(interval, function () { fade(false) });
+      }
+      else {
+        element.fadeOut(interval, function () { fade(true) });
+      }
+    }
+    else if (callback) {
+      callback(element[0]);
+    }
+  };
+  fade(false);
 }
 
 function filterImages() {

@@ -1,3 +1,5 @@
+localStorage.animation_duration_default = '500';
+
 localStorage.body_width_default = '340';
 
 localStorage.image_min_width_default = '30';
