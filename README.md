@@ -21,6 +21,7 @@ In the developer version of Google Chrome (v21), pressing "Download" used to cau
 Change Log
 ================
 1.1:
+- Added the URL above the image itself and a checkbox in options to toggle it
 - Added wildcard filter mode (alongside normal and regex)
 - The state of the selected filters will now be saved
 - Moved the "Sort by URL" option to the filters
