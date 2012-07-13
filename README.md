@@ -21,10 +21,11 @@ In the developer version of Google Chrome (v21), pressing "Download" used to cau
 Change Log
 ================
 1.1:
-- Added the URL above the image itself and a checkbox in options to toggle it
+- Fixed saving of minimum and maximum image width
+- Added the URL above the image itself and an option to toggle it
 - Added wildcard filter mode (alongside normal and regex)
 - The state of the selected filters will now be saved
-- Moved the "Sort by URL" option to the filters
+- Moved the "Sort by URL" option back to the filters
 - Added a "Clear Data" button to options page. While the extension does not use a lot of local storage yet, someone might appreciate the option.
 - Refactored a lot of code, especially the use of local storage
 
