@@ -231,7 +231,7 @@ function startDownload() {
     });
   });
   
-  var downloading_notification = $('<div class="notification">Downloading ' + checkedImages.length + ' images...</div>').appendTo('#filters_container');
+  var downloading_notification = $('<div class="notification">Downloading ' + checkedImages.length + ' image' + (checkedImages.length > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
   flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove() });
 }
 
