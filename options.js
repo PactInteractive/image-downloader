@@ -23,7 +23,10 @@ function initializeControlValues(reset) {
 }
 
 function initializeControlStyles(reset) {
-  jss('body', { width: reset ? localStorage.body_width_default : localStorage.body_width });
+  jss('body', {
+    width: reset ? localStorage.body_width_default : localStorage.body_width
+  });
+  
   jss('img', {
       'min-width': (reset ? localStorage.image_min_width_default : localStorage.image_min_width) + 'px',
       'max-width': (reset ? localStorage.image_max_width_default : localStorage.image_max_width) + 'px',

@@ -48,20 +48,30 @@ function initializePopup() {
 }
 
 function initializeStyles() {
-  jss('body', { width: localStorage.body_width + 'px' });
+  jss('body', {
+    width: localStorage.body_width + 'px'
+  });
+  
   jss('#filters_container', {
     'border-bottom-width': localStorage.image_border_width + 'px',
     'border-bottom-style': localStorage.image_border_style,
     'border-bottom-color': localStorage.image_border_color
   });
-  jss('.image_url_textbox', { width: (localStorage.image_max_width - 2) + 'px' });
-  jss('.image_buttons_container', { 'margin-top': (localStorage.show_image_url == 'true' ? 3 : -3) + 'px' });
+  
+  jss('.image_url_textbox', {
+    width: (parseInt(localStorage.image_max_width) + 2 * (parseInt(localStorage.image_border_width) - 2)) + 'px'
+  });
+  
+  jss('.image_buttons_container', {
+    'margin-top': (localStorage.show_image_url == 'true' ? 3 : -3) + 'px'
+  });
+  
   jss('img', {
-      'min-width': localStorage.image_min_width + 'px',
-      'max-width': localStorage.image_max_width + 'px',
-      'border-width': localStorage.image_border_width + 'px',
-      'border-style': localStorage.image_border_style,
-      'border-color': localStorage.image_border_color
+    'min-width': localStorage.image_min_width + 'px',
+    'max-width': localStorage.image_max_width + 'px',
+    'border-width': localStorage.image_border_width + 'px',
+    'border-style': localStorage.image_border_style,
+    'border-color': localStorage.image_border_color
   });
 }
 
