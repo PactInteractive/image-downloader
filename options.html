@@ -2,21 +2,17 @@
   <head>
     <title>Image Downloader | Options</title>
     <style>
+      select,
+      input[type="color"],
       input[type="number"]
       {
         width: 75px;
+      }
+      
+      input[type="number"]
+      {
         text-align: right;
         margin-right: 2px;
-      }
-      
-      input[type="color"]
-      {
-        width: 75px;
-      }
-      
-      select
-      {
-        width: 75px;
       }
       
       #notifications .success
@@ -52,38 +48,70 @@
     <fieldset>
       <legend>General</legend>
       
-      <label>
-        Popup Width:
-        <input type="number" id="body_width_numberbox" min="300" />px
+      <label title="Requires confirmation when you press the Download button">
+        <input type="checkbox" id="show_download_confirmation_checkbox" />
+        Show download confirmation
       </label>
       
       <br />
-      
-      <label>
+      <label title="Flashes a notification to let you know your download is starting">
         <input type="checkbox" id="show_download_notification_checkbox" />
-        Show download confirmation
+        Show downloading notification
+      </label>
+    </fieldset>
+    
+    <fieldset>
+      <legend>Filters</legend>
+      
+      <label title="Enables selection between normal, wildcard and regex filter mode">
+        <input type="checkbox" id="show_filter_mode_checkbox" />
+        Show advanced modes
+      </label>
+      
+      <br />
+      <label title="Enables the option to only show images from links on the page; can be useful if you want to filter out things like avatars and icons">
+        <input type="checkbox" id="show_only_images_from_links_checkbox" />
+        Show "Only images from links" option
+      </label>
+      
+      <br />
+      <label title="Enables the option to sort the images by URL instead of displaying them in the order they appear on the page">
+        <input type="checkbox" id="show_sort_by_url_checkbox" />
+        Show "Sort by URL" option
       </label>
     </fieldset>
     
     <fieldset>
       <legend>Images</legend>
       
-      <label>
+      <label title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option.">
+        <input type="checkbox" id="show_download_image_button_checkbox" />
+        Show a download button
+      </label>
+      
+      <br />
+      <label title="Displays a button next to each image to open it in a new tab">
+        <input type="checkbox" id="show_open_image_button_checkbox" />
+        Show an open button
+      </label>
+      
+      <br />
+      <label title="Displays the URL above each image">
         <input type="checkbox" id="show_image_url_checkbox" />
-        Show URL
+        Show the URL
       </label>
       
       <table>
-        <tr>
-          <td><label for="image_min_width_numberbox">Min Width:</label></td>
-          <td><input type="number" id="image_min_width_numberbox" min="0" />px</td>
+        <tr title="Setting the minimum width can be useful for images that are too small to make out">
+          <td><label for="image_min_width_numberbox">Minimum Width:</label></td>
+          <td><input type="number" id="image_min_width_numberbox" min="0" max="720" />px</td>
         </tr>
         
-        <tr>
-          <td><label for="image_max_width_numberbox">Max Width:</label></td>
-          <td><input type="number" id="image_max_width_numberbox" min="0" />px</td>
+        <tr title="Setting the maximum width prevents bigger images from taking too much space, and also adjusts the size of the popup">
+          <td><label for="image_max_width_numberbox">Maximum Width:</label></td>
+          <td><input type="number" id="image_max_width_numberbox" min="200" max="720" />px</td>
         </tr>
-      
+        
         <tr>
           <td><label for="image_border_width_numberbox">Border Width:</label></td>
           <td><input type="number" id="image_border_width_numberbox" min="0" max="5" />px</td>

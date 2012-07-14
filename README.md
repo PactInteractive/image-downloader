@@ -2,21 +2,23 @@ Image Downloader
 ================
 If you need to bulk download images from a web page, with this extension you can:
 - See images that the page contains and links to
-- Filter them by URL; also supports regular expressions
-- Select which images to download either by using checkboxes or by clicking directly on the image
-- Customize display width, border and sorting of images
+- Filter or sort them by URL; also supports wildcards and regular expressions
+- Optionally show only images from links
+- Select images for download by either using the checkboxes or directly clicking on the image
+- Dedicated buttons to download or open in new tab individual images
+- Customize display width, border size, style and color
+- Hide filters, buttons and notifications you don't need
 
 Unfortunately it's not possible to control Chrome's download manager. Google does not give developers that kind of access...yet. These features are experimental and do not work properly. For more information on Chrome's progress on the development, please refer to this page: http://code.google.com/chrome/extensions/experimental.downloads.html
 
-When you finally press the "Download" button, all selected images are saved to the default download directory of Chrome. If you don't have one, you will have to manually choose the save location for each image
+When you press the "Download" button, all selected images are saved to the default download directory of Chrome. If you don't have one, you will have to manually choose the save location for each image.
 
 WARNING: it is not recommended to attempt to download too many images at once if you haven't set up a default download directory for Chrome.
 
 Known Issues
 ================
-This extension can't always extract the full-resolution images that open when you click a photo (e.g. in Facebook albums). If you need that kind of functionality, even if you can't download many photos at once with it, I highly recommend the Hover Zoom extension: https://chrome.google.com/webstore/detail/nonjdcjchghhkdoolnlbekcfllmednbl
-
-In the developer version of Google Chrome (v21), pressing "Download" used to cause a crash because of an issue in the browser itself. There is no known workaround, but only developers and experienced users should be using this version anyway. I apologize to any affected users for the inconvenience. This issue has been fixed in Chrome as of version 21.0.1163.0 dev-m.
+This extension can't always extract the full-resolution images that open when you click a photo (e.g. in Facebook albums). That's because the page doesn't directly link to the image, but uses a script.
+If you need that kind of functionality, I highly recommend the Hover Zoom extension, even if you can't mass download images with it: https://chrome.google.com/webstore/detail/nonjdcjchghhkdoolnlbekcfllmednbl
 
 Change Log
 ================
@@ -24,6 +26,9 @@ Change Log
 - Changed the URL above the image to be displayed in a read-only textbox
 - Moved the image checkboxes to the top and added open & download buttons below each
 - Initially disabled the "Download" button and "All" checkbox
+- Introduced a few new options to hide filters, buttons and notification
+- Removed the body width option; the width of the popup now resizes relatively to the maximum image width option
+- Streamlined the design
 
 1.1:
 - Fixed saving of minimum and maximum image width
@@ -74,5 +79,6 @@ Change Log
 
 Credits
 ================
-Based on the Google Chrome Extension sample "Download Selected Links":
-http://code.google.com/chrome/extensions/samples.html#9e4fd06300ee2b3a171e1f30d1b70f8f10152c2b
+Based on the Google Chrome Extension sample "Download Selected Links": http://code.google.com/chrome/extensions/samples.html#9e4fd06300ee2b3a171e1f30d1b70f8f10152c2b
+Uses the tiny, but awesome JSS library: https://github.com/Box9/jss
+And jQuery 1.7.2: http://jquery.com/

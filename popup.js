@@ -5,7 +5,8 @@ window.onload = function () {
 
 function initializePopup() {
   $('#filter_textbox').on('keyup', filterImages);
-  
+  $('#download_button').on('click', downloadImages);
+
   $('input[name="filter_mode"][value="' + localStorage.filter_mode + '"]').prop('checked', true);
   $('input[name="filter_mode"]').on('change', function () {
     localStorage.filter_mode = this.value;
@@ -25,8 +26,6 @@ function initializePopup() {
       localStorage.sort_by_url = this.checked;
       filterImages();
     });
-  
-  $('#download_button').on('click', downloadImages);
   
   $('#images_table')
     .on('change', 'input[type="checkbox"]', toggleCheckBox)
@@ -51,15 +50,37 @@ function initializePopup() {
 }
 
 function initializeStyles() {
-  jss('body', {
-    width: localStorage.body_width + 'px'
-  });
+  //General
+  $('body').width(localStorage.body_width);
   
+  //Filters
   jss('#filters_container', {
     'border-bottom-width': localStorage.image_border_width + 'px',
     'border-bottom-style': localStorage.image_border_style,
     'border-bottom-color': localStorage.image_border_color
   });
+  
+  var downloadButtonWidth = 72;
+  var downloadButtonMargin = 10;
+  $('#filter_textbox').width(parseInt(localStorage.body_width) - downloadButtonWidth - downloadButtonMargin);
+  $('#download_button').width(downloadButtonWidth);
+  
+  if (localStorage.show_filter_mode != 'true') {
+    $('#filter_mode_container').toggle(false);
+  }
+  
+  if (localStorage.show_only_images_from_links != 'true') {
+    $('#only_images_from_links_container').toggle(false);
+  }
+  
+  if (localStorage.show_sort_by_url != 'true') {
+    $('#sort_by_url_container').toggle(false);
+  }
+  
+  //Images
+  //alert($('#filters_container').height());
+  var filters_container = $('#filters_container');
+  $('#images_table').css('margin-top', filters_container.height() + parseInt(filters_container.css('padding-top')) + 2 * parseInt(filters_container.css('padding-bottom')));
   
   jss('.image_url_textbox', {
     width: (parseInt(localStorage.image_max_width) + 2 * (parseInt(localStorage.image_border_width) - 2)) + 'px'
@@ -152,22 +173,30 @@ function displayImages() {
   images_table.append('<tr><th>' + toggle_all_checkbox + '</th><th align="left">' + toggle_all_checkbox_label + '</th></tr>');
   
   for (var i in visibleImages) {
+    var download_image_button = '';
+    if (localStorage.show_download_image_button == 'true') {
+      download_image_button = '<a class="download_image" href="' + visibleImages[i] + '" download><div class="download_image_button"></div></a>';
+    }
+    
+    var open_image_button = '';
+    if (localStorage.show_open_image_button == 'true') {
+      open_image_button = '<div class="open_image_button" data-url="' + visibleImages[i] + '"></div>';
+    }
+    
     var image_url_textbox = '';
     if (localStorage.show_image_url == 'true') {
       image_url_textbox = '<input type="text" class="image_url_textbox" value="' + visibleImages[i] + '" readonly />';
     }
+    
     images_table.append(
       '<tr>\
         <td valign="top">\
           <div class="image_buttons_container">\
-            <input type="checkbox" id="checkbox' + i + '" class="image_checkbox" />\
-            <a class="download_image" href="' + visibleImages[i] + '" download><div class="download_image_button"></div></a>\
-            <div class="open_image_button" data-url="' + visibleImages[i] + '"></div>\
+            <input type="checkbox" id="checkbox' + i + '" />' + download_image_button + open_image_button + '\
           </div>\
         </td>\
-        <td>\
-          ' + image_url_textbox + '\
-          <img src="' + visibleImages[i] + '" data-index="' + i + '" />\
+        <td valign="top">\
+          ' + image_url_textbox + '<img src="' + visibleImages[i] + '" data-index="' + i + '" />\
         </td>\
       </tr>'
     );
@@ -215,7 +244,7 @@ function toggleCheckBox() {
 }
 
 function downloadImages() {
-  if (localStorage.show_download_notification == 'true') {
+  if (localStorage.show_download_confirmation == 'true') {
     showDownloadConfirmation();
   }
   else {
@@ -237,7 +266,7 @@ function showDownloadConfirmation() {
     .appendTo('#filters_container');
   
   $('#okay_button, #cancel_button').on('click', function () {
-    localStorage.show_download_notification = !$('#dont_show_again_checkbox').prop('checked');
+    localStorage.show_download_confirmation = !$('#dont_show_again_checkbox').prop('checked');
     notification_container.remove();
   });
   $('#okay_button').on('click', startDownload);
@@ -264,6 +293,8 @@ function startDownload() {
 }
 
 function flashDownloadingNotification(imageCount) {
+  if (localStorage.show_download_notification != 'true') return;
+  
   var downloading_notification = $('<div class="notification">Downloading ' + imageCount + ' image' + (imageCount > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
   flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove() });
 }
