@@ -8,7 +8,7 @@
       {
         min-height: 200px;
       }
-    
+      
       #filters_container
       {
         position: fixed;
@@ -49,12 +49,25 @@
         margin-top: 109px;
       }
       
-      .image_link
+      .open_image_button,
+      .download_image_button
       {
-        display: block;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
+        height: 24px;
+        cursor: pointer;
+        
+        background-size: 24px;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+      
+      .open_image_button
+      {
+        background-image: url(images/open.png);
+      }
+      
+      .download_image_button
+      {
+        background-image: url(images/download.png);
       }
     </style>
   </head>
@@ -68,7 +81,7 @@
           </td>
           
           <td align="right">
-            <input type="button" id="download_button" value="Download" />
+            <input type="button" id="download_button" value="Download" disabled="true" />
           </td>
         </tr>
         

@@ -20,6 +20,11 @@ In the developer version of Google Chrome (v21), pressing "Download" used to cau
 
 Change Log
 ================
+1.2:
+- Changed the URL above the image to be displayed in a read-only textbox
+- Moved the image checkboxes to the top and added open & download buttons below each
+- Initially disabled the "Download" button and "All" checkbox
+
 1.1:
 - Fixed saving of minimum and maximum image width
 - Added the URL above the image itself and an option to toggle it

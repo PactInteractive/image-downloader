@@ -30,14 +30,15 @@ function initializePopup() {
   
   $('#images_table')
     .on('change', 'input[type="checkbox"]', toggleCheckBox)
-    .on('click', '.image_link', function () {
-      chrome.tabs.create({ url: this.innerHTML, active: false });
-    })
     .on('click', 'img', function () {
       var checkbox = $('#checkbox' + $(this).data('index'));
       checkbox.prop('checked', !checkbox.prop('checked'));
       checkbox.change();
-    });
+    })
+    .on('click', '.open_image_button', function () {
+      chrome.tabs.create({ url: $(this).data('url'), active: false });
+    })
+    ;
   
   chrome.windows.getCurrent(function (currentWindow) {
     chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
@@ -53,7 +54,8 @@ function initializeStyles() {
     'border-bottom-style': localStorage.image_border_style,
     'border-bottom-color': localStorage.image_border_color
   });
-  jss('.image_link', { width: localStorage.image_max_width + 'px' });
+  jss('.image_url_textbox', { width: (localStorage.image_max_width - 2) + 'px' });
+  jss('.image_buttons_container', { 'margin-top': (localStorage.show_image_url == 'true' ? 3 : -3) + 'px' });
   jss('img', {
       'min-width': localStorage.image_min_width + 'px',
       'max-width': localStorage.image_max_width + 'px',
@@ -132,18 +134,30 @@ function filterImages() {
 function displayImages() {
   var images_table = $('#images_table').empty();
   
-  var toggle_all_checkbox = '<input type="checkbox" id="toggle_all_checkbox" checked />';
+  var toggle_all_checkbox = '<input type="checkbox" id="toggle_all_checkbox" />';
   var toggle_all_checkbox_label = '<label id="toggle_all_checkbox_label" for="toggle_all_checkbox">All (' + visibleImages.length + ')</label>';
   images_table.append('<tr><th>' + toggle_all_checkbox + '</th><th align="left">' + toggle_all_checkbox_label + '</th></tr>');
   
   for (var i in visibleImages) {
-    var checkbox = '<input type="checkbox" id="checkbox' + i + '" checked />';
-    var link = '';
+    var image_url_textbox = '';
     if (localStorage.show_image_url == 'true') {
-      link = '<a href="' + visibleImages[i] + '" class="image_link">' + visibleImages[i] + '</a>';
+      image_url_textbox = '<input type="text" class="image_url_textbox" value="' + visibleImages[i] + '" readonly />';
     }
-    var image = '<img src="' + visibleImages[i] + '" data-index="' + i + '" />';
-    images_table.append('<tr><td>' + checkbox + '</td><td>' + link + image + '</td></tr>');
+    images_table.append(
+      '<tr>\
+        <td valign="top">\
+          <div class="image_buttons_container">\
+            <input type="checkbox" id="checkbox' + i + '" class="image_checkbox" />\
+            <a class="download_image" href="' + visibleImages[i] + '" download><div class="download_image_button"></div></a>\
+            <div class="open_image_button" data-url="' + visibleImages[i] + '"></div>\
+          </div>\
+        </td>\
+        <td>\
+          ' + image_url_textbox + '\
+          <img src="' + visibleImages[i] + '" data-index="' + i + '" />\
+        </td>\
+      </tr>'
+    );
   }
 }
 
@@ -198,13 +212,15 @@ function downloadImages() {
 
 function showDownloadConfirmation() {
   var notification_container =
-    $('<div>' +
-        '<div class="notification">If you have set up a default download location for Chrome, the files will be saved there.</div>' +
-        '<div class="warning">Otherwise, you will have to choose the save location for each file, which might open a lot of Save dialogs. Are you sure you want to do this?</div>' +
-        '<input type="button" value="OK" id="okay_button" />' +
-        '<input type="button" value="Cancel" id="cancel_button" />' +
-        '<label><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>' +
-      '</div>')
+    $(
+      '<div>\
+        <div class="notification">If you have set up a default download location for Chrome, the files will be saved there.</div>\
+        <div class="warning">Otherwise, you will have to choose the save location for each file, which might open a lot of Save dialogs. Are you sure you want to do this?</div>\
+        <input type="button" id="okay_button" value="OK" />\
+        <input type="button" id="cancel_button" value="Cancel" />\
+        <label><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>\
+      </div>'
+    )
     .appendTo('#filters_container');
   
   $('#okay_button, #cancel_button').on('click', function () {
