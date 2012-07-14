@@ -38,6 +38,9 @@ function initializePopup() {
     .on('click', '.open_image_button', function () {
       chrome.tabs.create({ url: $(this).data('url'), active: false });
     })
+    .on('click', '.download_image', function () {
+      flashDownloadingNotification(1);
+    })
     ;
   
   chrome.windows.getCurrent(function (currentWindow) {
@@ -257,7 +260,11 @@ function startDownload() {
     });
   });
   
-  var downloading_notification = $('<div class="notification">Downloading ' + checkedImages.length + ' image' + (checkedImages.length > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
+  flashDownloadingNotification(checkedImages.length);
+}
+
+function flashDownloadingNotification(imageCount) {
+  var downloading_notification = $('<div class="notification">Downloading ' + imageCount + ' image' + (imageCount > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
   flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove() });
 }
 
