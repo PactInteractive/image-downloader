@@ -29,18 +29,12 @@ function initializePopup() {
   
   $('#images_table')
     .on('change', 'input[type="checkbox"]', toggleCheckBox)
-    .on('click', 'img', function () {
-      var checkbox = $('#checkbox' + $(this).data('index'));
-      checkbox.prop('checked', !checkbox.prop('checked'));
-      checkbox.change();
-    })
     .on('click', '.open_image_button', function () {
       chrome.tabs.create({ url: $(this).data('url'), active: false });
     })
     .on('click', '.download_image', function () {
       flashDownloadingNotification(1);
-    })
-    ;
+    });
   
   chrome.windows.getCurrent(function (currentWindow) {
     chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
@@ -169,18 +163,18 @@ function displayImages() {
   var images_table = $('#images_table').empty();
   
   var toggle_all_checkbox = '<input type="checkbox" id="toggle_all_checkbox" />';
-  var toggle_all_checkbox_label = '<label id="toggle_all_checkbox_label" for="toggle_all_checkbox">All (' + visibleImages.length + ')</label>';
+  var toggle_all_checkbox_label = '<label for="toggle_all_checkbox">All (' + visibleImages.length + ')</label>';
   images_table.append('<tr><th>' + toggle_all_checkbox + '</th><th align="left">' + toggle_all_checkbox_label + '</th></tr>');
   
   for (var i in visibleImages) {
     var download_image_button = '';
     if (localStorage.show_download_image_button == 'true') {
-      download_image_button = '<a class="download_image" href="' + visibleImages[i] + '" download><div class="download_image_button"></div></a>';
+      download_image_button = '<a class="download_image" href="' + visibleImages[i] + '" title="Download" download><div class="download_image_button"></div></a>';
     }
     
     var open_image_button = '';
     if (localStorage.show_open_image_button == 'true') {
-      open_image_button = '<div class="open_image_button" data-url="' + visibleImages[i] + '"></div>';
+      open_image_button = '<div class="open_image_button" data-url="' + visibleImages[i] + '" title="Open in new tab"></div>';
     }
     
     var image_url_textbox = '';
@@ -196,7 +190,7 @@ function displayImages() {
           </div>\
         </td>\
         <td valign="top">\
-          ' + image_url_textbox + '<img src="' + visibleImages[i] + '" data-index="' + i + '" />\
+          ' + image_url_textbox + '<label for="checkbox' + i + '"><img src="' + visibleImages[i] + '" /></label>\
         </td>\
       </tr>'
     );
