@@ -95,6 +95,7 @@ function initializeStyles() {
 
 //Add images to allImages and visibleImages and trigger filtration
 //send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
+var timeoutID;
 chrome.extension.onRequest.addListener(function (result) {
   $.extend(linkedImages, result.linked_images);
   for (var i in result.images) {
@@ -102,7 +103,8 @@ chrome.extension.onRequest.addListener(function (result) {
       allImages.push(result.images[i]);
     }
   }
-  filterImages();
+  clearTimeout(timeoutID); //Cancel pending filtration
+  timeoutID = setTimeout(filterImages, 100);
 });
 
 var allImages = [];
