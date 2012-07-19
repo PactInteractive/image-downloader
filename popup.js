@@ -96,9 +96,11 @@ function initializeStyles() {
 //Add images to allImages and visibleImages and trigger filtration
 //send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
 chrome.extension.onRequest.addListener(function (result) {
-  linkedImages = result.linked_images;
+  $.extend(linkedImages, result.linked_images);
   for (var i in result.images) {
-    allImages.push(result.images[i]);
+    if (allImages.indexOf(result.images[i]) == -1) {
+      allImages.push(result.images[i]);
+    }
   }
   filterImages();
 });

@@ -13,7 +13,7 @@ var image_downloader = {
     if (element.tagName.toLowerCase() == 'a') {
       var href = element.href;
       if (image_downloader.image_regex.test(href)) {
-        image_downloader.linked_images[href] = true;
+        image_downloader.linked_images[href] = '0';
         return href;
       }
     }
