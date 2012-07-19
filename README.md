@@ -22,8 +22,10 @@ If you need that kind of functionality, I highly recommend the Hover Zoom extens
 
 Change Log
 ================
-1.2.1:
+1.3:
 - Images used in a <style> tag will now also be included at the end of the list. Only images from inline style attributes of elements used to be included.
+- Added support for data URI
+- Several bug fixes and optimizations
 
 1.2:
 - Changed the URL above the image to be displayed in a read-only textbox

@@ -12,7 +12,7 @@ var image_downloader = {
     
     if (element.tagName.toLowerCase() == 'a') {
       var href = element.href;
-      if (image_downloader.image_regex.test(href)) {
+      if (image_downloader.is_image_url(href)) {
         image_downloader.linked_images[href] = '0';
         return href;
       }
@@ -20,8 +20,8 @@ var image_downloader = {
     
     var background_image = element.style['background-image'];
     if (background_image) {
-      var parsed_url = image_downloader.extractURLFromStyle(background_image);
-      if (image_downloader.image_regex.test(parsed_url)) {
+      var parsed_url = image_downloader.extract_url_from_style(background_image);
+      if (image_downloader.is_image_url(parsed_url)) {
         return parsed_url;
       }
     }
@@ -29,8 +29,12 @@ var image_downloader = {
     return '';
   },
   
-  extractURLFromStyle: function (url) {
+  extract_url_from_style: function (url) {
     return url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '')
+  },
+  
+  is_image_url: function (url) {
+    return url.substring(0, 10) == 'data:image' || image_downloader.image_regex.test(url);
   },
   
   remove_duplicate_or_empty: function (a) {
@@ -83,8 +87,8 @@ for (var i in document.styleSheets) { //Extract images from styles
     for (var j in cssRules) {
       var style = cssRules[j].style;
       if (style && style['background-image']) {
-        var url = image_downloader.extractURLFromStyle(style['background-image']);
-        if (image_downloader.image_regex.test(url)) {
+        var url = image_downloader.extract_url_from_style(style['background-image']);
+        if (image_downloader.is_image_url(url)) {
           image_downloader.images.push(url);
         }
       }
