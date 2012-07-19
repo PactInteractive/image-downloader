@@ -20,13 +20,17 @@ var image_downloader = {
     
     var background_image = element.style['background-image'];
     if (background_image) {
-      var parsed_url = background_image.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+      var parsed_url = image_downloader.extractURLFromStyle(background_image);
       if (image_downloader.image_regex.test(parsed_url)) {
         return parsed_url;
       }
     }
     
     return '';
+  },
+  
+  extractURLFromStyle: function (url) {
+    return url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '')
   },
   
   remove_duplicate_or_empty: function (a) {
@@ -72,6 +76,22 @@ var image_downloader = {
 image_downloader.linked_images = {};
 image_downloader.images = [].slice.apply(document.getElementsByTagName('*'));
 image_downloader.images = image_downloader.images.map(image_downloader.map_element);
+
+for (var i in document.styleSheets) { //Extract images from styles
+  var cssRules = document.styleSheets[i].cssRules;
+  if (cssRules) {
+    for (var j in cssRules) {
+      var style = cssRules[j].style;
+      if (style && style['background-image']) {
+        var url = image_downloader.extractURLFromStyle(style['background-image']);
+        if (image_downloader.image_regex.test(url)) {
+          image_downloader.images.push(url);
+        }
+      }
+    }
+  }
+}
+
 image_downloader.images = image_downloader.remove_duplicate_or_empty(image_downloader.images);
 chrome.extension.sendRequest({ linked_images: image_downloader.linked_images, images: image_downloader.images });
 

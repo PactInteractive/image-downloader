@@ -7,8 +7,8 @@ function initializePopup() {
   $('#filter_textbox').on('keyup', filterImages);
   $('#download_button').on('click', downloadImages);
 
-  $('input[name="filter_mode"][value="' + localStorage.filter_mode + '"]').prop('checked', true);
-  $('input[name="filter_mode"]').on('change', function () {
+  $('input:radio[name="filter_mode"][value="' + localStorage.filter_mode + '"]').prop('checked', true);
+  $('input:radio[name="filter_mode"]').on('change', function () {
     localStorage.filter_mode = this.value;
     filterImages();
   });
