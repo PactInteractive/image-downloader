@@ -219,24 +219,24 @@ function toggleCheckBox() {
   });
   
   var allAreChecked = true;
-  var allAreUnhecked = true;
+  var allAreUnchecked = true;
   checkboxes.each(function () {
     if (this.checked) {
-      allAreUnhecked = false;
+      allAreUnchecked = false;
     }
     else {
       allAreChecked = false;
     }
   });
   
-  $('#download_button').prop('disabled', allAreUnhecked);
+  $('#download_button').prop('disabled', allAreUnchecked);
   
   var toggle_all_checkbox = $('#toggle_all_checkbox');
-  toggle_all_checkbox.prop('indeterminate', !(allAreChecked || allAreUnhecked));
+  toggle_all_checkbox.prop('indeterminate', !(allAreChecked || allAreUnchecked));
   if (allAreChecked) {
     toggle_all_checkbox.prop('checked', true);
   }
-  else if (allAreUnhecked) {
+  else if (allAreUnchecked) {
     toggle_all_checkbox.prop('checked', false);
   }
 }
