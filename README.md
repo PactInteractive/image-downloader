@@ -22,6 +22,12 @@ If you need that kind of functionality, I highly recommend the Hover Zoom extens
 
 Change Log
 ================
+2.0:
+- Added the ability to save the files to a subfolder
+- Implemented a cleaner design
+- Utilized the Google Chrome downloads API
+- Fixed a few minor display issues
+
 1.3:
 - Images used in a <style> tag will now also be included at the end of the list. Only images from inline style attributes of elements used to be included.
 - Added support for data URI
@@ -84,6 +90,31 @@ Change Log
 
 Credits
 ================
-Based on the Google Chrome Extension sample "Download Selected Links": http://code.google.com/chrome/extensions/samples.html#9e4fd06300ee2b3a171e1f30d1b70f8f10152c2b
+Based on the Google Chrome Extension sample "Download Selected Links": https://developer.chrome.com/extensions/examples/api/downloads/download_links.zip
 Uses the tiny, but awesome JSS library: https://github.com/Box9/jss
-And jQuery 1.7.2: http://jquery.com/
+And Zepto.js: http://zeptojs.com
+
+License
+=======
+Copyright (c) 2014 Vladimir Sabev
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use,
+copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the
+Software is furnished to do so, subject to the following
+conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+OTHER DEALINGS IN THE SOFTWARE.

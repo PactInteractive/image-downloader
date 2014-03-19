@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Image Downloader</title>
+
+    <link rel="stylesheet" href="/stylesheets/main.css" type="text/css" />
+    <style>
+      body
+      {
+        margin-left: -5px;
+        padding: 5px 0 5px 5px;
+      }
+
+      #download_button { width: 90px; }
+
+      #dont_show_again_checkbox { margin: 8px 0 0 3px; }
+
+      #filters_container input[type="text"],
+      #filters_container input[type="button"]
+      {
+        height: 32px;
+        margin-bottom: 5px;
+        font-size: 12px;
+      }
+
+      #filters_container,
+      #images_table { padding: 5px; }
+
+      #filters_container
+      {
+        position: fixed;
+        top: 0px;
+        width: 100%;
+        box-sizing: border-box;
+        background: #fff;
+      }
+
+      #folder_name_textbox { margin-right: 5px; }
+
+      #filter_textbox { width: 100%; }
+
+      #images_table    { padding-top: 0; }
+      #images_table th,
+      #images_table td { padding-top: 3px; }
+
+      .open_image_button,
+      .download_image_button
+      {
+        height: 24px;
+        cursor: pointer;
+
+        background-size: 24px;
+        background-repeat: no-repeat;
+        background-position: center;
+      }
+
+      .open_image_button     { background-image: url(/images/open.png); }
+      .download_image_button { background-image: url(/images/download.png); }
+    </style>
+
+    <script src="/lib/zepto.js"></script>
+    <script src="/lib/jss.js"></script>
+
+    <script src="/scripts/popup.js"></script>
+  </head>
+
+  <body>
+    <div id="filters_container">
+      <input type="text" id="folder_name_textbox" class="left" placeholder="SAVE TO FOLDER" title="Set the name of the subfolder where you want download the images." />
+      <input type="button" id="download_button" class="left accent" value="DOWNLOAD" disabled="true" />
+      <div class="clear"></div>
+
+      <input type="text" id="filter_textbox" placeholder="FILTER BY URL" title="Filter by parts of the URL or regular expressions." />
+
+      <div id="filter_mode_container">
+        <div class="left">Mode:</div>
+
+        <div class="left">
+          <label title="Just a plain text search">
+            <input type="radio" name="filter_mode" value="normal" />
+            <span>Normal</span>
+          </label>
+
+          <label title="You can also use these special symbols:
+  * → zero or more characters
+  ? → zero or one character
+  + → one or more characters">
+            <input type="radio" name="filter_mode" value="wildcard" />
+            <span>Wildcard</span>
+          </label>
+
+          <label title="Regular expressions (for advanced users):
+  [abc] → A single character of: a, b or c
+  [^abc] → Any single character except: a, b, or c
+  [a-z] →	Any single character in the range a-z
+  [a-zA-Z] → Any single character in the range a-z or A-Z
+  ^ → Start of line
+  $ → End of line
+  \A → Start of string
+  \z → End of string
+  . → Any single character
+  \s → Any whitespace character
+  \S → Any non-whitespace character
+  \d → Any digit
+  \D → Any non-digit
+  \w → Any word character (letter, number, underscore)
+  \W → Any non-word character
+  \b → Any word boundary character
+  (...) → Capture everything enclosed
+  (a|b) → a or b
+  a? → Zero or one of a
+  a* → Zero or more of a
+  a+ → One or more of a
+  a{3} → Exactly 3 of a
+  a{3,} → 3 or more of a
+  a{3,6} → Between 3 and 6 of a">
+            <input type="radio" name="filter_mode" value="regex" />
+            <span>Regex</span>
+          </label>
+        </div>
+
+        <div class="clear"></div>
+      </div>
+
+      <div id="only_images_from_links_container" class="left">
+        <label title="Can be useful if you want to filter out things like avatars and icons">
+          <input type="checkbox" id="only_images_from_links_checkbox" />
+          <span>Only images from links</span>
+        </label>
+      </div>
+
+      <div id="sort_by_url_container" class="left">
+        <label title="By default, images are shown in the order they appear on the page. Check this box to sort them alphabetically by URL instead.">
+          <input type="checkbox" id="sort_by_url_checkbox" />
+          <span>Sort by URL</span>
+        </label>
+      </div>
+
+      <div class="clear"></div>
+    </div>
+
+    <table id="images_table" cellspacing="0" cellpadding="0"></table>
+  </body>
+</html>

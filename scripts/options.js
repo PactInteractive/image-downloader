@@ -5,15 +5,15 @@ window.onload = function () {
 };
 
 function initializeControlValues(reset) {
-  //General
+  // General
   if ((reset ? localStorage.show_download_confirmation_default : localStorage.show_download_confirmation) == 'true') {
     $('#show_download_confirmation_checkbox').prop('checked', true);
   }
   if ((reset ? localStorage.show_download_notification_default : localStorage.show_download_notification) == 'true') {
     $('#show_download_notification_checkbox').prop('checked', true);
   }
-  
-  //Filters
+
+  // Filters
   if ((reset ? localStorage.show_filter_mode_default : localStorage.show_filter_mode) == 'true') {
     $('#show_filter_mode_checkbox').prop('checked', true);
   }
@@ -23,8 +23,8 @@ function initializeControlValues(reset) {
   if ((reset ? localStorage.show_sort_by_url_default : localStorage.show_sort_by_url) == 'true') {
     $('#show_sort_by_url_checkbox').prop('checked', true);
   }
-  
-  //Images
+
+  // Images
   if ((reset ? localStorage.show_download_image_button_default : localStorage.show_download_image_button) == 'true') {
     $('#show_download_image_button_checkbox').prop('checked', true);
   }
@@ -42,11 +42,8 @@ function initializeControlValues(reset) {
 }
 
 function initializeControlStyles(reset) {
-  jss('body', {
-    width: reset ? localStorage.body_width_default : localStorage.body_width
-  });
-  
-  jss('img', {
+  jss.set('body', { width: (reset ? localStorage.body_width_default : localStorage.body_width) + 'px' });
+  jss.set('img', {
       'min-width': (reset ? localStorage.image_min_width_default : localStorage.image_min_width) + 'px',
       'max-width': (reset ? localStorage.image_max_width_default : localStorage.image_max_width) + 'px',
       'border-width': (reset ? localStorage.image_border_width_default : localStorage.image_border_width) + 'px',
@@ -58,78 +55,74 @@ function initializeControlStyles(reset) {
 function initializeControlEvents() {
   $('#image_min_width_numberbox')
     .on('change', function () {
-      jss('img', { 'min-width': (this.value || localStorage.image_min_width_default) + 'px' });
+      jss.set('img', { 'min-width': (this.value || localStorage.image_min_width_default) + 'px' });
     });
-  
+
   $('#image_max_width_numberbox')
     .on('change', function () {
       var width = parseInt(this.value || localStorage.image_max_width_default);
-      jss('img', {
-        'max-width': width + 'px'
-      });
-      
+      jss.set('img', { 'max-width': width + 'px' });
+
       var bodyWidth = width + parseInt(localStorage.body_width_default) - parseInt(localStorage.image_max_width_default);
-      jss('body', {
-        'width': bodyWidth + 'px'
-      });
+      jss.set('body', { 'width': bodyWidth + 'px' });
     });
-  
+
   $('#image_border_width_numberbox')
     .on('change', function () {
-      jss('img', { 'border-width': (this.value || localStorage.image_border_width_default) + 'px' });
+      jss.set('img', { 'border-width': (this.value || localStorage.image_border_width_default) + 'px' });
     });
-  
+
   $('#image_border_style_dropdown')
     .on('change', function () {
-      jss('img', { 'border-style': this.value || localStorage.image_border_style_default });
+      jss.set('img', { 'border-style': this.value || localStorage.image_border_style_default });
     });
-  
+
   $('#image_border_color_picker')
     .on('change', function () {
-      jss('img', { 'border-color': this.value || localStorage.image_border_color_default });
+      jss.set('img', { 'border-color': this.value || localStorage.image_border_color_default });
     });
-  
-  //Buttons
+
+  // Buttons
   $('#save_button').on('click', saveOptions);
   $('#reset_button').on('click', resetOptions);
   $('#clear_data_button').on('click', clearData);
 }
 
 function saveOptions() {
-  //General
+  // General
   localStorage.show_download_confirmation = $('#show_download_confirmation_checkbox').prop('checked');
   localStorage.show_download_notification = $('#show_download_notification_checkbox').prop('checked');
-  
-  //Filters
+
+  // Filters
   localStorage.show_filter_mode = $('#show_filter_mode_checkbox').prop('checked');
   localStorage.show_only_images_from_links = $('#show_only_images_from_links_checkbox').prop('checked');
   localStorage.show_sort_by_url = $('#show_sort_by_url_checkbox').prop('checked');
-  
-  //Images
+
+  // Images
   localStorage.show_download_image_button = $('#show_download_image_button_checkbox').prop('checked');
   localStorage.show_open_image_button = $('#show_open_image_button_checkbox').prop('checked');
   localStorage.show_image_url = $('#show_image_url_checkbox').prop('checked');
-  
+
   localStorage.image_min_width = $('#image_min_width_numberbox').val();
   localStorage.image_max_width = $('#image_max_width_numberbox').val();
   localStorage.image_border_width = $('#image_border_width_numberbox').val();
   localStorage.image_border_style = $('#image_border_style_dropdown').val();
   localStorage.image_border_color = $('#image_border_color_picker').val();
   localStorage.sort_images = $('#sort_images_checkbox').prop('checked');
-  
+
   localStorage.body_width = parseInt($('#image_max_width_numberbox').val()) + parseInt(localStorage.body_width_default) - parseInt(localStorage.image_max_width_default);
-  
+
   addNotification('Options saved.', 'success');
 }
 
 function resetOptions() {
   initializeControlValues(true);
   initializeControlStyles(true);
-  addNotification('Options have been reset to their defaults. You can now save the changes you made or discard them by reloading the page.', 'warning');
+  addNotification('All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.', 'warning');
 }
 
 function clearData() {
-  var result = confirm('Are you sure you want to clear all data for this extension?');
+  var result = confirm('Are you sure you want to clear all data for this extension? This includes filters, options and the name of the default folder where files are saved.');
   if (result) {
     localStorage.clear();
     window.location.reload();

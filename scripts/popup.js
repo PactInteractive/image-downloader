@@ -4,87 +4,97 @@ window.onload = function () {
 };
 
 function initializePopup() {
-  $('#filter_textbox').on('keyup', filterImages);
-  $('#download_button').on('click', downloadImages);
+  // Register download folder name listener
+  $('#folder_name_textbox')
+    .val(localStorage.folder_name)
+    .on('change', function () {
+      localStorage.folder_name = $.trim(this.value);
+    });
 
-  $('input:radio[name="filter_mode"][value="' + localStorage.filter_mode + '"]').prop('checked', true);
-  $('input:radio[name="filter_mode"]').on('change', function () {
+  chrome.downloads.onDeterminingFilename.addListener(function (item, suggest) {
+    if (localStorage.folder_name) {
+      suggest({ filename: localStorage.folder_name + '/' + item.filename});
+    }
+  });
+
+  $('#download_button').on('click', downloadImages);
+  $('#filter_textbox').on('keyup', filterImages);
+
+  $('input[type="radio"][name="filter_mode"][value="' + localStorage.filter_mode + '"]').prop('checked', true);
+  $('input[type="radio"][name="filter_mode"]').on('change', function () {
     localStorage.filter_mode = this.value;
     filterImages();
   });
-  
+
   $('#only_images_from_links_checkbox')
     .prop('checked', localStorage.only_images_from_links == 'true')
     .on('change', function () {
       localStorage.only_images_from_links = this.checked;
       filterImages();
     });
-  
+
   $('#sort_by_url_checkbox')
     .prop('checked', localStorage.sort_by_url == 'true')
     .on('change', function () {
       localStorage.sort_by_url = this.checked;
       filterImages();
     });
-  
+
   $('#images_table')
     .on('change', 'input[type="checkbox"]', toggleCheckBox)
+    .on('click', '.download_image_button', function () {
+      chrome.downloads.download({ url: $(this).data('url') });
+      flashDownloadingNotification(1);
+    })
     .on('click', '.open_image_button', function () {
       chrome.tabs.create({ url: $(this).data('url'), active: false });
-    })
-    .on('click', '.download_image', function () {
-      flashDownloadingNotification(1);
     });
-  
+
+  // Get images on the page
   chrome.windows.getCurrent(function (currentWindow) {
     chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
-      chrome.tabs.executeScript(activeTabs[0].id, { file: 'send_images.js', allFrames: true });
+      chrome.tabs.executeScript(activeTabs[0].id, { file: '/scripts/send_images.js', allFrames: true });
     });
   });
 }
 
 function initializeStyles() {
-  //General
-  $('body').width(localStorage.body_width);
-  
-  //Filters
-  jss('#filters_container', {
+  // General
+  $('body').width(parseInt(localStorage.body_width)).css('padding-top', $('#filters_container').height());
+
+  // Filters
+  jss.set('#filters_container', {
     'border-bottom-width': localStorage.image_border_width + 'px',
     'border-bottom-style': localStorage.image_border_style,
     'border-bottom-color': localStorage.image_border_color
   });
-  
-  var downloadButtonWidth = 72;
-  var downloadButtonMargin = 10;
-  $('#filter_textbox').width(parseInt(localStorage.body_width) - downloadButtonWidth - downloadButtonMargin);
-  $('#download_button').width(downloadButtonWidth);
-  
+
+  var downloadButtonWidth = $('#download_button').width();
+  var downloadButtonMargin = parseInt($('#download_button').css('margin-left')) + parseInt($('#download_button').css('margin-right'));
+  $('#folder_name_textbox').width($('#filters_container').width() - parseInt($('#filters_container').css('padding-left')) - parseInt($('#filters_container').css('padding-right')) - parseInt($('#folder_name_textbox').css('margin-right')) - downloadButtonWidth);
+
   if (localStorage.show_filter_mode != 'true') {
     $('#filter_mode_container').toggle(false);
   }
-  
+
   if (localStorage.show_only_images_from_links != 'true') {
     $('#only_images_from_links_container').toggle(false);
   }
-  
+
   if (localStorage.show_sort_by_url != 'true') {
     $('#sort_by_url_container').toggle(false);
   }
-  
-  //Images
-  //alert($('#filters_container').height());
-  var filters_container = $('#filters_container');
-  $('#images_table').css('margin-top', filters_container.height() + parseInt(filters_container.css('padding-top')) + 2 * parseInt(filters_container.css('padding-bottom')));
-  
-  jss('.image_url_textbox', {
-    width: (parseInt(localStorage.image_max_width) + 2 * (parseInt(localStorage.image_border_width) - 2)) + 'px'
+
+  // Images
+  jss.set('.image_url_textbox', {
+    width: (parseInt(localStorage.image_max_width) + 2 * parseInt(localStorage.image_border_width)) + 'px'
   });
-  
-  jss('.image_buttons_container', {
+
+  jss.set('.image_buttons_container', {
     'margin-top': (localStorage.show_image_url == 'true' ? 3 : -3) + 'px'
   });
-  
-  jss('img', {
+
+  jss.set('img', {
     'min-width': localStorage.image_min_width + 'px',
     'max-width': localStorage.image_max_width + 'px',
     'border-width': localStorage.image_border_width + 'px',
@@ -93,17 +103,17 @@ function initializeStyles() {
   });
 }
 
-//Add images to allImages and visibleImages and trigger filtration
-//send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
+// Add images to allImages and visibleImages and trigger filtration
+// send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
 var timeoutID;
-chrome.extension.onRequest.addListener(function (result) {
+chrome.extension.onMessage.addListener(function (result) {
   $.extend(linkedImages, result.linked_images);
   for (var i in result.images) {
     if (allImages.indexOf(result.images[i]) == -1) {
       allImages.push(result.images[i]);
     }
   }
-  clearTimeout(timeoutID); //Cancel pending filtration
+  clearTimeout(timeoutID); // Cancel pending filtration
   timeoutID = setTimeout(filterImages, 100);
 });
 
@@ -149,43 +159,43 @@ function filterImages() {
       });
       break;
   }
-  
+
   if (localStorage.only_images_from_links == 'true') {
     visibleImages = visibleImages.filter(function (url) {
       return linkedImages[url];
     });
   }
-  
+
   if (localStorage.sort_by_url == 'true') {
     visibleImages.sort();
   }
-  
+
   displayImages();
 }
 
 function displayImages() {
   var images_table = $('#images_table').empty();
-  
+
   var toggle_all_checkbox = '<input type="checkbox" id="toggle_all_checkbox" />';
-  var toggle_all_checkbox_label = '<label for="toggle_all_checkbox">All (' + visibleImages.length + ')</label>';
+  var toggle_all_checkbox_label = '<label for="toggle_all_checkbox">Select all (' + visibleImages.length + ')</label>';
   images_table.append('<tr><th>' + toggle_all_checkbox + '</th><th align="left">' + toggle_all_checkbox_label + '</th></tr>');
-  
+
   for (var i in visibleImages) {
     var download_image_button = '';
     if (localStorage.show_download_image_button == 'true') {
-      download_image_button = '<a class="download_image" href="' + visibleImages[i] + '" title="Download" download><div class="download_image_button"></div></a>';
+      download_image_button = '<div class="download_image_button" data-url="' + visibleImages[i] + '" title="Download"></div>';
     }
-    
+
     var open_image_button = '';
     if (localStorage.show_open_image_button == 'true') {
       open_image_button = '<div class="open_image_button" data-url="' + visibleImages[i] + '" title="Open in new tab"></div>';
     }
-    
+
     var image_url_textbox = '';
     if (localStorage.show_image_url == 'true') {
       image_url_textbox = '<input type="text" class="image_url_textbox" value="' + visibleImages[i] + '" readonly />';
     }
-    
+
     images_table.append(
       '<tr>\
         <td valign="top">\
@@ -209,7 +219,7 @@ function toggleCheckBox() {
     }
     return;
   }
-  
+
   var checkboxes = $('#images_table input[type="checkbox"]:not(#toggle_all_checkbox)');
   checkboxes.each(function () {
     if (this.checked) {
@@ -217,7 +227,7 @@ function toggleCheckBox() {
       return false;
     }
   });
-  
+
   var allAreChecked = true;
   var allAreUnchecked = true;
   checkboxes.each(function () {
@@ -228,9 +238,9 @@ function toggleCheckBox() {
       allAreChecked = false;
     }
   });
-  
+
   $('#download_button').prop('disabled', allAreUnchecked);
-  
+
   var toggle_all_checkbox = $('#toggle_all_checkbox');
   toggle_all_checkbox.prop('indeterminate', !(allAreChecked || allAreUnchecked));
   if (allAreChecked) {
@@ -243,64 +253,61 @@ function toggleCheckBox() {
 
 function downloadImages() {
   if (localStorage.show_download_confirmation == 'true') {
-    showDownloadConfirmation();
+    showDownloadConfirmation(startDownload);
   }
   else {
     startDownload();
   }
+
+  function startDownload() {
+    var checkedImages = 0;
+    for (var i in visibleImages) {
+      if ($('#checkbox' + i).prop('checked')) {
+        checkedImages++;
+        chrome.downloads.download({ url: visibleImages[i] });
+      }
+    }
+
+    flashDownloadingNotification(checkedImages);
+  }
 }
 
-function showDownloadConfirmation() {
+function showDownloadConfirmation(startDownload) {
   var notification_container =
     $(
       '<div>\
-        <div class="notification">If you have set up a default download location for Chrome, the files will be saved there.</div>\
-        <div class="warning">Otherwise, you will have to choose the save location for each file, which might open a lot of Save dialogs. Are you sure you want to do this?</div>\
-        <input type="button" id="okay_button" value="OK" />\
-        <input type="button" id="cancel_button" value="Cancel" />\
-        <label><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>\
+        <div>\
+          <hr/>\
+          Take a quick look at your <b><a href="chrome://settings/search#download location">download location settings</a></b>.\
+          <span class="danger">If the <b>Ask where to save each file before downloading</b> option is checked, proceeding might open a lot of popup windows. Are you sure you want to do this?</span>\
+        </div>\
+        <div class="left">\
+          <input type="button" id="yes_button" class="success" value="YES" />\
+          <input type="button" id="no_button" class="danger" value="NO" />\
+        </div>\
+        <label class="left"><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>\
+        <div class="clear"></div>\
       </div>'
     )
     .appendTo('#filters_container');
-  
-  $('#okay_button, #cancel_button').on('click', function () {
+
+  $('#yes_button, #no_button').on('click', function () {
     localStorage.show_download_confirmation = !$('#dont_show_again_checkbox').prop('checked');
     notification_container.remove();
   });
-  $('#okay_button').on('click', startDownload);
-}
-
-function startDownload() {
-  var checkedImages = [];
-  for (var i in visibleImages) {
-    if ($('#checkbox' + i).prop('checked')) {
-      checkedImages.push(visibleImages[i]);
-    }
-  }
-  
-  chrome.windows.getCurrent(function (currentWindow) {
-    chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
-      chrome.tabs.executeScript(
-        activeTabs[0].id,
-        { code: 'image_downloader.download_images(' + JSON.stringify(checkedImages) + ');' }
-      );
-    });
-  });
-  
-  flashDownloadingNotification(checkedImages.length);
+  $('#yes_button').on('click', startDownload);
 }
 
 function flashDownloadingNotification(imageCount) {
   if (localStorage.show_download_notification != 'true') return;
-  
-  var downloading_notification = $('<div class="notification">Downloading ' + imageCount + ' image' + (imageCount > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
+
+  var downloading_notification = $('<div class="success">Downloading ' + imageCount + ' image' + (imageCount > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
   flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove() });
 }
 
 function flash(element, flashes, interval, callback) {
-  if (!element.jquery) element = $(element);
   if (!interval) interval = parseInt(localStorage.animation_duration);
-  
+
   var fade = function (fadeIn) {
     if (flashes > 0) {
       flashes -= 0.5;
@@ -312,7 +319,7 @@ function flash(element, flashes, interval, callback) {
       }
     }
     else if (callback) {
-      callback(element[0]);
+      callback(element);
     }
   };
   fade(false);

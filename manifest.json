@@ -1,26 +1,29 @@
 {
   "name": "Image Downloader",
-  "description": "See all images shown or linked on a web page and download them.",
-  "version": "1.3",
+  "description": "Browse and download images on a web page.",
+  "version": "2.0",
+  "minimum_chrome_version": "31",
   "manifest_version": 2,
   "permissions": [
-    "tabs", "http://*/*", "https://*/*"
+    "downloads",
+    "<all_urls>",
+    "tabs"
   ],
   "browser_action": {
-    "default_icon": "icon_128.png",
-    "default_popup": "popup.html"
+    "default_icon": "/icon_128.png",
+    "default_popup": "/views/popup.html"
   },
   "icons": {
-    "16": "icon_16.png",
-    "48": "icon_48.png",
-    "128": "icon_128.png"
+    "16": "/icon_16.png",
+    "48": "/icon_48.png",
+    "128": "/icon_128.png"
   },
   "web_accessible_resources": [
-    "images/open.png",
-    "images/download.png"
+    "/images/open.png",
+    "/images/download.png"
   ],
   "background": {
-    "scripts": ["defaults.js"]
+    "scripts": ["/scripts/defaults.js"]
   },
-  "options_page": "options.html"
+  "options_page": "/views/options.html"
 }
