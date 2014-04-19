@@ -18,7 +18,7 @@ WARNING: it is not recommended to attempt to download too many images at once if
 Known Issues
 ================
 This extension can't always extract the full-resolution images that open when you click a photo (e.g. in Facebook albums). That's because the page doesn't directly link to the image, but uses a script.
-If you need that kind of functionality, I highly recommend the Hover Zoom extension, even if you can't mass download images with it: https://chrome.google.com/webstore/detail/nonjdcjchghhkdoolnlbekcfllmednbl
+If you need that kind of functionality, there are other useful extensions like Hover Zoom, even if you can't mass download images with it: https://chrome.google.com/webstore/detail/hover-zoom/nonjdcjchghhkdoolnlbekcfllmednbl
 
 Change Log
 ================
@@ -29,7 +29,7 @@ Change Log
 - Fixed a few minor display issues
 
 1.3:
-- Images used in a <style> tag will now also be included at the end of the list. Only images from inline style attributes of elements used to be included.
+- Images used in a style tag will now also be included at the end of the list. Only images from inline style attributes of elements used to be included.
 - Added support for data URI
 - Several bug fixes and optimizations
 
