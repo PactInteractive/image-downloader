@@ -91,7 +91,9 @@ Change Log
 Credits
 ================
 Based on the Google Chrome Extension sample "Download Selected Links": https://developer.chrome.com/extensions/examples/api/downloads/download_links.zip
+
 Uses the tiny, but awesome JSS library: https://github.com/Box9/jss
+
 And Zepto.js: http://zeptojs.com
 
 License
