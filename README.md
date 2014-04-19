@@ -24,8 +24,9 @@ Change Log
 ================
 2.0:
 - Added the ability to save the files to a subfolder
-- Implemented a cleaner design
 - Utilized the Google Chrome downloads API
+- Implemented a cleaner design
+- Clicking on an image URL textbox will now automatically select the text so users can copy it
 - Fixed a few minor display issues
 
 1.3:
