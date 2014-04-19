@@ -54,8 +54,8 @@
         background-position: center;
       }
 
-      .open_image_button     { background-image: url(/images/open.png); }
-      .download_image_button { background-image: url(/images/download.png); }
+      .open_image_button     { background-image: url("/images/open.png"); }
+      .download_image_button { background-image: url("/images/download.png"); }
     </style>
 
     <script src="/lib/zepto.js"></script>
@@ -76,7 +76,7 @@
         <div class="left">Mode:</div>
 
         <div class="left">
-          <label title="Just a plain text search">
+          <label title="A plain text search">
             <input type="radio" name="filter_mode" value="normal" />
             <span>Normal</span>
           </label>
@@ -89,7 +89,7 @@
             <span>Wildcard</span>
           </label>
 
-          <label title="Regular expressions (for advanced users):
+          <label title="Regular expressions (advanced):
   [abc] → A single character of: a, b or c
   [^abc] → Any single character except: a, b, or c
   [a-z] →	Any single character in the range a-z
