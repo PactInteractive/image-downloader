@@ -47,6 +47,9 @@
 
     $('#images_table')
       .on('change', 'input[type="checkbox"]', toggleCheckBox)
+      .on('click', '.image_url_textbox', function () {
+        this.select();
+      });
       .on('click', '.download_image_button', function () {
         chrome.downloads.download({ url: $(this).data('url') });
         flashDownloadingNotification(1);
@@ -185,11 +188,6 @@
     var toggle_all_checkbox = '<input type="checkbox" id="toggle_all_checkbox" />';
     var toggle_all_checkbox_label = '<label for="toggle_all_checkbox">Select all (' + visibleImages.length + ')</label>';
     images_table.append('<tr><th>' + toggle_all_checkbox + '</th><th align="left">' + toggle_all_checkbox_label + '</th></tr>');
-
-    // Select the image URL textbox content on click
-    if (ls.show_image_url === 'true') {
-      images_table.on('click', '.image_url_textbox', function () { this.select(); });
-    }
 
     for (var i in visibleImages) {
       var download_image_button = '';
