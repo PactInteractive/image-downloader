@@ -49,7 +49,7 @@
       .on('change', 'input[type="checkbox"]', toggleCheckBox)
       .on('click', '.image_url_textbox', function () {
         this.select();
-      });
+      })
       .on('click', '.download_image_button', function () {
         chrome.downloads.download({ url: $(this).data('url') });
         flashDownloadingNotification(1);
