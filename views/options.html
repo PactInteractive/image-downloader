@@ -76,9 +76,9 @@
     <fieldset>
       <legend>Images</legend>
 
-      <label title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option.">
-        <input type="checkbox" id="show_download_image_button_checkbox" />
-        <span>Show a <b>download</b> button</span>
+      <label title="Displays the URL above each image">
+        <input type="checkbox" id="show_image_url_checkbox" />
+        <span>Show the URL</span>
       </label>
 
       <br />
@@ -88,36 +88,30 @@
       </label>
 
       <br />
-      <label title="Displays the URL above each image">
-        <input type="checkbox" id="show_image_url_checkbox" />
-        <span>Show the URL</span>
+      <label title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option.">
+        <input type="checkbox" id="show_download_image_button_checkbox" />
+        <span>Show a <b>download</b> button</span>
       </label>
 
       <table>
+        <tr title="The number of columns">
+          <td><label for="columns_numberbox">Columns:</label></td>
+          <td><input type="number" id="columns_numberbox" min="1" max="10" required />px</td>
+        </tr>
+
         <tr title="Setting the minimum width can be useful for images that are too small to make out">
           <td><label for="image_min_width_numberbox">Minimum Width:</label></td>
           <td><input type="number" id="image_min_width_numberbox" min="0" max="720" required />px</td>
         </tr>
 
-        <tr title="Setting the maximum width prevents bigger images from taking too much space, and also adjusts the size of the popup">
+        <tr title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup">
           <td><label for="image_max_width_numberbox">Maximum Width:</label></td>
           <td><input type="number" id="image_max_width_numberbox" min="240" max="720" required />px</td>
         </tr>
 
         <tr>
           <td><label for="image_border_width_numberbox">Border Width:</label></td>
-          <td><input type="number" id="image_border_width_numberbox" min="0" max="5" required />px</td>
-        </tr>
-
-        <tr>
-          <td><label for="image_border_style_dropdown">Border Style:</label></td>
-          <td>
-            <select id="image_border_style_dropdown">
-              <option value="solid">Solid</option>
-              <option value="dotted">Dotted</option>
-              <option value="dashed">Dashed</option>
-            </select>
-          </td>
+          <td><input type="number" id="image_border_width_numberbox" min="1" max="10" required />px</td>
         </tr>
 
         <tr>

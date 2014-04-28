@@ -30,30 +30,30 @@
   ls.show_sort_by_url = ls.show_sort_by_url || ls.show_sort_by_url_default;
 
   // Images
-  ls.show_download_image_button_default = 'true';
-  ls.show_download_image_button = ls.show_download_image_button || ls.show_download_image_button_default;
+  ls.show_image_url_default = 'true';
+  ls.show_image_url = ls.show_image_url || ls.show_image_url_default;
 
   ls.show_open_image_button_default = 'true';
   ls.show_open_image_button = ls.show_open_image_button || ls.show_open_image_button_default;
 
-  ls.show_image_url_default = 'true';
-  ls.show_image_url = ls.show_image_url || ls.show_image_url_default;
+  ls.show_download_image_button_default = 'true';
+  ls.show_download_image_button = ls.show_download_image_button || ls.show_download_image_button_default;
 
-  ls.image_min_width_default = '30';
+  ls.columns_default = '2';
+  ls.columns = ls.columns || ls.columns_default;
+
+  ls.image_min_width_default = '50';
   ls.image_min_width = ls.image_min_width || ls.image_min_width_default;
 
-  ls.image_max_width_default = '300';
+  ls.image_max_width_default = '150';
   ls.image_max_width = ls.image_max_width || ls.image_max_width_default;
 
-  ls.image_border_width_default = '1';
+  ls.image_border_width_default = '3';
   ls.image_border_width = ls.image_border_width || ls.image_border_width_default;
 
-  ls.image_border_style_default = 'dotted';
-  ls.image_border_style = ls.image_border_style || ls.image_border_style_default;
-
-  ls.image_border_color_default = '#03add9';
+  ls.image_border_color_default = '#3498db';
   ls.image_border_color = ls.image_border_color || ls.image_border_color_default;
 
-  ls.body_width_default = '325';
+  ls.body_width_default = parseInt(ls.columns_default) * parseInt(ls.image_max_width_default);
   ls.body_width = ls.body_width || ls.body_width_default;
 }(localStorage));

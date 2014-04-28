@@ -46,7 +46,40 @@
       });
 
     $('#images_table')
-      .on('change', 'input[type="checkbox"]', toggleCheckBox)
+      .on('change', '#toggle_all_checkbox', function () {
+        $('#download_button').prop('disabled', !this.checked);
+        for (var i = 0; i < visibleImages.length; i++) {
+          $('#image' + i).toggleClass('checked', this.checked);
+        }
+      })
+      .on('click', 'img', function () {
+        $(this).toggleClass('checked', !$(this).hasClass('checked'));
+        // TODO: Border
+
+        var allAreChecked = true;
+        var allAreUnchecked = true;
+        for (var i = 0; i < visibleImages.length; i++) {
+          if ($('#image' + i).hasClass('checked')) {
+            allAreUnchecked = false;
+          }
+          else {
+            allAreChecked = false;
+          }
+          // Exit the loop early
+          if (!(allAreChecked || allAreUnchecked)) break;
+        }
+
+        $('#download_button').prop('disabled', allAreUnchecked);
+
+        var toggle_all_checkbox = $('#toggle_all_checkbox');
+        toggle_all_checkbox.prop('indeterminate', !(allAreChecked || allAreUnchecked));
+        if (allAreChecked) {
+          toggle_all_checkbox.prop('checked', true);
+        }
+        else if (allAreUnchecked) {
+          toggle_all_checkbox.prop('checked', false);
+        }
+      })
       .on('click', '.image_url_textbox', function () {
         this.select();
       })
@@ -67,19 +100,10 @@
   }
 
   function initializeStyles() {
-    // General
-    $('body').width(parseInt(ls.body_width)).css('padding-top', $('#filters_container').height());
-
     // Filters
     jss.set('#filters_container', {
-      'border-bottom-width': ls.image_border_width + 'px',
-      'border-bottom-style': ls.image_border_style,
       'border-bottom-color': ls.image_border_color
     });
-
-    var downloadButtonWidth = $('#download_button').width();
-    // var downloadButtonMargin = parseInt($('#download_button').css('margin-left')) + parseInt($('#download_button').css('margin-right'));
-    $('#folder_name_textbox').width($('#filters_container').width() - parseInt($('#filters_container').css('padding-left')) - parseInt($('#filters_container').css('padding-right')) - parseInt($('#folder_name_textbox').css('margin-right')) - downloadButtonWidth);
 
     if (ls.show_filter_mode != 'true') {
       $('#filter_mode_container').toggle(false);
@@ -94,10 +118,6 @@
     }
 
     // Images
-    jss.set('.image_url_textbox', {
-      width: (parseInt(ls.image_max_width) + 2 * parseInt(ls.image_border_width)) + 'px'
-    });
-
     jss.set('.image_buttons_container', {
       'margin-top': (ls.show_image_url === 'true' ? 3 : -3) + 'px'
     });
@@ -106,9 +126,20 @@
       'min-width': ls.image_min_width + 'px',
       'max-width': ls.image_max_width + 'px',
       'border-width': ls.image_border_width + 'px',
-      'border-style': ls.image_border_style,
+      'border-style': 'solid',
+      'border-color': 'transparent'
+    });
+    jss.set('img:hover', {
+      'border-style': 'dashed',
       'border-color': ls.image_border_color
     });
+    jss.set('img.checked', {
+      'border-style': 'solid',
+      'border-color': ls.image_border_color
+    });
+    // Finally, set the body width and padding to offset the height of the fixed position filters
+    var gridCellPadding = 4; // Magic
+    $('body').width(parseInt(ls.body_width) + parseInt(ls.columns) * gridCellPadding).css('padding-top', $('#filters_container').height());
   }
 
   // Add images to allImages and visibleImages and trigger filtration
@@ -116,7 +147,7 @@
   var timeoutID;
   chrome.extension.onMessage.addListener(function (result) {
     $.extend(linkedImages, result.linked_images);
-    for (var i in result.images) {
+    for (var i = 0; i < result.images.length; i++) {
       if (allImages.indexOf(result.images[i]) == -1) {
         allImages.push(result.images[i]);
       }
@@ -135,7 +166,7 @@
       case 'normal':
         var terms = filterValue.split(' ');
         visibleImages = allImages.filter(function (url) {
-          for (var i in terms) {
+          for (var i = 0; i < terms.length; i++) {
             var term = terms[i];
             if (term.length !== 0) {
               var expected = (term[0] !== '-');
@@ -183,82 +214,50 @@
   }
 
   function displayImages() {
-    var images_table = $('#images_table').empty();
+    var table = $('#images_table').empty();
 
-    var toggle_all_checkbox = '<input type="checkbox" id="toggle_all_checkbox" />';
-    var toggle_all_checkbox_label = '<label for="toggle_all_checkbox">Select all (' + visibleImages.length + ')</label>';
-    images_table.append('<tr><th>' + toggle_all_checkbox + '</th><th align="left">' + toggle_all_checkbox_label + '</th></tr>');
+    var toggle_all_checkbox_row = '<tr><th align="left" colspan="3"><label><input type="checkbox" id="toggle_all_checkbox" />Select all (' + visibleImages.length + ')</label></th></tr>';
+    table.append(toggle_all_checkbox_row);
 
-    for (var i in visibleImages) {
-      var download_image_button = '';
-      if (ls.show_download_image_button === 'true') {
-        download_image_button = '<div class="download_image_button" data-url="' + visibleImages[i] + '" title="Download"></div>';
+    var columns = parseInt(ls.columns);
+    var columnWidth = (Math.round(100 * 100 / columns) / 100) + '%';
+    var rows = Math.ceil(visibleImages.length / columns);
+    for (var rowIndex = 0; rowIndex < rows; rowIndex++) {
+      // Tools row
+      var show_image_url = ls.show_image_url === 'true';
+      var show_open_image_button = ls.show_open_image_button === 'true';
+      var show_download_image_button = ls.show_download_image_button === 'true';
+      if (show_image_url || show_open_image_button || show_download_image_button) {
+        var tools_row = $('<tr></tr>');
+        for (var columnIndex = 0; columnIndex < columns; columnIndex++) {
+          var index = rowIndex * columns + columnIndex;
+          if (index === visibleImages.length) break;
+
+          if (show_image_url) {
+            tools_row.append('<td><input type="text" class="image_url_textbox" value="' + visibleImages[index] + '" readonly /></td>');
+          }
+
+          if (show_open_image_button) {
+            tools_row.append('<td class="open_image_button" data-url="' + visibleImages[index] + '" title="Open in new tab">&nbsp;</td>');
+          }
+
+          if (show_download_image_button) {
+            tools_row.append('<td class="download_image_button" data-url="' + visibleImages[index] + '" title="Download">&nbsp;</td>');
+          }
+        }
+        table.append(tools_row);
       }
 
-      var open_image_button = '';
-      if (ls.show_open_image_button === 'true') {
-        open_image_button = '<div class="open_image_button" data-url="' + visibleImages[i] + '" title="Open in new tab"></div>';
+      // Images row
+      var images_row = $('<tr></tr>');
+      var colspan = ((show_image_url ? 1 : 0) + (show_open_image_button ? 1 : 0) + (show_download_image_button ? 1 : 0)) || 1;
+      for (var columnIndex = 0; columnIndex < columns; columnIndex++) {
+        var index = rowIndex * columns + columnIndex;
+        if (index === visibleImages.length) break;
+        var image = '<td colspan="' + colspan + '" style="width: ' + columnWidth + '; vertical-align: top;"><img id="image' + index + '" src="' + visibleImages[index] + '" /></td>';
+        images_row.append(image);
       }
-
-      var image_url_textbox = '';
-      if (ls.show_image_url === 'true') {
-        image_url_textbox = '<input type="text" class="image_url_textbox" value="' + visibleImages[i] + '" readonly />';
-      }
-
-      images_table.append(
-        '<tr>\
-          <td valign="top">\
-            <div class="image_buttons_container">\
-              <input type="checkbox" id="checkbox' + i + '" />' + download_image_button + open_image_button + '\
-            </div>\
-          </td>\
-          <td valign="top">\
-            ' + image_url_textbox + '<label for="checkbox' + i + '"><img src="' + visibleImages[i] + '" /></label>\
-          </td>\
-        </tr>'
-      );
-    }
-  }
-
-  function toggleCheckBox() {
-    /* jshint validthis: true */
-
-    if (this.id === 'toggle_all_checkbox') {
-      $('#download_button').prop('disabled', !this.checked);
-      for (var i in visibleImages) {
-        $('#checkbox' + i).prop('checked', this.checked);
-      }
-      return;
-    }
-
-    var checkboxes = $('#images_table input[type="checkbox"]:not(#toggle_all_checkbox)');
-    checkboxes.each(function () {
-      if (this.checked) {
-        $('#download_button').prop('disabled', false);
-        return false;
-      }
-    });
-
-    var allAreChecked = true;
-    var allAreUnchecked = true;
-    checkboxes.each(function () {
-      if (this.checked) {
-        allAreUnchecked = false;
-      }
-      else {
-        allAreChecked = false;
-      }
-    });
-
-    $('#download_button').prop('disabled', allAreUnchecked);
-
-    var toggle_all_checkbox = $('#toggle_all_checkbox');
-    toggle_all_checkbox.prop('indeterminate', !(allAreChecked || allAreUnchecked));
-    if (allAreChecked) {
-      toggle_all_checkbox.prop('checked', true);
-    }
-    else if (allAreUnchecked) {
-      toggle_all_checkbox.prop('checked', false);
+      table.append(images_row);
     }
   }
 
@@ -272,8 +271,8 @@
 
     function startDownload() {
       var checkedImages = 0;
-      for (var i in visibleImages) {
-        if ($('#checkbox' + i).prop('checked')) {
+      for (var i = 0; i < visibleImages.length; i++) {
+        if ($('#image' + i).hasClass('checked')) {
           checkedImages++;
           chrome.downloads.download({ url: visibleImages[i] });
         }
@@ -292,12 +291,9 @@
             Take a quick look at your Chrome settings and search for <b>download location</b>.\
             <span class="danger">If the <b>Ask where to save each file before downloading</b> option is checked, proceeding might open a lot of popup windows. Are you sure you want to do this?</span>\
           </div>\
-          <div class="left">\
-            <input type="button" id="yes_button" class="success" value="YES" />\
-            <input type="button" id="no_button" class="danger" value="NO" />\
-          </div>\
-          <label class="left"><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>\
-          <div class="clear"></div>\
+          <input type="button" id="yes_button" class="success" value="YES" />\
+          <input type="button" id="no_button" class="danger" value="NO" />\
+          <label><input type="checkbox" id="dont_show_again_checkbox" />Don\'t show this again</label>\
         </div>'
       )
       .appendTo('#filters_container');

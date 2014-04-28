@@ -41,12 +41,12 @@
       return url.substring(0, 10) === 'data:image' || image_downloader.image_regex.test(url);
     },
 
-    remove_duplicate_or_empty: function (a) {
+    remove_duplicate_or_empty: function (images) {
       var result = [],
           hash = {};
 
-      for (var i in a) {
-        hash[a[i]] = 0;
+      for (var i = 0; i < images.length; i++) {
+        hash[images[i]] = 0;
       }
       for (var key in hash) {
         if (key !== '') {
@@ -61,10 +61,10 @@
   image_downloader.images = [].slice.apply(document.getElementsByTagName('*'));
   image_downloader.images = image_downloader.images.map(image_downloader.map_element);
 
-  for (var i in document.styleSheets) { // Extract images from styles
+  for (var i = 0; i < document.styleSheets.length; i++) { // Extract images from styles
     var cssRules = document.styleSheets[i].cssRules;
     if (cssRules) {
-      for (var j in cssRules) {
+      for (var j = 0; j < cssRules.length; j++) {
         var style = cssRules[j].style;
         if (style && style['background-image']) {
           var url = image_downloader.extract_url_from_style(style['background-image']);
