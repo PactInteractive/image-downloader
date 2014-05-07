@@ -1,12 +1,6 @@
 (function (ls) {
-  /* globals $, jss */
+  /* globals $ */
   'use strict';
-
-  window.onload = function () {
-    initializeControlValues();
-    initializeControlStyles();
-    initializeControlEvents();
-  };
 
   function initializeControlValues(reset) {
     // General
@@ -45,51 +39,7 @@
     $('#image_border_color_picker').val(reset ? ls.image_border_color_default : ls.image_border_color);
   }
 
-  function initializeControlStyles(reset) {
-    jss.set('body', { width: (reset ? ls.body_width_default : ls.body_width) + 'px' });
-    jss.set('img', {
-      'min-width': (reset ? ls.image_min_width_default : ls.image_min_width) + 'px',
-      'max-width': (reset ? ls.image_max_width_default : ls.image_max_width) + 'px',
-      'border-width': (reset ? ls.image_border_width_default : ls.image_border_width) + 'px',
-      'border-style': 'solid',
-      'border-color': 'transparent'
-    });
-    jss.set('img:hover', {
-      'border-style': 'dashed',
-      'border-color': reset ? ls.image_border_color_default : ls.image_border_color
-    });
-    jss.set('img.checked', {
-      'border-style': 'solid',
-      'border-color': reset ? ls.image_border_color_default : ls.image_border_color
-    });
-  }
-
   function initializeControlEvents() {
-    $('#columns_numberbox')
-      .on('change', function () {
-        jss.set('body', { 'width': (this.value || parseInt(ls.columns_default)) * parseInt(ls.image_max_width) + 'px' });
-      });
-
-    $('#image_min_width_numberbox')
-      .on('change', function () {
-        jss.set('img', { 'min-width': (this.value || ls.image_min_width_default) + 'px' });
-      });
-
-    $('#image_max_width_numberbox')
-      .on('change', function () {
-        jss.set('img', { 'max-width': (this.value || ls.image_max_width_default) + 'px' });
-      });
-
-    $('#image_border_width_numberbox')
-      .on('change', function () {
-        jss.set('img', { 'border-width': (this.value || ls.image_border_width_default) + 'px' });
-      });
-
-    $('#image_border_color_picker')
-      .on('change', function () {
-        jss.set('img.checked', { 'border-color': this.value || ls.image_border_color_default });
-      });
-
     // Buttons
     $('#save_button').on('click', saveOptions);
     $('#reset_button').on('click', resetOptions);
@@ -116,7 +66,6 @@
     ls.image_max_width = $('#image_max_width_numberbox').val();
     ls.image_border_width = $('#image_border_width_numberbox').val();
     ls.image_border_color = $('#image_border_color_picker').val();
-    ls.sort_images = $('#sort_images_checkbox').prop('checked');
 
     ls.body_width = parseInt(ls.columns) * parseInt(ls.image_max_width);
 
@@ -125,7 +74,6 @@
 
   function resetOptions() {
     initializeControlValues(true);
-    initializeControlStyles(true);
     addNotification('All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.', 'warning');
   }
 
@@ -151,4 +99,9 @@
           }, 10000);
         });
   }
+
+  $(function () {
+    initializeControlValues();
+    initializeControlEvents();
+  });
 }(localStorage));

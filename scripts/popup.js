@@ -3,11 +3,6 @@
   /* jshint multistr: true */
   'use strict';
 
-  window.onload = function () {
-    initializePopup();
-    initializeStyles();
-  };
-
   function initializePopup() {
     // Register download folder name listener
     $('#folder_name_textbox')
@@ -54,7 +49,6 @@
       })
       .on('click', 'img', function () {
         $(this).toggleClass('checked', !$(this).hasClass('checked'));
-        // TODO: Border
 
         var allAreChecked = true;
         var allAreUnchecked = true;
@@ -127,7 +121,7 @@
       'max-width': ls.image_max_width + 'px',
       'border-width': ls.image_border_width + 'px',
       'border-style': 'solid',
-      'border-color': 'transparent'
+      'border-color': '#e9e9e9'
     });
     jss.set('img:hover', {
       'border-style': 'dashed',
@@ -137,6 +131,7 @@
       'border-style': 'solid',
       'border-color': ls.image_border_color
     });
+
     // Finally, set the body width and padding to offset the height of the fixed position filters
     var gridCellPadding = 4; // Magic
     $('body').width(parseInt(ls.body_width) + parseInt(ls.columns) * gridCellPadding).css('padding-top', $('#filters_container').height());
@@ -146,7 +141,7 @@
   // send_images.js is injected into all frames of the active tab, so this listener may be called multiple times
   var timeoutID;
   chrome.extension.onMessage.addListener(function (result) {
-    $.extend(linkedImages, result.linked_images);
+    $.extend(linkedImages, result.linkedImages);
     for (var i = 0; i < result.images.length; i++) {
       if (allImages.indexOf(result.images[i]) == -1) {
         allImages.push(result.images[i]);
@@ -216,7 +211,7 @@
   function displayImages() {
     var table = $('#images_table').empty();
 
-    var toggle_all_checkbox_row = '<tr><th align="left" colspan="3"><label><input type="checkbox" id="toggle_all_checkbox" />Select all (' + visibleImages.length + ')</label></th></tr>';
+    var toggle_all_checkbox_row = '<tr><th align="left" colspan="' + ls.columns + '"><label><input type="checkbox" id="toggle_all_checkbox" />Select all (' + visibleImages.length + ')</label></th></tr>';
     table.append(toggle_all_checkbox_row);
 
     var columns = parseInt(ls.columns);
@@ -331,4 +326,9 @@
     };
     fade(false);
   }
+
+  $(function () {
+    initializePopup();
+    initializeStyles();
+  });
 }(localStorage));

@@ -9,7 +9,6 @@
   ls.folder_name = ls.folder_name || '';
   ls.filter_mode = ls.filter_mode || 'normal';
   ls.only_images_from_links = ls.only_images_from_links || 'false';
-  ls.sort_images = ls.sort_images || 'false';
 
   // Options
   // General

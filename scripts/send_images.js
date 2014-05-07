@@ -2,46 +2,46 @@
   /* globals chrome */
   'use strict';
 
-  var image_downloader = {
-    image_regex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpe?g|gif|png))(?:\?([^#]*))?(?:#(.*))?/,
-    map_element: function (element) {
+  var imageDownloader = {
+    imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpe?g|gif|png))(?:\?([^#]*))?(?:#(.*))?/,
+    mapElement: function (element) {
       if (element.tagName.toLowerCase() === 'img') {
         var src = element.src;
-        var hash_index = src.indexOf('#');
-        if (hash_index >= 0) {
-          src = src.substr(0, hash_index);
+        var hashIndex = src.indexOf('#');
+        if (hashIndex >= 0) {
+          src = src.substr(0, hashIndex);
         }
         return src;
       }
 
       if (element.tagName.toLowerCase() === 'a') {
         var href = element.href;
-        if (image_downloader.is_image_url(href)) {
-          image_downloader.linked_images[href] = '0';
+        if (imageDownloader.isImageURL(href)) {
+          imageDownloader.linkedImages[href] = '0';
           return href;
         }
       }
 
-      var background_image = element.style['background-image'];
-      if (background_image) {
-        var parsed_url = image_downloader.extract_url_from_style(background_image);
-        if (image_downloader.is_image_url(parsed_url)) {
-          return parsed_url;
+      var backgroundImage = element.style['background-image'];
+      if (backgroundImage) {
+        var parsedURL = imageDownloader.extractURLFromStyle(backgroundImage);
+        if (imageDownloader.isImageURL(parsedURL)) {
+          return parsedURL;
         }
       }
 
       return '';
     },
 
-    extract_url_from_style: function (url) {
+    extractURLFromStyle: function (url) {
       return url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
     },
 
-    is_image_url: function (url) {
-      return url.substring(0, 10) === 'data:image' || image_downloader.image_regex.test(url);
+    isImageURL: function (url) {
+      return url.substring(0, 10) === 'data:image' || imageDownloader.imageRegex.test(url);
     },
 
-    remove_duplicate_or_empty: function (images) {
+    removeDuplicateOrEmpty: function (images) {
       var result = [],
           hash = {};
 
@@ -57,9 +57,9 @@
     }
   };
 
-  image_downloader.linked_images = {};
-  image_downloader.images = [].slice.apply(document.getElementsByTagName('*'));
-  image_downloader.images = image_downloader.images.map(image_downloader.map_element);
+  imageDownloader.linkedImages = {};
+  imageDownloader.images = [].slice.apply(document.getElementsByTagName('*'));
+  imageDownloader.images = imageDownloader.images.map(imageDownloader.mapElement);
 
   for (var i = 0; i < document.styleSheets.length; i++) { // Extract images from styles
     var cssRules = document.styleSheets[i].cssRules;
@@ -67,18 +67,18 @@
       for (var j = 0; j < cssRules.length; j++) {
         var style = cssRules[j].style;
         if (style && style['background-image']) {
-          var url = image_downloader.extract_url_from_style(style['background-image']);
-          if (image_downloader.is_image_url(url)) {
-            image_downloader.images.push(url);
+          var url = imageDownloader.extractURLFromStyle(style['background-image']);
+          if (imageDownloader.isImageURL(url)) {
+            imageDownloader.images.push(url);
           }
         }
       }
     }
   }
 
-  image_downloader.images = image_downloader.remove_duplicate_or_empty(image_downloader.images);
-  chrome.extension.sendMessage({ linked_images: image_downloader.linked_images, images: image_downloader.images });
+  imageDownloader.images = imageDownloader.removeDuplicateOrEmpty(imageDownloader.images);
+  chrome.extension.sendMessage({ linkedImages: imageDownloader.linkedImages, images: imageDownloader.images });
 
-  image_downloader.linked_images = null;
-  image_downloader.images = null;
+  imageDownloader.linkedImages = null;
+  imageDownloader.images = null;
 }());

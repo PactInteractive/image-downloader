@@ -17,7 +17,7 @@ a:visited { color: #3498db; text-decoration: none; }
 a:hover,
 a:active { color: #2791d9; } /* darken 3% */
 
-/* links */
+/* images */
 img { box-sizing: border-box; }
 
 /* inputs */
@@ -38,22 +38,22 @@ input[type="button"].accent           { background: #3498db; }
 input[type="button"].accent:hover,
 input[type="button"].accent:focus,
 input[type="button"].accent:active    { background: #3498db; } /* darken 3% */
-input[type="button"].accent:disabled  { rgba(52, 152, 219, 0.6); }
+input[type="button"].accent:disabled  { background: rgba(52, 152, 219, 0.6); }
 
 input[type="button"].success          { background: #28b463; }
 input[type="button"].success:hover,
 input[type="button"].success:focus,
 input[type="button"].success:active   { background: #25a75c; } /* darken 3% */
-input[type="button"].success:disabled { rgba(40, 180, 99, 0.6); }
+input[type="button"].success:disabled { background: rgba(40, 180, 99, 0.6); }
 
 input[type="button"].warning          { background: #f39c12; }
 input[type="button"].warning:hover,
 input[type="button"].warning:focus,
 input[type="button"].warning:active   { background: #ea940c; } /* darken 3% */
-input[type="button"].warning:disabled { rgba(243, 156, 18, 0.6); }
+input[type="button"].warning:disabled { background: rgba(243, 156, 18, 0.6); }
 
 input[type="button"].danger           { background: #e74c3c; }
 input[type="button"].danger:hover,
 input[type="button"].danger:focus,
 input[type="button"].danger:active    { background: #e53f2e; } /* darken 3% */
-input[type="button"].danger:disabled  { rgba(231, 76, 60, 0.6); }
+input[type="button"].danger:disabled  { background: rgba(231, 76, 60, 0.6); }

@@ -7,7 +7,7 @@
     <style>
       select,
       input[type="color"],
-      input[type="number"] { width: 76px; }
+      input[type="number"] { width: 80px; }
 
       input[type="number"]
       {
@@ -17,7 +17,7 @@
 
       input[type="button"]
       {
-        min-width: 76px;
+        min-width: 80px;
 
         height: 32px;
         margin: 6px 2px 0;
@@ -27,10 +27,14 @@
         border: 0;
         color: #fff;
       }
+
+      #clear_data_button
+      {
+        float: right;
+      }
     </style>
 
     <script src="/lib/zepto.js"></script>
-    <script src="/lib/jss.js"></script>
 
     <script src="/scripts/defaults.js"></script>
     <script src="/scripts/options.js"></script>
@@ -78,25 +82,25 @@
 
       <label title="Displays the URL above each image">
         <input type="checkbox" id="show_image_url_checkbox" />
-        <span>Show the URL</span>
+        <span>Show the URL textbox</span>
       </label>
 
       <br />
       <label title="Displays a button next to each image to open it in a new tab">
         <input type="checkbox" id="show_open_image_button_checkbox" />
-        <span>Show an <b>open</b> button</span>
+        <span>Show the <b>open</b> button</span>
       </label>
 
       <br />
       <label title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option.">
         <input type="checkbox" id="show_download_image_button_checkbox" />
-        <span>Show a <b>download</b> button</span>
+        <span>Show the <b>download</b> button</span>
       </label>
 
       <table>
         <tr title="The number of columns">
           <td><label for="columns_numberbox">Columns:</label></td>
-          <td><input type="number" id="columns_numberbox" min="1" max="10" required />px</td>
+          <td><input type="number" id="columns_numberbox" min="1" max="10" required /></td>
         </tr>
 
         <tr title="Setting the minimum width can be useful for images that are too small to make out">
@@ -106,7 +110,7 @@
 
         <tr title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup">
           <td><label for="image_max_width_numberbox">Maximum Width:</label></td>
-          <td><input type="number" id="image_max_width_numberbox" min="240" max="720" required />px</td>
+          <td><input type="number" id="image_max_width_numberbox" min="30" max="720" required />px</td>
         </tr>
 
         <tr>
@@ -119,8 +123,6 @@
           <td><input type="color" id="image_border_color_picker" /></td>
         </tr>
       </table>
-
-      <img src="/icon_128.png" />
     </fieldset>
 
     <div id="buttons">
