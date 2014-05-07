@@ -121,7 +121,7 @@
       'max-width': ls.image_max_width + 'px',
       'border-width': ls.image_border_width + 'px',
       'border-style': 'solid',
-      'border-color': '#e9e9e9'
+      'border-color': '#f6f6f6'
     });
     jss.set('img:hover', {
       'border-style': 'dashed',
