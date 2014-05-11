@@ -209,6 +209,8 @@
   }
 
   function displayImages() {
+    $('#download_button').prop('disabled', true);
+
     var table = $('#images_table').empty();
 
     var toggle_all_checkbox_row = '<tr><th align="left" colspan="' + ls.columns + '"><label><input type="checkbox" id="toggle_all_checkbox" />Select all (' + visibleImages.length + ')</label></th></tr>';
