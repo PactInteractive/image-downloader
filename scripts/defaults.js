@@ -2,10 +2,11 @@
   'use strict';
 
   // Global
-  ls.animation_duration = '500';
+  ls.animation_duration = '150';
 
   // Popup
   // Filters
+  ls.show_donation_link = ls.show_donation_link || 'true';
   ls.folder_name = ls.folder_name || '';
   ls.filter_mode = ls.filter_mode || 'normal';
   ls.only_images_from_links = ls.only_images_from_links || 'false';
@@ -53,6 +54,6 @@
   ls.image_border_color_default = '#3498db';
   ls.image_border_color = ls.image_border_color || ls.image_border_color_default;
 
-  ls.body_width_default = parseInt(ls.columns_default) * parseInt(ls.image_max_width_default);
+  ls.body_width_default = Math.max(250, parseInt(ls.columns_default) * parseInt(ls.image_max_width_default));
   ls.body_width = ls.body_width || ls.body_width_default;
 }(localStorage));

@@ -67,7 +67,7 @@
     ls.image_border_width = $('#image_border_width_numberbox').val();
     ls.image_border_color = $('#image_border_color_picker').val();
 
-    ls.body_width = parseInt(ls.columns) * parseInt(ls.image_max_width);
+    ls.body_width = Math.max(250, parseInt(ls.columns) * parseInt(ls.image_max_width));
 
     addNotification('Options saved.', 'success');
   }

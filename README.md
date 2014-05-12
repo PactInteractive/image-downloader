@@ -9,11 +9,9 @@ If you need to bulk download images from a web page, with this extension you can
 - Customize display width, border size, style and color
 - Hide filters, buttons and notifications you don't need
 
-Unfortunately it's not possible to control Chrome's download manager. Google does not give developers that kind of access...yet. These features are experimental and do not work properly. For more information on Chrome's progress on the development, please refer to this page: http://code.google.com/chrome/extensions/experimental.downloads.html
+When you press the "Download" button, all selected images are saved to the default download directory of Chrome, or to a directory inside it if you specify a subfolder name.
 
-When you press the "Download" button, all selected images are saved to the default download directory of Chrome. If you don't have one, you will have to manually choose the save location for each image.
-
-WARNING: it is not recommended to attempt to download too many images at once if you haven't set up a default download directory for Chrome.
+WARNING: If you haven't set up a default download directory, you will have to manually choose the save location for each image, which might open a lot of popup windows. It is not recommended to attempt to download too many images at once without a default download directory.
 
 Known Issues
 ================
@@ -25,9 +23,11 @@ Change Log
 2.0:
 - Added the ability to save the files to a subfolder
 - Utilized the Google Chrome downloads API
-- Implemented a cleaner design
+- Implemented a cleaner, grid-based design
 - Clicking on an image URL textbox will now automatically select the text so users can copy it
 - Fixed a few minor display issues
+- Added settings for number of columns, removed border style setting
+- Added donation buttons on the options page
 
 1.3:
 - Images used in a style tag will now also be included at the end of the list. Only images from inline style attributes of elements used to be included.
@@ -91,6 +91,8 @@ Change Log
 
 Credits
 ================
+This extension is and always will be free, open-source, and without ads or tracking algorithms of any kind. You can find the source code here: https://github.com/vdsabev/image-downloader
+
 Based on the Google Chrome Extension sample "Download Selected Links": https://developer.chrome.com/extensions/examples/api/downloads/download_links.zip
 
 Uses the tiny, but awesome JSS library: https://github.com/Box9/jss

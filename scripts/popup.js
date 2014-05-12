@@ -4,6 +4,31 @@
   'use strict';
 
   function initializePopup() {
+    if (ls.show_donation_link === 'true') {
+      var donate = $('\
+        <tr><td colspan="2">You can support the development of this project at any time by donating on the <a href="/views/options.html" target="_blank">options</a> page.</td></tr>\
+        <tr>\
+          <td>\
+            <input type="button" id="donate_now_button" class="accent" value="DONATE NOW" />\
+          </td>\
+          <td>\
+            <input type="button" id="donate_later_button" class="danger" value="DONATE LATER" />\
+          </td>\
+        </tr>\
+        <tr><td colspan="2"><hr style="margin: 6px 0 9px 0;" /></td></tr>\
+      ').prependTo('#filter_inputs_container');
+
+      $('#filters_container')
+        .on('click', '#donate_now_button', function () {
+          chrome.tabs.create({ url: '/views/options.html' });
+        })
+        .on('click', '#donate_later_button', function () {
+          ls.show_donation_link = false;
+          donate.remove();
+          resizeBody();
+        });
+    }
+
     // Register download folder name listener
     $('#folder_name_textbox')
       .val(ls.folder_name)
@@ -95,10 +120,6 @@
 
   function initializeStyles() {
     // Filters
-    jss.set('#filters_container', {
-      'border-bottom-color': ls.image_border_color
-    });
-
     if (ls.show_filter_mode != 'true') {
       $('#filter_mode_container').toggle(false);
     }
@@ -123,16 +144,15 @@
       'border-style': 'solid',
       'border-color': '#f6f6f6'
     });
-    jss.set('img:hover', {
-      'border-style': 'dashed',
-      'border-color': ls.image_border_color
-    });
     jss.set('img.checked', {
-      'border-style': 'solid',
       'border-color': ls.image_border_color
     });
 
-    // Finally, set the body width and padding to offset the height of the fixed position filters
+    resizeBody();
+  }
+
+  // Set the body width and padding to offset the height of the fixed position filters
+  function resizeBody() {
     var gridCellPadding = 4; // Magic
     $('body').width(parseInt(ls.body_width) + parseInt(ls.columns) * gridCellPadding).css('padding-top', $('#filters_container').height());
   }
@@ -285,7 +305,7 @@
         '<div>\
           <div>\
             <hr/>\
-            Take a quick look at your Chrome settings and search for <b>download location</b>.\
+            Take a quick look at your Chrome settings and search for the <b>download location</b>.\
             <span class="danger">If the <b>Ask where to save each file before downloading</b> option is checked, proceeding might open a lot of popup windows. Are you sure you want to do this?</span>\
           </div>\
           <input type="button" id="yes_button" class="success" value="YES" />\

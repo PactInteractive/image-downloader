@@ -28,9 +28,7 @@
         width: 100%;
         padding: 2px 2px 2px 0; /* compensate for browser defaults */
         background: #fff;
-
-        border-bottom-width: 1px;
-        border-bottom-style: dashed;
+        border-bottom: 1px solid #ccc;
       }
 
       #filters_container input[type="text"],
@@ -64,12 +62,13 @@
     <script src="/lib/zepto.js"></script>
     <script src="/lib/jss.js"></script>
 
+    <script src="/scripts/defaults.js"></script>
     <script src="/scripts/popup.js"></script>
   </head>
 
   <body>
     <div id="filters_container">
-      <table class="grid">
+      <table id="filter_inputs_container" class="grid">
         <tr>
           <td>
             <input type="text" id="folder_name_textbox" placeholder="SAVE TO SUBFOLDER" title="Set the name of the subfolder you want to download the images to." />

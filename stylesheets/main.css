@@ -4,6 +4,13 @@ body
   color: #333;
 }
 
+hr
+{
+  border: 1px dotted #ccc;
+  border-bottom: none;
+  margin: 4px 0;
+}
+
 /* labels */
 .accent  { color: #3498db; }
 .success { color: #25a75c; }
@@ -18,7 +25,16 @@ a:hover,
 a:active { color: #2791d9; } /* darken 3% */
 
 /* images */
-img { box-sizing: border-box; }
+img
+{
+  box-sizing: border-box;
+  transition: border-color 0.15s;
+}
+
+img:hover
+{
+  border-color: #ccc;
+}
 
 /* inputs */
 input[type="text"],
@@ -28,9 +44,10 @@ input[type="button"]
 {
   min-width: 50px;
   cursor: pointer;
-  color: #ffffff;
+  color: #fff;
   border: 0;
   padding: 3px 10px;
+  transition: background 0.15s;
 }
 input[type="button"]:disabled         { cursor: not-allowed; }
 
