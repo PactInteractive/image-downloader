@@ -2,7 +2,7 @@
   'use strict';
 
   // Global
-  ls.animation_duration = '150';
+  ls.animation_duration = '500';
 
   // Popup
   // Filters
