@@ -2,11 +2,11 @@ Image Downloader
 ================
 If you need to bulk download images from a web page, with this extension you can:
 - See images that the page contains and links to
-- Filter or sort them by URL; also supports wildcards and regular expressions
+- Filter them by width, height, and URL; supports wildcard and regex
 - Optionally show only images from links
-- Select images for download by either using the checkboxes or directly clicking on the image
-- Dedicated buttons to download or open in new tab individual images
-- Customize display width, border size, style and color
+- Select images to download by clicking on the image
+- Use dedicated buttons to download or open individual images in new tabs
+- Customize image display width, columns, border size, and color
 - Hide filters, buttons and notifications you don't need
 
 When you press the "Download" button, all selected images are saved to the default download directory of Chrome, or to a directory inside it if you specify a subfolder name.
@@ -16,10 +16,15 @@ WARNING: If you haven't set up a default download directory, you will have to ma
 Known Issues
 ================
 This extension can't always extract the full-resolution images that open when you click a photo (e.g. in Facebook albums). That's because the page doesn't directly link to the image, but uses a script.
-If you need that kind of functionality, there are other useful extensions like Hover Zoom, even if you can't mass download images with it: https://chrome.google.com/webstore/detail/hover-zoom/nonjdcjchghhkdoolnlbekcfllmednbl
+If you need that kind of functionality, there are other extensions that can be useful like Hover Zoom, even if you can't mass download images with it.
 
 Change Log
 ================
+2.1:
+- Added image width / height filters
+- Added a one-time reset of all settings due to some people having sizing issues
+- Removed the sort by URL option
+
 2.0:
 - Added the ability to save the files to a subfolder
 - Utilized the Google Chrome downloads API

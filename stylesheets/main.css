@@ -11,11 +11,16 @@ hr
   margin: 4px 0;
 }
 
+.left { float: left; }
+.right { float: right; }
+.clear { clear: both; }
+
 /* labels */
 .accent  { color: #3498db; }
 .success { color: #25a75c; }
 .warning { color: #ea940c; }
 .danger  { color: #e74c3c; }
+.light   { color: #999; }
 
 /* links */
 a:link,
@@ -38,7 +43,9 @@ img:hover
 
 /* inputs */
 input[type="text"],
-input[type="button"] { box-sizing: border-box; }
+input[type="button"],
+input[type="number"],
+select { box-sizing: border-box; }
 
 input[type="button"]
 {

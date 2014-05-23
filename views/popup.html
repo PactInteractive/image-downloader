@@ -4,6 +4,7 @@
     <title>Image Downloader</title>
 
     <link rel="stylesheet" href="/stylesheets/main.css" type="text/css" />
+    <link rel="stylesheet" href="/lib/jquery.nouislider/jquery.nouislider.css" type="text/css" />
     <style>
       body
       {
@@ -18,7 +19,9 @@
       }
       .grid td { padding: 0 2px; }
       .grid td input[type="text"],
-      .grid td input[type="button"] { width: 100%; }
+      .grid td input[type="button"],
+      .grid td input[type="number"],
+      .grid td select { width: 100%; }
 
       #filters_container
       {
@@ -32,16 +35,19 @@
       }
 
       #filters_container input[type="text"],
-      #filters_container input[type="button"]
+      #filters_container input[type="button"],
+      #filters_container input[type="number"],
+      #filters_container select
       {
         height: 26px;
         margin-bottom: 4px;
-        font-size: 12px;
       }
 
-      #filter_mode_container { padding: 0 2px; }
+      #only_images_from_links_container { padding: 1px; }
 
+      #images_cache { display: none; }
       #images_table { margin-top: 2px; }
+      #images_table img { cursor: pointer; }
 
       .open_image_button,
       .download_image_button
@@ -60,6 +66,7 @@
     </style>
 
     <script src="/lib/zepto.js"></script>
+    <script src="/lib/jquery.nouislider/jquery.nouislider.js"></script>
     <script src="/lib/jss.js"></script>
 
     <script src="/scripts/defaults.js"></script>
@@ -69,72 +76,108 @@
   <body>
     <div id="filters_container">
       <table id="filter_inputs_container" class="grid">
+        <colgroup>
+          <col>
+          <col style="width: 100px;">
+        </colgroup>
         <tr>
           <td>
             <input type="text" id="folder_name_textbox" placeholder="SAVE TO SUBFOLDER" title="Set the name of the subfolder you want to download the images to." />
           </td>
-          <td style="width: 100px;">
+          <td>
             <input type="button" id="download_button" class="accent" value="DOWNLOAD" disabled="true" />
           </td>
         </tr>
-        <tr>
-          <td colspan="2">
+        <tr id="image_url_filter">
+          <td>
             <input type="text" id="filter_textbox" placeholder="FILTER BY URL" title="Filter by parts of the URL or regular expressions." />
+          </td>
+          <td>
+            <select id="filter_url_mode_input">
+              <option value="normal" title="A plain text search">Normal</option>
+              <option value="wildcard" title="You can also use these special symbols:
+    * → zero or more characters
+    ? → zero or one character
+    + → one or more characters">Wildcard</option>
+              <option value="regex" title="Regular expressions (advanced):
+    [abc] → A single character of: a, b or c
+    [^abc] → Any single character except: a, b, or c
+    [a-z] → Any single character in the range a-z
+    [a-zA-Z] → Any single character in the range a-z or A-Z
+    ^ → Start of line
+    $ → End of line
+    \A → Start of string
+    \z → End of string
+    . → Any single character
+    \s → Any whitespace character
+    \S → Any non-whitespace character
+    \d → Any digit
+    \D → Any non-digit
+    \w → Any word character (letter, number, underscore)
+    \W → Any non-word character
+    \b → Any word boundary character
+    (...) → Capture everything enclosed
+    (a|b) → a or b
+    a? → Zero or one of a
+    a* → Zero or more of a
+    a+ → One or more of a
+    a{3} → Exactly 3 of a
+    a{3,} → 3 or more of a
+    a{3,6} → Between 3 and 6 of a">Regex</option>
+            </select>
           </td>
         </tr>
       </table>
 
-      <div id="filter_mode_container">
-        Mode:
-        <label title="A plain text search">
-          <input type="radio" name="filter_mode" value="normal" />Normal
-        </label>
+      <table class="grid">
+        <colgroup>
+          <col style="width: 45px;">
+          <col style="width: 40px;">
+          <col style="width: 10px;">
+          <col>
+          <col style="width: 10px;">
+          <col style="width: 40px;">
+        </colgroup>
+        <tr id="image_width_filter">
+          <td>Width:</td>
+          <td style="text-align: right;">
+            <label for="image_width_filter_min_checkbox">
+              <small id="image_width_filter_min"></small>
+            </label>
+          </td>
+          <td><input type="checkbox" id="image_width_filter_min_checkbox" /></td>
+          <td><div id="image_width_filter_slider"></div></td>
+          <td><input type="checkbox" id="image_width_filter_max_checkbox" /></td>
+          <td style="text-align: right;">
+            <label for="image_width_filter_max_checkbox">
+              <small id="image_width_filter_max"></small>
+            </label>
+          </td>
+        </tr>
+        <tr id="image_height_filter">
+          <td>Height:</td>
+          <td style="text-align: right;">
+            <label for="image_height_filter_min_checkbox">
+              <small id="image_height_filter_min"></small>
+            </label>
+          </td>
+          <td><input type="checkbox" id="image_height_filter_min_checkbox" /></td>
+          <td><div id="image_height_filter_slider"></div></td>
+          <td><input type="checkbox" id="image_height_filter_max_checkbox" /></td>
+          <td style="text-align: right;">
+            <label for="image_height_filter_max_checkbox">
+              <small id="image_height_filter_max"></small>
+            </label>
+          </td>
+        </tr>
+      </table>
 
-        <label title="You can also use these special symbols:
-* → zero or more characters
-? → zero or one character
-+ → one or more characters">
-          <input type="radio" name="filter_mode" value="wildcard" />Wildcard
-        </label>
-
-        <label title="Regular expressions (advanced):
-[abc] → A single character of: a, b or c
-[^abc] → Any single character except: a, b, or c
-[a-z] →	Any single character in the range a-z
-[a-zA-Z] → Any single character in the range a-z or A-Z
-^ → Start of line
-$ → End of line
-\A → Start of string
-\z → End of string
-. → Any single character
-\s → Any whitespace character
-\S → Any non-whitespace character
-\d → Any digit
-\D → Any non-digit
-\w → Any word character (letter, number, underscore)
-\W → Any non-word character
-\b → Any word boundary character
-(...) → Capture everything enclosed
-(a|b) → a or b
-a? → Zero or one of a
-a* → Zero or more of a
-a+ → One or more of a
-a{3} → Exactly 3 of a
-a{3,} → 3 or more of a
-a{3,6} → Between 3 and 6 of a">
-          <input type="radio" name="filter_mode" value="regex" />Regex
-        </label>
-      </div>
-
-      <label id="only_images_from_links_container" title="Can be useful if you want to filter out things like avatars and icons">
+      <label id="only_images_from_links_container" title="Only show images from direct links on the page; this can be useful on sites like Reddit">
         <input type="checkbox" id="only_images_from_links_checkbox" />Only images from links
-      </label>
-
-      <label id="sort_by_url_container" title="By default, images are shown in the order they appear on the page. Check this box to sort them alphabetically by URL instead.">
-        <input type="checkbox" id="sort_by_url_checkbox" />Sort by URL
       </label>
     </div>
 
+    <div id="images_cache"></div>
     <table id="images_table" class="grid"></table>
   </body>
 </html>

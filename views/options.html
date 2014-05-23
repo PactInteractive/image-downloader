@@ -28,15 +28,11 @@
 
         height: 26px;
         margin: 6px 2px 0;
-        font-size: 12px;
 
         cursor: pointer;
         border: 0;
         color: #fff;
       }
-
-      .left { float: left; }
-      .right { float: right; }
     </style>
 
     <script src="/lib/zepto.js"></script>
@@ -104,21 +100,27 @@
     <fieldset>
       <legend>Filters</legend>
 
-      <label title="Enables selection between normal, wildcard and regex filter mode">
-        <input type="checkbox" id="show_filter_mode_checkbox" />
-        <span>Show advanced filter modes</span>
+      <label title="Enables filtering by image URL; supports wildcard and regex">
+        <input type="checkbox" id="show_url_filter_checkbox" />
+        <span>Show image URL filter</span>
       </label>
 
       <br/>
-      <label title="Enables the option to only show images from direct links on the page; can be useful if you want to filter out things like avatars and icons on some sites">
+      <label title="Enables filtering by image width">
+        <input type="checkbox" id="show_image_width_filter_checkbox" />
+        <span>Show image width filter</span>
+      </label>
+
+      <br/>
+      <label title="Enables filtering by image height">
+        <input type="checkbox" id="show_image_height_filter_checkbox" />
+        <span>Show image height filter</span>
+      </label>
+
+      <br/>
+      <label title="Enables the option to only show images from direct links on the page; this can be useful on sites like Reddit">
         <input type="checkbox" id="show_only_images_from_links_checkbox" />
         <span>Show <b>Only images from links</b> option</span>
-      </label>
-
-      <br/>
-      <label title="Enables the option to sort the images by URL instead of displaying them in the order they appear on the page">
-        <input type="checkbox" id="show_sort_by_url_checkbox" />
-        <span>Show <b>Sort by URL</b> option</span>
       </label>
     </fieldset>
 
@@ -149,12 +151,12 @@
         </tr>
 
         <tr title="Setting the minimum width can be useful for images that are too small to make out">
-          <td><label for="image_min_width_numberbox">Minimum Width:</label></td>
+          <td><label for="image_min_width_numberbox">Minimum Display Width:</label></td>
           <td><input type="number" id="image_min_width_numberbox" min="0" max="720" required />px</td>
         </tr>
 
         <tr title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup">
-          <td><label for="image_max_width_numberbox">Maximum Width:</label></td>
+          <td><label for="image_max_width_numberbox">Maximum Display Width:</label></td>
           <td><input type="number" id="image_max_width_numberbox" min="30" max="720" required />px</td>
         </tr>
 

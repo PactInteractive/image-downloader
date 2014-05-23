@@ -2,41 +2,29 @@
   /* globals $ */
   'use strict';
 
-  function initializeControlValues(reset) {
+  function initializeControlValues(values) {
+    if (!values) values = ls;
+
     // General
-    if ((reset ? ls.show_download_confirmation_default : ls.show_download_confirmation) === 'true') {
-      $('#show_download_confirmation_checkbox').prop('checked', true);
-    }
-    if ((reset ? ls.show_download_notification_default : ls.show_download_notification) === 'true') {
-      $('#show_download_notification_checkbox').prop('checked', true);
-    }
+    $('#show_download_confirmation_checkbox').prop('checked', values.show_download_confirmation === 'true');
+    $('#show_download_notification_checkbox').prop('checked', values.show_download_notification === 'true');
 
     // Filters
-    if ((reset ? ls.show_filter_mode_default : ls.show_filter_mode) === 'true') {
-      $('#show_filter_mode_checkbox').prop('checked', true);
-    }
-    if ((reset ? ls.show_only_images_from_links_default : ls.show_only_images_from_links) === 'true') {
-      $('#show_only_images_from_links_checkbox').prop('checked', true);
-    }
-    if ((reset ? ls.show_sort_by_url_default : ls.show_sort_by_url) === 'true') {
-      $('#show_sort_by_url_checkbox').prop('checked', true);
-    }
+    $('#show_url_filter_checkbox').prop('checked', values.show_url_filter === 'true');
+    $('#show_image_width_filter_checkbox').prop('checked', values.show_image_width_filter === 'true');
+    $('#show_image_height_filter_checkbox').prop('checked', values.show_image_height_filter === 'true');
+    $('#show_only_images_from_links_checkbox').prop('checked', values.show_only_images_from_links === 'true');
 
     // Images
-    if ((reset ? ls.show_image_url_default : ls.show_image_url) === 'true') {
-      $('#show_image_url_checkbox').prop('checked', true);
-    }
-    if ((reset ? ls.show_open_image_button_default : ls.show_open_image_button) === 'true') {
-      $('#show_open_image_button_checkbox').prop('checked', true);
-    }
-    if ((reset ? ls.show_download_image_button_default : ls.show_download_image_button) === 'true') {
-      $('#show_download_image_button_checkbox').prop('checked', true);
-    }
-    $('#columns_numberbox').val(reset ? ls.columns_default : ls.columns);
-    $('#image_min_width_numberbox').val(reset ? ls.image_min_width_default : ls.image_min_width);
-    $('#image_max_width_numberbox').val(reset ? ls.image_max_width_default : ls.image_max_width);
-    $('#image_border_width_numberbox').val(reset ? ls.image_border_width_default : ls.image_border_width);
-    $('#image_border_color_picker').val(reset ? ls.image_border_color_default : ls.image_border_color);
+    $('#show_image_url_checkbox').prop('checked', values.show_image_url === 'true');
+    $('#show_open_image_button_checkbox').prop('checked', values.show_open_image_button === 'true');
+    $('#show_download_image_button_checkbox').prop('checked', values.show_download_image_button === 'true');
+
+    $('#columns_numberbox').val(values.columns);
+    $('#image_min_width_numberbox').val(values.image_min_width);
+    $('#image_max_width_numberbox').val(values.image_max_width);
+    $('#image_border_width_numberbox').val(values.image_border_width);
+    $('#image_border_color_picker').val(values.image_border_color);
   }
 
   function initializeControlEvents() {
@@ -52,9 +40,10 @@
     ls.show_download_notification = $('#show_download_notification_checkbox').prop('checked');
 
     // Filters
-    ls.show_filter_mode = $('#show_filter_mode_checkbox').prop('checked');
+    ls.show_url_filter = $('#show_url_filter_checkbox').prop('checked');
+    ls.show_image_width_filter = $('#show_image_width_filter_checkbox').prop('checked');
+    ls.show_image_height_filter = $('#show_image_height_filter_checkbox').prop('checked');
     ls.show_only_images_from_links = $('#show_only_images_from_links_checkbox').prop('checked');
-    ls.show_sort_by_url = $('#show_sort_by_url_checkbox').prop('checked');
 
     // Images
     ls.show_image_url = $('#show_image_url_checkbox').prop('checked');
@@ -73,8 +62,17 @@
   }
 
   function resetOptions() {
-    initializeControlValues(true);
+    resetToDefault();
     addNotification('All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.', 'warning');
+  }
+
+  function resetToDefault() {
+    var options = JSON.parse(ls.options);
+    var values = {};
+    for (var i = 0; i < options.length; i++) {
+      values[options[i]] = ls[options[i] + '_default'];
+    }
+    initializeControlValues(values);
   }
 
   function clearData() {

@@ -1,59 +1,57 @@
 (function (ls) {
   'use strict';
 
+  // One-time reset of settings
+  chrome.runtime.onInstalled.addListener(function (details) {
+    if (details.reason === 'update' && chrome.runtime.getManifest().version === '2.1') {
+      ls.clear();
+    }
+  });
+
   // Global
   ls.animation_duration = '500';
 
   // Popup
-  // Filters
-  ls.show_donation_link = ls.show_donation_link || 'true';
-  ls.folder_name = ls.folder_name || '';
-  ls.filter_mode = ls.filter_mode || 'normal';
-  ls.only_images_from_links = ls.only_images_from_links || 'false';
+  var defaults = {
+    // Filters
+    show_donation_link: true,
+    folder_name: '',
+    filter_url_mode: 'normal',
+    filter_min_width: 0,
+    filter_min_width_enabled: true,
+    filter_max_width: 3000,
+    filter_max_width_enabled: true,
+    filter_min_height: 0,
+    filter_min_height_enabled: true,
+    filter_max_height: 3000,
+    filter_max_height_enabled: true,
+    only_images_from_links: false,
+    // Options
+    // General
+    show_download_confirmation: true,
+    show_download_notification: true,
+    // Filters
+    show_url_filter: true,
+    show_image_width_filter: true,
+    show_image_height_filter: true,
+    show_only_images_from_links: true,
+    // Images
+    show_image_url: true,
+    show_open_image_button: true,
+    show_download_image_button: true,
+    columns: 2,
+    image_min_width: 50,
+    image_max_width: 200,
+    image_border_width: 3,
+    image_border_color: '#3498db'
+  };
 
-  // Options
-  // General
-  ls.show_download_confirmation_default = 'true';
-  ls.show_download_confirmation = ls.show_download_confirmation || ls.show_download_confirmation_default;
+  defaults.body_width = Math.max(250, defaults.columns * defaults.image_max_width);
 
-  ls.show_download_notification_default = 'true';
-  ls.show_download_notification = ls.show_download_notification || ls.show_download_notification_default;
+  for (var option in defaults) {
+    if (ls[option] === undefined) ls[option] = defaults[option];
+    ls[option + '_default'] = defaults[option];
+  }
 
-  // Filters
-  ls.show_filter_mode_default = 'true';
-  ls.show_filter_mode = ls.show_filter_mode || ls.show_filter_mode_default;
-
-  ls.show_only_images_from_links_default = 'true';
-  ls.show_only_images_from_links = ls.show_only_images_from_links || ls.show_only_images_from_links_default;
-
-  ls.show_sort_by_url_default = 'true';
-  ls.show_sort_by_url = ls.show_sort_by_url || ls.show_sort_by_url_default;
-
-  // Images
-  ls.show_image_url_default = 'true';
-  ls.show_image_url = ls.show_image_url || ls.show_image_url_default;
-
-  ls.show_open_image_button_default = 'true';
-  ls.show_open_image_button = ls.show_open_image_button || ls.show_open_image_button_default;
-
-  ls.show_download_image_button_default = 'true';
-  ls.show_download_image_button = ls.show_download_image_button || ls.show_download_image_button_default;
-
-  ls.columns_default = '2';
-  ls.columns = ls.columns || ls.columns_default;
-
-  ls.image_min_width_default = '50';
-  ls.image_min_width = ls.image_min_width || ls.image_min_width_default;
-
-  ls.image_max_width_default = '150';
-  ls.image_max_width = ls.image_max_width || ls.image_max_width_default;
-
-  ls.image_border_width_default = '3';
-  ls.image_border_width = ls.image_border_width || ls.image_border_width_default;
-
-  ls.image_border_color_default = '#3498db';
-  ls.image_border_color = ls.image_border_color || ls.image_border_color_default;
-
-  ls.body_width_default = Math.max(250, parseInt(ls.columns_default) * parseInt(ls.image_max_width_default));
-  ls.body_width = ls.body_width || ls.body_width_default;
+  ls.options = JSON.stringify(Object.keys(defaults));
 }(localStorage));
