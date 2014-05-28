@@ -169,7 +169,6 @@
       })
       .on('click', '.download_image_button', function () {
         chrome.downloads.download({ url: $(this).data('url') });
-        flashDownloadingNotification(1);
       })
       .on('click', '.open_image_button', function () {
         chrome.tabs.create({ url: $(this).data('url'), active: false });
