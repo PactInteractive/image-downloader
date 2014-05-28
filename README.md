@@ -21,6 +21,7 @@ If you need that kind of functionality, there are other extensions that can be u
 Change Log
 ================
 2.2:
+- Removed the unnecessary permission to access tabs
 - Save the value of the URL filter
 - Another attempt to fix some sizing issues
 
