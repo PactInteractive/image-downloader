@@ -20,6 +20,10 @@ If you need that kind of functionality, there are other extensions that can be u
 
 Change Log
 ================
+2.2:
+- Save the value of the URL filter
+- Another attempt to fix some sizing issues
+
 2.1:
 - Added image width / height filters
 - Added a one-time reset of all settings due to some people having sizing issues

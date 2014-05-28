@@ -29,7 +29,6 @@
         .on('click', '#donate_later_button', function () {
           ls.show_donation_link = false;
           donate.remove();
-          resizeBody();
         });
     }
 
@@ -38,6 +37,13 @@
       .val(ls.folder_name)
       .on('change', function () {
         ls.folder_name = $.trim(this.value);
+      });
+
+    // Register filter URL listener
+    $('#filter_textbox')
+      .val(ls.filter_url)
+      .on('change', function () {
+        ls.filter_url = $.trim(this.value);
       });
 
     chrome.downloads.onDeterminingFilename.addListener(function (item, suggest) {
@@ -200,13 +206,10 @@
       'border-color': ls.image_border_color
     });
 
-    resizeBody();
-  }
-
-  // Set the body width and padding to offset the height of the fixed position filters
-  function resizeBody() {
-    var gridCellPadding = 4; // Magic
-    $('body').width(parseInt(ls.body_width) + parseInt(ls.columns) * gridCellPadding).css('padding-top', $('#filters_container').height());
+    // Periodically set the body padding to offset the height of the fixed position filters
+    setInterval(function () {
+      $('body').css('padding-top', $('#filters_container').height());
+    }, 200);
   }
 
   var allImages = [];
@@ -321,11 +324,22 @@
     var columns = parseInt(ls.columns);
     var columnWidth = (Math.round(100 * 100 / columns) / 100) + '%';
     var rows = Math.ceil(visibleImages.length / columns);
+
+    // Tools row
+    var show_image_url = ls.show_image_url === 'true';
+    var show_open_image_button = ls.show_open_image_button === 'true';
+    var show_download_image_button = ls.show_download_image_button === 'true';
+
+    // Append dummy image row to keep the popup width constant
+    var dummy_row = $('<tr></tr>');
+    var colspan = ((show_image_url ? 1 : 0) + (show_open_image_button ? 1 : 0) + (show_download_image_button ? 1 : 0)) || 1;
+    for (var columnIndex = 0; columnIndex < columns; columnIndex++) {
+      var dummy_cell = '<td colspan="' + colspan + '" style="min-width: ' + ls.image_max_width + 'px; width: ' + columnWidth + '; vertical-align: top;"></td>';
+      dummy_row.append(dummy_cell);
+    }
+    images_table.append(dummy_row);
+
     for (var rowIndex = 0; rowIndex < rows; rowIndex++) {
-      // Tools row
-      var show_image_url = ls.show_image_url === 'true';
-      var show_open_image_button = ls.show_open_image_button === 'true';
-      var show_download_image_button = ls.show_download_image_button === 'true';
       if (show_image_url || show_open_image_button || show_download_image_button) {
         var tools_row = $('<tr></tr>');
         for (var columnIndex = 0; columnIndex < columns; columnIndex++) {
@@ -349,11 +363,10 @@
 
       // Images row
       var images_row = $('<tr></tr>');
-      var colspan = ((show_image_url ? 1 : 0) + (show_open_image_button ? 1 : 0) + (show_download_image_button ? 1 : 0)) || 1;
       for (var columnIndex = 0; columnIndex < columns; columnIndex++) {
         var index = rowIndex * columns + columnIndex;
         if (index === visibleImages.length) break;
-        var image = '<td colspan="' + colspan + '" style="width: ' + columnWidth + '; vertical-align: top;"><img id="image' + index + '" src="' + visibleImages[index] + '" /></td>';
+        var image = '<td colspan="' + colspan + '" style="min-width: ' + ls.image_max_width + 'px; width: ' + columnWidth + '; vertical-align: top;"><img id="image' + index + '" src="' + visibleImages[index] + '" /></td>';
         images_row.append(image);
       }
       images_table.append(images_row);

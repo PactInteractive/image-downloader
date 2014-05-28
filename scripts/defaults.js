@@ -16,15 +16,16 @@
     // Filters
     show_donation_link: true,
     folder_name: '',
+    filter_url: '',
     filter_url_mode: 'normal',
     filter_min_width: 0,
-    filter_min_width_enabled: true,
+    filter_min_width_enabled: false,
     filter_max_width: 3000,
-    filter_max_width_enabled: true,
+    filter_max_width_enabled: false,
     filter_min_height: 0,
-    filter_min_height_enabled: true,
+    filter_min_height_enabled: false,
     filter_max_height: 3000,
-    filter_max_height_enabled: true,
+    filter_max_height_enabled: false,
     only_images_from_links: false,
     // Options
     // General
@@ -45,8 +46,6 @@
     image_border_width: 3,
     image_border_color: '#3498db'
   };
-
-  defaults.body_width = Math.max(250, defaults.columns * defaults.image_max_width);
 
   for (var option in defaults) {
     if (ls[option] === undefined) ls[option] = defaults[option];
