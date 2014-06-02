@@ -3,7 +3,10 @@
 
   // One-time reset of settings
   chrome.runtime.onInstalled.addListener(function (details) {
-    if (details.reason === 'update' && chrome.runtime.getManifest().version === '2.1') {
+    if (details.reason === 'install') { // Open the options page after install
+      chrome.tabs.create({ url: '/views/options.html' });
+    }
+    else if (details.reason === 'update' && /^(((0|1)\..*)|(2\.(0|1)(\..*)?))$/.test(details.previousVersion)) { // Clear data from versions before 2.1
       ls.clear();
     }
   });
@@ -14,7 +17,6 @@
   // Popup
   var defaults = {
     // Filters
-    show_donation_link: true,
     folder_name: '',
     filter_url: '',
     filter_url_mode: 'normal',

@@ -4,34 +4,6 @@
   'use strict';
 
   function initializePopup() {
-    if (ls.show_donation_link === 'true') {
-      var donate = $('\
-        <tr><td colspan="2">You can support the development of this project at any time by donating on the <a id="options_link" href="/views/options.html" target="_blank">options</a> page.</td></tr>\
-        <tr>\
-          <td>\
-            <input type="button" id="donate_now_button" class="accent" value="DONATE NOW" />\
-          </td>\
-          <td>\
-            <input type="button" id="donate_later_button" class="danger" value="DONATE LATER" />\
-          </td>\
-        </tr>\
-        <tr><td colspan="2"><hr style="margin: 6px 0 9px 0;" /></td></tr>\
-      ').prependTo('#filter_inputs_container');
-
-      $('#filters_container')
-        .on('click', '#options_link', function () {
-          ls.show_donation_link = false;
-        })
-        .on('click', '#donate_now_button', function () {
-          chrome.tabs.create({ url: '/views/options.html' });
-          ls.show_donation_link = false;
-        })
-        .on('click', '#donate_later_button', function () {
-          ls.show_donation_link = false;
-          donate.remove();
-        });
-    }
-
     // Register download folder name listener
     $('#folder_name_textbox')
       .val(ls.folder_name)

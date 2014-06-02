@@ -22,6 +22,7 @@ Change Log
 ================
 2.2:
 - Removed the unnecessary permission to access tabs
+- Removed the donation prompt due to complains from some users that it doesn't disappear after the first time as it should; now, the options page will be opened on first install instead
 - Save the value of the URL filter
 - Another attempt to fix some sizing issues
 
