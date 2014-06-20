@@ -22,7 +22,7 @@
         }
       }
 
-      var backgroundImage = element.style['background-image'];
+      var backgroundImage = window.getComputedStyle(element)['background-image'];
       if (backgroundImage) {
         var parsedURL = imageDownloader.extractURLFromStyle(backgroundImage);
         if (imageDownloader.isImageURL(parsedURL)) {
