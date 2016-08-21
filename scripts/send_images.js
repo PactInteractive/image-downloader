@@ -3,7 +3,7 @@
   'use strict';
 
   var imageDownloader = {
-    imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpe?g|gif|png))(?:\?([^#]*))?(?:#(.*))?/i,
+    imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpe?g|gif|png|webm))(?:\?([^#]*))?(?:#(.*))?/i,
     mapElement: function (element) {
       if (element.tagName.toLowerCase() === 'img') {
         var src = element.src;
