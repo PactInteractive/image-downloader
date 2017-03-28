@@ -189,7 +189,7 @@
 
   // Add images to `allImages` and trigger filtration
   // `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times
-  chrome.extension.onMessage.addListener(function (result) {
+  chrome.runtime.onMessage.addListener(function (result) {
     $.extend(linkedImages, result.linkedImages);
     for (var i = 0; i < result.images.length; i++) {
       if (allImages.indexOf(result.images[i]) === -1) {

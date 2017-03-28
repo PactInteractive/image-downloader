@@ -3,7 +3,33 @@
   'use strict';
 
   var imageDownloader = {
-    imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:jpe?g|gif|png))(?:\?([^#]*))?(?:#(.*))?/i,
+    // Source: https://support.google.com/webmasters/answer/2598805?hl=en
+    imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|jpe?g|png|svg|webp))(?:\?([^#]*))?(?:#(.*))?/i,
+
+    extractImagesFromTags: function () {
+      return [].slice.apply(document.querySelectorAll('img, a, [background-image]')).map(imageDownloader.mapElement);
+    },
+
+    extractImagesFromStyles: function () {
+      var imagesFromStyles = [];
+      for (var i = 0; i < document.styleSheets.length; i++) {
+        var cssRules = document.styleSheets[i].cssRules;
+        if (cssRules) {
+          for (var j = 0; j < cssRules.length; j++) {
+            var style = cssRules[j].style;
+            if (style && style['background-image']) {
+              var url = imageDownloader.extractURLFromStyle(style['background-image']);
+              if (imageDownloader.isImageURL(url)) {
+                imagesFromStyles.push(url);
+              }
+            }
+          }
+        }
+      }
+
+      return imagesFromStyles;
+    },
+
     mapElement: function (element) {
       if (element.tagName.toLowerCase() === 'img') {
         var src = element.src;
@@ -38,12 +64,12 @@
     },
 
     isImageURL: function (url) {
-      return url.substring(0, 10) === 'data:image' || imageDownloader.imageRegex.test(url);
+      return url.indexOf('data:image') === 0 || imageDownloader.imageRegex.test(url);
     },
 
     removeDuplicateOrEmpty: function (images) {
-      var result = [],
-          hash = {};
+      var result = [];
+      var hash = {};
 
       for (var i = 0; i < images.length; i++) {
         hash[images[i]] = 0;
@@ -57,27 +83,16 @@
     }
   };
 
-  imageDownloader.linkedImages = {};
-  imageDownloader.images = [].slice.apply(document.getElementsByTagName('*'));
-  imageDownloader.images = imageDownloader.images.map(imageDownloader.mapElement);
+  imageDownloader.linkedImages = {}; // TODO: Avoid mutating this object in `mapElement`
+  imageDownloader.images = imageDownloader.removeDuplicateOrEmpty([].concat(
+    imageDownloader.extractImagesFromTags(),
+    imageDownloader.extractImagesFromStyles()
+  ));
 
-  for (var i = 0; i < document.styleSheets.length; i++) { // Extract images from styles
-    var cssRules = document.styleSheets[i].cssRules;
-    if (cssRules) {
-      for (var j = 0; j < cssRules.length; j++) {
-        var style = cssRules[j].style;
-        if (style && style['background-image']) {
-          var url = imageDownloader.extractURLFromStyle(style['background-image']);
-          if (imageDownloader.isImageURL(url)) {
-            imageDownloader.images.push(url);
-          }
-        }
-      }
-    }
-  }
-
-  imageDownloader.images = imageDownloader.removeDuplicateOrEmpty(imageDownloader.images);
-  chrome.extension.sendMessage({ linkedImages: imageDownloader.linkedImages, images: imageDownloader.images });
+  chrome.runtime.sendMessage({
+    linkedImages: imageDownloader.linkedImages,
+    images: imageDownloader.images
+  });
 
   imageDownloader.linkedImages = null;
   imageDownloader.images = null;

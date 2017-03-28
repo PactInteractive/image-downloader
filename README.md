@@ -20,6 +20,11 @@ If you need that kind of functionality, there are other extensions that can be u
 
 Change Log
 ================
+2.3:
+- Added support for BMP, SVG, and WebP images
+- Improved popup loading speed by searching through less elements
+- Replaced deprecated `chrome.extension` calls with `chrome.runtime`
+
 2.2:
 - Removed the unnecessary permission to access tabs
 - Removed the donation prompt due to complains from some users that it doesn't disappear after the first time as it should; now, the options page will be opened on first install instead
