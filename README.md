@@ -22,6 +22,7 @@ Change Log
 ================
 2.3:
 - Added support for BMP, SVG, and WebP images
+- Added support for relative URLs
 - Improved popup loading speed by searching through less elements
 - Replaced deprecated `chrome.extension` calls with `chrome.runtime`
 
@@ -117,7 +118,7 @@ And Zepto.js: http://zeptojs.com
 
 License
 =======
-Copyright (c) 2014 Vladimir Sabev
+Copyright (c) 2017 Vladimir Sabev
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation

@@ -67,6 +67,10 @@
       return url.indexOf('data:image') === 0 || imageDownloader.imageRegex.test(url);
     },
 
+    relativeUrlToAbsolute: function (url) {
+      return url.indexOf('/') === 0 ? `${window.location.origin}${url}` : url;
+    },
+
     removeDuplicateOrEmpty: function (images) {
       var result = [];
       var hash = {};
@@ -84,10 +88,12 @@
   };
 
   imageDownloader.linkedImages = {}; // TODO: Avoid mutating this object in `mapElement`
-  imageDownloader.images = imageDownloader.removeDuplicateOrEmpty([].concat(
-    imageDownloader.extractImagesFromTags(),
-    imageDownloader.extractImagesFromStyles()
-  ));
+  imageDownloader.images = imageDownloader.removeDuplicateOrEmpty(
+    [].concat(
+      imageDownloader.extractImagesFromTags(),
+      imageDownloader.extractImagesFromStyles()
+    ).map(imageDownloader.relativeUrlToAbsolute)
+  );
 
   chrome.runtime.sendMessage({
     linkedImages: imageDownloader.linkedImages,
