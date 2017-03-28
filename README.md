@@ -20,6 +20,12 @@ If you need that kind of functionality, there are other extensions that can be u
 
 Change Log
 ================
+2.3:
+- Added support for BMP, SVG, and WebP images
+- Added support for relative URLs
+- Improved popup loading speed by searching through less elements
+- Replaced deprecated `chrome.extension` calls with `chrome.runtime`
+
 2.2:
 - Removed the unnecessary permission to access tabs
 - Removed the donation prompt due to complains from some users that it doesn't disappear after the first time as it should; now, the options page will be opened on first install instead
@@ -112,7 +118,7 @@ And Zepto.js: http://zeptojs.com
 
 License
 =======
-Copyright (c) 2014 Vladimir Sabev
+Copyright (c) 2017 Vladimir Sabev
 
 Permission is hereby granted, free of charge, to any person
 obtaining a copy of this software and associated documentation
