@@ -7,7 +7,7 @@
     imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|jpe?g|png|svg|webp))(?:\?([^#]*))?(?:#(.*))?/i,
 
     extractImagesFromTags: function () {
-      return [].slice.apply(document.querySelectorAll('img, a, [background-image]')).map(imageDownloader.mapElement);
+      return [].slice.apply(document.querySelectorAll('img, a, [style]')).map(imageDownloader.mapElement);
     },
 
     extractImagesFromStyles: function () {
@@ -17,8 +17,8 @@
         if (cssRules) {
           for (var j = 0; j < cssRules.length; j++) {
             var style = cssRules[j].style;
-            if (style && style['background-image']) {
-              var url = imageDownloader.extractURLFromStyle(style['background-image']);
+            if (style && style.backgroundImage) {
+              var url = imageDownloader.extractURLFromStyle(style.backgroundImage);
               if (imageDownloader.isImageURL(url)) {
                 imagesFromStyles.push(url);
               }
@@ -48,7 +48,7 @@
         }
       }
 
-      var backgroundImage = window.getComputedStyle(element)['background-image'];
+      var backgroundImage = window.getComputedStyle(element).backgroundImage;
       if (backgroundImage) {
         var parsedURL = imageDownloader.extractURLFromStyle(backgroundImage);
         if (imageDownloader.isImageURL(parsedURL)) {
