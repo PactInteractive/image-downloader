@@ -18,6 +18,7 @@
   var defaults = {
     // Filters
     folder_name: '',
+    new_file_name: '',
     filter_url: '',
     filter_url_mode: 'normal',
     filter_min_width: 0,
@@ -33,6 +34,7 @@
     // General
     show_download_confirmation: true,
     show_download_notification: true,
+    show_file_renaming: false,
     // Filters
     show_url_filter: true,
     show_image_width_filter: true,

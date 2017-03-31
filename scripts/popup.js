@@ -10,6 +10,13 @@
       .on('change', function () {
         ls.folder_name = $.trim(this.value);
       });
+    
+    // Register file renaming listener
+    $('#file_renaming_textbox')
+      .val(ls.new_file_name)
+      .on('change', function () {
+        ls.new_file_name = $.trim(this.value);
+      });
 
     // Register filter URL listener
     $('#filter_textbox')
@@ -19,9 +26,18 @@
       });
 
     chrome.downloads.onDeterminingFilename.addListener(function (item, suggest) {
+      var new_filename = '';
       if (ls.folder_name) {
-        suggest({ filename: ls.folder_name + '/' + item.filename});
+        new_filename = ls.folder_name + '/';
       }
+      if (ls.new_file_name) {
+        var regex = /(?:\.([^.]+))?$/;
+        var extension = regex.exec(item.filename)[1];
+        new_filename += ls.new_file_name + '.' + extension;
+      } else {
+        new_filename += item.filename;
+      }
+      suggest({ filename: new_filename, conflictAction: 'uniquify'});
     });
 
     $('#download_button').on('click', downloadImages);
@@ -155,6 +171,9 @@
   }
 
   function initializeStyles() {
+    // General
+    $('#file_renaming_textbox').toggle(ls.show_file_renaming === 'true');
+    
     // Filters
     $('#image_url_filter').toggle(ls.show_url_filter === 'true');
     $('#image_width_filter').toggle(ls.show_image_width_filter === 'true');
