@@ -33,11 +33,16 @@
       if (ls.new_file_name) {
         var regex = /(?:\.([^.]+))?$/;
         var extension = regex.exec(item.filename)[1];
-        new_filename += ls.new_file_name + '.' + extension;
+        if (ls.image_count == 1) {
+          new_filename += ls.new_file_name + '.' + extension;
+        } else {
+          new_filename += ls.new_file_name + ls.image_number + '.' + extension;
+          ls.image_number++;
+        }
       } else {
         new_filename += item.filename;
       }
-      suggest({ filename: new_filename, conflictAction: 'uniquify'});
+      suggest({ filename: new_filename });
     });
 
     $('#download_button').on('click', downloadImages);
@@ -372,15 +377,19 @@
     }
 
     function startDownload() {
-      var checkedImages = 0;
+      var checkedImages = [];
       for (var i = 0; i < visibleImages.length; i++) {
         if ($('#image' + i).hasClass('checked')) {
-          checkedImages++;
-          chrome.downloads.download({ url: visibleImages[i] });
+          checkedImages.push(visibleImages[i]);;
         }
       }
+      ls.image_count = checkedImages.length;
+      ls.image_number = 1;
+      checkedImages.forEach(function(checkedImage) {
+        chrome.downloads.download({ url: checkedImage });
+      });
 
-      flashDownloadingNotification(checkedImages);
+      flashDownloadingNotification();
     }
   }
 
@@ -407,10 +416,10 @@
     $('#yes_button').on('click', startDownload);
   }
 
-  function flashDownloadingNotification(imageCount) {
+  function flashDownloadingNotification() {
     if (ls.show_download_notification !== 'true') return;
 
-    var downloading_notification = $('<div class="success">Downloading ' + imageCount + ' image' + (imageCount > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
+    var downloading_notification = $('<div class="success">Downloading ' + ls.image_count + ' image' + (ls.imageCount > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
     flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove(); });
   }
 
