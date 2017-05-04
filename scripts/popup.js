@@ -11,6 +11,13 @@
         ls.folder_name = $.trim(this.value);
       });
 
+    // Register file renaming listener
+    $('#file_renaming_textbox')
+      .val(ls.new_file_name)
+      .on('change', function () {
+        ls.new_file_name = $.trim(this.value);
+      });
+
     // Register filter URL listener
     $('#filter_textbox')
       .val(ls.filter_url)
@@ -18,11 +25,7 @@
         ls.filter_url = $.trim(this.value);
       });
 
-    chrome.downloads.onDeterminingFilename.addListener(function (item, suggest) {
-      if (ls.folder_name) {
-        suggest({ filename: ls.folder_name + '/' + item.filename});
-      }
-    });
+    chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 
     $('#download_button').on('click', downloadImages);
 
@@ -154,7 +157,32 @@
     });
   }
 
+  function suggestNewFilename(item, suggest) {
+    var newFilename = '';
+    if (ls.folder_name) {
+      newFilename = ls.folder_name + '/';
+    }
+    if (ls.new_file_name) {
+      var regex = /(?:\.([^.]+))?$/;
+      var extension = regex.exec(item.filename)[1];
+      if (parseInt(ls.image_count, 10) === 1) {
+        newFilename += ls.new_file_name + '.' + extension;
+      }
+      else {
+        newFilename += ls.new_file_name + ls.image_number + '.' + extension;
+        ls.image_number++;
+      }
+    }
+    else {
+      newFilename += item.filename;
+    }
+    suggest({ filename: newFilename });
+  }
+
   function initializeStyles() {
+    // General
+    $('#file_renaming_textbox').toggle(ls.show_file_renaming === 'true');
+
     // Filters
     $('#image_url_filter').toggle(ls.show_url_filter === 'true');
     $('#image_width_filter').toggle(ls.show_image_width_filter === 'true');
@@ -353,15 +381,19 @@
     }
 
     function startDownload() {
-      var checkedImages = 0;
+      var checkedImages = [];
       for (var i = 0; i < visibleImages.length; i++) {
         if ($('#image' + i).hasClass('checked')) {
-          checkedImages++;
-          chrome.downloads.download({ url: visibleImages[i] });
+          checkedImages.push(visibleImages[i]);
         }
       }
+      ls.image_count = checkedImages.length;
+      ls.image_number = 1;
+      checkedImages.forEach(function(checkedImage) {
+        chrome.downloads.download({ url: checkedImage });
+      });
 
-      flashDownloadingNotification(checkedImages);
+      flashDownloadingNotification(ls.image_count);
     }
   }
 

@@ -20,6 +20,9 @@ If you need that kind of functionality, there are other extensions that can be u
 
 Change Log
 ================
+2.4:
+- Added an option for renaming files before downloading
+
 2.3:
 - Added support for BMP, SVG, and WebP images
 - Added support for relative URLs
