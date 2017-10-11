@@ -7,7 +7,7 @@
     imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|jpe?g|png|svg|webp))(?:\?([^#]*))?(?:#(.*))?/i,
 
     extractImagesFromTags: function () {
-      return [].slice.apply(document.querySelectorAll('img, a, [style]')).map(imageDownloader.mapElement);
+      return [].slice.apply(document.querySelectorAll('img, a, [style]')).map(imageDownloader.extractImageFromElement);
     },
 
     extractImagesFromStyles: function () {
@@ -30,7 +30,7 @@
       return imagesFromStyles;
     },
 
-    mapElement: function (element) {
+    extractImageFromElement: function (element) {
       if (element.tagName.toLowerCase() === 'img') {
         var src = element.src;
         var hashIndex = src.indexOf('#');
@@ -87,7 +87,7 @@
     }
   };
 
-  imageDownloader.linkedImages = {}; // TODO: Avoid mutating this object in `mapElement`
+  imageDownloader.linkedImages = {}; // TODO: Avoid mutating this object in `extractImageFromElement`
   imageDownloader.images = imageDownloader.removeDuplicateOrEmpty(
     [].concat(
       imageDownloader.extractImagesFromTags(),
