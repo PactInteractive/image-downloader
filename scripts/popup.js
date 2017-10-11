@@ -237,7 +237,7 @@
         if (cached_images < allImages.length) {
           for (var i = cached_images; i < allImages.length; i++) {
             // Refilter the images after they're loaded in cache
-            images_cache.append($('<img src="' + allImages[i] + '" />').on('load', filterImages));
+            images_cache.append($('<img src="' + encodeURI(allImages[i]) + '" />').on('load', filterImages));
           }
         }
       }
@@ -296,7 +296,7 @@
 
       if (ls.show_image_width_filter === 'true' || ls.show_image_height_filter === 'true') {
         visibleImages = visibleImages.filter(function (url) {
-          var image = images_cache.children('img[src="' + url + '"]')[0];
+          var image = images_cache.children('img[src="' + encodeURI(url) + '"]')[0];
           return (ls.show_image_width_filter !== 'true' ||
                    (ls.filter_min_width_enabled !== 'true' || ls.filter_min_width <= image.naturalWidth) &&
                    (ls.filter_max_width_enabled !== 'true' || image.naturalWidth <= ls.filter_max_width)
