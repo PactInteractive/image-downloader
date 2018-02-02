@@ -13,17 +13,21 @@
     extractImagesFromStyles: function () {
       var imagesFromStyles = [];
       for (var i = 0; i < document.styleSheets.length; i++) {
-        var cssRules = document.styleSheets[i].cssRules;
-        if (cssRules) {
-          for (var j = 0; j < cssRules.length; j++) {
-            var style = cssRules[j].style;
-            if (style && style.backgroundImage) {
-              var url = imageDownloader.extractURLFromStyle(style.backgroundImage);
-              if (imageDownloader.isImageURL(url)) {
-                imagesFromStyles.push(url);
+        try {
+          var cssRules = document.styleSheets[i].cssRules;
+          if (cssRules) {
+            for (var j = 0; j < cssRules.length; j++) {
+              var style = cssRules[j].style;
+              if (style && style.backgroundImage) {
+                var url = imageDownloader.extractURLFromStyle(style.backgroundImage);
+                if (imageDownloader.isImageURL(url)) {
+                  imagesFromStyles.push(url);
+                }
               }
             }
           }
+        } catch(exception) {
+          // Exception suppressed
         }
       }
 
