@@ -2,23 +2,27 @@
   /* globals chrome */
   'use strict';
 
-  var imageDownloader = {
+  const imageDownloader = {
     // Source: https://support.google.com/webmasters/answer/2598805?hl=en
     imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|jpe?g|png|svg|webp))(?:\?([^#]*))?(?:#(.*))?/i,
 
-    extractImagesFromTags: function () {
+    extractImagesFromTags() {
       return [].slice.apply(document.querySelectorAll('img, a, [style]')).map(imageDownloader.extractImageFromElement);
     },
 
-    extractImagesFromStyles: function () {
-      var imagesFromStyles = [];
-      for (var i = 0; i < document.styleSheets.length; i++) {
-        var cssRules = document.styleSheets[i].cssRules;
-        if (cssRules) {
-          for (var j = 0; j < cssRules.length; j++) {
-            var style = cssRules[j].style;
+    extractImagesFromStyles() {
+      const imagesFromStyles = [];
+      for (let i = 0; i < document.styleSheets.length; i++) {
+        const styleSheet = document.styleSheets[i];
+        // Prevents `Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules` error. Also see:
+        // https://github.com/vdsabev/image-downloader/issues/37
+        // https://github.com/odoo/odoo/issues/22517
+        if (styleSheet.hasOwnProperty('cssRules')) {
+          const { cssRules } = styleSheet;
+          for (let j = 0; j < cssRules.length; j++) {
+            const style = cssRules[j].style;
             if (style && style.backgroundImage) {
-              var url = imageDownloader.extractURLFromStyle(style.backgroundImage);
+              const url = imageDownloader.extractURLFromStyle(style.backgroundImage);
               if (imageDownloader.isImageURL(url)) {
                 imagesFromStyles.push(url);
               }
@@ -30,10 +34,10 @@
       return imagesFromStyles;
     },
 
-    extractImageFromElement: function (element) {
+    extractImageFromElement(element) {
       if (element.tagName.toLowerCase() === 'img') {
-        var src = element.src;
-        var hashIndex = src.indexOf('#');
+        let src = element.src;
+        const hashIndex = src.indexOf('#');
         if (hashIndex >= 0) {
           src = src.substr(0, hashIndex);
         }
@@ -41,16 +45,16 @@
       }
 
       if (element.tagName.toLowerCase() === 'a') {
-        var href = element.href;
+        const href = element.href;
         if (imageDownloader.isImageURL(href)) {
           imageDownloader.linkedImages[href] = '0';
           return href;
         }
       }
 
-      var backgroundImage = window.getComputedStyle(element).backgroundImage;
+      const backgroundImage = window.getComputedStyle(element).backgroundImage;
       if (backgroundImage) {
-        var parsedURL = imageDownloader.extractURLFromStyle(backgroundImage);
+        const parsedURL = imageDownloader.extractURLFromStyle(backgroundImage);
         if (imageDownloader.isImageURL(parsedURL)) {
           return parsedURL;
         }
@@ -59,30 +63,31 @@
       return '';
     },
 
-    extractURLFromStyle: function (url) {
+    extractURLFromStyle(url) {
       return url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
     },
 
-    isImageURL: function (url) {
+    isImageURL(url) {
       return url.indexOf('data:image') === 0 || imageDownloader.imageRegex.test(url);
     },
 
-    relativeUrlToAbsolute: function (url) {
+    relativeUrlToAbsolute(url) {
       return url.indexOf('/') === 0 ? `${window.location.origin}${url}` : url;
     },
 
-    removeDuplicateOrEmpty: function (images) {
-      var result = [];
-      var hash = {};
-
-      for (var i = 0; i < images.length; i++) {
+    removeDuplicateOrEmpty(images) {
+      const hash = {};
+      for (let i = 0; i < images.length; i++) {
         hash[images[i]] = 0;
       }
-      for (var key in hash) {
+
+      const result = [];
+      for (let key in hash) {
         if (key !== '') {
           result.push(key);
         }
       }
+
       return result;
     }
   };

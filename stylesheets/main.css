@@ -1,83 +1,140 @@
-body
-{
-  font: 13px/1.5em "Lucida Grande", Arial, sans-serif;
-  color: #333;
+:root {
+  --foreground: #333;
+  --foregroundLight: #999;
+
+  --neutral: #ccc;
+  --neutralLight: #fff;
+
+  --accent: #3498db;
+  --accentDark: #2791d9;
+
+  --success: #25a75c;
+  --successLight: #28b463;
+
+  --warning: #ea940c;
+  --warningLight: #f39c12;
+
+  --danger: #e53f2e;
+  --dangerLight: #e74c3c;
 }
 
-hr
-{
-  border: 1px dotted #ccc;
+body {
+  font: 13px/1.5em 'Lucida Grande', Arial, sans-serif;
+  color: var(--foreground);
+}
+
+hr {
+  border: 1px dotted var(--neutral);
   border-bottom: none;
   margin: 4px 0;
 }
 
-.left { float: left; }
-.right { float: right; }
-.clear { clear: both; }
+.left {
+  float: left;
+}
+.right {
+  float: right;
+}
+.clear {
+  clear: both;
+}
 
 /* labels */
-.accent  { color: #3498db; }
-.success { color: #25a75c; }
-.warning { color: #ea940c; }
-.danger  { color: #e74c3c; }
-.light   { color: #999; }
+.accent {
+  color: var(--accent);
+}
+.success {
+  color: var(--success);
+}
+.warning {
+  color: var(--warning);
+}
+.danger {
+  color: var(--danger);
+}
+.light {
+  color: var(--foregroundLight);
+}
 
 /* links */
 a:link,
-a:visited { color: #3498db; text-decoration: none; }
+a:visited {
+  color: var(--accent);
+  text-decoration: none;
+}
 
 a:hover,
-a:active { color: #2791d9; } /* darken 3% */
+a:active {
+  color: var(--accentDark);
+}
 
 /* images */
-img
-{
+img {
   box-sizing: border-box;
   transition: border-color 0.15s;
 }
 
-img:hover
-{
-  border-color: #ccc;
+img:hover {
+  border-color: var(--neutral);
 }
 
 /* inputs */
-input[type="text"],
-input[type="button"],
-input[type="number"],
-select { box-sizing: border-box; }
+input[type='text'],
+input[type='button'],
+input[type='number'],
+select {
+  box-sizing: border-box;
+}
 
-input[type="button"]
-{
+input[type='button'] {
   min-width: 50px;
   cursor: pointer;
-  color: #fff;
+  color: var(--neutralLight);
   border: 0;
   padding: 3px 10px;
   transition: background 0.15s;
 }
-input[type="button"]:disabled         { cursor: not-allowed; }
+input[type='button']:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
 
-input[type="button"].accent           { background: #3498db; }
-input[type="button"].accent:hover,
-input[type="button"].accent:focus,
-input[type="button"].accent:active    { background: #3498db; } /* darken 3% */
-input[type="button"].accent:disabled  { background: rgba(52, 152, 219, 0.6); }
+/* accent */
+input[type='button'].accent {
+  background: var(--accent);
+}
+input[type='button'].accent:hover,
+input[type='button'].accent:focus,
+input[type='button'].accent:active {
+  background: var(--accent);
+}
 
-input[type="button"].success          { background: #28b463; }
-input[type="button"].success:hover,
-input[type="button"].success:focus,
-input[type="button"].success:active   { background: #25a75c; } /* darken 3% */
-input[type="button"].success:disabled { background: rgba(40, 180, 99, 0.6); }
+/* success */
+input[type='button'].success {
+  background: var(--successLight);
+}
+input[type='button'].success:hover,
+input[type='button'].success:focus,
+input[type='button'].success:active {
+  background: var(--success);
+}
 
-input[type="button"].warning          { background: #f39c12; }
-input[type="button"].warning:hover,
-input[type="button"].warning:focus,
-input[type="button"].warning:active   { background: #ea940c; } /* darken 3% */
-input[type="button"].warning:disabled { background: rgba(243, 156, 18, 0.6); }
+/* warning */
+input[type='button'].warning {
+  background: var(--warningLight);
+}
+input[type='button'].warning:hover,
+input[type='button'].warning:focus,
+input[type='button'].warning:active {
+  background: var(--warning);
+}
 
-input[type="button"].danger           { background: #e74c3c; }
-input[type="button"].danger:hover,
-input[type="button"].danger:focus,
-input[type="button"].danger:active    { background: #e53f2e; } /* darken 3% */
-input[type="button"].danger:disabled  { background: rgba(231, 76, 60, 0.6); }
+/* danger */
+input[type='button'].danger {
+  background: var(--dangerLight);
+}
+input[type='button'].danger:hover,
+input[type='button'].danger:focus,
+input[type='button'].danger:active {
+  background: var(--danger);
+}
