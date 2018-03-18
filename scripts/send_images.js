@@ -13,23 +13,21 @@
     extractImagesFromStyles() {
       const imagesFromStyles = [];
       for (let i = 0; i < document.styleSheets.length; i++) {
-        try {
-          const cssRules = document.styleSheets[i].cssRules;
-          if (cssRules) {
-            for (let j = 0; j < cssRules.length; j++) {
-              const style = cssRules[j].style;
-              if (style && style.backgroundImage) {
-                const url = imageDownloader.extractURLFromStyle(style.backgroundImage);
-                if (imageDownloader.isImageURL(url)) {
-                  imagesFromStyles.push(url);
-                }
+        const styleSheet = document.styleSheets[i];
+        // Prevents `Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules` error. Also see:
+        // https://github.com/vdsabev/image-downloader/issues/37
+        // https://github.com/odoo/odoo/issues/22517
+        if (styleSheet.hasOwnProperty('cssRules')) {
+          const { cssRules } = styleSheet;
+          for (let j = 0; j < cssRules.length; j++) {
+            const style = cssRules[j].style;
+            if (style && style.backgroundImage) {
+              const url = imageDownloader.extractURLFromStyle(style.backgroundImage);
+              if (imageDownloader.isImageURL(url)) {
+                imagesFromStyles.push(url);
               }
             }
           }
-        }
-        catch (error) {
-          // Ignore Chrome permission error when trying to access cross-domain CSS rules. Also see:
-          // https://github.com/vdsabev/image-downloader/pull/36/files
         }
       }
 
