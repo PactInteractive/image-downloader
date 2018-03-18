@@ -20,6 +20,9 @@ If you need that kind of functionality, there are other extensions that can be u
 
 Change Log
 ================
+2.4.2:
+- Workaround for Chrome disallowing access to cross-domain CSS rules
+
 2.4.1:
 - Fixed an issue where invalid URLs would break the extension - https://github.com/vdsabev/image-downloader/issues/23
 - Updated Zepto.js to 1.2.0
