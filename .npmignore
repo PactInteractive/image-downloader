@@ -1,0 +1,10 @@
+coverage
+node_modules
+*.config.js
+*.js.map
+*.ts
+.gitignore
+.prettierignore
+package-lock.json
+tsconfig.json
+tslint.json
