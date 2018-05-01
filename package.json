@@ -1,0 +1,42 @@
+{
+  "private": true,
+  "name": "image-downloader",
+  "version": "3.0.0",
+  "license": "MIT",
+  "scripts": {
+    "build": "tsc",
+    "test": "jest",
+    "test.watch": "jest --watch"
+  },
+  "dependencies": {
+    "@types/chrome": "0.0.64",
+    "tslib": "1.9.0"
+  },
+  "devDependencies": {
+    "@types/jest": "22.2.3",
+    "jest": "22.4.3",
+    "sneer": "0.2.0",
+    "ts-jest": "22.4.4",
+    "typescript": "2.8.3"
+  },
+  "jest": {
+    "collectCoverage": true,
+    "collectCoverageFrom": [
+      "!coverage/**",
+      "!lib/**",
+      "!node_modules/**",
+      "!**/*.config.(ts|js)",
+      "!**/*.d.ts",
+      "!**/*.test.(ts|js)",
+      "**/*.(ts|js)"
+    ],
+    "moduleFileExtensions": [
+      "ts",
+      "js"
+    ],
+    "testRegex": "\\.test\\.(ts|js)$",
+    "transform": {
+      ".ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+    }
+  }
+}

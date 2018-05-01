@@ -1,0 +1,27 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "experimentalDecorators": true,
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "noUnusedLocals": true,
+    "sourceMap": true,
+    "strict": true,
+    "suppressImplicitAnyIndexErrors": false,
+
+    "baseUrl": "scripts",
+    "importHelpers": true,
+    "moduleResolution": "node",
+    "module": "umd",
+    "target": "es6",
+
+    "jsx": "react",
+    "jsxFactory": "h"
+  },
+  "exclude": [
+    "scripts/**/*.test.ts"
+  ],
+  "include": [
+    "scripts/**/*.ts"
+  ]
+}
