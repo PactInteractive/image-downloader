@@ -150,11 +150,7 @@
       });
 
     // Get images on the page
-    chrome.windows.getCurrent(function (currentWindow) {
-      chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
-        chrome.tabs.executeScript(activeTabs[0].id, { file: '/scripts/send_images.js', allFrames: true });
-      });
-    });
+    chrome.tabs.executeScript({ file: '/scripts/send_images.js', allFrames: true });
   }
 
   function suggestNewFilename(item, suggest) {
@@ -217,6 +213,7 @@
 
   // Add images to `allImages` and trigger filtration
   // `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times
+  // TODO: Try if using the callback of `executeScript` and returning the results from the content script works the same way with iframes
   chrome.runtime.onMessage.addListener(function (result) {
     $.extend(linkedImages, result.linkedImages);
     for (var i = 0; i < result.images.length; i++) {

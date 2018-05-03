@@ -38,6 +38,7 @@ export const defaults: Record<string, string | number | boolean> = {
 };
 
 export const setDefaults = ({ localStorage, chrome }: { localStorage: Storage; chrome: Chrome }) => {
+  // TODO: Extract
   // One-time reset of settings
   chrome.runtime.onInstalled.addListener((details) => {
     if (details.reason === 'install') {
@@ -67,5 +68,4 @@ export const setDefaults = ({ localStorage, chrome }: { localStorage: Storage; c
   localStorage.options = JSON.stringify(options);
 };
 
-// TODO: Uncomment
 setDefaults({ localStorage: window.localStorage, chrome: window.chrome });

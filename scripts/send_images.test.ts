@@ -19,7 +19,9 @@ const setup = () => {
 
 setup(); // Setup before import to prevent errors
 
-import {
+// HACK: Import using `require` to prevent VSCode from changing the order of imports
+declare const require: any;
+const {
   extractImagesFromTags,
   extractImageFromElement,
   extractImagesFromStyles,
@@ -28,20 +30,22 @@ import {
   isElement,
   relativeUrlToAbsolute,
   removeDuplicateOrEmpty,
-} from './send_images';
+} = require('./send_images');
 
 describe(`sendImages`, () => {
   beforeEach(setup);
-
-  describe(`extractImagesFromTags`, () => {
-    // TODO
-  });
 
   describe(`extractImageFromElement`, () => {
     const imageUrl = 'http://example.com/img.jpg';
 
     it(`should return img src`, () => {
       const element = mockPartial<HTMLImageElement>({ tagName: 'img', src: imageUrl });
+      expect(extractImageFromElement(element)).toBe(imageUrl);
+    });
+
+
+    it(`should remove img src hash`, () => {
+      const element = mockPartial<HTMLImageElement>({ tagName: 'img', src: imageUrl + '#abc' });
       expect(extractImageFromElement(element)).toBe(imageUrl);
     });
 
@@ -56,29 +60,89 @@ describe(`sendImages`, () => {
       const element = mockRecursivePartial<HTMLDivElement>({ tagName: 'div', style: { backgroundImage } });
       expect(extractImageFromElement(element)).toBe(imageUrl);
     });
+
+    it(`should return empty string for other elements`, () => {
+      jest.spyOn(window, 'getComputedStyle').mockImplementationOnce(() => ({}));
+      const element = mockPartial<HTMLButtonElement>({ tagName: 'button' });
+      expect(extractImageFromElement(element)).toBe('');
+    });
   });
 
   describe(`extractImagesFromStyles`, () => {
-    // TODO
+    it(`should return empty array for empty stylesheets`, () => {
+      expect(extractImagesFromStyles([])).toEqual([]);
+    });
+
+    it(`should return background images`, () => {
+      const imageA = 'http://example.com/a.jpg';
+      const imageB = 'http://example.com/b.jpg';
+      const imageC = 'http://example.com/c.jpg';
+      const stylesheets = [{
+        cssRules: [
+          { style: { backgroundImage: imageA } },
+          { style: { backgroundImage: imageB } },
+          { style: { backgroundImage: imageC } },
+        ]
+      }];
+      expect(extractImagesFromStyles(stylesheets)).toEqual([imageA, imageB, imageC]);
+    });
   });
 
   describe(`extractURLFromStyle`, () => {
-    // TODO
-  });
+    it(`should remove url(...)`, () => {
+      expect(extractURLFromStyle(`url(a)`)).toBe('a');
+    });
 
-  describe(`isImageURL`, () => {
-    // TODO
-  });
+    it(`should remove url("...")`, () => {
+      expect(extractURLFromStyle(`url("a")`)).toBe('a');
+    });
 
-  describe(`isElement`, () => {
-    // TODO
+    it(`should remove url('...')`, () => {
+      expect(extractURLFromStyle(`url('a')`)).toBe('a');
+    });
   });
 
   describe(`relativeUrlToAbsolute`, () => {
-    // TODO
+    it(`should convert relative URL to absolute`, () => {
+      expect(relativeUrlToAbsolute('/a')).toBe(window.location.origin + '/a');
+    });
+
+    it(`should preserve non-relative URL`, () => {
+      expect(relativeUrlToAbsolute('a')).toBe('a');
+    });
   });
 
   describe(`removeDuplicateOrEmpty`, () => {
-    // TODO
+    it(`should remove duplicate`, () => {
+      expect(removeDuplicateOrEmpty([
+        'a',
+        'b',
+        'c',
+        'b',
+        'c',
+        'd',
+      ])).toEqual([
+        'a',
+        'b',
+        'c',
+        'd',
+      ]);
+    });
+
+    it(`should remove empty`, () => {
+      expect(removeDuplicateOrEmpty([
+        '',
+        'a',
+        'b',
+        'c',
+        'd',
+        '',
+      ])).toEqual([
+        'a',
+        'b',
+        'c',
+        'd',
+      ]);
+    });
   });
 });

@@ -2,7 +2,7 @@
   "name": "Image Downloader",
   "description": "Browse and download images on a web page.",
   "version": "3.0.0",
-  "minimum_chrome_version": "31",
+  "minimum_chrome_version": "61",
   "manifest_version": 2,
   "permissions": [
     "activeTab",
