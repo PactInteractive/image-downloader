@@ -4,12 +4,14 @@
   "version": "3.0.0",
   "license": "MIT",
   "scripts": {
+    "start": "tsc --watch",
     "build": "tsc",
     "test": "jest",
     "test.watch": "jest --watch"
   },
   "dependencies": {
     "@types/chrome": "0.0.64",
+    "npm": "6.0.0",
     "tslib": "1.9.0"
   },
   "devDependencies": {
@@ -25,16 +27,16 @@
       "!coverage/**",
       "!lib/**",
       "!node_modules/**",
-      "!**/*.config.(ts|js)",
+      "!**/*.config.ts",
       "!**/*.d.ts",
-      "!**/*.test.(ts|js)",
-      "**/*.(ts|js)"
+      "!**/*.test.ts",
+      "**/*.ts"
     ],
     "moduleFileExtensions": [
       "ts",
       "js"
     ],
-    "testRegex": "\\.test\\.(ts|js)$",
+    "testRegex": "\\.test\\.ts$",
     "transform": {
       ".ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     }

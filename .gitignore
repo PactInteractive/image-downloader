@@ -2,3 +2,4 @@ coverage
 node_modules
 *.js.map
 scripts/defaults.js
+scripts/send_images.js
