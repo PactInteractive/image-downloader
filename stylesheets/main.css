@@ -5,8 +5,8 @@
   --neutral: #ccc;
   --neutralLight: #fff;
 
-  --accent: #3498db;
-  --accentDark: #2791d9;
+  --primary: #3498db;
+  --primaryDark: #2791d9;
 
   --success: #25a75c;
   --successLight: #28b463;
@@ -40,8 +40,8 @@ hr {
 }
 
 /* labels */
-.accent {
-  color: var(--accent);
+.primary {
+  color: var(--primary);
 }
 .success {
   color: var(--success);
@@ -59,13 +59,13 @@ hr {
 /* links */
 a:link,
 a:visited {
-  color: var(--accent);
+  color: var(--primary);
   text-decoration: none;
 }
 
 a:hover,
 a:active {
-  color: var(--accentDark);
+  color: var(--primaryDark);
 }
 
 /* images */
@@ -99,14 +99,14 @@ input[type='button']:disabled {
   opacity: 0.6;
 }
 
-/* accent */
-input[type='button'].accent {
-  background: var(--accent);
+/* primary */
+input[type='button'].primary {
+  background: var(--primary);
 }
-input[type='button'].accent:hover,
-input[type='button'].accent:focus,
-input[type='button'].accent:active {
-  background: var(--accent);
+input[type='button'].primary:hover,
+input[type='button'].primary:focus,
+input[type='button'].primary:active {
+  background: var(--primary);
 }
 
 /* success */

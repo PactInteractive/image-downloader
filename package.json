@@ -4,21 +4,22 @@
   "version": "3.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "tsc --watch",
-    "build": "tsc",
+    "start": "cmless start",
+    "build": "cmless build",
     "test": "jest",
     "test.watch": "jest --watch"
   },
   "dependencies": {
-    "@types/chrome": "0.0.64",
-    "npm": "6.0.0",
+    "@types/chrome": "0.0.65",
+    "preact": "8.2.9",
     "tslib": "1.9.0"
   },
   "devDependencies": {
     "@types/jest": "22.2.3",
+    "cmless": "0.5.5",
     "jest": "22.4.3",
     "sneer": "0.2.0",
-    "ts-jest": "22.4.4",
+    "ts-jest": "22.4.5",
     "typescript": "2.8.3"
   },
   "jest": {
@@ -40,5 +41,12 @@
     "transform": {
       ".ts": "<rootDir>/node_modules/ts-jest/preprocessor.js"
     }
+  },
+  "cmless": {
+    "input": "src",
+    "template": "${input}/options.html",
+    "script": "${input}/options.tsx",
+    "style": "${input}/style.ts",
+    "serviceWorker": false
   }
 }

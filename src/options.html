@@ -1,0 +1,21 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Image Downloader | Options</title>
+
+    <meta content="text/html; charset=utf-8" http-equiv="content-type">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1" name="viewport">
+    <meta content="True" name="HandheldFriendly">
+    <meta content="320" name="MobileOptimized">
+    <meta content="on" http-equiv="cleartype">
+
+    <base href="/">
+
+    <% const fonts = htmlWebpackPlugin.options.style.fonts; %>
+    <link href="https://fonts.googleapis.com/css?family=<%= Object.values(fonts).map((font) => font.split(/\s+/).join('+')).join('|') %>" rel="stylesheet">
+  </head>
+
+  <body>
+  </body>
+</html>

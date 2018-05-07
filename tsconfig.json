@@ -1,27 +1,9 @@
 {
-  "compileOnSave": false,
-  "compilerOptions": {
-    "experimentalDecorators": true,
-    "noImplicitAny": true,
-    "noImplicitReturns": true,
-    "noUnusedLocals": true,
-    "sourceMap": true,
-    "strict": true,
-    "suppressImplicitAnyIndexErrors": false,
-
-    "baseUrl": "scripts",
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "module": "umd",
-    "target": "es6",
-
-    "jsx": "react",
-    "jsxFactory": "h"
-  },
+  "extends": "./node_modules/cmless/tsconfig.json",
   "exclude": [
-    "scripts/**/*.test.ts"
+    "node_modules"
   ],
   "include": [
-    "scripts/**/*.ts"
+    "src"
   ]
 }
