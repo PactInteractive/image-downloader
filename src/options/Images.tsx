@@ -1,50 +1,78 @@
-import { h } from '../dom';
-import { Fieldset } from './Fieldset';
-import { Checkbox } from './Checkbox';
+import './Images.css';
 
-export const Images = () => (
+import { h } from '../dom';
+import { css } from '../style';
+import { Checkbox } from './Checkbox';
+import { Color } from './Color';
+import { Fieldset } from './Fieldset';
+import { Number } from './Number';
+
+export class ImagesOptions {
+  show_image_url = true;
+  show_open_image_button = true;
+  show_download_image_button = true;
+  columns = 2;
+  image_min_width = 50;
+  image_max_width = 200;
+  image_border_width = 3;
+  image_border_color = css.primary;
+}
+
+export const Images = (props: { options: ImagesOptions }) => (
   <Fieldset legend="Images">
-    <Checkbox title="Displays the URL above each image">
+    <Checkbox
+      checked={props.options.show_image_url}
+      title="Displays the URL above each image"
+    >
       Show the URL textbox
     </Checkbox>
 
-    <br/>
+    <br />
 
-    <Checkbox title="Displays a button next to each image to open it in a new tab">
+    <Checkbox
+      checked={props.options.show_open_image_button}
+      title="Displays a button next to each image to open it in a new tab"
+    >
       Show the <b>open</b> button
     </Checkbox>
 
-    <br/>
+    <br />
 
-    <Checkbox title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option.">
+    <Checkbox
+      checked={props.options.show_download_image_button}
+      title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
+    >
       Show the <b>download</b> button
     </Checkbox>
 
-    <table>
-      <tr title="The number of columns">
-        <td><label for="columns_numberbox">Columns:</label></td>
-        <td><input type="number" id="columns_numberbox" min="1" max="10" required /></td>
-      </tr>
+    <div class="images__options">
+      <label title="The number of columns">
+        <span>Columns:</span>
+        <Number value={props.options.columns} min="1" max="10" required />
+      </label>
 
-      <tr title="Setting the minimum width can be useful for images that are too small to make out">
-        <td><label for="image_min_width_numberbox">Minimum Display Width:</label></td>
-        <td><input type="number" id="image_min_width_numberbox" min="0" max="720" required />px</td>
-      </tr>
+      <label title="Setting the minimum width can be useful for images that are too small to make out">
+        <span>Minimum Display Width:</span>
+        <Number value={props.options.image_min_width} min="0" max="720" required />
+        <span>px</span>
+      </label>
 
-      <tr title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup">
-        <td><label for="image_max_width_numberbox">Maximum Display Width:</label></td>
-        <td><input type="number" id="image_max_width_numberbox" min="30" max="720" required />px</td>
-      </tr>
+      <label title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup">
+        <span>Maximum Display Width:</span>
+        <Number value={props.options.image_max_width} min="30" max="720" required />
+        <span>px</span>
+      </label>
 
-      <tr>
-        <td><label for="image_border_width_numberbox">Border Width:</label></td>
-        <td><input type="number" id="image_border_width_numberbox" min="1" max="10" required />px</td>
-      </tr>
+      <label>
+        <span>Border Width:</span>
+        <Number value={props.options.image_border_width} min="1" max="10" required />
+        <span>px</span>
+      </label>
 
-      <tr>
-        <td><label for="image_border_color_picker">Border Color:</label></td>
-        <td><input type="color" id="image_border_color_picker" /></td>
-      </tr>
-    </table>
+      <label>
+        <span>Border Color:</span>
+        <Color value={props.options.image_border_color} />
+      </label>
+    </div>
   </Fieldset>
 );

@@ -1,0 +1,12 @@
+.images__options {
+  display: table;
+
+  & > label {
+    display: table-row;
+
+    & > * {
+      display: table-cell;
+      margin: 0.15rem 0.3rem;
+    }
+  }
+}

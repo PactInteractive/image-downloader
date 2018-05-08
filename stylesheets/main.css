@@ -82,6 +82,7 @@ img:hover {
 input[type='text'],
 input[type='button'],
 input[type='number'],
+input[type='color'],
 select {
   box-sizing: border-box;
 }

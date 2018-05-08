@@ -1,8 +1,9 @@
 import { h } from '../dom';
 
-export const Checkbox = (props: Props<HTMLInputElement>) => (
-  <label title={props.title}>
-    <input type="checkbox" />
-    <span>{props.children}</span>
+// TODO: Implement custom style
+export const Checkbox = ({ title, children, ...props }: Props<any>) => (
+  <label title={title}>
+    <input type="checkbox" {...props} />
+    <span>{children}</span>
   </label>
 );

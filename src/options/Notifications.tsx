@@ -1,5 +1,5 @@
 import { h } from '../dom';
 
-export const Notifications = (props: Props) => (
+export const Notifications = (props: {}) => (
   <div id="notifications"></div>
 );
