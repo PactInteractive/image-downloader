@@ -23,3 +23,14 @@ input[type="button"] {
   margin: 6px 2px 0;
   color: #fff;
 }
+
+.fade-enter,
+.fade-leave {
+  transition: opacity var(--transitionDuration) var(--transitionEasing);
+}
+
+.fade-enter        { opacity: 0; }
+.fade-enter-active { opacity: 1; }
+
+.fade-leave        { opacity: 1; }
+.fade-leave-active { opacity: 0; }

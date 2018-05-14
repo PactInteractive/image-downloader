@@ -29,6 +29,10 @@ hr {
   margin: 4px 0;
 }
 
+label {
+  cursor: pointer;
+}
+
 .left {
   float: left;
 }
