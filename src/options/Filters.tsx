@@ -2,11 +2,11 @@ import { h } from '../dom';
 import { Fieldset } from './Fieldset';
 import { Checkbox } from './Checkbox';
 
-export class FiltersOptions {
-  show_url_filter = true;
-  show_image_width_filter = true;
-  show_image_height_filter = true;
-  show_only_images_from_links = true;
+export interface FiltersOptions {
+  show_url_filter: boolean;
+  show_image_width_filter: boolean;
+  show_image_height_filter: boolean;
+  show_only_images_from_links: boolean;
 }
 
 export const Filters = (props: { options: FiltersOptions }) => (

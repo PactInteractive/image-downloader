@@ -1,21 +1,20 @@
 import './Images.css';
 
 import { h } from '../dom';
-import { css } from '../style';
 import { Checkbox } from './Checkbox';
 import { Color } from './Color';
 import { Fieldset } from './Fieldset';
 import { Number } from './Number';
 
-export class ImagesOptions {
-  show_image_url = true;
-  show_open_image_button = true;
-  show_download_image_button = true;
-  columns = 2;
-  image_min_width = 50;
-  image_max_width = 200;
-  image_border_width = 3;
-  image_border_color = css.primary;
+export interface ImagesOptions {
+  show_image_url: boolean;
+  show_open_image_button: boolean;
+  show_download_image_button: boolean;
+  columns: number;
+  image_min_width: number;
+  image_max_width: number;
+  image_border_width: number;
+  image_border_color: string;
 }
 
 export const Images = (props: { options: ImagesOptions }) => (

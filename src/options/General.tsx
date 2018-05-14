@@ -2,10 +2,10 @@ import { h } from '../dom';
 import { Fieldset } from './Fieldset';
 import { Checkbox } from './Checkbox';
 
-export class GeneralOptions {
-  show_download_confirmation = true;
-  show_download_notification = true;
-  show_file_renaming = false;
+export interface GeneralOptions {
+  show_download_confirmation: boolean;
+  show_download_notification: boolean;
+  show_file_renaming: boolean;
 }
 
 export const General = (props: { options: GeneralOptions }) => (
