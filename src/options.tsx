@@ -37,6 +37,22 @@ class State implements GeneralOptions, FiltersOptions, ImagesOptions {
     );
   }
 
+  // Filters
+  folder_name = '';
+  new_file_name = '';
+  filter_url = '';
+  filter_url_mode = 'normal';
+  filter_min_width = 0;
+  filter_min_width_enabled = false;
+  filter_max_width = 3000;
+  filter_max_width_enabled = false;
+  filter_min_height = 0;
+  filter_min_height_enabled = false;
+  filter_max_height = 3000;
+  filter_max_height_enabled = false;
+  only_images_from_links = false;
+
+  // Options
   // General
   show_download_confirmation = true;
   show_download_notification = true;
@@ -60,21 +76,20 @@ class State implements GeneralOptions, FiltersOptions, ImagesOptions {
 }
 
 class App extends Component<{}, State> {
-  state = State.load(localStorage, new State());
+  private readonly defaultState = new State();
+  readonly state = State.load(localStorage, this.defaultState);
 
   private saveOptions = () => {
     State.save(this.state as any, localStorage.setItem.bind(localStorage));
-    // TODO: addNotification('Options saved.', 'success');
+    this.addNotification('Options saved.', 'success');
   };
 
   private resetOptions = () => {
-    // TODO: Reset options
-    // var options = JSON.parse(ls.options);
-    // var values = {};
-    // for (var i = 0; i < options.length; i++) {
-    //   values[options[i]] = ls[options[i] + '_default'];
-    // }
-    // TODO: addNotification('All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.', 'warning');
+    this.setState(this.defaultState);
+    this.addNotification(
+      'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.',
+      'warning'
+    );
   };
 
   private clearData = () => {
@@ -83,13 +98,17 @@ class App extends Component<{}, State> {
     );
     if (result) {
       localStorage.clear();
-      // TODO: Just re-render the application instead of doing a hard reload
-      window.location.reload();
+      this.setState(this.defaultState);
+      this.addNotification('All date cleared.', 'success');
     }
   };
 
   private setOption: SetOption = (key, value) => {
     this.setState({ [key]: value } as any);
+  };
+
+  private addNotification = (message: string, type: 'success' | 'warning' | 'error') => {
+    // TODO: Implement
   };
 
   render(props: {}, state: State) {
