@@ -6,6 +6,8 @@
   "scripts": {
     "start": "cmless start",
     "build": "cmless build",
+    "tsc": "tsc scripts/defaults.ts scripts/send_images.ts",
+    "tsc.watch": "tsc scripts/defaults.ts scripts/send_images.ts --watch",
     "test": "jest",
     "test.watch": "jest --watch"
   },
