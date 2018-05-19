@@ -35,6 +35,7 @@
     show_download_confirmation: true,
     show_download_notification: true,
     show_file_renaming: false,
+    remove_special_characters: false,
     // Filters
     show_url_filter: true,
     show_image_width_filter: true,

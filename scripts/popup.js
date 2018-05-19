@@ -7,8 +7,13 @@
     // Register download folder name listener
     $('#folder_name_textbox')
       .val(ls.folder_name)
-      .on('change', function () {
-        ls.folder_name = $.trim(this.value);
+      .on('change', function() {
+        if (ls.remove_special_characters === 'true') {
+          ls.folder_name = $.trim(this.value.replace(/[^a-z0-9\s]/gi, ''));
+          this.value = ls.folder_name;
+        } else {
+          ls.folder_name = $.trim(this.value);
+        }
       });
 
     // Register file renaming listener
