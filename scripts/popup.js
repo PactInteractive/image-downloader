@@ -9,7 +9,7 @@
       .val(ls.folder_name)
       .on('change', function() {
         if (ls.remove_special_characters === 'true') {
-          ls.folder_name = $.trim(this.value.replace(/[^a-z0-9\s]/gi, ''));
+          ls.folder_name = $.trim(this.value.replace(/[^a-z0-9\s\/\\]/gi, ''));
           this.value = ls.folder_name;
         } else {
           ls.folder_name = $.trim(this.value);
