@@ -1,4 +1,4 @@
-(function (ls) {
+(function(ls) {
   /* globals $ */
   'use strict';
 
@@ -9,6 +9,7 @@
     $('#show_download_confirmation_checkbox').prop('checked', values.show_download_confirmation === 'true');
     $('#show_download_notification_checkbox').prop('checked', values.show_download_notification === 'true');
     $('#show_file_renaming_checkbox').prop('checked', values.show_file_renaming === 'true');
+    $('#remove_special_characters_checkbox').prop('checked', values.remove_special_characters === 'true');
 
     // Filters
     $('#show_url_filter_checkbox').prop('checked', values.show_url_filter === 'true');
@@ -40,6 +41,7 @@
     ls.show_download_confirmation = $('#show_download_confirmation_checkbox').prop('checked');
     ls.show_download_notification = $('#show_download_notification_checkbox').prop('checked');
     ls.show_file_renaming = $('#show_file_renaming_checkbox').prop('checked');
+    ls.remove_special_characters = $('#remove_special_characters_checkbox').prop('checked');
 
     // Filters
     ls.show_url_filter = $('#show_url_filter_checkbox').prop('checked');
@@ -87,18 +89,20 @@
     var animation_duration = parseInt(ls.animation_duration);
     var container =
       $('<div></div>')
-        .prependTo('#notifications')
-        .toggle(false)
-        .html(message)
-        .addClass(cssClass)
-        .fadeIn(animation_duration, function () {
-          setTimeout(function () {
-            container.fadeOut(animation_duration, function () { container.remove(); });
-          }, 10000);
-        });
+      .prependTo('#notifications')
+      .toggle(false)
+      .html(message)
+      .addClass(cssClass)
+      .fadeIn(animation_duration, function() {
+        setTimeout(function() {
+          container.fadeOut(animation_duration, function() {
+            container.remove();
+          });
+        }, 10000);
+      });
   }
 
-  $(function () {
+  $(function() {
     initializeControlValues();
     initializeControlEvents();
   });
