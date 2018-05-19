@@ -1,4 +1,4 @@
-(function(ls) {
+(function (ls) {
   /* globals $, jss, chrome */
   /* jshint multistr: true */
   'use strict';
@@ -7,27 +7,21 @@
     // Register download folder name listener
     $('#folder_name_textbox')
       .val(ls.folder_name)
-      .on('change', function() {
-        console.log(ls.remove_special_characters);
-        if (ls.remove_special_characters === 'true') {
-          ls.folder_name = $.trim(this.value.replace(/[^a-z0-9\s]/gi, ''));
-          this.value = ls.folder_name;
-        } else {
-          ls.folder_name = $.trim(this.value);
-        }
+      .on('change', function () {
+        ls.folder_name = $.trim(this.value);
       });
 
     // Register file renaming listener
     $('#file_renaming_textbox')
       .val(ls.new_file_name)
-      .on('change', function() {
+      .on('change', function () {
         ls.new_file_name = $.trim(this.value);
       });
 
     // Register filter URL listener
     $('#filter_textbox')
       .val(ls.filter_url)
-      .on('change', function() {
+      .on('change', function () {
         ls.filter_url = $.trim(this.value);
       });
 
@@ -37,7 +31,7 @@
 
     if (ls.show_url_filter === 'true') {
       $('#filter_textbox').on('keyup', filterImages);
-      $('#filter_url_mode_input').val(ls.filter_url_mode).on('change', function() {
+      $('#filter_url_mode_input').val(ls.filter_url_mode).on('change', function () {
         ls.filter_url_mode = this.value;
         filterImages();
       });
@@ -45,9 +39,9 @@
 
     if (ls.show_image_width_filter === 'true' || ls.show_image_height_filter === 'true') {
       // Image dimension filters
-      var serializeSliderValue = function(label, option) {
+      var serializeSliderValue = function (label, option) {
         return $.Link({
-          target: function(value) {
+          target: function (value) {
             $('#' + label).html(value + 'px');
             ls[option] = value;
             filterImages();
@@ -55,42 +49,37 @@
         });
       };
 
-      var toggleDimensionFilter = function(label, option, value) {
+      var toggleDimensionFilter = function (label, option, value) {
         if (value !== undefined) ls[option] = value;
         $('#' + label).toggleClass('light', ls[option] !== 'true');
         filterImages();
       };
 
-      var initializeFilter = function(dimension) {
+      var initializeFilter = function (dimension) {
         $('#image_' + dimension + '_filter_slider').noUiSlider({
           behaviour: 'extend-tap',
           connect: true,
-          range: {
-            min: parseInt(ls['filter_min_' + dimension + '_default']),
-            max: parseInt(ls['filter_max_' + dimension + '_default'])
-          },
+          range: { min: parseInt(ls['filter_min_' + dimension + '_default']), max: parseInt(ls['filter_max_' + dimension + '_default']) },
           step: 10,
           start: [ls['filter_min_' + dimension], ls['filter_max_' + dimension]],
           serialization: {
             lower: [serializeSliderValue('image_' + dimension + '_filter_min', 'filter_min_' + dimension)],
             upper: [serializeSliderValue('image_' + dimension + '_filter_max', 'filter_max_' + dimension)],
-            format: {
-              decimals: 0
-            }
+            format: { decimals: 0 }
           }
         });
 
         toggleDimensionFilter('image_' + dimension + '_filter_min', 'filter_min_' + dimension + '_enabled');
         $('#image_' + dimension + '_filter_min_checkbox')
           .prop('checked', ls['filter_min_' + dimension + '_enabled'] === 'true')
-          .on('change', function() {
+          .on('change', function () {
             toggleDimensionFilter('image_' + dimension + '_filter_min', 'filter_min_' + dimension + '_enabled', this.checked);
           });
 
         toggleDimensionFilter('image_' + dimension + '_filter_max', 'filter_max_' + dimension + '_enabled');
         $('#image_' + dimension + '_filter_max_checkbox')
           .prop('checked', ls['filter_max_' + dimension + '_enabled'] === 'true')
-          .on('change', function() {
+          .on('change', function () {
             toggleDimensionFilter('image_' + dimension + '_filter_max', 'filter_max_' + dimension + '_enabled', this.checked);
           });
       };
@@ -110,20 +99,20 @@
     if (ls.show_only_images_from_links === 'true') {
       $('#only_images_from_links_checkbox')
         .prop('checked', ls.only_images_from_links === 'true')
-        .on('change', function() {
+        .on('change', function () {
           ls.only_images_from_links = this.checked;
           filterImages();
         });
     }
 
     $('#images_table')
-      .on('change', '#toggle_all_checkbox', function() {
+      .on('change', '#toggle_all_checkbox', function () {
         $('#download_button').prop('disabled', !this.checked);
         for (var i = 0; i < visibleImages.length; i++) {
           $('#image' + i).toggleClass('checked', this.checked);
         }
       })
-      .on('click', 'img', function() {
+      .on('click', 'img', function () {
         $(this).toggleClass('checked', !$(this).hasClass('checked'));
 
         var allAreChecked = true;
@@ -131,7 +120,8 @@
         for (var i = 0; i < visibleImages.length; i++) {
           if ($('#image' + i).hasClass('checked')) {
             allAreUnchecked = false;
-          } else {
+          }
+          else {
             allAreChecked = false;
           }
           // Exit the loop early
@@ -144,35 +134,25 @@
         toggle_all_checkbox.prop('indeterminate', !(allAreChecked || allAreUnchecked));
         if (allAreChecked) {
           toggle_all_checkbox.prop('checked', true);
-        } else if (allAreUnchecked) {
+        }
+        else if (allAreUnchecked) {
           toggle_all_checkbox.prop('checked', false);
         }
       })
-      .on('click', '.image_url_textbox', function() {
+      .on('click', '.image_url_textbox', function () {
         this.select();
       })
-      .on('click', '.download_image_button', function() {
-        chrome.downloads.download({
-          url: $(this).data('url')
-        });
+      .on('click', '.download_image_button', function () {
+        chrome.downloads.download({ url: $(this).data('url') });
       })
-      .on('click', '.open_image_button', function() {
-        chrome.tabs.create({
-          url: $(this).data('url'),
-          active: false
-        });
+      .on('click', '.open_image_button', function () {
+        chrome.tabs.create({ url: $(this).data('url'), active: false });
       });
 
     // Get images on the page
-    chrome.windows.getCurrent(function(currentWindow) {
-      chrome.tabs.query({
-        active: true,
-        windowId: currentWindow.id
-      }, function(activeTabs) {
-        chrome.tabs.executeScript(activeTabs[0].id, {
-          file: '/scripts/send_images.js',
-          allFrames: true
-        });
+    chrome.windows.getCurrent(function (currentWindow) {
+      chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
+        chrome.tabs.executeScript(activeTabs[0].id, { file: '/scripts/send_images.js', allFrames: true });
       });
     });
   }
@@ -187,16 +167,16 @@
       var extension = regex.exec(item.filename)[1];
       if (parseInt(ls.image_count, 10) === 1) {
         newFilename += ls.new_file_name + '.' + extension;
-      } else {
+      }
+      else {
         newFilename += ls.new_file_name + ls.image_number + '.' + extension;
         ls.image_number++;
       }
-    } else {
+    }
+    else {
       newFilename += item.filename;
     }
-    suggest({
-      filename: newFilename
-    });
+    suggest({ filename: newFilename });
   }
 
   function initializeStyles() {
@@ -226,7 +206,7 @@
     });
 
     // Periodically set the body padding to offset the height of the fixed position filters
-    setInterval(function() {
+    setInterval(function () {
       $('body').css('padding-top', $('#filters_container').height());
     }, 200);
   }
@@ -237,7 +217,7 @@
 
   // Add images to `allImages` and trigger filtration
   // `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times
-  chrome.runtime.onMessage.addListener(function(result) {
+  chrome.runtime.onMessage.addListener(function (result) {
     $.extend(linkedImages, result.linkedImages);
     for (var i = 0; i < result.images.length; i++) {
       if (allImages.indexOf(result.images[i]) === -1) {
@@ -248,10 +228,9 @@
   });
 
   var timeoutID;
-
   function filterImages() {
     clearTimeout(timeoutID); // Cancel pending filtration
-    timeoutID = setTimeout(function() {
+    timeoutID = setTimeout(function () {
       var images_cache = $('#images_cache');
       if (ls.show_image_width_filter === 'true' || ls.show_image_height_filter === 'true') {
         var cached_images = images_cache.children().length;
@@ -272,7 +251,7 @@
           switch (ls.filter_url_mode) {
             case 'normal':
               var terms = filterValue.split(' ');
-              visibleImages = visibleImages.filter(function(url) {
+              visibleImages = visibleImages.filter(function (url) {
                 for (var i = 0; i < terms.length; i++) {
                   var term = terms[i];
                   if (term.length !== 0) {
@@ -296,10 +275,11 @@
               filterValue = filterValue.replace(/([.^$[\]\\(){}|-])/g, '\\$1').replace(/([?*+])/, '.$1');
               /* fall through */
             case 'regex':
-              visibleImages = visibleImages.filter(function(url) {
+              visibleImages = visibleImages.filter(function (url) {
                 try {
                   return url.match(filterValue);
-                } catch (e) {
+                }
+                catch (e) {
                   return false;
                 }
               });
@@ -309,22 +289,22 @@
       }
 
       if (ls.show_only_images_from_links === 'true' && ls.only_images_from_links === 'true') {
-        visibleImages = visibleImages.filter(function(url) {
+        visibleImages = visibleImages.filter(function (url) {
           return linkedImages[url];
         });
       }
 
       if (ls.show_image_width_filter === 'true' || ls.show_image_height_filter === 'true') {
-        visibleImages = visibleImages.filter(function(url) {
+        visibleImages = visibleImages.filter(function (url) {
           var image = images_cache.children('img[src="' + encodeURI(url) + '"]')[0];
           return (ls.show_image_width_filter !== 'true' ||
-              (ls.filter_min_width_enabled !== 'true' || ls.filter_min_width <= image.naturalWidth) &&
-              (ls.filter_max_width_enabled !== 'true' || image.naturalWidth <= ls.filter_max_width)
-            ) &&
-            (ls.show_image_height_filter !== 'true' ||
-              (ls.filter_min_height_enabled !== 'true' || ls.filter_min_height <= image.naturalHeight) &&
-              (ls.filter_max_height_enabled !== 'true' || image.naturalHeight <= ls.filter_max_height)
-            );
+                   (ls.filter_min_width_enabled !== 'true' || ls.filter_min_width <= image.naturalWidth) &&
+                   (ls.filter_max_width_enabled !== 'true' || image.naturalWidth <= ls.filter_max_width)
+                 ) &&
+                 (ls.show_image_height_filter !== 'true' ||
+                   (ls.filter_min_height_enabled !== 'true' || ls.filter_min_height <= image.naturalHeight) &&
+                   (ls.filter_max_height_enabled !== 'true' || image.naturalHeight <= ls.filter_max_height)
+                 );
         });
       }
 
@@ -395,7 +375,8 @@
   function downloadImages() {
     if (ls.show_download_confirmation === 'true') {
       showDownloadConfirmation(startDownload);
-    } else {
+    }
+    else {
       startDownload();
     }
 
@@ -409,9 +390,7 @@
       ls.image_count = checkedImages.length;
       ls.image_number = 1;
       checkedImages.forEach(function(checkedImage) {
-        chrome.downloads.download({
-          url: checkedImage
-        });
+        chrome.downloads.download({ url: checkedImage });
       });
 
       flashDownloadingNotification(ls.image_count);
@@ -434,7 +413,7 @@
       )
       .appendTo('#filters_container');
 
-    $('#yes_button, #no_button').on('click', function() {
+    $('#yes_button, #no_button').on('click', function () {
       ls.show_download_confirmation = !$('#dont_show_again_checkbox').prop('checked');
       notification_container.remove();
     });
@@ -445,34 +424,30 @@
     if (ls.show_download_notification !== 'true') return;
 
     var downloading_notification = $('<div class="success">Downloading ' + imageCount + ' image' + (imageCount > 1 ? 's' : '') + '...</div>').appendTo('#filters_container');
-    flash(downloading_notification, 3.5, 0, function() {
-      downloading_notification.remove();
-    });
+    flash(downloading_notification, 3.5, 0, function () { downloading_notification.remove(); });
   }
 
   function flash(element, flashes, interval, callback) {
     if (!interval) interval = parseInt(ls.animation_duration);
 
-    var fade = function(fadeIn) {
+    var fade = function (fadeIn) {
       if (flashes > 0) {
         flashes -= 0.5;
         if (fadeIn) {
-          element.fadeIn(interval, function() {
-            fade(false);
-          });
-        } else {
-          element.fadeOut(interval, function() {
-            fade(true);
-          });
+          element.fadeIn(interval, function () { fade(false); });
         }
-      } else if (callback) {
+        else {
+          element.fadeOut(interval, function () { fade(true); });
+        }
+      }
+      else if (callback) {
         callback(element);
       }
     };
     fade(false);
   }
 
-  $(function() {
+  $(function () {
     initializePopup();
     initializeStyles();
   });
