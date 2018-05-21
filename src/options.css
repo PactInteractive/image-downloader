@@ -25,12 +25,12 @@ input[type="button"] {
 }
 
 .fade-enter,
-.fade-leave {
+.fade-exit {
   transition: opacity var(--transitionDuration) var(--transitionEasing);
 }
 
 .fade-enter        { opacity: 0; }
 .fade-enter-active { opacity: 1; }
 
-.fade-leave        { opacity: 1; }
-.fade-leave-active { opacity: 0; }
+.fade-exit        { opacity: 1; }
+.fade-exit-active { opacity: 0; }

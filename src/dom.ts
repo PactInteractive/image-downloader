@@ -1,1 +1,2 @@
-export { Component, h, render } from 'preact';
+export { Component } from 'react';
+export { render } from 'react-dom';

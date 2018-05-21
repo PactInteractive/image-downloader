@@ -1,4 +1,5 @@
-import { Component, h } from '../dom';
+import * as React from 'react';
+import { Component } from '../dom';
 import { Fieldset } from './Fieldset';
 
 export class About extends Component<{}, {}> {

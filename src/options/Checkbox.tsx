@@ -1,9 +1,15 @@
-import { h } from '../dom';
+import * as React from 'react';
+import { Component } from '../dom';
 
 // TODO: Implement custom style
-export const Checkbox = ({ title, children, ...props }: Props<any>) => (
-  <label title={title}>
-    <input type="checkbox" {...props} />
-    <span>{children}</span>
-  </label>
-);
+export class Checkbox extends Component<Props<HTMLInputElement>> {
+  render() {
+    const { title, children, ...props } = this.props;
+    return (
+      <label title={title}>
+        <input type="checkbox" {...props} />
+        <span>{children}</span>
+      </label>
+    );
+  }
+}

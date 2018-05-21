@@ -1,5 +1,9 @@
-import { h } from '../dom';
+import * as React from 'react';
+import { Component } from '../dom';
 
-export const Color = (props: Props<any>) => (
-  <input type="color" {...props} />
-);
+export class Color extends Component<Props<HTMLInputElement>> {
+  render() {
+    const { props } = this;
+    return <input type="color" {...props} />;
+  }
+}

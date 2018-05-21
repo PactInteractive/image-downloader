@@ -3,7 +3,8 @@ import '../stylesheets/main.css';
 import './options.css';
 
 // Application
-import { Component, h, render } from './dom';
+import * as React from 'react';
+import { Component, render } from './dom';
 import { About } from './options/About';
 import { Actions } from './options/Actions';
 import { Filters, FiltersOptions } from './options/Filters';
@@ -34,6 +35,9 @@ class Options implements GeneralOptions, FiltersOptions, ImagesOptions {
             break;
           case 'number':
             (result as any)[key] = savedValue === undefined ? defaultValue : parseInt(savedValue, 10);
+            break;
+          case 'string':
+            (result as any)[key] = savedValue === undefined ? defaultValue : savedValue;
             break;
         }
         return result;
@@ -81,7 +85,7 @@ class Options implements GeneralOptions, FiltersOptions, ImagesOptions {
 }
 
 class App extends Component<{}, State> {
-  private readonly notificationDuration = 1000; // TODO: Make 10000
+  private readonly notificationDuration = 10000;
   private readonly defaultOptions = new Options();
 
   readonly state = {
@@ -89,7 +93,8 @@ class App extends Component<{}, State> {
     options: Options.load(localStorage, this.defaultOptions),
   };
 
-  render(props: {}, state: State) {
+  render() {
+    const { state } = this;
     return (
       <div>
         <h2>Image Downloader</h2>
@@ -135,8 +140,8 @@ class App extends Component<{}, State> {
     this.setState((state: State) => ({ ...state, options: { ...state.options, [key]: value } }));
   };
 
-  private addNotification = (notificationData: Pick<Notification, 'type' | 'message'>) => {
-    const notification: Notification = { ...notificationData, timestamp: Date.now() };
+  private addNotification = (notificationData: Notification) => {
+    const notification: Notification = notificationData;
 
     this.setState((state: State) => ({ ...state, notifications: [...state.notifications, notification] }));
 
@@ -149,4 +154,4 @@ class App extends Component<{}, State> {
   };
 }
 
-render(<App />, document.body);
+render(<App />, document.querySelector('main'));

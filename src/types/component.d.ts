@@ -1,14 +1,10 @@
-import { VNode } from 'preact';
+// Importing a library makes this file a module, which allows us to declare global types:
+// https://stackoverflow.com/questions/26955140/how-to-include-ambient-module-declarations-inside-another-ambient-module
+import * as React from 'react';
 
 declare global {
-  export type Props<ElementType = HTMLElement> = CustomProps<Partial<ElementType>>;
-}
-
-type CustomProps<P extends {}> = P & Partial<ComponentProps<P>>;
-
-interface ComponentProps<P extends {}> {
-  class: string;
-  children: JSX.Element[];
-  key: string | number | any;
-  ref(el: any): void;
+  export type Props<
+    ElementType = HTMLDivElement,
+    ReactElementType = React.AllHTMLAttributes<ElementType>
+  > = React.DetailedHTMLProps<ReactElementType, ElementType>;
 }

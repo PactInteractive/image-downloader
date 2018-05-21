@@ -1,5 +1,9 @@
 {
   "extends": "./node_modules/cmless/tsconfig.json",
+  "compilerOptions": {
+    "jsx": "react",
+    "jsxFactory": "React.createElement"
+  },
   "exclude": [
     "node_modules"
   ],

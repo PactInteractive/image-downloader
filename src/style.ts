@@ -1,11 +1,11 @@
-export const transitionDuration = 0.4;
+export const transitionDuration = 400;
 
 export const fonts = {
   text: 'PT Sans',
 };
 
 export const css = {
-  transitionDuration: `${transitionDuration}s`,
+  transitionDuration: `${transitionDuration}ms`,
   transitionEasing: 'cubic-bezier(0.25, 1, 0.25, 1)',
   transitionElastic: 'cubic-bezier(0.5, 2, 0.5, 0.5)',
 

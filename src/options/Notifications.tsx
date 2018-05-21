@@ -1,30 +1,24 @@
-import { Component, h } from '../dom';
+import * as React from 'react';
+import { CSSTransition, TransitionGroup } from 'react-transition-group';
+import { Component } from '../dom';
+import { transitionDuration } from '../style';
 
 export interface Notification {
   type: 'success' | 'warning' | 'error';
   message: string;
-  timestamp: number;
 }
 
-export const Notifications = (props: { notifications: Notification[] }) => (
-  <div>
-    {props.notifications.map((notification) => <NotificationView notification={notification} />)}
-  </div>
-);
-
-// TODO: Implement `fade-leave` animation
-class NotificationView extends Component<{ notification: Notification }, {}> {
-  componentDidMount() {
-    if (!this.base) return;
-
-    const el = this.base;
-    el.classList.add('fade-enter');
-    setTimeout(() => {
-      el.classList.add('fade-enter-active');
-    }, 0);
-  }
-
-  render(props: { notification: Notification }, state: {}) {
-    return <div key={props.notification.timestamp} >{props.notification.message}</div>;
+export class Notifications extends Component<{ notifications: Notification[] }> {
+  render() {
+    const { props } = this;
+    return (
+      <TransitionGroup>
+        {props.notifications.map((notification, index) => (
+          <CSSTransition key={index} classNames="fade" timeout={transitionDuration}>
+            <div>{notification.message}</div>
+          </CSSTransition>
+        ))}
+      </TransitionGroup>
+    );
   }
 }

@@ -1,8 +1,14 @@
-import { h } from '../dom';
+import * as React from 'react';
+import { Component } from '../dom';
 
-export const Fieldset = (props: Props<HTMLFieldSetElement> & { legend: string }) => (
-  <fieldset>
-    <legend>{props.legend}</legend>
-    {props.children}
-  </fieldset>
-);
+export class Fieldset extends Component<Props & { legend: string }> {
+  render() {
+    const { props } = this;
+    return (
+      <fieldset>
+        <legend>{props.legend}</legend>
+        {props.children}
+      </fieldset>
+    );
+  }
+}
