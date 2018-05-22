@@ -1,49 +1,49 @@
-// Style
-import '../stylesheets/main.css';
-import './options.css';
-
-// Application
 import * as React from 'react';
-import { Component, render } from './dom';
-import { About } from './options/About';
-import { Actions } from './options/Actions';
-import { Filters, FiltersOptions } from './options/Filters';
-import { General, GeneralOptions } from './options/General';
-import { Images, ImagesOptions } from './options/Images';
-import { Notification, Notifications } from './options/Notifications';
-import { SetOption } from './options/SetOption';
-import { css } from './style';
+import { Component } from '../dom';
+import { css } from '../style';
+
+import { About } from './About';
+import { Actions } from './Actions';
+import { Filters, FiltersOptions } from './Filters';
+import { General, GeneralOptions } from './General';
+import { Images, ImagesOptions } from './Images';
+import { Notification, Notifications } from './Notifications';
+import { SetOption } from './SetOption';
 
 interface State {
   notifications: Notification[];
   options: Options;
 }
 
-class Options implements GeneralOptions, FiltersOptions, ImagesOptions {
+export class Options implements GeneralOptions, FiltersOptions, ImagesOptions {
   static save(values: Record<string, number | boolean>, saveValue: (key: string, value: string) => any): void {
     Object.keys(values).forEach((key) => saveValue(key, values[key].toString()));
   }
 
-  static load(savedValues: Record<string, string>, defaultValues: any): Options {
-    return Object.keys(defaultValues).reduce<Options>(
+  static load<T extends Record<string, any>>(savedValues: Record<string, string>, defaultValues: T): T {
+    return Object.keys(defaultValues).reduce<T>(
       (result, key) => {
-        const defaultValue = defaultValues[key];
         const savedValue = savedValues[key];
-        switch (typeof defaultValue) {
-          case 'boolean':
-            (result as any)[key] = savedValue === undefined ? defaultValue : savedValue === 'true';
-            break;
-          case 'number':
-            (result as any)[key] = savedValue === undefined ? defaultValue : parseInt(savedValue, 10);
-            break;
-          case 'string':
-            (result as any)[key] = savedValue === undefined ? defaultValue : savedValue;
-            break;
-        }
+        const defaultValue = defaultValues[key];
+        result[key] = savedValue === undefined
+          ? defaultValue
+          : Options.convertValueToType(savedValue, typeof defaultValue);
+
         return result;
       },
-      {} as any
+      {} as T
     );
+  }
+
+  static convertValueToType(value: any, type: string): any {
+    switch (type) {
+      case 'boolean':
+        return value === 'true';
+      case 'number':
+        return parseInt(value, 10);
+      case 'string':
+        return value;
+    }
   }
 
   // Values
@@ -84,11 +84,11 @@ class Options implements GeneralOptions, FiltersOptions, ImagesOptions {
   image_border_color = css.primary;
 }
 
-class App extends Component<{}, State> {
+export class App extends Component<{}, State> {
   private readonly notificationDuration = 10000;
   private readonly defaultOptions = new Options();
 
-  readonly state = {
+  readonly state: State = {
     notifications: [],
     options: Options.load(localStorage, this.defaultOptions),
   };
@@ -137,21 +137,18 @@ class App extends Component<{}, State> {
   };
 
   private setOption: SetOption = (key, value) => {
-    this.setState((state: State) => ({ ...state, options: { ...state.options, [key]: value } }));
+    this.setState((state: State) => ({ options: { ...state.options, [key]: value } }));
   };
 
   private addNotification = (notificationData: Notification) => {
     const notification: Notification = notificationData;
 
-    this.setState((state: State) => ({ ...state, notifications: [...state.notifications, notification] }));
+    this.setState((state: State) => ({ notifications: [...state.notifications, notification] }));
 
     setTimeout(() => {
       this.setState((state: State) => ({
-        ...state,
         notifications: state.notifications.filter((n) => n !== notification),
       }));
     }, this.notificationDuration);
   };
 }
-
-render(<App />, document.querySelector('main'));

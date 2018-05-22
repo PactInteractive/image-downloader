@@ -6,10 +6,12 @@
   "scripts": {
     "start": "cmless start",
     "build": "cmless build",
-    "tsc": "tsc scripts/defaults.ts scripts/send_images.ts",
-    "tsc.watch": "tsc scripts/defaults.ts scripts/send_images.ts --watch",
+    "tsc": "tsc scripts/defaults.ts scripts/send_images.ts --module umd",
+    "tsc.watch": "npm run tsc -- --watch",
     "test": "jest",
-    "test.watch": "jest --watch"
+    "test.watch": "jest --watch",
+    "e2e": "cypress run",
+    "e2e.watch": "cypress open"
   },
   "dependencies": {
     "@types/chrome": "0.0.65",
@@ -22,8 +24,10 @@
     "tslib": "1.9.0"
   },
   "devDependencies": {
+    "@cypress/webpack-preprocessor": "2.0.1",
     "@types/jest": "22.2.3",
     "cmless": "0.5.5",
+    "cypress": "2.1.0",
     "jest": "22.4.3",
     "sneer": "0.2.0",
     "ts-jest": "22.4.5",
@@ -51,8 +55,8 @@
   },
   "cmless": {
     "input": "src",
-    "template": "${input}/options.html",
-    "script": "${input}/options.tsx",
+    "template": "${input}/options/index.html",
+    "script": "${input}/options/index.tsx",
     "style": "${input}/style.ts",
     "serviceWorker": false
   }

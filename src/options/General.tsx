@@ -17,6 +17,7 @@ export class General extends Component<{ options: GeneralOptions, setOption: Set
     return (
       <Fieldset legend="General">
         <Checkbox
+          data-test="show_download_confirmation"
           checked={props.options.show_download_confirmation}
           onChange={(e: InputEvent) => props.setOption('show_download_confirmation', e.currentTarget.checked)}
           title="Requires confirmation when you press the Download button"
@@ -27,6 +28,7 @@ export class General extends Component<{ options: GeneralOptions, setOption: Set
         <br />
 
         <Checkbox
+          data-test="show_download_notification"
           checked={props.options.show_download_notification}
           onChange={(e: InputEvent) => props.setOption('show_download_notification', e.currentTarget.checked)}
           title="Flashes a message to let you know your download is starting"
@@ -37,6 +39,7 @@ export class General extends Component<{ options: GeneralOptions, setOption: Set
         <br />
 
         <Checkbox
+          data-test="show_file_renaming"
           checked={props.options.show_file_renaming}
           onChange={(e: InputEvent) => props.setOption('show_file_renaming', e.currentTarget.checked)}
           title="Lets you specify a new file name for downloaded files"

@@ -18,6 +18,7 @@ export class Filters extends Component<{ options: FiltersOptions, setOption: Set
     return (
       <Fieldset legend="Filters">
         <Checkbox
+          data-test="show_url_filter"
           checked={props.options.show_url_filter}
           onChange={(e: InputEvent) => props.setOption('show_url_filter', e.currentTarget.checked)}
           title="Enables filtering by image URL; supports wildcard and regex"
@@ -28,6 +29,7 @@ export class Filters extends Component<{ options: FiltersOptions, setOption: Set
         <br />
 
         <Checkbox
+          data-test="show_image_width_filter"
           checked={props.options.show_image_width_filter}
           onChange={(e: InputEvent) => props.setOption('show_image_width_filter', e.currentTarget.checked)}
           title="Enables filtering by image width"
@@ -38,6 +40,7 @@ export class Filters extends Component<{ options: FiltersOptions, setOption: Set
         <br />
 
         <Checkbox
+          data-test="show_image_height_filter"
           checked={props.options.show_image_height_filter}
           onChange={(e: InputEvent) => props.setOption('show_image_height_filter', e.currentTarget.checked)}
           title="Enables filtering by image height"
@@ -48,6 +51,7 @@ export class Filters extends Component<{ options: FiltersOptions, setOption: Set
         <br />
 
         <Checkbox
+          data-test="show_only_images_from_links"
           checked={props.options.show_only_images_from_links}
           onChange={(e: InputEvent) => props.setOption('show_only_images_from_links', e.currentTarget.checked)}
           title="Enables the option to only show images from direct links on the page; this can be useful on sites like Reddit"

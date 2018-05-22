@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Component } from '../dom';
+import { Component, Props } from '../dom';
 
 // TODO: Implement custom style
 export class Checkbox extends Component<Props<HTMLInputElement>> {

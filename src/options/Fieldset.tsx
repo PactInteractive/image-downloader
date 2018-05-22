@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Component } from '../dom';
+import { Component, Props } from '../dom';
 
 export class Fieldset extends Component<Props & { legend: string }> {
   render() {
