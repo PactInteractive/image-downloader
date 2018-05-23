@@ -1,3 +1,7 @@
+// Assets
+import './download.png';
+import './open.png';
+
 // Style
 import '../style.css';
 import './style.css';
@@ -6,6 +10,6 @@ import './style.css';
 import * as React from 'react';
 import { render } from '../dom';
 
-import { App } from './Options';
+import { App } from './Popup';
 
 render(<App />, document.querySelector('main'));

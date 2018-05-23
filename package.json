@@ -55,8 +55,8 @@
   },
   "cmless": {
     "input": "src",
-    "template": "${input}/options/index.html",
-    "script": "${input}/options/index.tsx",
+    "template": "${input}/popup/index.html",
+    "script": "${input}/popup/index.tsx",
     "style": "${input}/style.ts",
     "serviceWorker": false
   }
