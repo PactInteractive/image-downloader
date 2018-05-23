@@ -12,6 +12,7 @@ export class Actions extends Component<{ save: () => any, reset: () => any, clea
           className="primary"
           value="SAVE"
           title="Saves the current settings"
+          data-test="save"
           onClick={props.save}
         />
 
@@ -20,6 +21,7 @@ export class Actions extends Component<{ save: () => any, reset: () => any, clea
           className="warning"
           value="RESET"
           title="Resets all settings to their defaults; save afterwards to preserve the changes"
+          data-test="reset"
           onClick={props.reset}
         />
 
@@ -28,6 +30,7 @@ export class Actions extends Component<{ save: () => any, reset: () => any, clea
           className="danger right"
           value="CLEAR DATA"
           title="Clears all data this extension has stored on your machine"
+          data-test="clear"
           onClick={props.clear}
         />
       </div>
