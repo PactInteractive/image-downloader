@@ -26,7 +26,7 @@
   "devDependencies": {
     "@cypress/webpack-preprocessor": "2.0.1",
     "@types/jest": "22.2.3",
-    "cmless": "0.5.5",
+    "cmless": "0.6.0",
     "cypress": "2.1.0",
     "jest": "22.4.3",
     "sneer": "0.2.0",
@@ -58,6 +58,11 @@
     "template": "${input}/popup/index.html",
     "script": "${input}/popup/index.tsx",
     "style": "${input}/style.ts",
-    "serviceWorker": false
+    "serviceWorker": false,
+    "target": {
+      "browsers": [
+        "chrome >= 61"
+      ]
+    }
   }
 }
