@@ -6,6 +6,10 @@ interface State {}
 export class App extends Component<{}, State> {
   readonly state: State = {};
 
+  componentDidUpdate(prevProps: {}, prevState: State): void {
+    // TODO: Save relevant changes to local storage
+  }
+
   render() {
     // const { state } = this;
     return (
@@ -139,9 +143,9 @@ class FilterUrlModeInput extends Component<{}, {}> {
       value: 'wildcard',
       text: 'Wildcard',
       title: `You can also use these special symbols:
-  * → zero or more characters
-  ? → zero or one character
-  + → one or more characters
+  * → match zero or more characters
+  ? → match zero or one character
+  + → match one or more characters
       `,
     },
     {
@@ -154,16 +158,16 @@ class FilterUrlModeInput extends Component<{}, {}> {
   [a-zA-Z] → Any single character in the range a-z or A-Z
   ^ → Start of line
   $ → End of line
-  \A → Start of string
-  \z → End of string
+  \\A → Start of string
+  \\z → End of string
   . → Any single character
-  \s → Any whitespace character
-  \S → Any non-whitespace character
-  \d → Any digit
-  \D → Any non-digit
-  \w → Any word character (letter, number, underscore)
-  \W → Any non-word character
-  \b → Any word boundary character
+  \\s → Any whitespace character
+  \\S → Any non-whitespace character
+  \\d → Any digit
+  \\D → Any non-digit
+  \\w → Any word character (letter, number, underscore)
+  \\W → Any non-word character
+  \\b → Any word boundary character
   (...) → Capture everything enclosed
   (a|b) → a or b
   a? → Zero or one of a
