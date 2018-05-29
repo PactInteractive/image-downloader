@@ -221,17 +221,17 @@ class Image extends Component<{ imageUrl: string; options: Options }, {}> {
         />
 
         <div
-          className="open_image_button"
-          onClick={() => Services.openImage(imageUrl)}
+          className="openImageButton"
           title="Open in new tab"
+          onClick={() => Services.openImage(imageUrl)}
         >
           &nbsp;
         </div>
 
         <div
-          className="download_image_button"
-          onClick={() => Services.downloadImage(imageUrl)}
+          className="downloadImageButton"
           title="Download"
+          onClick={() => Services.downloadImage(imageUrl)}
         >
           &nbsp;
         </div>

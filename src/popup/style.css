@@ -1,13 +1,13 @@
 body {
   margin: 0;
   padding: 0 2px 0 0; /* compensate for browser defaults */
-  min-width: 200px;
-  min-height: 150px;
+  min-width: 20rem;
+  min-height: 15rem;
 }
 
 .filters {
   position: sticky;
-  top: 0px;
+  top: 0;
   width: 100%;
   padding: 2px 2px 2px 0; /* compensate for browser defaults */
   background: var(--neutralLighter);
@@ -43,7 +43,7 @@ body {
 }
 
 .images {
-  margin-top: 2px;
+  margin-top: 0.2rem;
 
   & img {
     cursor: pointer;
@@ -53,6 +53,7 @@ body {
 .image {
   grid-template-rows: auto 1fr;
   grid-template-columns: 1fr auto auto;
+  padding-bottom: 1rem;
 
   & > img {
     grid-column: 1 / -1;
@@ -75,8 +76,8 @@ body {
   display: none;
 }
 
-.open_image_button,
-.download_image_button {
+.openImageButton,
+.downloadImageButton {
   width: 24px;
   height: 24px;
   cursor: pointer;
@@ -86,10 +87,10 @@ body {
   background-position: center;
 }
 
-.open_image_button {
+.openImageButton {
   background-image: url("/open.png");
 }
 
-.download_image_button {
+.downloadImageButton {
   background-image: url("/download.png");
 }
