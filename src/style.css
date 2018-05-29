@@ -75,74 +75,56 @@ a:active {
   color: var(--primaryDark);
 }
 
-/* images */
-img {
-  box-sizing: border-box;
-  transition: border-color 0.15s;
-}
-
-img:hover {
-  border-color: var(--neutral);
-}
-
 /* inputs */
-input[type='text'],
-input[type='button'],
-input[type='number'],
-input[type='color'],
-select {
-  box-sizing: border-box;
-}
-
-input[type='button'] {
+input[type="button"] {
   min-width: 50px;
   cursor: pointer;
-  color: var(--neutralLight);
+  color: var(--neutralLighter);
   border: 0;
   padding: 3px 10px;
   transition: background 0.15s;
 }
-input[type='button']:disabled {
+input[type="button"]:disabled {
   cursor: not-allowed;
   opacity: 0.6;
 }
 
 /* primary */
-input[type='button'].primary {
+input[type="button"].primary {
   background: var(--primary);
 }
-input[type='button'].primary:hover,
-input[type='button'].primary:focus,
-input[type='button'].primary:active {
+input[type="button"].primary:hover,
+input[type="button"].primary:focus,
+input[type="button"].primary:active {
   background: var(--primary);
 }
 
 /* success */
-input[type='button'].success {
+input[type="button"].success {
   background: var(--successLight);
 }
-input[type='button'].success:hover,
-input[type='button'].success:focus,
-input[type='button'].success:active {
+input[type="button"].success:hover,
+input[type="button"].success:focus,
+input[type="button"].success:active {
   background: var(--success);
 }
 
 /* warning */
-input[type='button'].warning {
+input[type="button"].warning {
   background: var(--warningLight);
 }
-input[type='button'].warning:hover,
-input[type='button'].warning:focus,
-input[type='button'].warning:active {
+input[type="button"].warning:hover,
+input[type="button"].warning:focus,
+input[type="button"].warning:active {
   background: var(--warning);
 }
 
 /* danger */
-input[type='button'].danger {
+input[type="button"].danger {
   background: var(--dangerLight);
 }
-input[type='button'].danger:hover,
-input[type='button'].danger:focus,
-input[type='button'].danger:active {
+input[type="button"].danger:hover,
+input[type="button"].danger:focus,
+input[type="button"].danger:active {
   background: var(--danger);
 }

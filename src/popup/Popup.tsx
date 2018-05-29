@@ -16,7 +16,7 @@ export class App extends Component<{}, State> {
 
   componentDidMount() {
     this.subscriptions.push(
-      Services.imageUrls.subscribe((imageUrls) => {
+      Services.onImageUrlsChanged((imageUrls) => {
         this.setState({ allImages: imageUrls, visibleImages: imageUrls });
       })
     );
@@ -40,7 +40,6 @@ export class App extends Component<{}, State> {
             <input
               type="text"
               id="folder_name_textbox"
-              className="subfolderNameTextbox"
               placeholder="SAVE TO SUBFOLDER"
               title="Set the name of the subfolder you want to download the images to."
             />
@@ -48,7 +47,7 @@ export class App extends Component<{}, State> {
             <input
               type="button"
               id="download_button"
-              className="downloadButton primary"
+              className="primary"
               value="DOWNLOAD"
               disabled
             />
@@ -64,7 +63,6 @@ export class App extends Component<{}, State> {
             <input
               type="text"
               id="filter_textbox"
-              className="filterTextbox"
               placeholder="FILTER BY URL"
               title="Filter by parts of the URL or regular expressions."
             />
@@ -130,7 +128,7 @@ export class App extends Component<{}, State> {
         <div>
           <label>
             <input type="checkbox" id="toggle_all_checkbox" />
-            Select all ({state.visibleImages.length})
+            <b>Select all ({state.visibleImages.length})</b>
           </label>
         </div>
 
@@ -139,8 +137,8 @@ export class App extends Component<{}, State> {
           className="images"
           style={{ gridTemplateColumns: '1fr '.repeat(state.options.columns) }}
         >
-          {state.visibleImages.map((imageUrl, index) => (
-            <img key={imageUrl} id={`image${index}`} src={imageUrl} />
+          {state.visibleImages.map((imageUrl) => (
+            <Image key={imageUrl} imageUrl={imageUrl} options={state.options} />
           ))}
         </div>
       </>
@@ -202,6 +200,51 @@ class FilterUrlModeInput extends Component<{}, {}> {
           </option>
         ))}
       </select>
+    );
+  }
+}
+
+class Image extends Component<{ imageUrl: string; options: Options }, {}> {
+  render() {
+    const {
+      props: { imageUrl, options },
+    } = this;
+
+    return (
+      <div className="image">
+        <input
+          type="text"
+          className="image_url_textbox"
+          value={imageUrl}
+          readOnly
+          onClick={(e) => e.currentTarget.select()}
+        />
+
+        <div
+          className="open_image_button"
+          onClick={() => Services.openImage(imageUrl)}
+          title="Open in new tab"
+        >
+          &nbsp;
+        </div>
+
+        <div
+          className="download_image_button"
+          onClick={() => Services.downloadImage(imageUrl)}
+          title="Download"
+        >
+          &nbsp;
+        </div>
+
+        <img
+          src={imageUrl}
+          style={{
+            minWidth: `${options.image_min_width}px`,
+            maxWidth: `${options.image_max_width}px`,
+            borderWidth: `${options.image_border_width}px`,
+          }}
+        />
+      </div>
     );
   }
 }

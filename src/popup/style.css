@@ -3,16 +3,14 @@ body {
   padding: 0 2px 0 0; /* compensate for browser defaults */
   min-width: 200px;
   min-height: 150px;
-  box-sizing: border-box;
 }
 
 .filters {
   position: sticky;
   top: 0px;
-  box-sizing: border-box;
   width: 100%;
   padding: 2px 2px 2px 0; /* compensate for browser defaults */
-  background: var(--neutralLight);
+  background: var(--neutralLighter);
   border-bottom: 1px solid var(--neutral);
 
   & input[type="text"],
@@ -25,38 +23,18 @@ body {
 
 .filterInputs,
 .filterRanges,
-.images {
+.images,
+.image {
   display: grid;
   grid-gap: 0.4rem;
 }
 
 .filterInputs {
   grid-template-columns: 1fr 100px;
-  grid-template-areas:
-    "subfolderName download"
-    "rename rename"
-    "filter filterMode"
-  ;
-}
-
-.subfolderNameTextbox {
-  grid-area: subfolderName;
-}
-
-.downloadButton {
-  grid-area: download;
 }
 
 .renameTextbox {
-  grid-area: rename;
-}
-
-.filterTextbox {
-  grid-area: filter;
-}
-
-.filterModeDropdown {
-  grid-area: filterMode;
+  grid-column: 1 / -1;
 }
 
 .filterRanges {
@@ -69,6 +47,23 @@ body {
 
   & img {
     cursor: pointer;
+  }
+}
+
+.image {
+  grid-template-rows: auto 1fr;
+  grid-template-columns: 1fr auto auto;
+
+  & > img {
+    grid-column: 1 / -1;
+    border-style: solid;
+
+    transition: border-color var(--transitionDuration) var(--transitionEasing);
+    border-color: var(--neutralLight);
+
+    &:hover {
+      border-color: var(--neutral);
+    }
   }
 }
 
