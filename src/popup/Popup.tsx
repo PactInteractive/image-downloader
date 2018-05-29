@@ -1,136 +1,149 @@
 import * as React from 'react';
 import { Component } from '../dom';
+import { Options } from '../options/Options';
+import { Services } from './Services';
+import { Subscription } from './Subscription';
 
-interface State {}
+class State {
+  allImages: string[] = [];
+  visibleImages: string[] = [];
+  options = new Options();
+}
 
 export class App extends Component<{}, State> {
-  readonly state: State = {};
+  readonly state = new State();
+  private readonly subscriptions: Subscription[] = [];
+
+  componentDidMount() {
+    this.subscriptions.push(
+      Services.imageUrls.subscribe((imageUrls) => {
+        this.setState({ allImages: imageUrls, visibleImages: imageUrls });
+      })
+    );
+  }
 
   componentDidUpdate(prevProps: {}, prevState: State): void {
     // TODO: Save relevant changes to local storage
   }
 
+  componentWillUnmount() {
+    this.subscriptions.forEach((subscription) => subscription.unsubscribe());
+  }
+
+  // TODO: Extract style to CSS
   render() {
-    // const { state } = this;
+    const { state } = this;
     return (
-      <div>
-        <div id="filters_container">
-          <table id="filter_inputs_container" className="grid">
-            <colgroup>
-              <col />
-              <col style={{ width: '100px' }} />
-            </colgroup>
-            <tbody>
-              <tr>
-                <td>
-                  <input
-                    type="text"
-                    id="folder_name_textbox"
-                    placeholder="SAVE TO SUBFOLDER"
-                    title="Set the name of the subfolder you want to download the images to."
-                  />
-                </td>
-                <td>
-                  <input type="button" id="download_button" className="primary" value="DOWNLOAD" disabled />
-                </td>
-              </tr>
+      <>
+        <div className="filters">
+          <div className="filterInputs">
+            <input
+              type="text"
+              id="folder_name_textbox"
+              className="subfolderNameTextbox"
+              placeholder="SAVE TO SUBFOLDER"
+              title="Set the name of the subfolder you want to download the images to."
+            />
 
-              <tr>
-                <td colSpan={2}>
-                  <input
-                    type="text"
-                    id="file_renaming_textbox"
-                    placeholder="RENAME FILES"
-                    title="Set a new file name for the images you want to download."
-                  />
-                </td>
-              </tr>
+            <input
+              type="button"
+              id="download_button"
+              className="downloadButton primary"
+              value="DOWNLOAD"
+              disabled
+            />
 
-              <tr id="image_url_filter">
-                <td>
-                  <input
-                    type="text"
-                    id="filter_textbox"
-                    placeholder="FILTER BY URL"
-                    title="Filter by parts of the URL or regular expressions."
-                  />
-                </td>
-                <td>
-                  <FilterUrlModeInput />
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <input
+              type="text"
+              id="file_renaming_textbox"
+              className="renameTextbox"
+              placeholder="RENAME FILES"
+              title="Set a new file name for the images you want to download."
+            />
 
-          <table className="grid">
-            <colgroup>
-              <col style={{ width: '45px' }} />
-              <col style={{ width: '40px' }} />
-              <col style={{ width: '10px' }} />
-              <col />
-              <col style={{ width: '10px' }} />
-              <col style={{ width: '40px' }} />
-            </colgroup>
-            <tbody>
-              <tr id="image_width_filter">
-                <td>Width:</td>
-                <td style={{ textAlign: 'right' }}>
-                  <label htmlFor="image_width_filter_min_checkbox">
-                    <small id="image_width_filter_min" />
-                  </label>
-                </td>
-                <td>
-                  <input type="checkbox" id="image_width_filter_min_checkbox" />
-                </td>
-                <td>
-                  <div id="image_width_filter_slider" />
-                </td>
-                <td>
-                  <input type="checkbox" id="image_width_filter_max_checkbox" />
-                </td>
-                <td style={{ textAlign: 'right' }}>
-                  <label htmlFor="image_width_filter_max_checkbox">
-                    <small id="image_width_filter_max" />
-                  </label>
-                </td>
-              </tr>
+            <input
+              type="text"
+              id="filter_textbox"
+              className="filterTextbox"
+              placeholder="FILTER BY URL"
+              title="Filter by parts of the URL or regular expressions."
+            />
 
-              <tr id="image_height_filter">
-                <td>Height:</td>
-                <td style={{ textAlign: 'right' }}>
-                  <label htmlFor="image_height_filter_min_checkbox">
-                    <small id="image_height_filter_min" />
-                  </label>
-                </td>
-                <td>
-                  <input type="checkbox" id="image_height_filter_min_checkbox" />
-                </td>
-                <td>
-                  <div id="image_height_filter_slider" />
-                </td>
-                <td>
-                  <input type="checkbox" id="image_height_filter_max_checkbox" />
-                </td>
-                <td style={{ textAlign: 'right' }}>
-                  <label htmlFor="image_height_filter_max_checkbox">
-                    <small id="image_height_filter_max" />
-                  </label>
-                </td>
-              </tr>
-            </tbody>
-          </table>
+            <FilterUrlModeInput />
+          </div>
+
+          <div className="filterRanges">
+            <div>Width:</div>
+            <div style={{ textAlign: 'right' }}>
+              <label htmlFor="image_width_filter_min_checkbox">
+                <small id="image_width_filter_min" />
+              </label>
+            </div>
+            <div>
+              <input type="checkbox" id="image_width_filter_min_checkbox" />
+            </div>
+            <div>
+              <div id="image_width_filter_slider" />
+            </div>
+            <div>
+              <input type="checkbox" id="image_width_filter_max_checkbox" />
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <label htmlFor="image_width_filter_max_checkbox">
+                <small id="image_width_filter_max" />
+              </label>
+            </div>
+
+            <div>Height:</div>
+            <div style={{ textAlign: 'right' }}>
+              <label htmlFor="image_height_filter_min_checkbox">
+                <small id="image_height_filter_min" />
+              </label>
+            </div>
+            <div>
+              <input type="checkbox" id="image_height_filter_min_checkbox" />
+            </div>
+            <div>
+              <div id="image_height_filter_slider" />
+            </div>
+            <div>
+              <input type="checkbox" id="image_height_filter_max_checkbox" />
+            </div>
+            <div style={{ textAlign: 'right' }}>
+              <label htmlFor="image_height_filter_max_checkbox">
+                <small id="image_height_filter_max" />
+              </label>
+            </div>
+          </div>
 
           <label
             id="only_images_from_links_container"
+            className="onlyImagesFromLinks"
             title="Only show images from direct links on the page; this can be useful on sites like Reddit"
           >
             <input type="checkbox" id="only_images_from_links_checkbox" />Only images from links
           </label>
         </div>
 
-        <div id="images_cache" />
-        <table id="images_table" className="grid" />
-      </div>
+        <div id="images_cache" className="imagesCache" />
+
+        <div>
+          <label>
+            <input type="checkbox" id="toggle_all_checkbox" />
+            Select all ({state.visibleImages.length})
+          </label>
+        </div>
+
+        <div
+          id="images_table"
+          className="images"
+          style={{ gridTemplateColumns: '1fr '.repeat(state.options.columns) }}
+        >
+          {state.visibleImages.map((imageUrl, index) => (
+            <img key={imageUrl} id={`image${index}`} src={imageUrl} />
+          ))}
+        </div>
+      </>
     );
   }
 }
@@ -182,9 +195,9 @@ class FilterUrlModeInput extends Component<{}, {}> {
 
   render() {
     return (
-      <select id="filter_url_mode_input">
+      <select id="filter_url_mode_input" className="filterModeDropdown">
         {this.options.map((option) => (
-          <option value={option.value} title={option.title}>
+          <option key={option.value} value={option.value} title={option.title}>
             {option.text}
           </option>
         ))}

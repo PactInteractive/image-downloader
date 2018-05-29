@@ -6,52 +6,78 @@ body {
   box-sizing: border-box;
 }
 
-.grid {
-  width: 100%;
-  border-collapse: collapse;
-}
-.grid td {
-  padding: 0 2px;
-}
-.grid td input[type="text"],
-.grid td input[type="button"],
-.grid td input[type="number"],
-.grid td select {
-  width: 100%;
-}
-
-#filters_container {
-  position: fixed;
+.filters {
+  position: sticky;
   top: 0px;
   box-sizing: border-box;
   width: 100%;
   padding: 2px 2px 2px 0; /* compensate for browser defaults */
-  background: #fff;
-  border-bottom: 1px solid #ccc;
+  background: var(--neutralLight);
+  border-bottom: 1px solid var(--neutral);
+
+  & input[type="text"],
+  & input[type="button"],
+  & input[type="number"],
+  & select {
+    height: 2.6rem;
+  }
 }
 
-#filters_container input[type="text"],
-#filters_container input[type="button"],
-#filters_container input[type="number"],
-#filters_container select {
-  height: 26px;
-  margin-bottom: 4px;
+.filterInputs,
+.filterRanges,
+.images {
+  display: grid;
+  grid-gap: 0.4rem;
 }
 
-#only_images_from_links_container {
+.filterInputs {
+  grid-template-columns: 1fr 100px;
+  grid-template-areas:
+    "subfolderName download"
+    "rename rename"
+    "filter filterMode"
+  ;
+}
+
+.subfolderNameTextbox {
+  grid-area: subfolderName;
+}
+
+.downloadButton {
+  grid-area: download;
+}
+
+.renameTextbox {
+  grid-area: rename;
+}
+
+.filterTextbox {
+  grid-area: filter;
+}
+
+.filterModeDropdown {
+  grid-area: filterMode;
+}
+
+.filterRanges {
+  /* TODO: Try with auto instead of px values */
+  grid-template-columns: auto 40px 10px 1fr 10px 40px;
+}
+
+.images {
+  margin-top: 2px;
+
+  & img {
+    cursor: pointer;
+  }
+}
+
+.onlyImagesFromLinks {
   padding: 1px;
 }
 
-#images_cache {
+.imagesCache {
   display: none;
-}
-
-#images_table {
-  margin-top: 2px;
-}
-
-#images_table img {
-  cursor: pointer;
 }
 
 .open_image_button,
@@ -66,9 +92,9 @@ body {
 }
 
 .open_image_button {
-  background-image: url('/open.png');
+  background-image: url("/open.png");
 }
 
 .download_image_button {
-  background-image: url('/download.png');
+  background-image: url("/download.png");
 }

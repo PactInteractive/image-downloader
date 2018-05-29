@@ -13,7 +13,9 @@
     <base href="/">
 
     <% const fonts = htmlWebpackPlugin.options.style.fonts; %>
+    <% if (Object.keys(fonts).length > 0) { %>
     <link href="https://fonts.googleapis.com/css?family=<%= Object.values(fonts).map((font) => font.split(/\s+/).join('+')).join('|') %>" rel="stylesheet">
+    <% } %>
   </head>
 
   <body>

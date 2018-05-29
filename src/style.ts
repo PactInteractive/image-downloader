@@ -1,7 +1,7 @@
 export const transitionDuration = 400;
 
 export const fonts = {
-  text: 'PT Sans',
+  text: '"Lucida Grande", Arial, sans-serif',
 };
 
 export const css = {

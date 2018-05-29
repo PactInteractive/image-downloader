@@ -1,26 +1,29 @@
-:root {
-  --foreground: #333;
-  --foregroundLight: #999;
+html {
+  box-sizing: border-box;
+}
 
-  --neutral: #ccc;
-  --neutralLight: #fff;
+*,
+*:before,
+*:after {
+  box-sizing: inherit;
+}
 
-  --primary: #3498db;
-  --primaryDark: #2791d9;
+html,
+body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
-  --success: #25a75c;
-  --successLight: #28b463;
-
-  --warning: #ea940c;
-  --warningLight: #f39c12;
-
-  --danger: #e53f2e;
-  --dangerLight: #e74c3c;
+html {
+  /* 0.625 of 16px is 10px: https://engageinteractive.co.uk/blog/em-vs-rem-vs-px */
+  font-size: 62.5%;
+  font-family: var(--fontText);
+  color: var(--foreground);
 }
 
 body {
-  font: 13px/1.5em 'Lucida Grande', Arial, sans-serif;
-  color: var(--foreground);
+  font-size: 1.3rem;
 }
 
 hr {
