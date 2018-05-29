@@ -5,8 +5,18 @@ import { Services } from './Services';
 import { Subscription } from './Subscription';
 
 class State {
+  static toggleImageSelection = (imageUrl: string) => (state: Readonly<State>) => {
+    const imageIsSelected = state.selectedImages.indexOf(imageUrl) !== -1;
+    return {
+      selectedImages: imageIsSelected
+        ? state.selectedImages.filter((url) => url !== imageUrl)
+        : [...state.selectedImages, imageUrl],
+    };
+  };
+
   allImages: string[] = [];
   visibleImages: string[] = [];
+  selectedImages: string[] = [];
   options = new Options();
 }
 
@@ -138,11 +148,21 @@ export class App extends Component<{}, State> {
           style={{ gridTemplateColumns: '1fr '.repeat(state.options.columns) }}
         >
           {state.visibleImages.map((imageUrl) => (
-            <Image key={imageUrl} imageUrl={imageUrl} options={state.options} />
+            <Image
+              key={imageUrl}
+              imageUrl={imageUrl}
+              options={state.options}
+              onToggleSelected={(imageUrl) => this.toggleImageSelected(imageUrl)}
+              selected={state.selectedImages.indexOf(imageUrl) !== -1}
+            />
           ))}
         </div>
       </>
     );
+  }
+
+  private toggleImageSelected(imageUrl: string): void {
+    this.setState(State.toggleImageSelection(imageUrl));
   }
 }
 
@@ -204,10 +224,18 @@ class FilterUrlModeInput extends Component<{}, {}> {
   }
 }
 
-class Image extends Component<{ imageUrl: string; options: Options }, {}> {
+class Image extends Component<
+  {
+    imageUrl: string;
+    onToggleSelected: (imageUrl: string) => any;
+    options: Options;
+    selected: boolean;
+  },
+  {}
+> {
   render() {
     const {
-      props: { imageUrl, options },
+      props: { imageUrl, options, onToggleSelected, selected },
     } = this;
 
     return (
@@ -242,7 +270,9 @@ class Image extends Component<{ imageUrl: string; options: Options }, {}> {
             minWidth: `${options.image_min_width}px`,
             maxWidth: `${options.image_max_width}px`,
             borderWidth: `${options.image_border_width}px`,
+            ...(selected ? { borderColor: options.image_border_color } : {}),
           }}
+          onClick={() => onToggleSelected(imageUrl)}
         />
       </div>
     );

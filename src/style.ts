@@ -1,4 +1,4 @@
-export const transitionDuration = 400;
+export const transitionDuration = 150;
 
 export const fonts = {};
 
