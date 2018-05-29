@@ -59,7 +59,8 @@ export class App extends Component<{}, State> {
               id="download_button"
               className="primary"
               value="DOWNLOAD"
-              disabled
+              disabled={state.selectedImages.length === 0}
+              onClick={() => this.downloadSelectedImages()}
             />
 
             <input
@@ -163,6 +164,26 @@ export class App extends Component<{}, State> {
 
   private toggleImageSelected(imageUrl: string): void {
     this.setState(State.toggleImageSelection(imageUrl));
+  }
+
+  private async downloadSelectedImages(): Promise<void> {
+    try {
+      const confirmed = await this.downloadConfirmation();
+      if (confirmed) {
+        this.state.selectedImages.forEach((imageUrl) => Services.downloadImage(imageUrl));
+        // TODO: Flash notification
+      }
+    }
+  }
+
+  private async downloadConfirmation(): Promise<boolean> {
+    if (this.state.options.show_download_confirmation) {
+      // TODO: Show warning in UI
+      return window.confirm(`Take a quick look at your Chrome settings and search for the download location.
+
+If the Ask where to save each file before downloading option is checked, continuing might open a lot of popup windows. Are you sure you want to do this?`);
+    }
+    return true;
   }
 }
 
