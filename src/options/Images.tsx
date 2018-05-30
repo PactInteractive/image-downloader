@@ -1,12 +1,9 @@
 import './Images.css';
 
 import * as React from 'react';
+import { Checkbox, Color, Fieldset, Number } from '../components';
 import { Component } from '../dom';
-import { Checkbox } from './Checkbox';
-import { Color } from './Color';
-import { Fieldset } from './Fieldset';
-import { InputEvent } from './InputEvent';
-import { Number } from './Number';
+import { InputEvent } from '../InputEvent';
 import { SetOption } from './SetOption';
 
 export interface ImagesOptions {

@@ -1,8 +1,8 @@
 import * as React from 'react';
+import { Fieldset } from '../components';
 import { Component } from '../dom';
-import { Fieldset } from './Fieldset';
 
-export class About extends Component<{}, {}> {
+export class About extends Component {
   private readonly source = 'https://github.com/vdsabev/image-downloader';
 
   render() {

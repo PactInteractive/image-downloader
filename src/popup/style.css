@@ -39,7 +39,17 @@ body {
 
 .filterRanges {
   /* TODO: Try with auto instead of px values */
-  grid-template-columns: auto 40px 10px 1fr 10px 40px;
+  grid-template-columns: auto 64px 1fr 64px;
+  align-items: center;
+
+  & > label {
+    display: flex;
+    align-items: center;
+
+    &.text-right {
+      justify-content: flex-end;
+    }
+  }
 }
 
 .images {

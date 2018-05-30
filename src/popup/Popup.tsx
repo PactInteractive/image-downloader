@@ -1,10 +1,26 @@
 import * as React from 'react';
-import { Component } from '../dom';
+import { Button, Checkbox, Text } from '../components';
+import { Component, Props } from '../dom';
+import { InputEvent } from '../InputEvent';
 import { Options } from '../options/Options';
 import { Services } from './Services';
 import { Subscription } from './Subscription';
 
 class State {
+  static setImageUrls = (imageUrls: string[]) => ({
+    allImages: imageUrls,
+    visibleImages: imageUrls,
+  });
+
+  static setOption = (key: keyof Options, value: boolean | number | string) => (
+    state: Readonly<State>
+  ) => ({
+    options: {
+      ...state.options,
+      [key]: value,
+    },
+  });
+
   static toggleImageSelection = (imageUrl: string) => (state: Readonly<State>) => {
     const imageIsSelected = state.selectedImages.indexOf(imageUrl) !== -1;
     return {
@@ -26,8 +42,9 @@ export class App extends Component<{}, State> {
 
   componentDidMount() {
     this.subscriptions.push(
+      // TODO: Filter `visibleImages`
       Services.onImageUrlsChanged((imageUrls) => {
-        this.setState({ allImages: imageUrls, visibleImages: imageUrls });
+        this.setState(State.setImageUrls(imageUrls));
       })
     );
   }
@@ -41,118 +58,116 @@ export class App extends Component<{}, State> {
   }
 
   render() {
-    const { state } = this;
+    const { options, ...state } = this.state;
     return (
       <>
         <div className="filters">
           <div className="filterInputs">
-            <input
-              type="text"
-              id="folder_name_textbox"
+            <Text
               placeholder="SAVE TO SUBFOLDER"
               title="Set the name of the subfolder you want to download the images to."
+              value={options.folder_name}
+              onChange={this.setOption('folder_name', 'value')}
             />
 
-            <input
-              type="button"
-              id="download_button"
+            <Button
               className="primary"
-              value="DOWNLOAD"
               disabled={state.selectedImages.length === 0}
-              onClick={() => this.downloadSelectedImages()}
-            />
+              onClick={this.downloadSelectedImages}
+            >
+              DOWNLOAD
+            </Button>
 
-            <input
-              type="text"
-              id="file_renaming_textbox"
+            <Text
               className="renameTextbox"
               placeholder="RENAME FILES"
               title="Set a new file name for the images you want to download."
+              value={options.new_file_name}
+              onChange={this.setOption('new_file_name', 'value')}
             />
 
-            <input
-              type="text"
-              id="filter_textbox"
+            <Text
               placeholder="FILTER BY URL"
               title="Filter by parts of the URL or regular expressions."
+              value={options.filter_url}
+              onChange={this.setOption('filter_url', 'value')}
             />
 
-            <FilterUrlModeInput />
+            {/* TODO: Refactor */}
+            <FilterUrlModeInput
+              onChange={(e: any) => {
+                // TODO: Finish
+                this.setState((state) => ({
+                  options: {
+                    ...state.options,
+                    filter_url_mode: e.currentTarget.value,
+                  },
+                }));
+              }}
+            />
           </div>
 
           <div className="filterRanges">
             <div>Width:</div>
-            <div className="text-right">
-              <label htmlFor="image_width_filter_min_checkbox">
-                <small id="image_width_filter_min" />
-              </label>
-            </div>
-            <div>
-              <input type="checkbox" id="image_width_filter_min_checkbox" />
-            </div>
-            <div>
-              <div id="image_width_filter_slider" />
-            </div>
-            <div>
-              <input type="checkbox" id="image_width_filter_max_checkbox" />
-            </div>
-            <div className="text-right">
-              <label htmlFor="image_width_filter_max_checkbox">
-                <small id="image_width_filter_max" />
-              </label>
-            </div>
+            <Checkbox
+              className="text-right"
+              position="after"
+              checked={options.filter_min_width_enabled}
+              onChange={this.setOption('filter_min_width_enabled', 'checked')}
+            >
+              <small>{options.filter_min_width}px</small>
+            </Checkbox>
+            {/* TODO: Display slider */}
+            <div id="image_width_filter_slider" />
+            <Checkbox
+              checked={options.filter_max_width_enabled}
+              onChange={this.setOption('filter_max_width_enabled', 'checked')}
+            >
+              <small>{options.filter_max_width}px</small>
+            </Checkbox>
 
             <div>Height:</div>
-            <div className="text-right">
-              <label htmlFor="image_height_filter_min_checkbox">
-                <small id="image_height_filter_min" />
-              </label>
-            </div>
-            <div>
-              <input type="checkbox" id="image_height_filter_min_checkbox" />
-            </div>
-            <div>
-              <div id="image_height_filter_slider" />
-            </div>
-            <div>
-              <input type="checkbox" id="image_height_filter_max_checkbox" />
-            </div>
-            <div className="text-right">
-              <label htmlFor="image_height_filter_max_checkbox">
-                <small id="image_height_filter_max" />
-              </label>
-            </div>
+            <Checkbox
+              className="text-right"
+              position="after"
+              checked={options.filter_min_height_enabled}
+              onChange={this.setOption('filter_min_height_enabled', 'checked')}
+            >
+              <small>{options.filter_min_height}px</small>
+            </Checkbox>
+            {/* TODO: Display slider */}
+            <div id="image_height_filter_slider" />
+            <Checkbox
+              checked={options.filter_max_height_enabled}
+              onChange={this.setOption('filter_max_height_enabled', 'checked')}
+            >
+              <small>{options.filter_max_height}px</small>
+            </Checkbox>
           </div>
 
-          <label
-            id="only_images_from_links_container"
+          <Checkbox
             className="onlyImagesFromLinks"
             title="Only show images from direct links on the page; this can be useful on sites like Reddit"
+            checked={options.only_images_from_links}
+            onChange={this.setOption('only_images_from_links', 'checked')}
           >
-            <input type="checkbox" id="only_images_from_links_checkbox" />Only images from links
-          </label>
+            Only images from links
+          </Checkbox>
         </div>
 
-        <div id="images_cache" className="imagesCache" />
+        <div className="imagesCache" />
 
-        <div>
-          <label>
-            <input type="checkbox" id="toggle_all_checkbox" />
-            <b>Select all ({state.visibleImages.length})</b>
-          </label>
-        </div>
+        <Checkbox id="toggle_all_checkbox">
+          <b>Select all ({state.visibleImages.length})</b>
+        </Checkbox>
 
-        <div
-          id="images_table"
-          className="images"
-          style={{ gridTemplateColumns: '1fr '.repeat(state.options.columns) }}
-        >
+        <div className="images" style={{ gridTemplateColumns: '1fr '.repeat(options.columns) }}>
           {state.visibleImages.map((imageUrl) => (
             <Image
               key={imageUrl}
               imageUrl={imageUrl}
-              options={state.options}
-              onToggleSelected={(imageUrl) => this.toggleImageSelected(imageUrl)}
+              options={options}
+              onToggleSelected={this.toggleImageSelected}
               selected={state.selectedImages.indexOf(imageUrl) !== -1}
             />
           ))}
@@ -161,19 +176,23 @@ export class App extends Component<{}, State> {
     );
   }
 
-  private toggleImageSelected(imageUrl: string): void {
-    this.setState(State.toggleImageSelection(imageUrl));
-  }
+  private setOption = (option: keyof Options, key: 'checked' | 'value') => (e: InputEvent) => {
+    this.setState(State.setOption(option, e.currentTarget[key]));
+  };
 
-  private async downloadSelectedImages(): Promise<void> {
+  private toggleImageSelected = (imageUrl: string): void => {
+    this.setState(State.toggleImageSelection(imageUrl));
+  };
+
+  private downloadSelectedImages = async (): Promise<void> => {
     const confirmed = await this.downloadConfirmation();
     if (confirmed) {
       this.state.selectedImages.forEach((imageUrl) => Services.downloadImage(imageUrl));
       // TODO: Flash notification
     }
-  }
+  };
 
-  private async downloadConfirmation(): Promise<boolean> {
+  private downloadConfirmation = async (): Promise<boolean> => {
     if (this.state.options.show_download_confirmation) {
       // TODO: Show warning in UI
       return window.confirm(`Take a quick look at your Chrome settings and search for the download location.
@@ -181,10 +200,10 @@ export class App extends Component<{}, State> {
 If the Ask where to save each file before downloading option is checked, continuing might open a lot of popup windows. Are you sure you want to do this?`);
     }
     return true;
-  }
+  };
 }
 
-class FilterUrlModeInput extends Component<{}, {}> {
+class FilterUrlModeInput extends Component<Props<HTMLSelectElement>> {
   // TODO: Show title as a styled tooltip
   private readonly options = [
     { value: 'normal', title: 'A plain text search', text: 'Normal' },
@@ -230,8 +249,9 @@ class FilterUrlModeInput extends Component<{}, {}> {
   ];
 
   render() {
+    const { props } = this;
     return (
-      <select id="filter_url_mode_input" className="filterModeDropdown">
+      <select className="filterModeDropdown" {...props}>
         {this.options.map((option) => (
           <option key={option.value} value={option.value} title={option.title}>
             {option.text}
@@ -242,15 +262,12 @@ class FilterUrlModeInput extends Component<{}, {}> {
   }
 }
 
-class Image extends Component<
-  {
-    imageUrl: string;
-    onToggleSelected: (imageUrl: string) => any;
-    options: Options;
-    selected: boolean;
-  },
-  {}
-> {
+class Image extends Component<{
+  imageUrl: string;
+  onToggleSelected: (imageUrl: string) => any;
+  options: Options;
+  selected: boolean;
+}> {
   render() {
     const {
       props: { imageUrl, options, onToggleSelected, selected },
@@ -258,12 +275,11 @@ class Image extends Component<
 
     return (
       <div className="image">
-        <input
-          type="text"
+        <Text
           className="image_url_textbox"
           value={imageUrl}
-          readOnly
           onClick={(e) => e.currentTarget.select()}
+          readOnly
         />
 
         <div

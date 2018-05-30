@@ -1,8 +1,7 @@
 import * as React from 'react';
+import { Checkbox, Fieldset } from '../components';
 import { Component } from '../dom';
-import { Checkbox } from './Checkbox';
-import { Fieldset } from './Fieldset';
-import { InputEvent } from './InputEvent';
+import { InputEvent } from '../InputEvent';
 import { SetOption } from './SetOption';
 
 export interface GeneralOptions {
