@@ -36,18 +36,6 @@ label {
   cursor: pointer;
 }
 
-/* floats */
-.left { float: left; }
-.right { float: right; }
-.clear { clear: both; }
-
-/* labels */
-.primary { color: var(--primary); }
-.success { color: var(--success); }
-.warning { color: var(--warning); }
-.danger { color: var(--danger); }
-.light { color: var(--foregroundLight); }
-
 /* links */
 a:link,
 a:visited {
@@ -59,6 +47,22 @@ a:hover,
 a:active {
   color: var(--primaryDark);
 }
+
+/* floats */
+.left { float: left; }
+.right { float: right; }
+.clear { clear: both; }
+
+/* text */
+.primary { color: var(--primary); }
+.success { color: var(--success); }
+.warning { color: var(--warning); }
+.danger { color: var(--danger); }
+.light { color: var(--foregroundLight); }
+
+.text-left { text-align: left; }
+.text-right { text-align: right; }
+.text-center { text-align: center; }
 
 /* buttons */
 button,

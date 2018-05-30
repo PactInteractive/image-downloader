@@ -40,7 +40,6 @@ export class App extends Component<{}, State> {
     this.subscriptions.forEach((subscription) => subscription.unsubscribe());
   }
 
-  // TODO: Extract style to CSS
   render() {
     const { state } = this;
     return (
@@ -83,7 +82,7 @@ export class App extends Component<{}, State> {
 
           <div className="filterRanges">
             <div>Width:</div>
-            <div style={{ textAlign: 'right' }}>
+            <div className="text-right">
               <label htmlFor="image_width_filter_min_checkbox">
                 <small id="image_width_filter_min" />
               </label>
@@ -97,14 +96,14 @@ export class App extends Component<{}, State> {
             <div>
               <input type="checkbox" id="image_width_filter_max_checkbox" />
             </div>
-            <div style={{ textAlign: 'right' }}>
+            <div className="text-right">
               <label htmlFor="image_width_filter_max_checkbox">
                 <small id="image_width_filter_max" />
               </label>
             </div>
 
             <div>Height:</div>
-            <div style={{ textAlign: 'right' }}>
+            <div className="text-right">
               <label htmlFor="image_height_filter_min_checkbox">
                 <small id="image_height_filter_min" />
               </label>
@@ -118,7 +117,7 @@ export class App extends Component<{}, State> {
             <div>
               <input type="checkbox" id="image_height_filter_max_checkbox" />
             </div>
-            <div style={{ textAlign: 'right' }}>
+            <div className="text-right">
               <label htmlFor="image_height_filter_max_checkbox">
                 <small id="image_height_filter_max" />
               </label>
@@ -167,12 +166,10 @@ export class App extends Component<{}, State> {
   }
 
   private async downloadSelectedImages(): Promise<void> {
-    try {
-      const confirmed = await this.downloadConfirmation();
-      if (confirmed) {
-        this.state.selectedImages.forEach((imageUrl) => Services.downloadImage(imageUrl));
-        // TODO: Flash notification
-      }
+    const confirmed = await this.downloadConfirmation();
+    if (confirmed) {
+      this.state.selectedImages.forEach((imageUrl) => Services.downloadImage(imageUrl));
+      // TODO: Flash notification
     }
   }
 
