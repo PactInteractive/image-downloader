@@ -9,20 +9,20 @@
     "downloads"
   ],
   "browser_action": {
-    "default_icon": "/icon_128.png",
+    "default_icon": "/images/icon_128.png",
     "default_popup": "/views/popup.html"
   },
   "icons": {
-    "16": "/icon_16.png",
-    "48": "/icon_48.png",
-    "128": "/icon_128.png"
+    "16": "/images/icon_16.png",
+    "48": "/images/icon_48.png",
+    "128": "/images/icon_128.png"
   },
   "web_accessible_resources": [
     "/images/open.png",
     "/images/download.png"
   ],
   "background": {
-    "scripts": ["/scripts/defaults.js"]
+    "scripts": ["/src/defaults.js"]
   },
   "options_page": "/views/options.html"
 }

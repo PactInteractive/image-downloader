@@ -152,7 +152,7 @@
     // Get images on the page
     chrome.windows.getCurrent(function (currentWindow) {
       chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (activeTabs) {
-        chrome.tabs.executeScript(activeTabs[0].id, { file: '/scripts/send_images.js', allFrames: true });
+        chrome.tabs.executeScript(activeTabs[0].id, { file: '/src/send_images.js', allFrames: true });
       });
     });
   }

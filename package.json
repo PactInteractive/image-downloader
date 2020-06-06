@@ -1,0 +1,19 @@
+{
+  "private": true,
+  "name": "image-downloader",
+  "version": "3.0.0",
+  "license": "MIT",
+  "scripts": {
+    "start": "http-server -p 3000",
+    "build": "node scripts/build.js",
+    "test": "npm run build && cypress open",
+    "test.ci": "npm run build && cypress run"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "cypress": "4.7.0",
+    "fs-extra": "9.0.1",
+    "http-server": "0.12.3",
+    "typescript": "3.9.5"
+  }
+}
