@@ -4,16 +4,19 @@
   "version": "3.0.0",
   "license": "MIT",
   "scripts": {
-    "start": "http-server -p 3000",
     "build": "node scripts/build.js",
-    "test": "npm run build && cypress open",
-    "test.ci": "npm run build && cypress run"
+    "test": "jest --coverage",
+    "test.watch": "jest --watch"
   },
   "dependencies": {},
   "devDependencies": {
-    "cypress": "4.7.0",
+    "@types/chrome": "0.0.114",
+    "@types/jest": "25.2.3",
     "fs-extra": "9.0.1",
-    "http-server": "0.12.3",
+    "jest": "26.0.1",
+    "prettier": "2.0.5",
+    "sneer": "1.0.1",
+    "ts-jest": "26.1.0",
     "typescript": "3.9.5"
   }
 }
