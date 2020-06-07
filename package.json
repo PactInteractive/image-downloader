@@ -5,8 +5,8 @@
   "license": "MIT",
   "scripts": {
     "build": "node scripts/build.js",
-    "test": "jest --coverage",
-    "test.watch": "jest --watch"
+    "test": "jest --watch",
+    "test.once": "jest --coverage"
   },
   "dependencies": {
     "@types/chrome": "0.0.114",
