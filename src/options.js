@@ -98,8 +98,6 @@
         });
   }
 
-  $(function () {
-    initializeControlValues();
-    initializeControlEvents();
-  });
+  initializeControlValues();
+  initializeControlEvents();
 }(localStorage));

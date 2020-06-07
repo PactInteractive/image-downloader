@@ -447,8 +447,6 @@
     fade(false);
   }
 
-  $(function () {
-    initializePopup();
-    initializeStyles();
-  });
+  initializePopup();
+  initializeStyles();
 }(localStorage));

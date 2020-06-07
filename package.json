@@ -8,9 +8,12 @@
     "test": "jest --coverage",
     "test.watch": "jest --watch"
   },
-  "dependencies": {},
-  "devDependencies": {
+  "dependencies": {
     "@types/chrome": "0.0.114",
+    "@types/jquery": "3.3.38",
+    "jquery": "3.5.1"
+  },
+  "devDependencies": {
     "@types/jest": "25.2.3",
     "fs-extra": "9.0.1",
     "jest": "26.0.1",
