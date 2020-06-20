@@ -1,5 +1,5 @@
 import * as $ from 'jquery'
-import { createElement } from './utils'
+import { createElement, mockChrome } from './utils'
 
 declare var global: any
 
@@ -135,18 +135,101 @@ describe(`save`, () => {
           const input = createElement('input', option.props)
           document.body.append(input)
 
-          const button = createElement('input', {
+          const saveButton = createElement('input', {
             id: 'save_button',
             type: 'button',
           })
-          document.body.append(button)
+          document.body.append(saveButton)
 
           require('./options')
 
           option.trigger($(`#${input.id}`), value)
-          $(`#${button.id}`).trigger('click')
+          $(`#${saveButton.id}`).trigger('click')
 
           expect(localStorage[option.key]).toBe(value.toString())
+        })
+      })
+    })
+  })
+})
+
+describe(`reset`, () => {
+  beforeEach(() => {
+    global.chrome = mockChrome()
+  })
+
+  options.forEach((option) => {
+    describe(option.key, () => {
+      option.values.forEach((value) => {
+        it(value.toString(), () => {
+          const input = createElement('input', option.props)
+          document.body.append(input)
+
+          const saveButton = createElement('input', {
+            id: 'save_button',
+            type: 'button',
+          })
+          document.body.append(saveButton)
+
+          const resetButton = createElement('input', {
+            id: 'reset_button',
+            type: 'button',
+          })
+          document.body.append(resetButton)
+
+          require('./defaults')
+          require('./options')
+
+          option.trigger($(`#${input.id}`), value)
+          $(`#${resetButton.id}`).trigger('click')
+          $(`#${saveButton.id}`).trigger('click')
+
+          expect(localStorage[option.key]).toBe(
+            localStorage[`${option.key}_default`]
+          )
+        })
+      })
+    })
+  })
+})
+
+describe(`clear data`, () => {
+  beforeEach(() => {
+    global.chrome = mockChrome()
+    global.confirm = () => true
+    delete global.window.location
+    global.window.location = { reload() {} }
+  })
+
+  options.forEach((option) => {
+    describe(option.key, () => {
+      option.values.forEach((value) => {
+        it(value.toString(), () => {
+          const input = createElement('input', option.props)
+          document.body.append(input)
+
+          const saveButton = createElement('input', {
+            id: 'save_button',
+            type: 'button',
+          })
+          document.body.append(saveButton)
+
+          const clearDataButton = createElement('input', {
+            id: 'clear_data_button',
+            type: 'button',
+          })
+          document.body.append(clearDataButton)
+
+          require('./defaults')
+          require('./options')
+
+          option.trigger($(`#${input.id}`), value)
+          $(`#${saveButton.id}`).trigger('click')
+          $(`#${clearDataButton.id}`).trigger('click')
+
+          expect(localStorage[option.key]).toBe(
+            localStorage[`${option.key}_default`]
+          )
         })
       })
     })

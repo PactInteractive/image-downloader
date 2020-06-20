@@ -1,4 +1,16 @@
-import { RecursivePartial } from 'sneer'
+import { mockRecursivePartial, RecursivePartial } from 'sneer'
+
+export const mockChrome = () =>
+  mockRecursivePartial<typeof chrome>({
+    runtime: {
+      onInstalled: {
+        addListener: jest.fn(),
+      },
+    },
+    tabs: {
+      create: jest.fn(),
+    },
+  })
 
 export const asMockedFunction = <T extends (...args: any[]) => any>(fn: T) =>
   fn as jest.MockedFunction<T>

@@ -1,19 +1,10 @@
 import { mockRecursivePartial } from 'sneer'
-import { asMockedFunction } from './utils'
+import { asMockedFunction, mockChrome } from './utils'
 
 declare var global: any
 
 beforeEach(() => {
-  global.chrome = mockRecursivePartial<typeof chrome>({
-    runtime: {
-      onInstalled: {
-        addListener: jest.fn(),
-      },
-    },
-    tabs: {
-      create: jest.fn(),
-    },
-  })
+  global.chrome = mockChrome()
   localStorage.clear()
 })
 
