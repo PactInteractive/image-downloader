@@ -56,16 +56,70 @@ describe(`'a' elements`, () => {
 })
 
 describe(`background images`, () => {
-  it(`collects the background image from computed style`, () => {
+  it(`collects the background image from computed style with double quotes`, () => {
     expectExtractedImages(
       html`<div
         style=${{
-          backgroundImage: `url("http://www.example.com/background-image.png")`,
+          backgroundImage: `url("http://www.example.com/background-image-double-quotes.png")`,
         }}
       />`
     ).toEqual({
       linkedImages: {},
-      images: ['http://www.example.com/background-image.png'],
+      images: ['http://www.example.com/background-image-double-quotes.png'],
     })
+  })
+
+  it(`collects the background image from computed style with single quotes`, () => {
+    expectExtractedImages(
+      html`<div
+        style=${{
+          backgroundImage: `url('http://www.example.com/background-image-single-quotes.png')`,
+        }}
+      />`
+    ).toEqual({
+      linkedImages: {},
+      images: ['http://www.example.com/background-image-single-quotes.png'],
+    })
+  })
+
+  it(`collects the background image from computed style with no quotes`, () => {
+    expectExtractedImages(
+      html`<div
+        style=${{
+          backgroundImage: `url(http://www.example.com/background-image-no-quotes.png)`,
+        }}
+      />`
+    ).toEqual({
+      linkedImages: {},
+      images: ['http://www.example.com/background-image-no-quotes.png'],
+    })
+  })
+})
+
+it(`removes duplicates`, () => {
+  expectExtractedImages(
+    html`<img src="http://www.example.com/image-src.png" />`,
+    html`<div
+      style=${{
+        backgroundImage: `url("http://www.example.com/image-src.png")`,
+      }}
+    />`
+  ).toEqual({
+    linkedImages: {},
+    images: ['http://www.example.com/image-src.png'],
+  })
+})
+
+it(`removes empty images`, () => {
+  expectExtractedImages(html`<img />`, html`<img />`).toEqual({
+    linkedImages: {},
+    images: [],
+  })
+})
+
+it(`maps relative URLs to absolute`, () => {
+  expectExtractedImages(html`<img src="/image-relative.png" />`).toEqual({
+    linkedImages: {},
+    images: ['http://localhost/image-relative.png'],
   })
 })
