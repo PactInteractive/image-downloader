@@ -14,40 +14,38 @@ beforeEach(() => {
 })
 
 describe(`'img' elements`, () => {
-  it(`collects the 'src' property`, () => {
+  it(`extracts image URLs from the 'src' property`, () => {
     expectExtractedImages(
-      html`<img src="http://www.example.com/image-src.png" />`
+      html`<img src="http://example.com/image-src.png" />`
     ).toEqual({
       linkedImages: {},
-      images: ['http://www.example.com/image-src.png'],
+      images: ['http://example.com/image-src.png'],
     })
   })
 
   it(`removes the hash from the 'src' property`, () => {
     expectExtractedImages(
-      html`<img
-        src="http://www.example.com/image-with-hash.png#irrelevant-hash"
-      />`
+      html`<img src="http://example.com/image-with-hash.png#irrelevant-hash" />`
     ).toEqual({
       linkedImages: {},
-      images: ['http://www.example.com/image-with-hash.png'],
+      images: ['http://example.com/image-with-hash.png'],
     })
   })
 })
 
 describe(`'a' elements`, () => {
-  it(`collects the 'href' property if it links to an image`, () => {
+  it(`extracts the 'href' property if it links to an image`, () => {
     expectExtractedImages(
-      html`<a href="http://www.example.com/image-link.png" />`
+      html`<a href="http://example.com/image-link.png" />`
     ).toEqual({
-      linkedImages: { 'http://www.example.com/image-link.png': '0' },
-      images: ['http://www.example.com/image-link.png'],
+      linkedImages: { 'http://example.com/image-link.png': '0' },
+      images: ['http://example.com/image-link.png'],
     })
   })
 
-  it(`doesn't collect the 'href' property if it doesn't link to an image`, () => {
+  it(`doesn't extract the 'href' property if it doesn't link to an image`, () => {
     expectExtractedImages(
-      html`<a href="http://www.example.com/not-an-image.html" />`
+      html`<a href="http://example.com/not-an-image.html" />`
     ).toEqual({
       linkedImages: {},
       images: [],
@@ -56,57 +54,72 @@ describe(`'a' elements`, () => {
 })
 
 describe(`background images`, () => {
-  it(`collects the background image from computed style with double quotes`, () => {
+  it(`extracts the background image from computed style with double quotes`, () => {
     expectExtractedImages(
       html`<div
         style=${{
-          backgroundImage: `url("http://www.example.com/background-image-double-quotes.png")`,
+          backgroundImage: `url("http://example.com/background-image-double-quotes.png")`,
         }}
       />`
     ).toEqual({
       linkedImages: {},
-      images: ['http://www.example.com/background-image-double-quotes.png'],
+      images: ['http://example.com/background-image-double-quotes.png'],
     })
   })
 
-  it(`collects the background image from computed style with single quotes`, () => {
+  it(`extracts the background image from computed style with single quotes`, () => {
     expectExtractedImages(
       html`<div
         style=${{
-          backgroundImage: `url('http://www.example.com/background-image-single-quotes.png')`,
+          backgroundImage: `url('http://example.com/background-image-single-quotes.png')`,
         }}
       />`
     ).toEqual({
       linkedImages: {},
-      images: ['http://www.example.com/background-image-single-quotes.png'],
+      images: ['http://example.com/background-image-single-quotes.png'],
     })
   })
 
-  it(`collects the background image from computed style with no quotes`, () => {
+  it(`extracts the background image from computed style with no quotes`, () => {
     expectExtractedImages(
       html`<div
         style=${{
-          backgroundImage: `url(http://www.example.com/background-image-no-quotes.png)`,
+          backgroundImage: `url(http://example.com/background-image-no-quotes.png)`,
         }}
       />`
     ).toEqual({
       linkedImages: {},
-      images: ['http://www.example.com/background-image-no-quotes.png'],
+      images: ['http://example.com/background-image-no-quotes.png'],
     })
+  })
+})
+
+// TODO: Find a way to append the style to `document.styleSheets`
+it.skip(`extracts images from CSS rules`, () => {
+  const style = document.createElement('link')
+  document.body.append(style)
+  style.sheet.insertRule(`
+    .with-background-image {
+      background-image: url('http://example.com/background-image-from-css-rules.png');
+    }
+  `)
+  expectExtractedImages().toEqual({
+    linkedImages: {},
+    images: ['http://example.com/background-image-from-css-rules.png'],
   })
 })
 
 it(`removes duplicates`, () => {
   expectExtractedImages(
-    html`<img src="http://www.example.com/image-src.png" />`,
+    html`<img src="http://example.com/image-src.png" />`,
     html`<div
       style=${{
-        backgroundImage: `url("http://www.example.com/image-src.png")`,
+        backgroundImage: `url("http://example.com/image-src.png")`,
       }}
     />`
   ).toEqual({
     linkedImages: {},
-    images: ['http://www.example.com/image-src.png'],
+    images: ['http://example.com/image-src.png'],
   })
 })
 
