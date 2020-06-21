@@ -1,3 +1,4 @@
+const htm = require('htm') // NOTE: Looks like Jest doesn't handle ES6 imports for this library
 import { mockRecursivePartial, RecursivePartial } from 'sneer'
 
 export const mockChrome = () =>
@@ -16,7 +17,7 @@ export const mockChrome = () =>
 export const asMockedFunction = <T extends (...args: any[]) => any>(fn: T) =>
   fn as jest.MockedFunction<T>
 
-export const createElement = <T extends keyof HTMLElementTagNameMap>(
+const createElement = <T extends keyof HTMLElementTagNameMap>(
   tagName: T,
   { style, ...props }: RecursivePartial<HTMLElementTagNameMap[T]>
 ) => {
@@ -26,3 +27,5 @@ export const createElement = <T extends keyof HTMLElementTagNameMap>(
 
   return element
 }
+
+export const html = htm.bind(createElement)
