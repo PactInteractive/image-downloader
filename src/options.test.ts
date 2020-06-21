@@ -6,6 +6,7 @@ declare var global: any
 beforeEach(() => {
   global.$ = $
   localStorage.clear()
+  document.body.innerHTML = ''
 })
 
 const checkboxOptions = {

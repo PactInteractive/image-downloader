@@ -1,4 +1,3 @@
-import { mockRecursivePartial } from 'sneer'
 import { asMockedFunction, mockChrome } from './utils'
 
 declare var global: any

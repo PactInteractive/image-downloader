@@ -6,6 +6,7 @@ export const mockChrome = () =>
       onInstalled: {
         addListener: jest.fn(),
       },
+      sendMessage: jest.fn(),
     },
     tabs: {
       create: jest.fn(),
