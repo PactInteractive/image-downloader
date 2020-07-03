@@ -4,23 +4,27 @@
   "version": "3.0.0",
   "license": "MIT",
   "scripts": {
+    "start": "node scripts/watch.js",
     "build": "node scripts/build.js",
+    "task": "node scripts/task.js",
     "test": "jest --watch",
     "test.once": "jest --coverage"
   },
   "dependencies": {
-    "@types/chrome": "0.0.114",
-    "@types/jquery": "3.3.38",
+    "@types/chrome": "0.0.117",
+    "@types/jquery": "3.5.0",
     "htm": "3.0.4",
     "jquery": "3.5.1"
   },
   "devDependencies": {
-    "@types/jest": "25.2.3",
+    "@types/jest": "26.0.3",
     "fs-extra": "9.0.1",
-    "jest": "26.0.1",
+    "glob": "7.1.6",
+    "glob-watcher": "5.0.3",
+    "jest": "26.1.0",
     "prettier": "2.0.5",
     "sneer": "1.0.1",
-    "ts-jest": "26.1.0",
-    "typescript": "3.9.5"
+    "ts-jest": "26.1.1",
+    "typescript": "3.9.6"
   }
 }

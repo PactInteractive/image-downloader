@@ -1,27 +1,25 @@
-const { join } = require('path')
-const fs = require('fs-extra')
-const { outputDirectory } = require('./config')
+const glob = require('glob')
+const { filesToCopy } = require('./config')
+const tasks = require('./tasks')
 
-// Update manifest version
-const packageJson = require('../package.json')
-const manifestJson = require('../manifest.json')
-fs.writeJsonSync(
-  './manifest.json',
-  { ...manifestJson, version: packageJson.version },
-  { spaces: 2 }
-)
+const build = async () => {
+  await tasks.clean()
+  await tasks.updateManifestVersion()
+  await Promise.all(
+    filesToCopy
+      .map((filePattern) => glob.sync(filePattern))
+      .reduce((parent, child) => [...parent, ...child], [])
+      .map(tasks.copyFile)
+      .map((promise) =>
+        promise.catch((error) => {
+          if (error.code === 'EEXIST') {
+            // Ignore already existing file error
+          } else {
+            throw error
+          }
+        })
+      )
+  )
+}
 
-// Empty output directory
-fs.emptyDirSync(outputDirectory)
-
-// Copy root directory files
-const filesToCopy = ['manifest.json']
-filesToCopy.forEach((file) => {
-  fs.copyFileSync(file, join(outputDirectory, file))
-})
-
-// Copy directories recursively
-const directoriesToCopy = ['images', 'lib', 'src', 'stylesheets', 'views']
-directoriesToCopy.forEach((directory) => {
-  fs.copySync(directory, join(outputDirectory, directory), { recursive: true })
-})
+build()
