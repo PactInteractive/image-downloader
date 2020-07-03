@@ -3,14 +3,26 @@ import { mockRecursivePartial, RecursivePartial } from 'sneer'
 
 export const mockChrome = () =>
   mockRecursivePartial<typeof chrome>({
+    downloads: {
+      onDeterminingFilename: {
+        addListener: jest.fn(),
+      },
+    },
     runtime: {
       onInstalled: {
+        addListener: jest.fn(),
+      },
+      onMessage: {
         addListener: jest.fn(),
       },
       sendMessage: jest.fn(),
     },
     tabs: {
       create: jest.fn(),
+      query: jest.fn(),
+    },
+    windows: {
+      getCurrent: () => ({ id: 'window' }),
     },
   })
 

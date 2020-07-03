@@ -44,13 +44,13 @@ it(`doesn't clear data from versions after 2.1`, () => {
   clearSpy.mockRestore()
 })
 
-it(`should preserve existing options in 'localStorage'`, () => {
+it(`preserves existing options in 'localStorage'`, () => {
   localStorage.folder_name = 'test'
   require('./defaults')
   expect(localStorage.folder_name).toBe('test')
 })
 
-it(`should set undefined options in 'localStorage' to default`, () => {
+it(`sets undefined options in 'localStorage' to default`, () => {
   localStorage.folder_name = undefined
   require('./defaults')
   expect(localStorage.folder_name).not.toBe(undefined)
