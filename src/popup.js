@@ -179,7 +179,7 @@
     `
     images_table.append(toggle_all_checkbox_row)
 
-    const columns = parseInt(ls.columns)
+    const columns = parseInt(ls.columns, 10)
     const columnWidth = `${Math.round((100 * 100) / columns) / 100}%`
     const rows = Math.ceil(visibleImages.length / columns)
 
@@ -436,7 +436,7 @@
   }
 
   function flash(element, flashes, interval, callback) {
-    if (!interval) interval = parseInt(ls.animation_duration)
+    if (!interval) interval = parseInt(ls.animation_duration, 10)
 
     const fade = (fadeIn) => {
       if (flashes > 0) {
@@ -738,8 +738,8 @@ a{3,6} → Between 3 and 6 of a`}
         behaviour: 'extend-tap',
         connect: true,
         range: {
-          min: parseInt(ls[`filter_min_${dimension}_default`]),
-          max: parseInt(ls[`filter_max_${dimension}_default`]),
+          min: parseInt(ls[`filter_min_${dimension}_default`], 10),
+          max: parseInt(ls[`filter_max_${dimension}_default`], 10),
         },
         step: 10,
         start: [ls[`filter_min_${dimension}`], ls[`filter_max_${dimension}`]],
