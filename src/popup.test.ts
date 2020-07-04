@@ -11,12 +11,11 @@ beforeEach(() => {
   global.$ = $
   global.jss = { set: jest.fn() }
   global.chrome = mockChrome()
+  global.html = html
   document.body.innerHTML = ''
 })
 
 it(`renders images`, () => {
-  document.body.append(html`<table id="images_table" />`)
-
   require('./defaults')
   require('./popup')
   asMockedFunction(chrome.runtime.onMessage.addListener).mock.calls[0][0](
