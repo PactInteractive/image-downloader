@@ -6,8 +6,7 @@
     <link rel="stylesheet" href="/stylesheets/main.css" type="text/css" />
     <link rel="stylesheet" href="/lib/jquery.nouislider/jquery.nouislider.css" type="text/css" />
     <style>
-      body
-      {
+      body {
         margin: 0;
         padding: 0 2px 0 0; /* compensate for browser defaults */
         min-width: 200px;
@@ -15,19 +14,20 @@
         box-sizing: border-box;
       }
 
-      .grid
-      {
+      .grid {
         width: 100%;
         border-collapse: collapse;
       }
+
       .grid td { padding: 0 2px; }
       .grid td input[type="text"],
       .grid td input[type="button"],
       .grid td input[type="number"],
-      .grid td select { width: 100%; }
+      .grid td select {
+        width: 100%;
+      }
 
-      #filters_container
-      {
+      #filters_container {
         position: fixed;
         top: 0px;
         box-sizing: border-box;
@@ -40,8 +40,7 @@
       #filters_container input[type="text"],
       #filters_container input[type="button"],
       #filters_container input[type="number"],
-      #filters_container select
-      {
+      #filters_container select {
         height: 26px;
         margin-bottom: 4px;
       }
@@ -53,8 +52,7 @@
       #images_table img { cursor: pointer; }
 
       .open_image_button,
-      .download_image_button
-      {
+      .download_image_button {
         width: 24px;
         height: 24px;
         cursor: pointer;
@@ -70,6 +68,8 @@
   </head>
 
   <body>
+    <main></main>
+
     <script src="/lib/htm.js"></script>
     <script src="/lib/zepto.js"></script>
     <script src="/lib/jquery.nouislider/jquery.nouislider.js"></script>

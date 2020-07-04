@@ -1,10 +1,6 @@
 ;(function (ls, html) {
-  /* globals $, jss, chrome */
-  /* jshint multistr: true */
-  'use strict'
-
   function initializePopup() {
-    $(document.body).append(html`
+    $('main').append(html`
       <div id="filters_container">
         <table id="filter_inputs_container" class="grid">
           <colgroup>
@@ -53,7 +49,6 @@
               </td>
             </tr>
           `}
-
           ${ls.show_url_filter === 'true' &&
           html`
             <tr>
@@ -225,7 +220,7 @@ a{3,6} → Between 3 and 6 of a`}
       ls.show_image_height_filter === 'true'
     ) {
       // Image dimension filters
-      var serializeSliderValue = function (label, option) {
+      const serializeSliderValue = (label, option) => {
         return $.Link({
           target(value) {
             $(`#${label}`).html(`${value}px`)
@@ -235,13 +230,13 @@ a{3,6} → Between 3 and 6 of a`}
         })
       }
 
-      var toggleDimensionFilter = function (label, option, value) {
+      const toggleDimensionFilter = (label, option, value) => {
         if (value !== undefined) ls[option] = value
         $(`#${label}`).toggleClass('light', ls[option] !== 'true')
         filterImages()
       }
 
-      var initializeFilter = function (dimension) {
+      const initializeFilter = (dimension) => {
         $(`#image_${dimension}_filter_slider`).noUiSlider({
           behaviour: 'extend-tap',
           connect: true,
@@ -309,26 +304,27 @@ a{3,6} → Between 3 and 6 of a`}
     }
 
     // Get images on the page
-    chrome.windows.getCurrent(function (currentWindow) {
-      chrome.tabs.query({ active: true, windowId: currentWindow.id }, function (
-        activeTabs
-      ) {
-        chrome.tabs.executeScript(activeTabs[0].id, {
-          file: '/src/send_images.js',
-          allFrames: true,
-        })
-      })
+    chrome.windows.getCurrent((currentWindow) => {
+      chrome.tabs.query(
+        { active: true, windowId: currentWindow.id },
+        (activeTabs) => {
+          chrome.tabs.executeScript(activeTabs[0].id, {
+            file: '/src/send_images.js',
+            allFrames: true,
+          })
+        }
+      )
     })
   }
 
   function suggestNewFilename(item, suggest) {
-    var newFilename = ''
+    let newFilename = ''
     if (ls.folder_name) {
       newFilename = `${ls.folder_name}/`
     }
     if (ls.new_file_name) {
-      var regex = /(?:\.([^.]+))?$/
-      var extension = regex.exec(item.filename)[1]
+      const regex = /(?:\.([^.]+))?$/
+      const extension = regex.exec(item.filename)[1]
       if (parseInt(ls.image_count, 10) === 1) {
         newFilename += `${ls.new_file_name}.${extension}`
       } else {
@@ -347,10 +343,6 @@ a{3,6} → Between 3 and 6 of a`}
     $('#image_height_filter').toggle(ls.show_image_height_filter === 'true')
 
     // Images
-    jss.set('.image_buttons_container', {
-      'margin-top': `${ls.show_image_url === 'true' ? 3 : -3}px`,
-    })
-
     jss.set('img', {
       'min-width': `${ls.image_min_width}px`,
       'max-width': `${ls.image_max_width}px`,
@@ -363,43 +355,50 @@ a{3,6} → Between 3 and 6 of a`}
     })
 
     // Periodically set the body padding to offset the height of the fixed position filters
-    setInterval(function () {
+    setInterval(() => {
       $('body').css('padding-top', $('#filters_container').height())
     }, 200)
   }
 
-  var allImages = []
-  var visibleImages = []
-  var linkedImages = {}
+  const allImages = []
+  let visibleImages = []
+  const linkedImages = {}
 
   // Add images to `allImages` and trigger filtration
   // `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times
-  chrome.runtime.onMessage.addListener(function (result) {
-    $.extend(linkedImages, result.linkedImages)
-    for (var i = 0; i < result.images.length; i++) {
-      if (allImages.indexOf(result.images[i]) === -1) {
-        allImages.push(result.images[i])
+  chrome.runtime.onMessage.addListener((result) => {
+    Object.assign(linkedImages, result.linkedImages)
+    result.images.forEach((image) => {
+      if (!allImages.includes(image)) {
+        allImages.push(image)
       }
-    }
+    })
     filterImages()
   })
 
-  var timeoutID
+  let timeoutID
   function filterImages() {
     clearTimeout(timeoutID) // Cancel pending filtration
     timeoutID = setTimeout(() => {
-      var images_cache = $('#images_cache')
+      const images_cache = $('#images_cache')
       if (
         ls.show_image_width_filter === 'true' ||
         ls.show_image_height_filter === 'true'
       ) {
-        var cached_images = images_cache.children().length
-        if (cached_images < allImages.length) {
-          for (var i = cached_images; i < allImages.length; i++) {
+        const numberOfCachedImages = images_cache.children().length
+        if (numberOfCachedImages < allImages.length) {
+          for (
+            let index = numberOfCachedImages;
+            index < allImages.length;
+            index++
+          ) {
             // Refilter the images after they're loaded in cache
             images_cache.append(
               html`
-                <img src=${encodeURI(allImages[i])} onLoad=${filterImages} />
+                <img
+                  src=${encodeURI(allImages[index])}
+                  onLoad=${filterImages}
+                />
               `
             )
           }
@@ -410,23 +409,23 @@ a{3,6} → Between 3 and 6 of a`}
       visibleImages = allImages.slice(0)
 
       if (ls.show_url_filter === 'true') {
-        var filterValue = $('#filter_textbox').val()
+        let filterValue = $('#filter_textbox').val()
         if (filterValue) {
           switch (ls.filter_url_mode) {
             case 'normal':
-              var terms = filterValue.split(' ')
-              visibleImages = visibleImages.filter(function (url) {
-                for (var i = 0; i < terms.length; i++) {
-                  var term = terms[i]
+              const terms = filterValue.split(/\s+/)
+              visibleImages = visibleImages.filter((url) => {
+                for (let index = 0; index < terms.length; index++) {
+                  let term = terms[index]
                   if (term.length !== 0) {
-                    var expected = term[0] !== '-'
+                    const expected = term[0] !== '-'
                     if (!expected) {
                       term = term.substr(1)
                       if (term.length === 0) {
                         continue
                       }
                     }
-                    var found = url.indexOf(term) !== -1
+                    const found = url.indexOf(term) !== -1
                     if (found !== expected) {
                       return false
                     }
@@ -441,7 +440,7 @@ a{3,6} → Between 3 and 6 of a`}
                 .replace(/([?*+])/, '.$1')
             /* fall through */
             case 'regex':
-              visibleImages = visibleImages.filter(function (url) {
+              visibleImages = visibleImages.filter((url) => {
                 try {
                   return url.match(filterValue)
                 } catch (e) {
@@ -457,17 +456,15 @@ a{3,6} → Between 3 and 6 of a`}
         ls.show_only_images_from_links === 'true' &&
         ls.only_images_from_links === 'true'
       ) {
-        visibleImages = visibleImages.filter(function (url) {
-          return linkedImages[url]
-        })
+        visibleImages = visibleImages.filter((url) => linkedImages[url])
       }
 
       if (
         ls.show_image_width_filter === 'true' ||
         ls.show_image_height_filter === 'true'
       ) {
-        visibleImages = visibleImages.filter(function (url) {
-          var image = images_cache.children(`img[src="${encodeURI(url)}"]`)[0]
+        visibleImages = visibleImages.filter((url) => {
+          const image = images_cache.children(`img[src="${encodeURI(url)}"]`)[0]
           return (
             (ls.show_image_width_filter !== 'true' ||
               ((ls.filter_min_width_enabled !== 'true' ||
@@ -490,9 +487,10 @@ a{3,6} → Between 3 and 6 of a`}
   function displayImages() {
     $('#download_button').prop('disabled', true)
 
-    var images_table = $('#images_table').empty()
+    const images_table = $('#images_table')
+    images_table.empty()
 
-    var toggle_all_checkbox_row = html`
+    const toggle_all_checkbox_row = html`
       <tr>
         <th align="left" colspan=${ls.columns}>
           <label>
@@ -501,7 +499,7 @@ a{3,6} → Between 3 and 6 of a`}
               id="toggle_all_checkbox"
               onChange=${(e) => {
                 $('#download_button').prop('disabled', !e.target.checked)
-                for (var index = 0; index < visibleImages.length; index++) {
+                for (let index = 0; index < visibleImages.length; index++) {
                   $(`#image${index}`).toggleClass('checked', e.target.checked)
                 }
               }}
@@ -513,22 +511,22 @@ a{3,6} → Between 3 and 6 of a`}
     `
     images_table.append(toggle_all_checkbox_row)
 
-    var columns = parseInt(ls.columns)
-    var columnWidth = `${Math.round((100 * 100) / columns) / 100}%`
-    var rows = Math.ceil(visibleImages.length / columns)
+    const columns = parseInt(ls.columns)
+    const columnWidth = `${Math.round((100 * 100) / columns) / 100}%`
+    const rows = Math.ceil(visibleImages.length / columns)
 
     // Tools row
-    var show_image_url = ls.show_image_url === 'true'
-    var show_open_image_button = ls.show_open_image_button === 'true'
-    var show_download_image_button = ls.show_download_image_button === 'true'
+    const show_image_url = ls.show_image_url === 'true'
+    const show_open_image_button = ls.show_open_image_button === 'true'
+    const show_download_image_button = ls.show_download_image_button === 'true'
 
-    var colspan =
+    const colspan =
       (show_image_url ? 1 : 0) +
         (show_open_image_button ? 1 : 0) +
         (show_download_image_button ? 1 : 0) || 1
 
     // Append dummy image row to keep the popup width constant when there are 0 images
-    var dummy_row = html`
+    const dummy_row = html`
       <tr>
         ${Array(columns)
           .fill(undefined)
@@ -548,15 +546,15 @@ a{3,6} → Between 3 and 6 of a`}
     `
     images_table.append(dummy_row)
 
-    for (var rowIndex = 0; rowIndex < rows; rowIndex++) {
+    for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
       if (
         show_image_url ||
         show_open_image_button ||
         show_download_image_button
       ) {
-        var tools_row = $('<tr></tr>')
-        for (var columnIndex = 0; columnIndex < columns; columnIndex++) {
-          var index = rowIndex * columns + columnIndex
+        const tools_row = $('<tr></tr>') // TODO: Rewrite with `html`
+        for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
+          const index = rowIndex * columns + columnIndex
           if (index === visibleImages.length) break
 
           const imageUrl = visibleImages[index]
@@ -615,14 +613,14 @@ a{3,6} → Between 3 and 6 of a`}
       }
 
       // Images row
-      var images_row = $('<tr></tr>')
-      for (var columnIndex = 0; columnIndex < columns; columnIndex++) {
-        var index = rowIndex * columns + columnIndex
+      const images_row = $('<tr></tr>')
+      for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
+        const index = rowIndex * columns + columnIndex
         if (index === visibleImages.length) break
 
         const imageUrl = visibleImages[index]
 
-        var image = html`
+        const image = html`
           <td
             colspan=${colspan}
             style=${{
@@ -682,15 +680,15 @@ a{3,6} → Between 3 and 6 of a`}
     }
 
     function startDownload() {
-      var checkedImages = []
-      for (var i = 0; i < visibleImages.length; i++) {
-        if ($(`#image${i}`).hasClass('checked')) {
-          checkedImages.push(visibleImages[i])
+      const checkedImages = []
+      for (let index = 0; index < visibleImages.length; index++) {
+        if ($(`#image${index}`).hasClass('checked')) {
+          checkedImages.push(visibleImages[index])
         }
       }
       ls.image_count = checkedImages.length
       ls.image_number = 1
-      checkedImages.forEach(function (checkedImage) {
+      checkedImages.forEach((checkedImage) => {
         chrome.downloads.download({ url: checkedImage })
       })
 
@@ -699,7 +697,7 @@ a{3,6} → Between 3 and 6 of a`}
   }
 
   function showDownloadConfirmation(startDownload) {
-    const saveDontShowThisAgainState = () => {
+    const saveDontShowAgainState = () => {
       ls.show_download_confirmation = !$('#dont_show_again_checkbox').prop(
         'checked'
       )
@@ -709,7 +707,7 @@ a{3,6} → Between 3 and 6 of a`}
       notification_container.remove()
     }
 
-    var notification_container = html`
+    const notification_container = html`
       <div>
         <div>
           <hr />
@@ -727,7 +725,7 @@ a{3,6} → Between 3 and 6 of a`}
           class="success"
           value="YES"
           onClick=${() => {
-            saveDontShowThisAgainState()
+            saveDontShowAgainState()
             removeNotificationContainer()
             startDownload()
           }}
@@ -738,7 +736,7 @@ a{3,6} → Between 3 and 6 of a`}
           class="danger"
           value="NO"
           onClick=${() => {
-            saveDontShowThisAgainState()
+            saveDontShowAgainState()
             removeNotificationContainer()
           }}
         />
@@ -764,7 +762,7 @@ a{3,6} → Between 3 and 6 of a`}
 
     $('#filters_container').append(downloading_notification)
 
-    flash(downloading_notification, 3.5, 0, function () {
+    flash(downloading_notification, 3.5, 0, () => {
       downloading_notification.remove()
     })
   }
@@ -772,17 +770,13 @@ a{3,6} → Between 3 and 6 of a`}
   function flash(element, flashes, interval, callback) {
     if (!interval) interval = parseInt(ls.animation_duration)
 
-    var fade = function (fadeIn) {
+    const fade = (fadeIn) => {
       if (flashes > 0) {
         flashes -= 0.5
         if (fadeIn) {
-          element.fadeIn(interval, function () {
-            fade(false)
-          })
+          element.fadeIn(interval, () => fade(false))
         } else {
-          element.fadeOut(interval, function () {
-            fade(true)
-          })
+          element.fadeOut(interval, () => fade(true))
         }
       } else if (callback) {
         callback(element)
