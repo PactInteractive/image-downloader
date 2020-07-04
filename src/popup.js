@@ -4,6 +4,7 @@ import {
   ImageUrlTextbox,
   OpenImageButton,
 } from './ImageActions.js'
+import { SelectAllCheckbox } from './SelectAllCheckbox.js'
 
 const ls = localStorage
 
@@ -166,19 +167,17 @@ function displayImages() {
   const toggle_all_checkbox_row = html`
     <tr>
       <th align="left" colspan=${ls.columns}>
-        <label>
-          <input
-            type="checkbox"
-            id="toggle_all_checkbox"
-            onChange=${(e) => {
-              $('#download_button').prop('disabled', !e.target.checked)
-              for (let index = 0; index < visibleImages.length; index++) {
-                $(`#image${index}`).toggleClass('checked', e.target.checked)
-              }
-            }}
-          />
+        <${SelectAllCheckbox}
+          id="toggle_all_checkbox"
+          onChange=${(e) => {
+            $('#download_button').prop('disabled', !e.target.checked)
+            for (let index = 0; index < visibleImages.length; index++) {
+              $(`#image${index}`).toggleClass('checked', e.target.checked)
+            }
+          }}
+        >
           Select all (${visibleImages.length})
-        </label>
+        <//>
       </th>
     </tr>
   `
@@ -224,36 +223,27 @@ function displayImages() {
       show_open_image_button ||
       show_download_image_button
     ) {
-      const tools_row = $('<tr></tr>') // TODO: Rewrite with `html`
-      for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
-        const index = rowIndex * columns + columnIndex
-        if (index === visibleImages.length) break
+      const actions_row = html`
+        <tr>
+          ${Array(columns)
+            .fill(undefined)
+            .map((_, columnIndex) => {
+              const index = rowIndex * columns + columnIndex
+              if (index === visibleImages.length) return null
 
-        const imageUrl = visibleImages[index]
-
-        if (show_image_url) {
-          tools_row.append(
-            html`
-              <td>
-                <${ImageUrlTextbox} value=${imageUrl} />
-              </td>
-            `
-          )
-        }
-
-        if (show_open_image_button) {
-          tools_row.append(
-            html`<td><${OpenImageButton} imageUrl=${imageUrl} /></td>`
-          )
-        }
-
-        if (show_download_image_button) {
-          tools_row.append(
-            html`<td><${DownloadImageButton} imageUrl=${imageUrl} /></td>`
-          )
-        }
-      }
-      images_table.append(tools_row)
+              const imageUrl = visibleImages[index]
+              return html`
+                ${show_image_url &&
+                html`<td><${ImageUrlTextbox} value=${imageUrl} /></td>`}
+                ${show_open_image_button &&
+                html`<td><${OpenImageButton} imageUrl=${imageUrl} /></td>`}
+                ${show_download_image_button &&
+                html`<td><${DownloadImageButton} imageUrl=${imageUrl} /></td>`}
+              `
+            })}
+        </tr>
+      `
+      images_table.append(actions_row)
     }
 
     // Images row

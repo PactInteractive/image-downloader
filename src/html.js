@@ -42,7 +42,7 @@ const html = (tagName, props, ...children) => {
 
   children
     // Handle the case when there are nested children that use `html`
-    .flat()
+    .flat(2)
     // Remove falsy values
     .filter((child) => child || child === 0)
     // Append children
