@@ -11,20 +11,18 @@
     "test.once": "jest --coverage"
   },
   "dependencies": {
-    "@types/chrome": "0.0.117",
-    "@types/jquery": "3.5.0",
-    "htm": "3.0.4",
-    "jquery": "3.5.1"
+    "@types/chrome": "0.0.122",
+    "@types/jquery": "3.5.1"
   },
   "devDependencies": {
-    "@types/jest": "26.0.3",
+    "@types/jest": "26.0.9",
     "fs-extra": "9.0.1",
     "glob": "7.1.6",
-    "glob-watcher": "5.0.3",
-    "jest": "26.1.0",
+    "glob-watcher": "5.0.5",
+    "jest": "26.2.2",
     "prettier": "2.0.5",
     "sneer": "1.0.1",
-    "ts-jest": "26.1.1",
-    "typescript": "3.9.6"
+    "ts-jest": "26.1.4",
+    "typescript": "3.9.7"
   }
 }
