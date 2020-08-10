@@ -1,10 +1,10 @@
 import html from './html.js'
+import { Checkbox } from './Checkbox.js'
 import {
   DownloadImageButton,
   ImageUrlTextbox,
   OpenImageButton,
 } from './ImageActions.js'
-import { SelectAllCheckbox } from './SelectAllCheckbox.js'
 
 const ls = localStorage
 
@@ -167,7 +167,7 @@ function displayImages() {
   const toggle_all_checkbox_row = html`
     <tr>
       <th align="left" colspan=${ls.columns}>
-        <${SelectAllCheckbox}
+        <${Checkbox}
           id="toggle_all_checkbox"
           onChange=${(e) => {
             $('#download_button').prop('disabled', !e.target.checked)
