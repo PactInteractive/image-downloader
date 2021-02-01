@@ -8,13 +8,14 @@
     "build": "node scripts/build.js",
     "task": "node scripts/task.js",
     "test": "jest --watch",
-    "test.once": "jest --coverage"
+    "test.all": "jest --coverage"
   },
   "dependencies": {
     "@types/chrome": "0.0.122",
     "@types/jquery": "3.5.1"
   },
   "devDependencies": {
+    "@babel/plugin-transform-modules-commonjs": "7.10.4",
     "@types/jest": "26.0.9",
     "fs-extra": "9.0.1",
     "glob": "7.1.6",
@@ -24,5 +25,14 @@
     "sneer": "1.0.1",
     "ts-jest": "26.1.4",
     "typescript": "3.9.7"
+  },
+  "babel": {
+    "env": {
+      "test": {
+        "plugins": [
+          "@babel/plugin-transform-modules-commonjs"
+        ]
+      }
+    }
   }
 }

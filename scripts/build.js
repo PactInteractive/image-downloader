@@ -1,10 +1,10 @@
-const glob = require('glob')
-const { filesToCopy } = require('./config')
-const tasks = require('./tasks')
+const glob = require('glob');
+const { filesToCopy } = require('./config');
+const tasks = require('./tasks');
 
 const build = async () => {
-  await tasks.clean()
-  await tasks.updateManifestVersion()
+  await tasks.clean();
+  await tasks.updateManifestVersion();
   await Promise.all(
     filesToCopy
       .map((filePattern) => glob.sync(filePattern))
@@ -15,11 +15,11 @@ const build = async () => {
           if (error.code === 'EEXIST') {
             // Ignore already existing file error
           } else {
-            throw error
+            throw error;
           }
         })
       )
-  )
-}
+  );
+};
 
-build()
+build();

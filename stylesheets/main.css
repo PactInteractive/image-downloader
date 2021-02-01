@@ -23,12 +23,6 @@ body {
   color: var(--foreground);
 }
 
-hr {
-  border: 1px dotted var(--neutral);
-  border-bottom: none;
-  margin: 4px 0;
-}
-
 .left {
   float: left;
 }
@@ -66,6 +60,12 @@ a:visited {
 a:hover,
 a:active {
   color: var(--accentDark);
+}
+
+hr {
+  border: 1px dotted var(--neutral);
+  border-bottom: none;
+  margin: 4px 0;
 }
 
 /* images */
@@ -137,4 +137,8 @@ input[type='button'].danger:hover,
 input[type='button'].danger:focus,
 input[type='button'].danger:active {
   background: var(--danger);
+}
+
+label {
+  cursor: pointer;
 }

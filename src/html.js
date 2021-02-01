@@ -1,42 +1,42 @@
-import htm from '../lib/htm.js'
+import htm from '../lib/htm.js';
 
 const html = (tagName, props, ...children) => {
   // Functional components
   if (typeof tagName === 'function') {
-    return tagName({ children, ...props })
+    return tagName({ children, ...props });
   }
 
   // Elements
-  const element = document.createElement(tagName)
+  const element = document.createElement(tagName);
 
   for (let prop in props) {
     // Class
     if (prop === 'class' || prop === 'className') {
-      element.className = props.class || props.className || ''
+      element.className = props.class || props.className || '';
     }
     // Style
     else if (prop === 'style') {
-      Object.assign(element.style, props.style)
+      Object.assign(element.style, props.style);
     }
     // Event handlers
     else if (prop.startsWith('on')) {
-      const eventHandler = props[prop]
+      const eventHandler = props[prop];
       if (typeof eventHandler === 'function') {
-        const eventName = prop.replace(/^on/, '').toLowerCase()
-        element.addEventListener(eventName, eventHandler)
+        const eventName = prop.replace(/^on/, '').toLowerCase();
+        element.addEventListener(eventName, eventHandler);
       }
     }
     // Override children coming from functional components
     else if (prop === 'children') {
-      children = props.children
+      children = props.children;
     }
     // Properties
     else if (prop in element) {
-      element[prop] = props[prop]
+      element[prop] = props[prop];
     }
     // Attributes
     else {
-      element.setAttribute(prop, props[prop])
+      element.setAttribute(prop, props[prop]);
     }
   }
 
@@ -48,19 +48,19 @@ const html = (tagName, props, ...children) => {
     // Append children
     .forEach((child) => {
       if (typeof child === 'string') {
-        child = decodeHtml(child)
+        child = decodeHtml(child);
       }
-      element.append(child)
-    })
+      element.append(child);
+    });
 
-  return element
-}
+  return element;
+};
 
 /** Source: https://stackoverflow.com/questions/7394748/whats-the-right-way-to-decode-a-string-that-has-special-html-entities-in-it/7394787 */
 const decodeHtml = (html) => {
-  const textarea = document.createElement('textarea')
-  textarea.innerHTML = html
-  return textarea.value
-}
+  const textarea = document.createElement('textarea');
+  textarea.innerHTML = html;
+  return textarea.value;
+};
 
-export default htm.bind(html)
+export default htm.bind(html);

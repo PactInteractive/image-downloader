@@ -1,30 +1,38 @@
-import * as $ from 'jquery'
-import { html, mockChrome } from './utils'
+import html from './html';
+import { mockChrome } from './utils';
 
-declare var global: any
+declare var global: any;
 
 beforeEach(() => {
-  global.$ = $
-  localStorage.clear()
-  document.body.innerHTML = ''
-})
+  localStorage.clear();
+  require('../lib/zepto');
+  ($.fn as any).fadeIn = function (duration, fn) {
+    setTimeout(duration, fn);
+    return this;
+  };
+  ($.fn as any).fadeOut = function (duration, fn) {
+    setTimeout(duration, fn);
+    return this;
+  };
+  document.body.innerHTML = '';
+});
 
 const checkboxOptions = {
   prop: 'checked',
   values: [true, false],
   trigger($el: JQuery<HTMLElement>, value: any) {
     if (value) {
-      $el.trigger('click')
+      $el.trigger('click');
     }
   },
-}
+};
 
 const inputOptions = {
   prop: 'value',
   trigger($el: JQuery<HTMLElement>, value: any) {
-    $el.val(value)
+    $el.val(value);
   },
-}
+};
 
 const options = [
   {
@@ -125,115 +133,115 @@ const options = [
     values: ['#ff0000', '#00ff00', '#0000ff'],
     ...inputOptions,
   },
-]
+];
 
 describe(`initialize control values`, () => {
   options.forEach((option) => {
     option.values.forEach((value) => {
       describe(option.key, () => {
         it(value.toString(), () => {
-          document.body.append(option.input)
-          localStorage[option.key] = value.toString()
+          document.body.append(option.input);
+          localStorage[option.key] = value.toString();
 
-          require('./options')
+          require('./options');
 
-          expect(option.input[option.prop]).toBe(value)
-        })
-      })
-    })
-  })
-})
+          expect(option.input[option.prop]).toBe(value);
+        });
+      });
+    });
+  });
+});
 
 describe(`save`, () => {
   options.forEach((option) => {
     describe(option.key, () => {
       option.values.forEach((value) => {
         it(value.toString(), () => {
-          document.body.append(option.input)
+          document.body.append(option.input);
 
-          const saveButton = html`<input id="save_button" type="button" />`
-          document.body.append(saveButton)
+          const saveButton = html`<input id="save_button" type="button" />`;
+          document.body.append(saveButton);
 
-          require('./options')
+          require('./options');
 
-          option.trigger($(`#${option.input.id}`), value)
-          $(`#${saveButton.id}`).trigger('click')
+          option.trigger($(`#${option.input.id}`), value);
+          $(`#${saveButton.id}`).trigger('click');
 
-          expect(localStorage[option.key]).toBe(value.toString())
-        })
-      })
-    })
-  })
-})
+          expect(localStorage[option.key]).toBe(value.toString());
+        });
+      });
+    });
+  });
+});
 
 describe(`reset`, () => {
   beforeEach(() => {
-    global.chrome = mockChrome()
-  })
+    global.chrome = mockChrome();
+  });
 
   options.forEach((option) => {
     describe(option.key, () => {
       option.values.forEach((value) => {
         it(value.toString(), () => {
-          document.body.append(option.input)
+          document.body.append(option.input);
 
-          const saveButton = html`<input id="save_button" type="button" />`
-          document.body.append(saveButton)
+          const saveButton = html`<input id="save_button" type="button" />`;
+          document.body.append(saveButton);
 
-          const resetButton = html`<input id="reset_button" type="button" />`
-          document.body.append(resetButton)
+          const resetButton = html`<input id="reset_button" type="button" />`;
+          document.body.append(resetButton);
 
-          require('./defaults')
-          require('./options')
+          require('./defaults');
+          require('./options');
 
-          option.trigger($(`#${option.input.id}`), value)
-          $(`#${resetButton.id}`).trigger('click')
-          $(`#${saveButton.id}`).trigger('click')
+          option.trigger($(`#${option.input.id}`), value);
+          $(`#${resetButton.id}`).trigger('click');
+          $(`#${saveButton.id}`).trigger('click');
 
           expect(localStorage[option.key]).toBe(
             localStorage[`${option.key}_default`]
-          )
-        })
-      })
-    })
-  })
-})
+          );
+        });
+      });
+    });
+  });
+});
 
-describe(`clear data`, () => {
+describe.only(`clear data`, () => {
   beforeEach(() => {
-    global.chrome = mockChrome()
-    global.confirm = () => true
-    delete global.window.location
-    global.window.location = { reload() {} }
-  })
+    global.chrome = mockChrome();
+    global.confirm = () => true;
+    delete global.window.location;
+    global.window.location = { reload() {} };
+  });
 
   options.forEach((option) => {
     describe(option.key, () => {
       option.values.forEach((value) => {
         it(value.toString(), () => {
-          document.body.append(option.input)
+          document.body.append(option.input);
 
-          const saveButton = html`<input id="save_button" type="button" />`
-          document.body.append(saveButton)
+          const saveButton = html`<input id="save_button" type="button" />`;
+          document.body.append(saveButton);
 
           const clearDataButton = html`<input
             id="clear_data_button"
             type="button"
-          />`
-          document.body.append(clearDataButton)
+          />`;
+          document.body.append(clearDataButton);
 
-          require('./defaults')
-          require('./options')
+          require('./defaults');
+          require('./options');
 
-          option.trigger($(`#${option.input.id}`), value)
-          $(`#${saveButton.id}`).trigger('click')
-          $(`#${clearDataButton.id}`).trigger('click')
+          option.trigger($(`#${option.input.id}`), value);
+          $(`#${saveButton.id}`).trigger('click');
+          $(`#${clearDataButton.id}`).trigger('click');
 
           expect(localStorage[option.key]).toBe(
             localStorage[`${option.key}_default`]
-          )
-        })
-      })
-    })
-  })
-})
+          );
+        });
+      });
+    });
+  });
+});

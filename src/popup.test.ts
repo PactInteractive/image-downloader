@@ -1,24 +1,33 @@
-import * as $ from 'jquery'
-import { html, asMockedFunction, mockChrome } from './utils'
+import { asMockedFunction, mockChrome } from './utils';
 
-jest.useFakeTimers()
+jest.useFakeTimers();
 
-declare var global: any
+declare var global: any;
 
 beforeEach(() => {
-  ;($ as any).Link = jest.fn()
-  ;($.fn as any).noUiSlider = jest.fn()
-  global.$ = $
-  global.jss = { set: jest.fn() }
-  global.chrome = mockChrome()
-  global.html = html
-  document.body.innerHTML = ''
-})
+  global.jss = { set: jest.fn() };
+  global.chrome = mockChrome();
+  global.this = global;
+  require('../lib/zepto');
+  ($.fn as any).fadeIn = function (duration, fn) {
+    setTimeout(duration, fn);
+    return this;
+  };
+  ($.fn as any).fadeOut = function (duration, fn) {
+    setTimeout(duration, fn);
+    return this;
+  };
+  ($ as any).Link = jest.fn();
+  ($.fn as any).noUiSlider = jest.fn();
+  document.body.innerHTML = '<main></main>';
+  require('./defaults');
+  require('./popup');
+});
 
-it(`renders images`, () => {
-  require('./defaults')
-  require('./popup')
-  asMockedFunction(chrome.runtime.onMessage.addListener).mock.calls[0][0](
+it.only(`renders images`, () => {
+  const renderImages = asMockedFunction(chrome.runtime.onMessage.addListener)
+    .mock.calls[0][0];
+  renderImages(
     {
       linkedImages: {},
       images: [
@@ -29,10 +38,8 @@ it(`renders images`, () => {
     },
     {},
     () => {}
-  )
-  jest.runOnlyPendingTimers()
+  );
+  jest.runOnlyPendingTimers();
 
-  expect(
-    document.querySelectorAll('img[src^="http://example.com/image-"]').length
-  ).toBe(3)
-})
+  expect(document.querySelectorAll('#images_table img').length).toBe(3);
+});

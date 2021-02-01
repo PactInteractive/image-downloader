@@ -1,12 +1,16 @@
-(function (ls) {
+((ls) => {
   'use strict';
 
   // One-time reset of settings
-  chrome.runtime.onInstalled.addListener(function (details) {
-    if (details.reason === 'install') { // Open the options page after install
+  chrome.runtime.onInstalled.addListener((details) => {
+    if (details.reason === 'install') {
+      // Open the options page after install
       chrome.tabs.create({ url: '/views/options.html' });
-    }
-    else if (details.reason === 'update' && /^(((0|1)\..*)|(2\.(0|1)(\..*)?))$/.test(details.previousVersion)) { // Clear data from versions before 2.1
+    } else if (
+      details.reason === 'update' &&
+      /^(((0|1)\..*)|(2\.(0|1)(\..*)?))$/.test(details.previousVersion)
+    ) {
+      // Clear data from versions before 2.1
       ls.clear();
     }
   });
@@ -48,7 +52,7 @@
     image_min_width: 50,
     image_max_width: 200,
     image_border_width: 3,
-    image_border_color: '#3498db'
+    image_border_color: '#3498db',
   };
 
   for (var option in defaults) {
@@ -57,4 +61,4 @@
   }
 
   ls.options = JSON.stringify(Object.keys(defaults));
-}(localStorage));
+})(localStorage);

@@ -1,5 +1,5 @@
-const packagePath = './package.json'
-const manifestPath = './manifest.json'
+const packagePath = './package.json';
+const manifestPath = './manifest.json';
 
 module.exports = {
   filesToCopy: [
@@ -15,4 +15,4 @@ module.exports = {
     manifest: manifestPath,
   },
   outputDirectory: 'build',
-}
+};

@@ -1,63 +1,63 @@
-import { asMockedFunction, mockChrome } from './utils'
+import { asMockedFunction, mockChrome } from './utils';
 
-declare var global: any
+declare var global: any;
 
 beforeEach(() => {
-  global.chrome = mockChrome()
-  localStorage.clear()
-})
+  global.chrome = mockChrome();
+  localStorage.clear();
+});
 
 it(`adds a listener on install or update`, () => {
-  require('./defaults')
-  expect(chrome.runtime.onInstalled.addListener).toHaveBeenCalledTimes(1)
-})
+  require('./defaults');
+  expect(chrome.runtime.onInstalled.addListener).toHaveBeenCalledTimes(1);
+});
 
 it(`opens options page on install`, () => {
-  require('./defaults')
+  require('./defaults');
   const handler = asMockedFunction(chrome.runtime.onInstalled.addListener).mock
-    .calls[0][0]
-  handler({ reason: 'install' })
+    .calls[0][0];
+  handler({ reason: 'install' });
   expect(chrome.tabs.create).toHaveBeenCalledWith({
     url: '/views/options.html',
-  })
-})
+  });
+});
 
 it(`clears data from versions before 2.1`, () => {
   // https://github.com/facebook/jest/issues/6798#issuecomment-412871616
-  const clearSpy = jest.spyOn(Storage.prototype, 'clear')
-  require('./defaults')
+  const clearSpy = jest.spyOn(Storage.prototype, 'clear');
+  require('./defaults');
   const handler = asMockedFunction(chrome.runtime.onInstalled.addListener).mock
-    .calls[0][0]
-  handler({ reason: 'update', previousVersion: '1.3' })
-  expect(clearSpy).toHaveBeenCalled()
-  clearSpy.mockRestore()
-})
+    .calls[0][0];
+  handler({ reason: 'update', previousVersion: '1.3' });
+  expect(clearSpy).toHaveBeenCalled();
+  clearSpy.mockRestore();
+});
 
 it(`doesn't clear data from versions after 2.1`, () => {
   // https://github.com/facebook/jest/issues/6798#issuecomment-412871616
-  const clearSpy = jest.spyOn(Storage.prototype, 'clear')
-  require('./defaults')
+  const clearSpy = jest.spyOn(Storage.prototype, 'clear');
+  require('./defaults');
   const handler = asMockedFunction(chrome.runtime.onInstalled.addListener).mock
-    .calls[0][0]
-  handler({ reason: 'update', previousVersion: '2.3' })
-  expect(clearSpy).not.toHaveBeenCalled()
-  clearSpy.mockRestore()
-})
+    .calls[0][0];
+  handler({ reason: 'update', previousVersion: '2.3' });
+  expect(clearSpy).not.toHaveBeenCalled();
+  clearSpy.mockRestore();
+});
 
 it(`preserves existing options in 'localStorage'`, () => {
-  localStorage.folder_name = 'test'
-  require('./defaults')
-  expect(localStorage.folder_name).toBe('test')
-})
+  localStorage.folder_name = 'test';
+  require('./defaults');
+  expect(localStorage.folder_name).toBe('test');
+});
 
 it(`sets undefined options in 'localStorage' to default`, () => {
-  localStorage.folder_name = undefined
-  require('./defaults')
-  expect(localStorage.folder_name).not.toBe(undefined)
-})
+  localStorage.folder_name = undefined;
+  require('./defaults');
+  expect(localStorage.folder_name).not.toBe(undefined);
+});
 
 it(`matches 'localStorage' snapshot`, () => {
-  require('./defaults')
+  require('./defaults');
   expect(global.localStorage).toMatchInlineSnapshot(`
     Storage {
       "animation_duration": "500",
@@ -119,5 +119,5 @@ it(`matches 'localStorage' snapshot`, () => {
       "show_url_filter": "true",
       "show_url_filter_default": "true",
     }
-  `)
-})
+  `);
+});
