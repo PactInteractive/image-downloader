@@ -84,11 +84,16 @@ input[type='button'],
 input[type='number'],
 select {
   box-sizing: border-box;
+  font-size: 12px;
+}
+
+input[type='button'],
+input[type='checkbox'] {
+  cursor: pointer;
 }
 
 input[type='button'] {
   min-width: 50px;
-  cursor: pointer;
   color: var(--neutralLight);
   border: 0;
   padding: 3px 10px;
@@ -141,4 +146,5 @@ input[type='button'].danger:active {
 
 label {
   cursor: pointer;
+  display: inline-flex;
 }

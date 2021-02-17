@@ -377,10 +377,9 @@ function showDownloadConfirmation(startDownload) {
         }}
       />
 
-      <label>
-        <input type="checkbox" id="dont_show_again_checkbox" />
+      <${Checkbox} id="dont_show_again_checkbox">
         Don't show this again
-      </label>
+      <//>
     </div>
   `;
 
@@ -663,19 +662,16 @@ a{3,6} → Between 3 and 6 of a`}
 
     ${ls.show_only_images_from_links === 'true' &&
     html`
-      <label
+      <${Checkbox}
         title="Only show images from direct links on the page; this can be useful on sites like Reddit"
+        checked=${ls.only_images_from_links === 'true'}
+        onChange=${(e) => {
+          ls.only_images_from_links = e.target.checked;
+          filterImages();
+        }}
       >
-        <input
-          type="checkbox"
-          checked=${ls.only_images_from_links === 'true'}
-          onChange=${(e) => {
-            ls.only_images_from_links = e.target.checked;
-            filterImages();
-          }}
-        />
         Only images from links
-      </label>
+      <//>
     `}
   </div>
 
