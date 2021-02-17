@@ -1,13 +1,12 @@
-(function () {
-  /* globals chrome */
-  'use strict';
-
+(() => {
   const imageDownloader = {
     // Source: https://support.google.com/webmasters/answer/2598805?hl=en
     imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|jpe?g|png|svg|webp))(?:\?([^#]*))?(?:#(.*))?/i,
 
     extractImagesFromTags() {
-      return [].slice.apply(document.querySelectorAll('img, a, [style]')).map(imageDownloader.extractImageFromElement);
+      return [].slice
+        .apply(document.querySelectorAll('img, a, [style]'))
+        .map(imageDownloader.extractImageFromElement);
     },
 
     extractImagesFromStyles() {
@@ -22,7 +21,9 @@
           for (let j = 0; j < cssRules.length; j++) {
             const style = cssRules[j].style;
             if (style && style.backgroundImage) {
-              const url = imageDownloader.extractURLFromStyle(style.backgroundImage);
+              const url = imageDownloader.extractURLFromStyle(
+                style.backgroundImage
+              );
               if (imageDownloader.isImageURL(url)) {
                 imagesFromStyles.push(url);
               }
@@ -68,7 +69,9 @@
     },
 
     isImageURL(url) {
-      return url.indexOf('data:image') === 0 || imageDownloader.imageRegex.test(url);
+      return (
+        url.indexOf('data:image') === 0 || imageDownloader.imageRegex.test(url)
+      );
     },
 
     relativeUrlToAbsolute(url) {
@@ -89,22 +92,24 @@
       }
 
       return result;
-    }
+    },
   };
 
   imageDownloader.linkedImages = {}; // TODO: Avoid mutating this object in `extractImageFromElement`
   imageDownloader.images = imageDownloader.removeDuplicateOrEmpty(
-    [].concat(
-      imageDownloader.extractImagesFromTags(),
-      imageDownloader.extractImagesFromStyles()
-    ).map(imageDownloader.relativeUrlToAbsolute)
+    []
+      .concat(
+        imageDownloader.extractImagesFromTags(),
+        imageDownloader.extractImagesFromStyles()
+      )
+      .map(imageDownloader.relativeUrlToAbsolute)
   );
 
   chrome.runtime.sendMessage({
     linkedImages: imageDownloader.linkedImages,
-    images: imageDownloader.images
+    images: imageDownloader.images,
   });
 
   imageDownloader.linkedImages = null;
   imageDownloader.images = null;
-}());
+})();

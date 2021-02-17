@@ -23,12 +23,6 @@ body {
   color: var(--foreground);
 }
 
-hr {
-  border: 1px dotted var(--neutral);
-  border-bottom: none;
-  margin: 4px 0;
-}
-
 .left {
   float: left;
 }
@@ -68,6 +62,12 @@ a:active {
   color: var(--accentDark);
 }
 
+hr {
+  border: 1px dotted var(--neutral);
+  border-bottom: none;
+  margin: 4px 0;
+}
+
 /* images */
 img {
   box-sizing: border-box;
@@ -84,11 +84,16 @@ input[type='button'],
 input[type='number'],
 select {
   box-sizing: border-box;
+  font-size: 12px;
+}
+
+input[type='button'],
+input[type='checkbox'] {
+  cursor: pointer;
 }
 
 input[type='button'] {
   min-width: 50px;
-  cursor: pointer;
   color: var(--neutralLight);
   border: 0;
   padding: 3px 10px;
@@ -137,4 +142,9 @@ input[type='button'].danger:hover,
 input[type='button'].danger:focus,
 input[type='button'].danger:active {
   background: var(--danger);
+}
+
+label {
+  cursor: pointer;
+  display: inline-flex;
 }

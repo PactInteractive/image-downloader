@@ -1,16 +1,15 @@
-
 /* Functional styling;
  * These styles are required for noUiSlider to function.
  * You don't need to change these rules to apply your design.
  */
 .noUi-target,
 .noUi-target * {
--webkit-touch-callout: none;
--webkit-user-select: none;
--ms-touch-action: none;
--ms-user-select: none;
--moz-user-select: none;
--moz-box-sizing: border-box;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -ms-touch-action: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 .noUi-base {
@@ -30,17 +29,17 @@
   z-index: 1;
 }
 .noUi-stacking .noUi-handle {
-/* This class is applied to the lower origin when
+  /* This class is applied to the lower origin when
    its values is > 50%. */
   z-index: 10;
 }
 .noUi-stacking + .noUi-origin {
-/* Fix stacking order in IE7, which incorrectly
+  /* Fix stacking order in IE7, which incorrectly
    creates a new context for the origins. */
   *z-index: -1;
 }
 .noUi-state-tap .noUi-origin {
--webkit-transition: left 0.3s, top 0.3s;
+  -webkit-transition: left 0.3s, top 0.3s;
   transition: left 0.3s, top 0.3s;
 }
 .noUi-state-drag * {
@@ -61,7 +60,7 @@
 .noUi-horizontal.noUi-extended {
   padding: 0 6px;
 }
-.noUi-horizontal.noUi-extended .noUi-origin  {
+.noUi-horizontal.noUi-extended .noUi-origin {
   right: -6px;
 }
 .noUi-vertical {
@@ -76,20 +75,20 @@
 .noUi-vertical.noUi-extended {
   padding: 6px 0;
 }
-.noUi-vertical.noUi-extended .noUi-origin  {
+.noUi-vertical.noUi-extended .noUi-origin {
   bottom: -6px;
 }
 
 /* Styling;
  */
 .noUi-background {
-  background: #FAFAFA;
+  background: #fafafa;
   box-shadow: inset 0 1px 1px #f0f0f0;
 }
 .noUi-connect {
-  background: #3498DB;
-  box-shadow: inset 0 0 3px rgba(51,51,51,0.45);
--webkit-transition: background 450ms;
+  background: #3498db;
+  box-shadow: inset 0 0 3px rgba(51, 51, 51, 0.45);
+  -webkit-transition: background 450ms;
   transition: background 450ms;
 }
 .noUi-origin {
@@ -97,11 +96,11 @@
 }
 .noUi-target {
   border-radius: 4px;
-  border: 1px solid #D3D3D3;
-  box-shadow: inset 0 1px 1px #F0F0F0, 0 3px 6px -5px #BBB;
+  border: 1px solid #d3d3d3;
+  box-shadow: inset 0 1px 1px #f0f0f0, 0 3px 6px -5px #bbb;
 }
 .noUi-target.noUi-connect {
-  box-shadow: inset 0 0 3px rgba(51,51,51,0.45), 0 3px 6px -5px #BBB;
+  box-shadow: inset 0 0 3px rgba(51, 51, 51, 0.45), 0 3px 6px -5px #bbb;
 }
 
 /* Handles and cursors;
@@ -113,30 +112,26 @@
   cursor: n-resize;
 }
 .noUi-handle {
-  border: 1px solid #D9D9D9;
+  border: 1px solid #d9d9d9;
   border-radius: 3px;
-  background: #FFF;
+  background: #fff;
   cursor: default;
-  box-shadow: inset 0 0 1px #FFF,
-        inset 0 1px 7px #EBEBEB,
-        0 3px 6px -3px #BBB;
+  box-shadow: inset 0 0 1px #fff, inset 0 1px 7px #ebebeb, 0 3px 6px -3px #bbb;
 }
 .noUi-active {
-  box-shadow: inset 0 0 1px #FFF,
-        inset 0 1px 7px #DDD,
-        0 3px 6px -3px #BBB;
+  box-shadow: inset 0 0 1px #fff, inset 0 1px 7px #ddd, 0 3px 6px -3px #bbb;
 }
 
 /* Handle stripes;
  */
 .noUi-handle:before,
 .noUi-handle:after {
-  content: "";
+  content: '';
   display: block;
   position: absolute;
   height: 11px;
   width: 1px;
-  background: #E8E7E6;
+  background: #e8e7e6;
   left: 4px;
   top: 2px;
 }
@@ -158,7 +153,7 @@
  */
 [disabled].noUi-connect,
 [disabled] .noUi-connect {
-  background: #B8B8B8;
+  background: #b8b8b8;
 }
 [disabled] .noUi-handle {
   cursor: not-allowed;

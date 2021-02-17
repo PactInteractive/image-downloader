@@ -12,17 +12,17 @@
       }
 
       select,
-      input[type="color"],
-      input[type="number"] {
+      input[type='color'],
+      input[type='number'] {
         width: 80px;
       }
 
-      input[type="number"] {
+      input[type='number'] {
         margin-right: 2px;
         text-align: right;
       }
 
-      input[type="button"] {
+      input[type='button'] {
         cursor: pointer;
         min-width: 80px;
         height: 26px;
@@ -31,11 +31,6 @@
         color: #fff;
       }
     </style>
-
-    <script src="/lib/zepto.js"></script>
-
-    <script src="/scripts/defaults.js"></script>
-    <script src="/scripts/options.js"></script>
   </head>
 
   <body>
@@ -44,9 +39,13 @@
     <fieldset>
       <legend>About</legend>
 
-      This extension is and always will be free, open-source, and without ads or tracking algorithms of any kind.
-      <br/>
-      The source code can be found on GitHub: <a href="https://github.com/vdsabev/image-downloader" target="_blank">https://github.com/vdsabev/image-downloader</a>
+      This extension is and always will be free, open-source, and without
+      targeted ads or tracking algorithms.
+      <br />
+      The source code can be found on GitHub:
+      <a href="https://github.com/vdsabev/image-downloader" target="_blank"
+        >https://github.com/vdsabev/image-downloader</a
+      >
     </fieldset>
 
     <fieldset>
@@ -57,13 +56,15 @@
         <span>Show download confirmation</span>
       </label>
 
-      <br/>
-      <label title="Flashes a message to let you know your download is starting">
+      <br />
+      <label
+        title="Flashes a message to let you know your download is starting"
+      >
         <input type="checkbox" id="show_download_notification_checkbox" />
         <span>Show <b>downloading</b> message</span>
       </label>
 
-      <br/>
+      <br />
       <label title="Lets you specify a new file name for downloaded files">
         <input type="checkbox" id="show_file_renaming_checkbox" />
         <span>Show file renaming textbox</span>
@@ -73,25 +74,29 @@
     <fieldset>
       <legend>Filters</legend>
 
-      <label title="Enables filtering by image URL; supports wildcard and regex">
+      <label
+        title="Enables filtering by image URL; supports wildcard and regex"
+      >
         <input type="checkbox" id="show_url_filter_checkbox" />
         <span>Show image URL filter</span>
       </label>
 
-      <br/>
+      <br />
       <label title="Enables filtering by image width">
         <input type="checkbox" id="show_image_width_filter_checkbox" />
         <span>Show image width filter</span>
       </label>
 
-      <br/>
+      <br />
       <label title="Enables filtering by image height">
         <input type="checkbox" id="show_image_height_filter_checkbox" />
         <span>Show image height filter</span>
       </label>
 
-      <br/>
-      <label title="Enables the option to only show images from direct links on the page; this can be useful on sites like Reddit">
+      <br />
+      <label
+        title="Enables the option to only show images from direct links on the page; this can be useful on sites like Reddit"
+      >
         <input type="checkbox" id="show_only_images_from_links_checkbox" />
         <span>Show <b>Only images from links</b> option</span>
       </label>
@@ -105,14 +110,18 @@
         <span>Show the URL textbox</span>
       </label>
 
-      <br/>
-      <label title="Displays a button next to each image to open it in a new tab">
+      <br />
+      <label
+        title="Displays a button next to each image to open it in a new tab"
+      >
         <input type="checkbox" id="show_open_image_button_checkbox" />
         <span>Show the <b>open</b> button</span>
       </label>
 
-      <br/>
-      <label title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option.">
+      <br />
+      <label
+        title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
+      >
         <input type="checkbox" id="show_download_image_button_checkbox" />
         <span>Show the <b>download</b> button</span>
       </label>
@@ -120,22 +129,68 @@
       <table>
         <tr title="The number of columns">
           <td><label for="columns_numberbox">Columns:</label></td>
-          <td><input type="number" id="columns_numberbox" min="1" max="10" required /></td>
+          <td>
+            <input
+              type="number"
+              id="columns_numberbox"
+              min="1"
+              max="10"
+              required
+            />
+          </td>
         </tr>
 
-        <tr title="Setting the minimum width can be useful for images that are too small to make out">
-          <td><label for="image_min_width_numberbox">Minimum Display Width:</label></td>
-          <td><input type="number" id="image_min_width_numberbox" min="0" max="720" required />px</td>
+        <tr
+          title="Setting the minimum width can be useful for images that are too small to make out"
+        >
+          <td>
+            <label for="image_min_width_numberbox"
+              >Minimum Display Width:</label
+            >
+          </td>
+          <td>
+            <input
+              type="number"
+              id="image_min_width_numberbox"
+              min="0"
+              max="720"
+              required
+            />px
+          </td>
         </tr>
 
-        <tr title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup">
-          <td><label for="image_max_width_numberbox">Maximum Display Width:</label></td>
-          <td><input type="number" id="image_max_width_numberbox" min="30" max="720" required />px</td>
+        <tr
+          title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup"
+        >
+          <td>
+            <label for="image_max_width_numberbox"
+              >Maximum Display Width:</label
+            >
+          </td>
+          <td>
+            <input
+              type="number"
+              id="image_max_width_numberbox"
+              min="30"
+              max="720"
+              required
+            />px
+          </td>
         </tr>
 
         <tr>
-          <td><label for="image_border_width_numberbox">Border Width:</label></td>
-          <td><input type="number" id="image_border_width_numberbox" min="1" max="10" required />px</td>
+          <td>
+            <label for="image_border_width_numberbox">Border Width:</label>
+          </td>
+          <td>
+            <input
+              type="number"
+              id="image_border_width_numberbox"
+              min="1"
+              max="10"
+              required
+            />px
+          </td>
         </tr>
 
         <tr>
@@ -146,11 +201,34 @@
     </fieldset>
 
     <div id="buttons">
-      <input type="button" id="save_button" class="accent" value="SAVE" title="Saves the current settings" />
-      <input type="button" id="reset_button" class="warning" value="RESET" title="Resets all settings to their defaults; save afterwards to preserve the changes" />
-      <input type="button" id="clear_data_button" class="danger right" value="CLEAR DATA" title="Clears all data this extension has stored on your machine" />
+      <input
+        type="button"
+        id="save_button"
+        class="accent"
+        value="SAVE"
+        title="Saves the current settings"
+      />
+      <input
+        type="button"
+        id="reset_button"
+        class="warning"
+        value="RESET"
+        title="Resets all settings to their defaults; save afterwards to preserve the changes"
+      />
+      <input
+        type="button"
+        id="clear_data_button"
+        class="danger right"
+        value="CLEAR DATA"
+        title="Clears all data this extension has stored on your machine"
+      />
     </div>
 
     <div id="notifications"></div>
+
+    <!-- Scripts -->
+    <script src="/lib/zepto.js"></script>
+    <script src="/src/defaults.js"></script>
+    <script type="module" src="/src/options.js"></script>
   </body>
 </html>
