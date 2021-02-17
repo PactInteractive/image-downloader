@@ -16,11 +16,11 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-modules-commonjs": "7.10.4",
-    "@types/jest": "26.0.9",
+    "@types/jest": "26.0.20",
     "fs-extra": "9.0.1",
     "glob": "7.1.6",
     "glob-watcher": "5.0.5",
-    "jest": "26.2.2",
+    "jest": "26.6.3",
     "prettier": "2.0.5",
     "sneer": "1.0.1",
     "ts-jest": "26.1.4",

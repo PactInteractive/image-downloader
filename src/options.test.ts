@@ -207,7 +207,7 @@ describe(`reset`, () => {
   });
 });
 
-describe.only(`clear data`, () => {
+describe(`clear data`, () => {
   beforeEach(() => {
     global.chrome = mockChrome();
     global.confirm = () => true;

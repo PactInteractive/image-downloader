@@ -24,7 +24,7 @@ beforeEach(() => {
   require('./popup');
 });
 
-it.only(`renders images`, () => {
+it(`renders images`, () => {
   const renderImages = asMockedFunction(chrome.runtime.onMessage.addListener)
     .mock.calls[0][0];
   renderImages(
