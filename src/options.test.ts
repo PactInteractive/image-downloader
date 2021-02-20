@@ -1,11 +1,10 @@
-import html from './html';
 import { mockChrome } from './utils';
 
 declare var global: any;
 
 beforeEach(() => {
   localStorage.clear();
-  require('../lib/zepto');
+  global.$ = require('../lib/jquery-3.5.1.min');
   ($.fn as any).fadeIn = function (duration, fn) {
     setTimeout(duration, fn);
     return this;
@@ -14,7 +13,7 @@ beforeEach(() => {
     setTimeout(duration, fn);
     return this;
   };
-  document.body.innerHTML = '';
+  document.body.innerHTML = '<main></main>';
 });
 
 const checkboxOptions = {
@@ -36,99 +35,81 @@ const inputOptions = {
 
 const options = [
   {
-    input: html`<input
-      id="show_download_confirmation_checkbox"
-      type="checkbox"
-    />`,
+    input: '#show_download_confirmation_checkbox',
     key: 'show_download_confirmation',
     ...checkboxOptions,
   },
   {
-    input: html`<input
-      id="show_download_notification_checkbox"
-      type="checkbox"
-    />`,
+    input: '#show_download_notification_checkbox',
     key: 'show_download_notification',
     ...checkboxOptions,
   },
   {
-    input: html`<input id="show_file_renaming_checkbox" type="checkbox" />`,
+    input: '#show_file_renaming_checkbox',
     key: 'show_file_renaming',
     ...checkboxOptions,
   },
   {
-    input: html`<input id="show_url_filter_checkbox" type="checkbox" />`,
+    input: '#show_url_filter_checkbox',
     key: 'show_url_filter',
     ...checkboxOptions,
   },
   {
-    input: html`<input
-      id="show_image_width_filter_checkbox"
-      type="checkbox"
-    />`,
+    input: '#show_image_width_filter_checkbox',
     key: 'show_image_width_filter',
     ...checkboxOptions,
   },
   {
-    input: html`<input
-      id="show_image_height_filter_checkbox"
-      type="checkbox"
-    />`,
+    input: '#show_image_height_filter_checkbox',
     key: 'show_image_height_filter',
     ...checkboxOptions,
   },
   {
-    input: html`<input
-      id="show_only_images_from_links_checkbox"
-      type="checkbox"
-    />`,
+    input: '#show_only_images_from_links_checkbox',
     key: 'show_only_images_from_links',
     ...checkboxOptions,
   },
   {
-    input: html`<input id="show_image_url_checkbox" type="checkbox" />`,
+    input: '#show_image_url_checkbox',
     key: 'show_image_url',
     ...checkboxOptions,
   },
   {
-    input: html`<input id="show_open_image_button_checkbox" type="checkbox" />`,
+    input: '#show_open_image_button_checkbox',
     key: 'show_open_image_button',
     ...checkboxOptions,
   },
   {
-    input: html`<input
-      id="show_download_image_button_checkbox"
-      type="checkbox"
-    />`,
+    input: '#show_download_image_button_checkbox',
     key: 'show_download_image_button',
     ...checkboxOptions,
   },
   {
-    input: html`<input id="columns_numberbox" type="number" />`,
+    input: '#columns_numberbox',
     key: 'columns',
     values: ['1', '2', '3'],
     ...inputOptions,
   },
   {
-    input: html`<input id="image_min_width_numberbox" type="number" />`,
+    input: '#image_min_width_numberbox',
     key: 'image_min_width',
     values: ['100', '200', '300'],
     ...inputOptions,
   },
   {
-    input: html`<input id="image_max_width_numberbox" type="number" />`,
+    input: '#image_max_width_numberbox',
     key: 'image_max_width',
     values: ['200', '400', '600'],
     ...inputOptions,
   },
   {
-    input: html`<input id="image_border_width_numberbox" type="number" />`,
+    input: '#image_border_width_numberbox',
     key: 'image_border_width',
     values: ['1', '2', '3'],
     ...inputOptions,
   },
   {
-    input: html`<input id="image_border_color_picker" type="color" />`,
+    input: '#image_border_color_picker',
     key: 'image_border_color',
     values: ['#ff0000', '#00ff00', '#0000ff'],
     ...inputOptions,
@@ -140,12 +121,9 @@ describe(`initialize control values`, () => {
     option.values.forEach((value) => {
       describe(option.key, () => {
         it(value.toString(), () => {
-          document.body.append(option.input);
           localStorage[option.key] = value.toString();
-
           require('./options');
-
-          expect(option.input[option.prop]).toBe(value);
+          expect($(option.input).prop(option.prop)).toBe(value);
         });
       });
     });
@@ -157,15 +135,10 @@ describe(`save`, () => {
     describe(option.key, () => {
       option.values.forEach((value) => {
         it(value.toString(), () => {
-          document.body.append(option.input);
-
-          const saveButton = html`<input id="save_button" type="button" />`;
-          document.body.append(saveButton);
-
           require('./options');
 
-          option.trigger($(`#${option.input.id}`), value);
-          $(`#${saveButton.id}`).trigger('click');
+          option.trigger($(option.input), value);
+          $('#save_button').trigger('click');
 
           expect(localStorage[option.key]).toBe(value.toString());
         });
@@ -183,20 +156,12 @@ describe(`reset`, () => {
     describe(option.key, () => {
       option.values.forEach((value) => {
         it(value.toString(), () => {
-          document.body.append(option.input);
-
-          const saveButton = html`<input id="save_button" type="button" />`;
-          document.body.append(saveButton);
-
-          const resetButton = html`<input id="reset_button" type="button" />`;
-          document.body.append(resetButton);
-
           require('./defaults');
           require('./options');
 
-          option.trigger($(`#${option.input.id}`), value);
-          $(`#${resetButton.id}`).trigger('click');
-          $(`#${saveButton.id}`).trigger('click');
+          option.trigger($(option.input), value);
+          $('#reset_button').trigger('click');
+          $('#save_button').trigger('click');
 
           expect(localStorage[option.key]).toBe(
             localStorage[`${option.key}_default`]
@@ -219,23 +184,12 @@ describe(`clear data`, () => {
     describe(option.key, () => {
       option.values.forEach((value) => {
         it(value.toString(), () => {
-          document.body.append(option.input);
-
-          const saveButton = html`<input id="save_button" type="button" />`;
-          document.body.append(saveButton);
-
-          const clearDataButton = html`<input
-            id="clear_data_button"
-            type="button"
-          />`;
-          document.body.append(clearDataButton);
-
           require('./defaults');
           require('./options');
 
-          option.trigger($(`#${option.input.id}`), value);
-          $(`#${saveButton.id}`).trigger('click');
-          $(`#${clearDataButton.id}`).trigger('click');
+          option.trigger($(option.input), value);
+          $('#save_button').trigger('click');
+          $('#clear_data_button').trigger('click');
 
           expect(localStorage[option.key]).toBe(
             localStorage[`${option.key}_default`]

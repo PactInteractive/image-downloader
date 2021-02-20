@@ -21,6 +21,9 @@ If you need that kind of functionality, there are other extensions that can be u
 
 # Change Log
 
+3.0.0
+- Design refresh
+
 2.4.2:
 
 - Workaround for Chrome disallowing access to cross-domain CSS rules
@@ -145,8 +148,6 @@ You can find the source code here: https://github.com/vdsabev/image-downloader
 Based on the Google Chrome Extension sample "Download Links": https://github.com/GoogleChrome/chrome-extensions-samples/tree/master/api/downloads/download_links
 
 Uses the tiny, but awesome JSS library: https://github.com/Box9/jss
-
-And Zepto.js: http://zeptojs.com
 
 # License
 
