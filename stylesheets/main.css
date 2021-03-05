@@ -5,7 +5,7 @@
   --neutral: #ccc;
   --neutralLight: #fff;
 
-  --accent: #3498db;
+  --accent: rgb(26, 116, 232);
   --accentDark: #2791d9;
 
   --success: #25a75c;
@@ -16,6 +16,8 @@
 
   --danger: #e53f2e;
   --dangerLight: #e74c3c;
+
+  --inputBackground: rgba(0, 0, 0, 0.05);
 }
 
 body {
@@ -84,7 +86,20 @@ input[type='button'],
 input[type='number'],
 select {
   box-sizing: border-box;
+  border-radius: 4px;
+  margin-bottom: 4px;
   font-size: 12px;
+}
+
+input[type='text'] {
+  border: 0;
+  margin-bottom: 4px;
+  background: var(--inputBackground);
+  padding: 8px 12px;
+}
+
+select {
+  padding: 6px 12px;
 }
 
 input[type='button'],
@@ -96,7 +111,7 @@ input[type='button'] {
   min-width: 50px;
   color: var(--neutralLight);
   border: 0;
-  padding: 3px 10px;
+  padding: 8px 12px;
   transition: background 0.15s;
 }
 input[type='button']:disabled {

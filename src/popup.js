@@ -432,7 +432,7 @@ $('main').append(html`
         <td>
           <input
             type="text"
-            placeholder="SAVE TO SUBFOLDER"
+            placeholder="Save to subfolder"
             title="Set the name of the subfolder you want to download the images to."
             value=${ls.folder_name}
             onChange=${(e) => {
@@ -446,7 +446,7 @@ $('main').append(html`
             type="button"
             id="download_button"
             class="accent"
-            value="DOWNLOAD"
+            value="Download"
             disabled="true"
             onClick=${downloadImages}
           />
@@ -459,7 +459,7 @@ $('main').append(html`
           <td colspan="{2}">
             <input
               type="text"
-              placeholder="RENAME FILES"
+              placeholder="Rename files"
               title="Set a new file name for the images you want to download."
               value=${ls.new_file_name}
               onChange=${(e) => {
@@ -476,7 +476,7 @@ $('main').append(html`
             <input
               type="text"
               id="filter_textbox"
-              placeholder="FILTER BY URL"
+              placeholder="Filter by URL"
               title="Filter by parts of the URL or regular expressions."
               value=${ls.filter_url}
               onKeyUp=${ls.show_url_filter === 'true' && filterImages}
@@ -677,7 +677,9 @@ a{3,6} → Between 3 and 6 of a`}
 
   <div id="images_cache"></div>
 
-  <table id="images_table" class="grid"></table>
+  <div id="images_table_container">
+    <table id="images_table" class="grid"></table>
+  </div>
 `);
 
 chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
@@ -770,8 +772,3 @@ jss.set('img', {
 jss.set('img.checked', {
   'border-color': ls.image_border_color,
 });
-
-// Periodically set the body padding to offset the height of the fixed position filters
-setInterval(() => {
-  $('body').css('padding-top', $('#filters_container').height());
-}, 200);
