@@ -19,17 +19,16 @@ beforeEach(() => {
 const checkboxOptions = {
   prop: 'checked',
   values: [true, false],
-  trigger($el: JQuery<HTMLElement>, value: any) {
-    if (value) {
-      $el.trigger('click');
-    }
+  trigger($el: JQuery<HTMLInputElement>, value: any) {
+    $el.prop('checked', !value).trigger('click');
   },
 };
 
 const inputOptions = {
   prop: 'value',
-  trigger($el: JQuery<HTMLElement>, value: any) {
+  trigger($el: JQuery<HTMLInputElement>, value: any) {
     $el.val(value);
+    $el[0].dispatchEvent(new CustomEvent('change'));
   },
 };
 

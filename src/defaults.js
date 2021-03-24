@@ -19,7 +19,7 @@
   ls.animation_duration = '500';
 
   // Popup
-  var defaults = {
+  const defaults = {
     // Filters
     folder_name: '',
     new_file_name: '',
@@ -55,9 +55,11 @@
     image_border_color: '#3498db',
   };
 
-  for (var option in defaults) {
-    if (ls[option] === undefined) ls[option] = defaults[option];
-    ls[option + '_default'] = defaults[option];
+  for (const option in defaults) {
+    if (ls[option] === undefined) {
+      ls[option] = defaults[option];
+    }
+    ls[`${option}_default`] = defaults[option];
   }
 
   ls.options = JSON.stringify(Object.keys(defaults));

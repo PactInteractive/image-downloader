@@ -9,7 +9,7 @@ const html = (tagName, props, ...children) => {
   // Elements
   const element = document.createElement(tagName);
 
-  for (let prop in props) {
+  for (const prop in props) {
     // Class
     if (prop === 'class' || prop === 'className') {
       element.className = props.class || props.className || '';

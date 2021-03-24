@@ -23,6 +23,7 @@ If you need that kind of functionality, there are other extensions that can be u
 
 3.0.0
 - Design refresh
+- Add support for .ico and .tif / .tiff images
 
 2.4.2:
 

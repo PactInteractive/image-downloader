@@ -1,9 +1,15 @@
 import html from './html.js';
 import { Checkbox } from './Checkbox.js';
 
-const ls = localStorage;
+let state = Object.keys(localStorage).reduce(
+  (newState, key) =>
+    key.endsWith('_default')
+      ? newState
+      : { ...newState, [key]: localStorage[key] },
+  {}
+);
 
-function render(values = ls) {
+function render() {
   $('main').html(html`
     <h2>Image Downloader</h2>
 
@@ -13,7 +19,7 @@ function render(values = ls) {
       This extension is and always will be free, open-source, and without
       targeted ads or tracking algorithms.
       <br />
-      The source code can be found on GitHub:
+      The source code can be found on GitHub:${' '}
       <a href="https://github.com/vdsabev/image-downloader" target="_blank">
         https://github.com/vdsabev/image-downloader
       </a>
@@ -24,8 +30,11 @@ function render(values = ls) {
 
       <${Checkbox}
         id="show_download_confirmation_checkbox"
-        checked="${values.show_download_confirmation === 'true'}"
         title="Requires confirmation when you press the Download button"
+        checked="${state.show_download_confirmation === 'true'}"
+        onChange=${(e) => {
+          state.show_download_confirmation = e.target.checked.toString();
+        }}
       >
         <span>Show download confirmation</span>
       <//>
@@ -33,8 +42,11 @@ function render(values = ls) {
       <br />
       <${Checkbox}
         id="show_download_notification_checkbox"
-        checked="${values.show_download_notification === 'true'}"
         title="Flashes a message to let you know your download is starting"
+        checked="${state.show_download_notification === 'true'}"
+        onChange=${(e) => {
+          state.show_download_notification = e.target.checked.toString();
+        }}
       >
         <span>Show <b>downloading</b> message</span>
       <//>
@@ -42,8 +54,11 @@ function render(values = ls) {
       <br />
       <${Checkbox}
         id="show_file_renaming_checkbox"
-        checked="${values.show_file_renaming === 'true'}"
         title="Lets you specify a new file name for downloaded files"
+        checked="${state.show_file_renaming === 'true'}"
+        onChange=${(e) => {
+          state.show_file_renaming = e.target.checked.toString();
+        }}
       >
         <span>Show file renaming textbox</span>
       <//>
@@ -54,8 +69,11 @@ function render(values = ls) {
 
       <${Checkbox}
         id="show_url_filter_checkbox"
-        checked="${values.show_url_filter === 'true'}"
         title="Enables filtering by image URL; supports wildcard and regex"
+        checked="${state.show_url_filter === 'true'}"
+        onChange=${(e) => {
+          state.show_url_filter = e.target.checked.toString();
+        }}
       >
         <span>Show image URL filter</span>
       <//>
@@ -63,8 +81,11 @@ function render(values = ls) {
       <br />
       <${Checkbox}
         id="show_image_width_filter_checkbox"
-        checked="${values.show_image_width_filter === 'true'}"
         title="Enables filtering by image width"
+        checked="${state.show_image_width_filter === 'true'}"
+        onChange=${(e) => {
+          state.show_image_width_filter = e.target.checked.toString();
+        }}
       >
         <span>Show image width filter</span>
       <//>
@@ -72,8 +93,11 @@ function render(values = ls) {
       <br />
       <${Checkbox}
         id="show_image_height_filter_checkbox"
-        checked="${values.show_image_height_filter === 'true'}"
         title="Enables filtering by image height"
+        checked="${state.show_image_height_filter === 'true'}"
+        onChange=${(e) => {
+          state.show_image_height_filter = e.target.checked.toString();
+        }}
       >
         <span>Show image height filter</span>
       <//>
@@ -81,8 +105,11 @@ function render(values = ls) {
       <br />
       <${Checkbox}
         id="show_only_images_from_links_checkbox"
-        checked="${values.show_only_images_from_links === 'true'}"
         title="Enables the option to only show images from direct links on the page; this can be useful on sites like Reddit"
+        checked="${state.show_only_images_from_links === 'true'}"
+        onChange=${(e) => {
+          state.show_only_images_from_links = e.target.checked.toString();
+        }}
       >
         <span>Show <b>Only images from links</b> option</span>
       <//>
@@ -93,8 +120,11 @@ function render(values = ls) {
 
       <${Checkbox}
         id="show_image_url_checkbox"
-        checked="${values.show_image_url === 'true'}"
         title="Displays the URL above each image"
+        checked="${state.show_image_url === 'true'}"
+        onChange=${(e) => {
+          state.show_image_url = e.target.checked.toString();
+        }}
       >
         <span>Show the URL textbox</span>
       <//>
@@ -102,8 +132,11 @@ function render(values = ls) {
       <br />
       <${Checkbox}
         id="show_open_image_button_checkbox"
-        checked="${values.show_open_image_button === 'true'}"
         title="Displays a button next to each image to open it in a new tab"
+        checked="${state.show_open_image_button === 'true'}"
+        onChange=${(e) => {
+          state.show_open_image_button = e.target.checked.toString();
+        }}
       >
         <span>Show the <b>open</b> button</span>
       <//>
@@ -111,8 +144,11 @@ function render(values = ls) {
       <br />
       <${Checkbox}
         id="show_download_image_button_checkbox"
-        checked="${values.show_download_image_button === 'true'}"
         title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
+        checked="${state.show_download_image_button === 'true'}"
+        onChange=${(e) => {
+          state.show_download_image_button = e.target.checked.toString();
+        }}
       >
         <span>Show the <b>download</b> button</span>
       <//>
@@ -124,10 +160,13 @@ function render(values = ls) {
             <input
               id="columns_numberbox"
               type="number"
+              required
               min="1"
               max="10"
-              value="${values.columns}"
-              required
+              value="${state.columns}"
+              onChange=${(e) => {
+                state.columns = e.target.value;
+              }}
             />
           </td>
         </tr>
@@ -144,10 +183,13 @@ function render(values = ls) {
             <input
               id="image_min_width_numberbox"
               type="number"
+              required
               min="0"
               max="720"
-              value="${values.image_min_width}"
-              required
+              value="${state.image_min_width}"
+              onChange=${(e) => {
+                state.image_min_width = e.target.value;
+              }}
             />px
           </td>
         </tr>
@@ -164,10 +206,13 @@ function render(values = ls) {
             <input
               id="image_max_width_numberbox"
               type="number"
+              required
               min="30"
               max="720"
-              value="${values.image_max_width}"
-              required
+              value="${state.image_max_width}"
+              onChange=${(e) => {
+                state.image_max_width = e.target.value;
+              }}
             />px
           </td>
         </tr>
@@ -180,10 +225,13 @@ function render(values = ls) {
             <input
               id="image_border_width_numberbox"
               type="number"
+              required
               min="1"
               max="10"
-              value="${values.image_border_width}"
-              required
+              value="${state.image_border_width}"
+              onChange=${(e) => {
+                state.image_border_width = e.target.value;
+              }}
             />px
           </td>
         </tr>
@@ -194,37 +242,43 @@ function render(values = ls) {
             <input
               id="image_border_color_picker"
               type="color"
-              value="${values.image_border_color}"
+              value="${state.image_border_color}"
+              onChange=${(e) => {
+                state.image_border_color = e.target.value;
+              }}
             />
           </td>
         </tr>
       </table>
     </fieldset>
 
-    <div id="buttons">
+    <div style=${{ display: 'flex', gap: '4px' }}>
       <input
         type="button"
-        id="save_button"
-        class="accent"
-        value="SAVE"
-        title="Saves the current settings"
-        onClick=${saveOptions}
+        id="clear_data_button"
+        class="danger"
+        value="Clear Data"
+        title="Clears all data this extension has stored on your machine"
+        onClick=${clearData}
       />
+
       <input
         type="button"
         id="reset_button"
         class="warning"
-        value="RESET"
+        style=${{ marginLeft: 'auto' }}
+        value="Reset"
         title="Resets all settings to their defaults; save afterwards to preserve the changes"
         onClick=${resetOptions}
       />
+
       <input
         type="button"
-        id="clear_data_button"
-        class="danger right"
-        value="CLEAR DATA"
-        title="Clears all data this extension has stored on your machine"
-        onClick=${clearData}
+        id="save_button"
+        class="accent"
+        value="Save"
+        title="Saves the current settings"
+        onClick=${saveOptions}
       />
     </div>
 
@@ -233,75 +287,37 @@ function render(values = ls) {
 }
 
 function saveOptions() {
-  // General
-  ls.show_download_confirmation = $(
-    '#show_download_confirmation_checkbox'
-  ).prop('checked');
-  ls.show_download_notification = $(
-    '#show_download_notification_checkbox'
-  ).prop('checked');
-  ls.show_file_renaming = $('#show_file_renaming_checkbox').prop('checked');
-
-  // Filters
-  ls.show_url_filter = $('#show_url_filter_checkbox').prop('checked');
-  ls.show_image_width_filter = $('#show_image_width_filter_checkbox').prop(
-    'checked'
-  );
-  ls.show_image_height_filter = $('#show_image_height_filter_checkbox').prop(
-    'checked'
-  );
-  ls.show_only_images_from_links = $(
-    '#show_only_images_from_links_checkbox'
-  ).prop('checked');
-
-  // Images
-  ls.show_image_url = $('#show_image_url_checkbox').prop('checked');
-  ls.show_open_image_button = $('#show_open_image_button_checkbox').prop(
-    'checked'
-  );
-  ls.show_download_image_button = $(
-    '#show_download_image_button_checkbox'
-  ).prop('checked');
-
-  ls.columns = $('#columns_numberbox').val();
-  ls.image_min_width = $('#image_min_width_numberbox').val();
-  ls.image_max_width = $('#image_max_width_numberbox').val();
-  ls.image_border_width = $('#image_border_width_numberbox').val();
-  ls.image_border_color = $('#image_border_color_picker').val();
-
+  Object.assign(localStorage, state);
   addNotification('Options saved.', 'success');
 }
 
 function resetOptions() {
-  resetToDefault();
+  const options = JSON.parse(localStorage.options);
+  state = options.reduce(
+    (newState, key) => ({ ...newState, [key]: localStorage[`${key}_default`] }),
+    {}
+  );
+  render();
   addNotification(
     'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.',
     'warning'
   );
 }
 
-function resetToDefault() {
-  var options = JSON.parse(ls.options);
-  var values = {};
-  for (var i = 0; i < options.length; i++) {
-    values[options[i]] = ls[options[i] + '_default'];
-  }
-  render(values);
-}
-
 function clearData() {
-  var result = window.confirm(
-    'Are you sure you want to clear all data for this extension? This includes filters, options and the name of the default folder where files are saved.'
+  const userHasConfirmed = window.confirm(
+    'This will delete all extension data related to filters, options, and the name of the default folder where files are saved. Continue?'
   );
-  if (result) {
-    ls.clear();
+  if (userHasConfirmed) {
+    localStorage.clear();
     window.location.reload();
   }
 }
 
 function addNotification(message, cssClass) {
-  var animation_duration = parseInt(ls.animation_duration);
-  var container = $('<div></div>')
+  const animation_duration = parseInt(localStorage.animation_duration);
+  // TODO: Figure out how to animate and move to state
+  const container = $('<div></div>')
     .prependTo('#notifications')
     .toggle(false)
     .html(message)
@@ -311,7 +327,7 @@ function addNotification(message, cssClass) {
         container.fadeOut(animation_duration, () => {
           container.remove();
         });
-      }, 10000);
+      }, 10_000);
     });
 }
 

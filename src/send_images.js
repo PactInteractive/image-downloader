@@ -1,7 +1,7 @@
 (() => {
   const imageDownloader = {
     // Source: https://support.google.com/webmasters/answer/2598805?hl=en
-    imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|jpe?g|png|svg|webp))(?:\?([^#]*))?(?:#(.*))?/i,
+    imageRegex: /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|ico|jpe?g|png|svg|tiff?|webp))(?:\?([^#]*))?(?:#(.*))?/i,
 
     extractImagesFromTags() {
       return [].slice
@@ -37,12 +37,9 @@
 
     extractImageFromElement(element) {
       if (element.tagName.toLowerCase() === 'img') {
-        let src = element.src;
+        const src = element.src;
         const hashIndex = src.indexOf('#');
-        if (hashIndex >= 0) {
-          src = src.substr(0, hashIndex);
-        }
-        return src;
+        return hashIndex >= 0 ? src.substr(0, hashIndex) : src;
       }
 
       if (element.tagName.toLowerCase() === 'a') {
@@ -80,12 +77,12 @@
 
     removeDuplicateOrEmpty(images) {
       const hash = {};
-      for (let i = 0; i < images.length; i++) {
-        hash[images[i]] = 0;
+      for (let index = 0; index < images.length; index++) {
+        hash[images[index]] = 0;
       }
 
       const result = [];
-      for (let key in hash) {
+      for (const key in hash) {
         if (key !== '') {
           result.push(key);
         }
