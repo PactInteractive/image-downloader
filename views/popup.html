@@ -12,8 +12,12 @@
     <style>
       body {
         margin: 0;
-        min-width: 500px;
-        min-height: 600px;
+      }
+
+      main {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
       }
 
       .grid {
@@ -50,13 +54,6 @@
         padding-bottom: 8px;
       }
 
-      #downloads_container {
-        bottom: 0px;
-        display: grid;
-        gap: 4px;
-        border-top: 1px solid #ccc;
-      }
-
       #only_images_from_links_container {
         padding: 1px;
       }
@@ -65,11 +62,33 @@
         display: none;
       }
 
-      #images_table_container {
+      #images_container {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--imagesContainerSpacing);
+        align-content: flex-start;
         padding: 9px 12px 12px 12px;
       }
 
-      #images_table img {
+      #images_container .card {
+        display: grid;
+        grid-template-rows: 1fr auto;
+        justify-items: center;
+        align-items: center;
+
+        overflow: hidden;
+        border-radius: var(--borderRadius);
+        border: 1px solid var(--borderColor);
+        background: var(--neutralTransparent);
+      }
+
+      #images_container .card .actions {
+        display: flex;
+        background: var(--neutralLightest);
+      }
+
+      #images_container img {
         cursor: pointer;
         background: var(--imageBackground); /* Useful for transparent images */
       }
@@ -83,6 +102,13 @@
         background-size: 24px;
         background-repeat: no-repeat;
         background-position: center;
+      }
+
+      #downloads_container {
+        bottom: 0px;
+        display: grid;
+        gap: 4px;
+        border-top: 1px solid #ccc;
       }
     </style>
   </head>

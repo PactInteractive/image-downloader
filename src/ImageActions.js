@@ -14,7 +14,7 @@ export const ImageUrlTextbox = (props) => html`
 const imageButtonStyle = {
   cursor: 'pointer',
   borderRadius: '4px',
-  border: '1px solid var(--iconButtonBorder)',
+  border: '1px solid var(--borderColor)',
   marginBottom: '4px',
   backgroundSize: '24px',
   backgroundRepeat: 'no-repeat',

@@ -41,5 +41,5 @@ it(`renders images`, () => {
   );
   jest.runOnlyPendingTimers();
 
-  expect(document.querySelectorAll('#images_table img').length).toBe(3);
+  expect(document.querySelectorAll('#images_container img').length).toBe(3);
 });

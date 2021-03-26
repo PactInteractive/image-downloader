@@ -161,149 +161,94 @@ function filterImages() {
 function displayImages() {
   $('#download_button').prop('disabled', true);
 
-  const images_table = $('#images_table');
-  images_table.empty();
-
-  const toggle_all_checkbox_row = html`
-    <tr>
-      <th align="left" colspan=${ls.columns}>
-        <${Checkbox}
-          id="toggle_all_checkbox"
-          onChange=${(e) => {
-            $('#download_button').prop('disabled', !e.target.checked);
-            for (let index = 0; index < visibleImages.length; index++) {
-              $(`#image${index}`).toggleClass('checked', e.target.checked);
-            }
-          }}
-        >
-          Select all (${visibleImages.length})
-        <//>
-      </th>
-    </tr>
-  `;
-  images_table.append(toggle_all_checkbox_row);
+  const imagesContainer = $('#images_container');
+  imagesContainer.empty();
 
   const columns = parseInt(ls.columns, 10);
-  const columnWidth = `${Math.round((100 * 100) / columns) / 100}%`;
-  const rows = Math.ceil(visibleImages.length / columns);
+  const columnWidth = `calc((100% - var(--imagesContainerSpacing)) / ${columns}`;
 
-  // Tools row
+  const selectAllCheckbox = html`
+    <div
+      style=${{
+        width: `calc(${columns} * (2 * ${ls.image_border_width}px + ${ls.image_max_width}px + var(--imagesContainerSpacing) / 2))`,
+      }}
+    >
+      <${Checkbox}
+        id="select_all_checkbox"
+        onChange=${(e) => {
+          $('#download_button').prop('disabled', !e.target.checked);
+          for (let index = 0; index < visibleImages.length; index++) {
+            $(`#image${index}`).toggleClass('checked', e.target.checked);
+          }
+        }}
+      >
+        Select all (${visibleImages.length})
+      <//>
+    </div>
+  `;
+  imagesContainer.append(selectAllCheckbox);
+
+  // Actions
   const show_image_url = ls.show_image_url === 'true';
   const show_open_image_button = ls.show_open_image_button === 'true';
   const show_download_image_button = ls.show_download_image_button === 'true';
 
-  const colspan =
-    (show_image_url ? 1 : 0) +
-      (show_open_image_button ? 1 : 0) +
-      (show_download_image_button ? 1 : 0) || 1;
+  // Images
+  visibleImages.forEach((imageUrl, index) => {
+    const image = html`
+      <div class="card" style=${{ width: columnWidth }}>
+        <img
+          id=${`image${index}`}
+          src=${imageUrl}
+          onClick=${(e) => {
+            $(e.target).toggleClass(
+              'checked',
+              !$(e.target).hasClass('checked')
+            );
 
-  // Append dummy image row to keep the popup width constant when there are 0 images
-  const DummyCell = () => html`
-    <td
-      colspan=${colspan}
-      style=${{
-        minWidth: `${ls.image_max_width}px`,
-        width: columnWidth,
-        verticalAlign: 'top',
-      }}
-    ></td>
-  `;
-  const DummyRow = () => html`
-    <tr>
-      ${Array(columns)
-        .fill(undefined)
-        .map(() => html`<${DummyCell} />`)}
-    </tr>
-  `;
-  images_table.append(html`<${DummyRow} />`);
+            let allAreChecked = true;
+            let allAreUnchecked = true;
+            for (let index = 0; index < visibleImages.length; index++) {
+              if ($(`#image${index}`).hasClass('checked')) {
+                allAreUnchecked = false;
+              } else {
+                allAreChecked = false;
+              }
+              // Exit the loop early
+              if (!(allAreChecked || allAreUnchecked)) break;
+            }
 
-  for (let rowIndex = 0; rowIndex < rows; rowIndex++) {
-    if (
-      show_image_url ||
-      show_open_image_button ||
-      show_download_image_button
-    ) {
-      const actions_row = html`
-        <tr>
-          ${Array(columns)
-            .fill(undefined)
-            .map((_, columnIndex) => {
-              const index = rowIndex * columns + columnIndex;
-              if (index === visibleImages.length) return null;
+            $('#download_button').prop('disabled', allAreUnchecked);
 
-              const imageUrl = visibleImages[index];
-              return html`
-                ${show_image_url &&
-                html`<td><${ImageUrlTextbox} value=${imageUrl} /></td>`}
-                ${show_open_image_button &&
-                html`<td><${OpenImageButton} imageUrl=${imageUrl} /></td>`}
-                ${show_download_image_button &&
-                html`<td><${DownloadImageButton} imageUrl=${imageUrl} /></td>`}
-              `;
-            })}
-        </tr>
-      `;
-      images_table.append(actions_row);
-    }
-
-    // Images row
-    const images_row = $('<tr></tr>');
-    for (let columnIndex = 0; columnIndex < columns; columnIndex++) {
-      const index = rowIndex * columns + columnIndex;
-      if (index === visibleImages.length) break;
-
-      const imageUrl = visibleImages[index];
-
-      const image = html`
-        <td
-          colspan=${colspan}
-          style=${{
-            minWidth: `${ls.image_max_width}px`,
-            width: columnWidth,
-            verticalAlign: 'top',
+            const select_all_checkbox = $('#select_all_checkbox');
+            select_all_checkbox.prop(
+              'indeterminate',
+              !(allAreChecked || allAreUnchecked)
+            );
+            if (allAreChecked) {
+              select_all_checkbox.prop('checked', true);
+            } else if (allAreUnchecked) {
+              select_all_checkbox.prop('checked', false);
+            }
           }}
-        >
-          <img
-            id=${`image${index}`}
-            src=${imageUrl}
-            onClick=${(e) => {
-              $(e.target).toggleClass(
-                'checked',
-                !$(e.target).hasClass('checked')
-              );
+        />
 
-              let allAreChecked = true;
-              let allAreUnchecked = true;
-              for (let index = 0; index < visibleImages.length; index++) {
-                if ($(`#image${index}`).hasClass('checked')) {
-                  allAreUnchecked = false;
-                } else {
-                  allAreChecked = false;
-                }
-                // Exit the loop early
-                if (!(allAreChecked || allAreUnchecked)) break;
-              }
-
-              $('#download_button').prop('disabled', allAreUnchecked);
-
-              const toggle_all_checkbox = $('#toggle_all_checkbox');
-              toggle_all_checkbox.prop(
-                'indeterminate',
-                !(allAreChecked || allAreUnchecked)
-              );
-              if (allAreChecked) {
-                toggle_all_checkbox.prop('checked', true);
-              } else if (allAreUnchecked) {
-                toggle_all_checkbox.prop('checked', false);
-              }
-            }}
-          />
-        </td>
-      `;
-      images_row.append(image);
-    }
-    images_table.append(images_row);
-  }
+        ${(show_image_url ||
+          show_open_image_button ||
+          show_download_image_button) &&
+        html`
+          <div class="actions">
+            ${show_image_url && html`<${ImageUrlTextbox} value=${imageUrl} />`}
+            ${show_open_image_button &&
+            html`<${OpenImageButton} imageUrl=${imageUrl} />`}
+            ${show_download_image_button &&
+            html`<${DownloadImageButton} imageUrl=${imageUrl} />`}
+          </div>
+        `}
+      </div>
+    `;
+    imagesContainer.append(image);
+  });
 }
 
 function downloadImages() {
@@ -636,9 +581,7 @@ a{3,6} → Between 3 and 6 of a`}
 
   <div id="images_cache"></div>
 
-  <div id="images_table_container">
-    <table id="images_table" class="grid"></table>
-  </div>
+  <div id="images_container"></div>
 
   <div
     id="downloads_container"

@@ -18,9 +18,12 @@
   --danger: #e53f2e;
   --dangerLight: #e74c3c;
 
-  --iconButtonBorder: var(--neutralTransparent);
+  --borderColor: var(--neutralTransparent);
   --imageBackground: var(--neutralTransparent);
   --inputBackground: var(--neutralTransparent);
+
+  --borderRadius: 4px;
+  --imagesContainerSpacing: 8px;
 }
 
 html {
@@ -34,6 +37,8 @@ html {
 }
 
 body {
+  min-width: 500px;
+  min-height: 600px;
   font: 13px/1.5em 'Lucida Grande', Arial, sans-serif;
   color: var(--foreground);
 }
@@ -97,7 +102,7 @@ input[type='text'],
 input[type='button'],
 input[type='number'],
 select {
-  border-radius: 4px;
+  border-radius: var(--borderRadius);
   margin-bottom: 4px;
   font-size: 12px;
 }
