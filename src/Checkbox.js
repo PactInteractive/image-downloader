@@ -1,8 +1,8 @@
 import html from './html.js';
 
-export const Checkbox = ({ children, title = '', ...props }) => html`
+export const Checkbox = ({ children, style, title = '', ...props }) => html`
   <label ...${{ title }}>
-    <input type="checkbox" ...${props} />
+    <input type="checkbox" style=${{ marginLeft: 0, ...style }} ...${props} />
     ${children}
   </label>
 `;

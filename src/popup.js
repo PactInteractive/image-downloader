@@ -345,7 +345,7 @@ function showDownloadConfirmation(startDownload) {
     <div>
       <div>
         <hr />
-        Take a quick look at your Chrome settings and search for
+        Take a quick look at your browser settings and search for
         <b> download location</b>.
         <span class="danger">
           If the <b>Ask where to save each file before downloading</b> option is
@@ -422,53 +422,12 @@ function flash(element, flashes, interval, callback) {
 
 $('main').append(html`
   <div id="filters_container">
-    <table id="filter_inputs_container" class="grid">
+    <table class="grid">
       <colgroup>
         <col />
         <col style=${{ width: '100px' }} />
       </colgroup>
 
-      <tr>
-        <td>
-          <input
-            type="text"
-            placeholder="Save to subfolder"
-            title="Set the name of the subfolder you want to download the images to."
-            value=${ls.folder_name}
-            onChange=${(e) => {
-              ls.folder_name = $.trim(e.target.value);
-            }}
-          />
-        </td>
-
-        <td>
-          <input
-            type="button"
-            id="download_button"
-            class="accent"
-            value="Download"
-            disabled="true"
-            onClick=${downloadImages}
-          />
-        </td>
-      </tr>
-
-      ${ls.show_file_renaming === 'true' &&
-      html`
-        <tr>
-          <td colspan="{2}">
-            <input
-              type="text"
-              placeholder="Rename files"
-              title="Set a new file name for the images you want to download."
-              value=${ls.new_file_name}
-              onChange=${(e) => {
-                ls.new_file_name = $.trim(e.target.value);
-              }}
-            />
-          </td>
-        </tr>
-      `}
       ${ls.show_url_filter === 'true' &&
       html`
         <tr>
@@ -679,6 +638,47 @@ a{3,6} → Between 3 and 6 of a`}
 
   <div id="images_table_container">
     <table id="images_table" class="grid"></table>
+  </div>
+
+  <div
+    id="downloads_container"
+    style=${{
+      gridTemplateColumns: `${
+        ls.show_file_renaming === 'true' ? '1fr' : ''
+      } 1fr 100px`,
+    }}
+  >
+    ${ls.show_file_renaming === 'true' &&
+    html`
+      <input
+        type="text"
+        placeholder="Rename files"
+        title="Set a new file name for the images you want to download."
+        value=${ls.new_file_name}
+        onChange=${(e) => {
+          ls.new_file_name = $.trim(e.target.value);
+        }}
+      />
+    `}
+
+    <input
+      type="text"
+      placeholder="Save to subfolder"
+      title="Set the name of the subfolder you want to download the images to. Note that browsers"
+      value=${ls.folder_name}
+      onChange=${(e) => {
+        ls.folder_name = $.trim(e.target.value);
+      }}
+    />
+
+    <input
+      type="button"
+      id="download_button"
+      class="accent"
+      value="Download"
+      disabled="true"
+      onClick=${downloadImages}
+    />
   </div>
 `);
 

@@ -13,12 +13,13 @@ export const ImageUrlTextbox = (props) => html`
 
 const imageButtonStyle = {
   cursor: 'pointer',
-  width: '24px',
-  height: '24px',
-  border: 0,
+  borderRadius: '4px',
+  border: '1px solid var(--iconButtonBorder)',
+  marginBottom: '4px',
   backgroundSize: '24px',
   backgroundRepeat: 'no-repeat',
   backgroundPosition: 'center',
+  padding: '13px',
 };
 
 const ImageButton = ({ children, style, ...props }) => html`

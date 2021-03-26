@@ -12,9 +12,8 @@
     <style>
       body {
         margin: 0;
-        min-width: 200px;
-        min-height: 150px;
-        box-sizing: border-box;
+        min-width: 500px;
+        min-height: 600px;
       }
 
       .grid {
@@ -25,6 +24,12 @@
       .grid td {
         padding: 0 2px;
       }
+      .grid td:first-child {
+        padding-left: 0;
+      }
+      .grid td:last-child {
+        padding-right: 0;
+      }
       .grid td input[type='text'],
       .grid td input[type='button'],
       .grid td input[type='number'],
@@ -32,14 +37,24 @@
         width: 100%;
       }
 
-      #filters_container {
+      #filters_container,
+      #downloads_container {
         position: sticky;
-        top: 0px;
-        box-sizing: border-box;
-        width: 100%;
-        padding: 16px 16px 8px 16px;
+        padding: 12px;
         background: #fff;
+      }
+
+      #filters_container {
+        top: 0px;
         border-bottom: 1px solid #ccc;
+        padding-bottom: 8px;
+      }
+
+      #downloads_container {
+        bottom: 0px;
+        display: grid;
+        gap: 4px;
+        border-top: 1px solid #ccc;
       }
 
       #only_images_from_links_container {
@@ -51,11 +66,12 @@
       }
 
       #images_table_container {
-        padding: 8px 16px 16px 16px;
+        padding: 9px 12px 12px 12px;
       }
 
       #images_table img {
         cursor: pointer;
+        background: var(--imageBackground); /* Useful for transparent images */
       }
 
       .open_image_button,
