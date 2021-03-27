@@ -82,25 +82,21 @@
         background: var(--neutralTransparent);
       }
 
-      #images_container .card .actions {
-        display: flex;
-        background: var(--neutralLightest);
-      }
-
       #images_container img {
         cursor: pointer;
         background: var(--imageBackground); /* Useful for transparent images */
       }
 
-      .open_image_button,
-      .download_image_button {
-        width: 24px;
-        height: 24px;
-        cursor: pointer;
+      #images_container .actions {
+        display: flex;
+        gap: 4px;
+        width: 100%;
+        padding: 4px;
+      }
 
-        background-size: 24px;
-        background-repeat: no-repeat;
-        background-position: center;
+      #images_container input[type='text'] {
+        flex: 1;
+        margin-bottom: 0;
       }
 
       #downloads_container {

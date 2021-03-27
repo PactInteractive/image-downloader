@@ -175,7 +175,7 @@ function displayImages() {
   });
 
   const selectAllCheckbox = html`
-    <div style=${{ gridColumn: '1 / -1' }}>
+    <div style=${{ gridColumn: '1 / -1', fontWeight: 'bold' }}>
       <${Checkbox}
         id="select_all_checkbox"
         onChange=${(e) => {
