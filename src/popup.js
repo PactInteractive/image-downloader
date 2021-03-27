@@ -167,11 +167,11 @@ function displayImages() {
   const columns = parseInt(ls.columns, 10);
   imagesContainer.css({
     gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-    width: `calc(2 * var(--imagesContainerPadding) + ${columns} * (2 * ${
+    width: `calc(2 * var(--images-container-padding) + ${columns} * (2 * ${
       ls.image_border_width
     }px + ${ls.image_max_width}px) + ${
       columns - 1
-    } * var(--imagesContainerGap))`,
+    } * var(--images-container-gap))`,
   });
 
   const selectAllCheckbox = html`
@@ -325,8 +325,10 @@ function showDownloadConfirmation(startDownload) {
         }}
       />
 
+      &nbsp;
+
       <${Checkbox} id="dont_show_again_checkbox">
-        Don't show this again
+        Got it, don't show again
       <//>
     </div>
   `;

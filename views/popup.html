@@ -43,14 +43,15 @@
 
       #filters_container,
       #downloads_container {
+        z-index: 1;
         position: sticky;
         padding: 12px;
-        background: #fff;
+        background: var(--neutral-lightest);
       }
 
       #filters_container {
         top: 0px;
-        border-bottom: 1px solid #ccc;
+        border-bottom: 1px solid var(--border-color);
         padding-bottom: 8px;
       }
 
@@ -65,45 +66,64 @@
       #images_container {
         flex: 1;
         display: grid;
-        gap: var(--imagesContainerGap);
-        padding: var(--imagesContainerPadding);
+        gap: var(--images-container-gap);
+        padding: var(--images-container-padding);
         padding-top: 9px; /* Account for checkbox 3px margin */
+        background: var(--neutral-lighter);
       }
 
       #images_container .card {
+        overflow: hidden;
+        position: relative;
+
         display: grid;
         grid-template-rows: 1fr auto;
         justify-items: center;
         align-items: center;
 
-        overflow: hidden;
-        border-radius: var(--borderRadius);
-        border: 1px solid var(--borderColor);
-        background: var(--neutralTransparent);
+        box-shadow: var(--elevation-1);
+        min-height: 160px;
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--border-color);
+        background: var(--neutral-lightest);
       }
 
       #images_container img {
         cursor: pointer;
-        background: var(--imageBackground); /* Useful for transparent images */
+        background: var(--image-background); /* Useful for transparent images */
       }
 
       #images_container .actions {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+
         display: flex;
         gap: 4px;
         width: 100%;
+        background: var(--neutral-transparent-20);
         padding: 4px;
+
+        opacity: 0;
+        transition: opacity 200ms ease-in-out;
+      }
+
+      #images_container .card:hover .actions {
+        opacity: 1;
       }
 
       #images_container input[type='text'] {
         flex: 1;
         margin-bottom: 0;
+        background: var(--neutral-lighter);
       }
 
       #downloads_container {
         bottom: 0px;
         display: grid;
         gap: 4px;
-        border-top: 1px solid #ccc;
+        border-top: 1px solid var(--border-color);
       }
     </style>
   </head>

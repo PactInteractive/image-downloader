@@ -1,30 +1,49 @@
 :root {
-  --foreground: #333;
-  --foregroundLight: #999;
+  /* Colors */
+  /* Neutral */
+  --neutral-lightest: hsl(0, 0%, 100%);
+  --neutral-lighter: hsl(300, 11%, 96%);
+  --neutral-light: hsl(300, 11%, 80%);
+  --neutral: hsl(300, 11%, 20%);
+  --neutral-dark: hsl(300, 11%, 10%);
+  --neutral-darker: hsl(300, 11%, 5%);
+  --neutral-darkest: hsl(300, 11%, 0%);
 
-  --neutral: #ccc;
-  --neutralTransparent: rgba(0, 0, 0, 0.05);
-  --neutralLightest: #fff;
+  --neutral-transparent-5: hsla(0, 0%, 0%, 5%);
+  --neutral-transparent-20: hsla(0, 0%, 0%, 20%);
 
-  --accent: rgb(26, 116, 232);
-  --accentDark: #2791d9;
+  /* Accent */
+  --accent: hsl(213, 80%, 50%);
+  --accent-dark: hsl(213, 80%, 40%);
 
-  --success: #25a75c;
-  --successLight: #28b463;
+  /* Success */
+  --success-light: hsl(145, 64%, 43%);
+  --success: hsl(145, 64%, 40%);
 
-  --warning: #ea940c;
-  --warningLight: #f39c12;
+  /* Warning */
+  --warning-light: hsl(37, 90%, 51%);
+  --warning: hsl(37, 90%, 48%);
 
-  --danger: #e53f2e;
-  --dangerLight: #e74c3c;
+  /* Danger */
+  --danger-light: hsl(6, 78%, 57%);
+  --danger: hsl(6, 78%, 54%);
 
-  --borderColor: var(--neutralTransparent);
-  --imageBackground: var(--neutralTransparent);
-  --inputBackground: var(--neutralTransparent);
+  /* Foreground */
+  --foreground-light: hsl(0, 0%, 60%);
+  --foreground: hsl(0, 0%, 20%);
 
-  --borderRadius: 4px;
-  --imagesContainerGap: 8px;
-  --imagesContainerPadding: 12px;
+  /* Border radii */
+  --border-radius-md: 4px;
+
+  /* Elevations */
+  --elevation-1: 0px 2px 4px var(--neutral-transparent-20);
+
+  /* Misc */
+  --border-color: var(--neutral-transparent-5);
+  --image-background: var(--neutralLight);
+  --input-background: var(--neutral-transparent-5);
+  --images-container-gap: 8px;
+  --images-container-padding: 12px;
 }
 
 html {
@@ -68,7 +87,7 @@ body {
   color: var(--danger);
 }
 .light {
-  color: var(--foregroundLight);
+  color: var(--foreground-light);
 }
 
 /* links */
@@ -80,7 +99,7 @@ a:visited {
 
 a:hover,
 a:active {
-  color: var(--accentDark);
+  color: var(--accent-dark);
 }
 
 hr {
@@ -103,14 +122,14 @@ input[type='text'],
 input[type='button'],
 input[type='number'],
 select {
-  border-radius: var(--borderRadius);
+  border-radius: var(--border-radius-md);
   margin-bottom: 4px;
   font-size: 12px;
 }
 
 input[type='text'] {
   border: 0;
-  background: var(--inputBackground);
+  background: var(--input-background);
   padding: 8px 12px;
 }
 
@@ -125,7 +144,7 @@ input[type='checkbox'] {
 
 input[type='button'] {
   min-width: 50px;
-  color: var(--neutralLightest);
+  color: var(--neutral-lightest);
   border: 0;
   padding: 8px 12px;
   transition: background 0.15s;
@@ -147,7 +166,7 @@ input[type='button'].accent:active {
 
 /* success */
 input[type='button'].success {
-  background: var(--successLight);
+  background: var(--success-light);
 }
 input[type='button'].success:hover,
 input[type='button'].success:focus,
@@ -157,7 +176,7 @@ input[type='button'].success:active {
 
 /* warning */
 input[type='button'].warning {
-  background: var(--warningLight);
+  background: var(--warning-light);
 }
 input[type='button'].warning:hover,
 input[type='button'].warning:focus,
@@ -167,7 +186,7 @@ input[type='button'].warning:active {
 
 /* danger */
 input[type='button'].danger {
-  background: var(--dangerLight);
+  background: var(--danger-light);
 }
 input[type='button'].danger:hover,
 input[type='button'].danger:focus,
