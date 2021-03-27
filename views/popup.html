@@ -64,11 +64,10 @@
 
       #images_container {
         flex: 1;
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--imagesContainerSpacing);
-        align-content: flex-start;
-        padding: 9px 12px 12px 12px;
+        display: grid;
+        gap: var(--imagesContainerGap);
+        padding: var(--imagesContainerPadding);
+        padding-top: 9px; /* Account for checkbox 3px margin */
       }
 
       #images_container .card {

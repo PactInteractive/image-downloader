@@ -23,7 +23,8 @@
   --inputBackground: var(--neutralTransparent);
 
   --borderRadius: 4px;
-  --imagesContainerSpacing: 8px;
+  --imagesContainerGap: 8px;
+  --imagesContainerPadding: 12px;
 }
 
 html {

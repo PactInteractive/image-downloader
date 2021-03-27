@@ -165,14 +165,17 @@ function displayImages() {
   imagesContainer.empty();
 
   const columns = parseInt(ls.columns, 10);
-  const columnWidth = `calc((100% - var(--imagesContainerSpacing)) / ${columns}`;
+  imagesContainer.css({
+    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
+    width: `calc(2 * var(--imagesContainerPadding) + ${columns} * (2 * ${
+      ls.image_border_width
+    }px + ${ls.image_max_width}px) + ${
+      columns - 1
+    } * var(--imagesContainerGap))`,
+  });
 
   const selectAllCheckbox = html`
-    <div
-      style=${{
-        width: `calc(${columns} * (2 * ${ls.image_border_width}px + ${ls.image_max_width}px + var(--imagesContainerSpacing) / 2))`,
-      }}
-    >
+    <div style=${{ gridColumn: '1 / -1' }}>
       <${Checkbox}
         id="select_all_checkbox"
         onChange=${(e) => {
@@ -196,7 +199,7 @@ function displayImages() {
   // Images
   visibleImages.forEach((imageUrl, index) => {
     const image = html`
-      <div class="card" style=${{ width: columnWidth }}>
+      <div class="card">
         <img
           id=${`image${index}`}
           src=${imageUrl}
@@ -607,7 +610,7 @@ a{3,6} → Between 3 and 6 of a`}
     <input
       type="text"
       placeholder="Save to subfolder"
-      title="Set the name of the subfolder you want to download the images to. Note that browsers"
+      title="Set the name of the subfolder you want to download the images to."
       value=${ls.folder_name}
       onChange=${(e) => {
         ls.folder_name = $.trim(e.target.value);
