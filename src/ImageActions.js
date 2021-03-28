@@ -5,7 +5,7 @@ export const ImageUrlTextbox = (props) => html`
     type="text"
     readonly
     onClick=${(e) => {
-      e.target.select();
+      e.currentTarget.select();
     }}
     ...${props}
   />

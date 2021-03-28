@@ -33,7 +33,7 @@ function render() {
         title="Requires confirmation when you press the Download button"
         checked="${state.show_download_confirmation === 'true'}"
         onChange=${(e) => {
-          state.show_download_confirmation = e.target.checked.toString();
+          state.show_download_confirmation = e.currentTarget.checked.toString();
         }}
       >
         <span>Show download confirmation</span>
@@ -45,7 +45,7 @@ function render() {
         title="Flashes a message to let you know your download is starting"
         checked="${state.show_download_notification === 'true'}"
         onChange=${(e) => {
-          state.show_download_notification = e.target.checked.toString();
+          state.show_download_notification = e.currentTarget.checked.toString();
         }}
       >
         <span>Show <b>downloading</b> message</span>
@@ -57,7 +57,7 @@ function render() {
         title="Lets you specify a new file name for downloaded files"
         checked="${state.show_file_renaming === 'true'}"
         onChange=${(e) => {
-          state.show_file_renaming = e.target.checked.toString();
+          state.show_file_renaming = e.currentTarget.checked.toString();
         }}
       >
         <span>Show file renaming textbox</span>
@@ -72,7 +72,7 @@ function render() {
         title="Enables filtering by image URL; supports wildcard and regex"
         checked="${state.show_url_filter === 'true'}"
         onChange=${(e) => {
-          state.show_url_filter = e.target.checked.toString();
+          state.show_url_filter = e.currentTarget.checked.toString();
         }}
       >
         <span>Show image URL filter</span>
@@ -84,7 +84,7 @@ function render() {
         title="Enables filtering by image width"
         checked="${state.show_image_width_filter === 'true'}"
         onChange=${(e) => {
-          state.show_image_width_filter = e.target.checked.toString();
+          state.show_image_width_filter = e.currentTarget.checked.toString();
         }}
       >
         <span>Show image width filter</span>
@@ -96,7 +96,7 @@ function render() {
         title="Enables filtering by image height"
         checked="${state.show_image_height_filter === 'true'}"
         onChange=${(e) => {
-          state.show_image_height_filter = e.target.checked.toString();
+          state.show_image_height_filter = e.currentTarget.checked.toString();
         }}
       >
         <span>Show image height filter</span>
@@ -108,7 +108,7 @@ function render() {
         title="Enables the option to only show images from direct links on the page; this can be useful on sites like Reddit"
         checked="${state.show_only_images_from_links === 'true'}"
         onChange=${(e) => {
-          state.show_only_images_from_links = e.target.checked.toString();
+          state.show_only_images_from_links = e.currentTarget.checked.toString();
         }}
       >
         <span>Show <b>Only images from links</b> option</span>
@@ -123,7 +123,7 @@ function render() {
         title="Displays the URL above each image"
         checked="${state.show_image_url === 'true'}"
         onChange=${(e) => {
-          state.show_image_url = e.target.checked.toString();
+          state.show_image_url = e.currentTarget.checked.toString();
         }}
       >
         <span>Show the URL textbox</span>
@@ -135,7 +135,7 @@ function render() {
         title="Displays a button next to each image to open it in a new tab"
         checked="${state.show_open_image_button === 'true'}"
         onChange=${(e) => {
-          state.show_open_image_button = e.target.checked.toString();
+          state.show_open_image_button = e.currentTarget.checked.toString();
         }}
       >
         <span>Show the <b>open</b> button</span>
@@ -147,7 +147,7 @@ function render() {
         title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
         checked="${state.show_download_image_button === 'true'}"
         onChange=${(e) => {
-          state.show_download_image_button = e.target.checked.toString();
+          state.show_download_image_button = e.currentTarget.checked.toString();
         }}
       >
         <span>Show the <b>download</b> button</span>
@@ -165,7 +165,7 @@ function render() {
               max="10"
               value="${state.columns}"
               onChange=${(e) => {
-                state.columns = e.target.value;
+                state.columns = e.currentTarget.value;
               }}
             />
           </td>
@@ -188,7 +188,7 @@ function render() {
               max="720"
               value="${state.image_min_width}"
               onChange=${(e) => {
-                state.image_min_width = e.target.value;
+                state.image_min_width = e.currentTarget.value;
               }}
             />px
           </td>
@@ -211,7 +211,7 @@ function render() {
               max="720"
               value="${state.image_max_width}"
               onChange=${(e) => {
-                state.image_max_width = e.target.value;
+                state.image_max_width = e.currentTarget.value;
               }}
             />px
           </td>
@@ -230,7 +230,7 @@ function render() {
               max="10"
               value="${state.image_border_width}"
               onChange=${(e) => {
-                state.image_border_width = e.target.value;
+                state.image_border_width = e.currentTarget.value;
               }}
             />px
           </td>
@@ -244,7 +244,7 @@ function render() {
               type="color"
               value="${state.image_border_color}"
               onChange=${(e) => {
-                state.image_border_color = e.target.value;
+                state.image_border_color = e.currentTarget.value;
               }}
             />
           </td>

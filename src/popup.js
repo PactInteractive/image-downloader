@@ -167,11 +167,9 @@ function displayImages() {
   const columns = parseInt(ls.columns, 10);
   imagesContainer.css({
     gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-    width: `calc(2 * var(--images-container-padding) + ${columns} * (2 * ${
-      ls.image_border_width
-    }px + ${ls.image_max_width}px) + ${
-      columns - 1
-    } * var(--images-container-gap))`,
+    width: `calc(2 * var(--images-container-padding) + ${columns} * ${
+      ls.image_max_width
+    }px + ${columns - 1} * var(--images-container-gap))`,
   });
 
   const selectAllCheckbox = html`
@@ -179,9 +177,9 @@ function displayImages() {
       <${Checkbox}
         id="select_all_checkbox"
         onChange=${(e) => {
-          $('#download_button').prop('disabled', !e.target.checked);
+          $('#download_button').prop('disabled', !e.currentTarget.checked);
           for (let index = 0; index < visibleImages.length; index++) {
-            $(`#image${index}`).toggleClass('checked', e.target.checked);
+            $(`#card_${index}`).toggleClass('checked', e.currentTarget.checked);
           }
         }}
       >
@@ -200,15 +198,18 @@ function displayImages() {
   visibleImages.forEach((imageUrl, index) => {
     const image = html`
       <div
+        id=${`card_${index}`}
         class="card"
         onClick=${(e) => {
-          const img = $(`#image${index}`);
-          img.toggleClass('checked', !img.hasClass('checked'));
+          $(e.currentTarget).toggleClass(
+            'checked',
+            !$(e.currentTarget).hasClass('checked')
+          );
 
           let allAreChecked = true;
           let allAreUnchecked = true;
           for (let index = 0; index < visibleImages.length; index++) {
-            if ($(`#image${index}`).hasClass('checked')) {
+            if ($(`#card_${index}`).hasClass('checked')) {
               allAreUnchecked = false;
             } else {
               allAreChecked = false;
@@ -231,8 +232,13 @@ function displayImages() {
           }
         }}
       >
-        <img id=${`image${index}`} src=${imageUrl} />
-
+        <img
+          src=${imageUrl}
+          style=${{
+            minWidth: `${ls.image_min_width}px`,
+            maxWidth: `${ls.image_max_width}px`,
+          }}
+        />
         ${show_image_url &&
         html`<div class="image_url_container">
           <${ImageUrlTextbox}
@@ -270,7 +276,7 @@ function downloadImages() {
   function startDownload() {
     const checkedImages = [];
     for (let index = 0; index < visibleImages.length; index++) {
-      if ($(`#image${index}`).hasClass('checked')) {
+      if ($(`#card_${index}`).hasClass('checked')) {
         checkedImages.push(visibleImages[index]);
       }
     }
@@ -296,50 +302,50 @@ function showDownloadConfirmation(startDownload) {
   };
 
   const notification_container = html`
-    <div>
+    <div style=${{ gridColumn: '1 / -1' }}>
       <div>
         <hr />
         Take a quick look at your browser settings and search for
         <b> download location</b>.
         <span class="danger">
           If the <b>Ask where to save each file before downloading</b> option is
-          checked, proceeding might open a lot of popup windows. Are you sure
-          you want to do this?
+          checked, proceeding might open a lot of popup windows. Proceed with
+          the download?
         </span>
       </div>
 
-      <input
-        type="button"
-        class="success"
-        value="YES"
-        onClick=${() => {
-          saveDontShowAgainState();
-          removeNotificationContainer();
-          startDownload();
-        }}
-      />
+      <div style=${{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+        <div style=${{ marginRight: 'auto' }}>
+          <${Checkbox} id="dont_show_again_checkbox">
+            Got it, don't show again
+          <//>
+        </div>
 
-      &nbsp;
+        <input
+          type="button"
+          class="ghost"
+          value="Cancel"
+          onClick=${() => {
+            saveDontShowAgainState();
+            removeNotificationContainer();
+          }}
+        />
 
-      <input
-        type="button"
-        class="danger"
-        value="NO"
-        onClick=${() => {
-          saveDontShowAgainState();
-          removeNotificationContainer();
-        }}
-      />
-
-      &nbsp;
-
-      <${Checkbox} id="dont_show_again_checkbox">
-        Got it, don't show again
-      <//>
+        <input
+          type="button"
+          class="success"
+          value="Yes, Download"
+          onClick=${() => {
+            saveDontShowAgainState();
+            removeNotificationContainer();
+            startDownload();
+          }}
+        />
+      </div>
     </div>
   `;
 
-  $('#filters_container').append(notification_container);
+  $('#downloads_container').append(notification_container);
 }
 
 function flashDownloadingNotification(imageCount) {
@@ -347,7 +353,7 @@ function flashDownloadingNotification(imageCount) {
 
   const downloading_notification = html`
     <div class="success">
-      Downloading ${imageCount} image${imageCount > 1 ? 's' : ''}...
+      Downloading ${imageCount} ${imageCount > 1 ? 'images' : 'image'}...
     </div>
   `;
 
@@ -396,7 +402,7 @@ $('main').append(html`
               value=${ls.filter_url}
               onKeyUp=${ls.show_url_filter === 'true' && filterImages}
               onChange=${(e) => {
-                ls.filter_url = $.trim(e.target.value);
+                ls.filter_url = $.trim(e.currentTarget.value);
               }}
             />
           </td>
@@ -405,7 +411,7 @@ $('main').append(html`
             <select
               value=${ls.filter_url_mode}
               onChange=${(e) => {
-                ls.filter_url_mode = e.target.value;
+                ls.filter_url_mode = e.currentTarget.value;
                 filterImages();
               }}
             >
@@ -487,9 +493,9 @@ a{3,6} → Between 3 and 6 of a`}
               checked=${ls[`filter_min_width_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.target,
+                  e.currentTarget,
                   `filter_min_width_enabled`,
-                  e.target.checked
+                  e.currentTarget.checked
                 );
               }}
             />
@@ -506,9 +512,9 @@ a{3,6} → Between 3 and 6 of a`}
               checked=${ls[`filter_max_width_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.target,
+                  e.currentTarget,
                   `filter_max_width_enabled`,
-                  e.target.checked
+                  e.currentTarget.checked
                 );
               }}
             />
@@ -539,9 +545,9 @@ a{3,6} → Between 3 and 6 of a`}
               checked=${ls[`filter_min_height_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.target,
+                  e.currentTarget,
                   `filter_min_height_enabled`,
-                  e.target.checked
+                  e.currentTarget.checked
                 );
               }}
             />
@@ -558,9 +564,9 @@ a{3,6} → Between 3 and 6 of a`}
               checked=${ls[`filter_max_height_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.target,
+                  e.currentTarget,
                   `filter_max_height_enabled`,
-                  e.target.checked
+                  e.currentTarget.checked
                 );
               }}
             />
@@ -581,7 +587,7 @@ a{3,6} → Between 3 and 6 of a`}
         title="Only show images from direct links on the page; this can be useful on sites like Reddit"
         checked=${ls.only_images_from_links === 'true'}
         onChange=${(e) => {
-          ls.only_images_from_links = e.target.checked;
+          ls.only_images_from_links = e.currentTarget.checked;
           filterImages();
         }}
       >
@@ -610,7 +616,7 @@ a{3,6} → Between 3 and 6 of a`}
         title="Set a new file name for the images you want to download."
         value=${ls.new_file_name}
         onChange=${(e) => {
-          ls.new_file_name = $.trim(e.target.value);
+          ls.new_file_name = $.trim(e.currentTarget.value);
         }}
       />
     `}
@@ -621,7 +627,7 @@ a{3,6} → Between 3 and 6 of a`}
       title="Set the name of the subfolder you want to download the images to."
       value=${ls.folder_name}
       onChange=${(e) => {
-        ls.folder_name = $.trim(e.target.value);
+        ls.folder_name = $.trim(e.currentTarget.value);
       }}
     />
 
@@ -715,12 +721,11 @@ chrome.windows.getCurrent((currentWindow) => {
   );
 });
 
-// Images
-jss.set('#images_container img', {
-  'min-width': `${ls.image_min_width}px`,
-  'max-width': `${ls.image_max_width}px`,
-  'border-width': `${ls.image_border_width}px`,
+// Dynamic classes
+jss.set('#images_container .card:hover', {
+  'box-shadow': `0 0 0 ${ls.image_border_width}px var(--neutral)`,
 });
-jss.set('#images_container .card img.checked', {
-  'border-color': ls.image_border_color,
+
+jss.set('#images_container .card.checked', {
+  'box-shadow': `0 0 0 ${ls.image_border_width}px ${ls.image_border_color}`,
 });

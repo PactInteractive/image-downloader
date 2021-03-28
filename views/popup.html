@@ -82,29 +82,24 @@
         justify-items: center;
         align-items: center;
 
-        box-shadow: var(--elevation-1);
         min-height: 160px;
         border-radius: var(--border-radius-md);
         border: 1px solid var(--border-color);
         background: var(--neutral-lightest);
+
+        box-shadow: var(--elevation-1);
+        transition: box-shadow 200ms linear;
       }
 
       #images_container img {
         background: var(--image-background); /* Useful for transparent images */
-        border-style: solid;
-        border-color: transparent;
-        transition: border-color 0.15s;
-      }
-
-      #images_container .card:hover img {
-        border-color: var(--neutral);
       }
 
       #images_container .image_url_container,
       #images_container .actions {
         position: absolute;
         opacity: 0;
-        transition: opacity 200ms ease-in-out;
+        transition: opacity 200ms linear;
       }
 
       #images_container .card:hover .image_url_container,
@@ -114,22 +109,23 @@
 
       #images_container .image_url_container {
         position: absolute;
-        right: 6px;
-        bottom: 6px;
-        left: 6px;
+        right: 4px;
+        bottom: 4px;
+        left: 4px;
         background: var(--neutral-lighter);
       }
 
       #images_container .image_url_container input[type='text'] {
         width: 100%;
+        margin-bottom: 0;
       }
 
       #images_container .actions {
         top: 0;
         right: 0;
         display: flex;
-        gap: 6px;
-        padding: 6px;
+        gap: 4px;
+        padding: 4px;
       }
 
       #downloads_container {

@@ -138,7 +138,7 @@ input[type='button'] {
   color: var(--neutral-lightest);
   border: 0;
   padding: 8px 12px;
-  transition: background 0.15s;
+  transition: background 200ms ease-in-out;
 }
 input[type='button']:disabled {
   cursor: not-allowed;
@@ -183,6 +183,18 @@ input[type='button'].danger:hover,
 input[type='button'].danger:focus,
 input[type='button'].danger:active {
   background: var(--danger);
+}
+
+/* ghost */
+input[type='button'].ghost {
+  border: 2px solid var(--neutral-light);
+  background: var(--neutral-lightest);
+  color: var(--foreground);
+}
+input[type='button'].ghost:hover,
+input[type='button'].ghost:focus,
+input[type='button'].ghost:active {
+  background: var(--neutral-lighter);
 }
 
 label {
