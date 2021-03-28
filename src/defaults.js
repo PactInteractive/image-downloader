@@ -52,15 +52,15 @@
     image_min_width: 50,
     image_max_width: 200,
     image_border_width: 3,
-    image_border_color: '#3498db',
+    image_border_color: '#1975e6',
   };
 
-  for (const option in defaults) {
+  Object.keys(defaults).forEach((option) => {
     if (ls[option] === undefined) {
       ls[option] = defaults[option];
     }
     ls[`${option}_default`] = defaults[option];
-  }
+  });
 
   ls.options = JSON.stringify(Object.keys(defaults));
 })(localStorage);

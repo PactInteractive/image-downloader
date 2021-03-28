@@ -14,7 +14,7 @@ export const ImageUrlTextbox = (props) => html`
 const imageButtonStyle = {
   cursor: 'pointer',
   borderRadius: 'var(--border-radius-md)',
-  border: '0',
+  border: '2px solid var(--neutral)',
   backgroundColor: 'var(--neutral-lightest)',
   backgroundPosition: 'center',
   backgroundRepeat: 'no-repeat',
@@ -28,13 +28,14 @@ const ImageButton = ({ children, style, ...props }) => html`
   </button>
 `;
 
-export const OpenImageButton = ({ imageUrl, ...props }) => {
+export const OpenImageButton = ({ imageUrl, onClick, ...props }) => {
   return html`
     <${ImageButton}
       title="Open in new tab"
       style=${{ backgroundImage: `url("/images/open.png")` }}
-      onClick=${() => {
+      onClick=${(e) => {
         chrome.tabs.create({ url: imageUrl, active: false });
+        onClick?.(e);
       }}
       ...${props}
     >
@@ -43,13 +44,14 @@ export const OpenImageButton = ({ imageUrl, ...props }) => {
   `;
 };
 
-export const DownloadImageButton = ({ imageUrl, ...props }) => {
+export const DownloadImageButton = ({ imageUrl, onClick, ...props }) => {
   return html`
     <${ImageButton}
       title="Download"
       style=${{ backgroundImage: `url("/images/download.png")` }}
-      onClick=${() => {
+      onClick=${(e) => {
         chrome.downloads.download({ url: imageUrl });
+        onClick?.(e);
       }}
       ...${props}
     >

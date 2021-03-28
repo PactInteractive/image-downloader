@@ -73,6 +73,7 @@
       }
 
       #images_container .card {
+        cursor: pointer;
         overflow: hidden;
         position: relative;
 
@@ -89,34 +90,46 @@
       }
 
       #images_container img {
-        cursor: pointer;
         background: var(--image-background); /* Useful for transparent images */
+        border-style: solid;
+        border-color: transparent;
+        transition: border-color 0.15s;
       }
 
+      #images_container .card:hover img {
+        border-color: var(--neutral);
+      }
+
+      #images_container .image_url_container,
       #images_container .actions {
         position: absolute;
-        right: 0;
-        bottom: 0;
-        left: 0;
-
-        display: flex;
-        gap: 4px;
-        width: 100%;
-        background: var(--neutral-transparent-20);
-        padding: 4px;
-
         opacity: 0;
         transition: opacity 200ms ease-in-out;
       }
 
+      #images_container .card:hover .image_url_container,
       #images_container .card:hover .actions {
         opacity: 1;
       }
 
-      #images_container input[type='text'] {
-        flex: 1;
-        margin-bottom: 0;
+      #images_container .image_url_container {
+        position: absolute;
+        right: 6px;
+        bottom: 6px;
+        left: 6px;
         background: var(--neutral-lighter);
+      }
+
+      #images_container .image_url_container input[type='text'] {
+        width: 100%;
+      }
+
+      #images_container .actions {
+        top: 0;
+        right: 0;
+        display: flex;
+        gap: 6px;
+        padding: 6px;
       }
 
       #downloads_container {

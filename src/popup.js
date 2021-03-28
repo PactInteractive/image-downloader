@@ -199,55 +199,61 @@ function displayImages() {
   // Images
   visibleImages.forEach((imageUrl, index) => {
     const image = html`
-      <div class="card">
-        <img
-          id=${`image${index}`}
-          src=${imageUrl}
-          onClick=${(e) => {
-            $(e.target).toggleClass(
-              'checked',
-              !$(e.target).hasClass('checked')
-            );
+      <div
+        class="card"
+        onClick=${(e) => {
+          const img = $(`#image${index}`);
+          img.toggleClass('checked', !img.hasClass('checked'));
 
-            let allAreChecked = true;
-            let allAreUnchecked = true;
-            for (let index = 0; index < visibleImages.length; index++) {
-              if ($(`#image${index}`).hasClass('checked')) {
-                allAreUnchecked = false;
-              } else {
-                allAreChecked = false;
-              }
-              // Exit the loop early
-              if (!(allAreChecked || allAreUnchecked)) break;
+          let allAreChecked = true;
+          let allAreUnchecked = true;
+          for (let index = 0; index < visibleImages.length; index++) {
+            if ($(`#image${index}`).hasClass('checked')) {
+              allAreUnchecked = false;
+            } else {
+              allAreChecked = false;
             }
+            // Exit the loop early
+            if (!(allAreChecked || allAreUnchecked)) break;
+          }
 
-            $('#download_button').prop('disabled', allAreUnchecked);
+          $('#download_button').prop('disabled', allAreUnchecked);
 
-            const select_all_checkbox = $('#select_all_checkbox');
-            select_all_checkbox.prop(
-              'indeterminate',
-              !(allAreChecked || allAreUnchecked)
-            );
-            if (allAreChecked) {
-              select_all_checkbox.prop('checked', true);
-            } else if (allAreUnchecked) {
-              select_all_checkbox.prop('checked', false);
-            }
-          }}
-        />
+          const select_all_checkbox = $('#select_all_checkbox');
+          select_all_checkbox.prop(
+            'indeterminate',
+            !(allAreChecked || allAreUnchecked)
+          );
+          if (allAreChecked) {
+            select_all_checkbox.prop('checked', true);
+          } else if (allAreUnchecked) {
+            select_all_checkbox.prop('checked', false);
+          }
+        }}
+      >
+        <img id=${`image${index}`} src=${imageUrl} />
 
-        ${(show_image_url ||
-          show_open_image_button ||
-          show_download_image_button) &&
-        html`
-          <div class="actions">
-            ${show_image_url && html`<${ImageUrlTextbox} value=${imageUrl} />`}
-            ${show_open_image_button &&
-            html`<${OpenImageButton} imageUrl=${imageUrl} />`}
-            ${show_download_image_button &&
-            html`<${DownloadImageButton} imageUrl=${imageUrl} />`}
-          </div>
-        `}
+        ${show_image_url &&
+        html`<div class="image_url_container">
+          <${ImageUrlTextbox}
+            value=${imageUrl}
+            onClick=${(e) => e.stopPropagation()}
+          />
+        </div>`}
+        ${show_open_image_button &&
+        show_download_image_button &&
+        html`<div class="actions">
+          ${show_open_image_button &&
+          html`<${OpenImageButton}
+            imageUrl=${imageUrl}
+            onClick=${(e) => e.stopPropagation()}
+          />`}
+          ${show_download_image_button &&
+          html`<${DownloadImageButton}
+            imageUrl=${imageUrl}
+            onClick=${(e) => e.stopPropagation()}
+          />`}
+        </div>`}
       </div>
     `;
     imagesContainer.append(image);
@@ -710,13 +716,11 @@ chrome.windows.getCurrent((currentWindow) => {
 });
 
 // Images
-jss.set('img', {
+jss.set('#images_container img', {
   'min-width': `${ls.image_min_width}px`,
   'max-width': `${ls.image_max_width}px`,
   'border-width': `${ls.image_border_width}px`,
-  'border-style': 'solid',
-  'border-color': '#f6f6f6',
 });
-jss.set('img.checked', {
+jss.set('#images_container .card img.checked', {
   'border-color': ls.image_border_color,
 });

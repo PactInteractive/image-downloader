@@ -4,7 +4,7 @@
   --neutral-lightest: hsl(0, 0%, 100%);
   --neutral-lighter: hsl(300, 11%, 96%);
   --neutral-light: hsl(300, 11%, 80%);
-  --neutral: hsl(300, 11%, 20%);
+  --neutral: hsl(300, 11%, 60%);
   --neutral-dark: hsl(300, 11%, 10%);
   --neutral-darker: hsl(300, 11%, 5%);
   --neutral-darkest: hsl(300, 11%, 0%);
@@ -106,15 +106,6 @@ hr {
   border: 1px dotted var(--neutral);
   border-bottom: none;
   margin: 4px 0;
-}
-
-/* images */
-img {
-  transition: border-color 0.15s;
-}
-
-img:hover {
-  border-color: var(--neutral);
 }
 
 /* inputs */
