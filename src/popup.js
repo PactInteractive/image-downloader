@@ -200,6 +200,7 @@ function displayImages() {
       <div
         id=${`card_${index}`}
         class="card"
+        style=${{ minHeight: `${ls.image_max_width}px` }}
         onClick=${(e) => {
           $(e.currentTarget).toggleClass(
             'checked',
@@ -239,15 +240,8 @@ function displayImages() {
             maxWidth: `${ls.image_max_width}px`,
           }}
         />
-        ${show_image_url &&
-        html`<div class="image_url_container">
-          <${ImageUrlTextbox}
-            value=${imageUrl}
-            onClick=${(e) => e.stopPropagation()}
-          />
-        </div>`}
-        ${show_open_image_button &&
-        show_download_image_button &&
+        <div key=${index} class="checkbox"></div>
+        ${(show_open_image_button || show_download_image_button) &&
         html`<div class="actions">
           ${show_open_image_button &&
           html`<${OpenImageButton}
@@ -259,6 +253,13 @@ function displayImages() {
             imageUrl=${imageUrl}
             onClick=${(e) => e.stopPropagation()}
           />`}
+        </div>`}
+        ${show_image_url &&
+        html`<div class="image_url_container">
+          <${ImageUrlTextbox}
+            value=${imageUrl}
+            onClick=${(e) => e.stopPropagation()}
+          />
         </div>`}
       </div>
     `;
@@ -719,13 +720,4 @@ chrome.windows.getCurrent((currentWindow) => {
       });
     }
   );
-});
-
-// Dynamic classes
-jss.set('#images_container .card:hover', {
-  'box-shadow': `0 0 0 ${ls.image_border_width}px var(--neutral)`,
-});
-
-jss.set('#images_container .card.checked', {
-  'box-shadow': `0 0 0 ${ls.image_border_width}px ${ls.image_border_color}`,
 });

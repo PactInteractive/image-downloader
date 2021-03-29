@@ -36,7 +36,7 @@
   --border-radius-md: 4px;
 
   /* Elevations */
-  --elevation-1: 0px 2px 4px var(--neutral-transparent-20);
+  --elevation-1: 0 2px 4px var(--neutral-transparent-20);
 
   /* Misc */
   --border-color: var(--neutral-transparent-5);
@@ -44,6 +44,7 @@
   --input-background: var(--neutral-transparent-5);
   --images-container-gap: 8px;
   --images-container-padding: 12px;
+  --transition-opacity: opacity 200ms linear;
 }
 
 html {

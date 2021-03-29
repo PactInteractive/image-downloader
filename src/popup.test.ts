@@ -5,7 +5,6 @@ jest.useFakeTimers();
 declare var global: any;
 
 beforeEach(() => {
-  global.jss = { set: jest.fn() };
   global.chrome = mockChrome();
   global.this = global;
   global.$ = require('../lib/jquery-3.5.1.min');

@@ -216,39 +216,6 @@ function render() {
             />px
           </td>
         </tr>
-
-        <tr>
-          <td>
-            <label for="image_border_width_numberbox">Border Width:</label>
-          </td>
-          <td>
-            <input
-              id="image_border_width_numberbox"
-              type="number"
-              required
-              min="1"
-              max="10"
-              value="${state.image_border_width}"
-              onChange=${(e) => {
-                state.image_border_width = e.currentTarget.value;
-              }}
-            />px
-          </td>
-        </tr>
-
-        <tr>
-          <td><label for="image_border_color_picker">Border Color:</label></td>
-          <td>
-            <input
-              id="image_border_color_picker"
-              type="color"
-              value="${state.image_border_color}"
-              onChange=${(e) => {
-                state.image_border_color = e.currentTarget.value;
-              }}
-            />
-          </td>
-        </tr>
       </table>
     </fieldset>
 

@@ -50,7 +50,7 @@
       }
 
       #filters_container {
-        top: 0px;
+        top: 0;
         border-bottom: 1px solid var(--border-color);
         padding-bottom: 8px;
       }
@@ -82,36 +82,99 @@
         justify-items: center;
         align-items: center;
 
-        min-height: 160px;
+        box-shadow: var(--elevation-1);
         border-radius: var(--border-radius-md);
         border: 1px solid var(--border-color);
         background: var(--neutral-lightest);
-
-        box-shadow: var(--elevation-1);
-        transition: box-shadow 200ms linear;
       }
 
       #images_container img {
         background: var(--image-background); /* Useful for transparent images */
       }
 
+      #images_container .checkbox,
       #images_container .image_url_container,
       #images_container .actions {
         position: absolute;
+
+        transition: var(--transition-opacity);
         opacity: 0;
-        transition: opacity 200ms linear;
       }
 
+      #images_container .card.checked .checkbox,
+      #images_container .card:hover .checkbox,
       #images_container .card:hover .image_url_container,
       #images_container .card:hover .actions {
         opacity: 1;
       }
 
+      #images_container .checkbox {
+        top: 4px;
+        left: 4px;
+      }
+
+      #images_container .actions {
+        top: 4px;
+        right: 4px;
+      }
+
       #images_container .image_url_container {
-        position: absolute;
         right: 4px;
         bottom: 4px;
         left: 4px;
+      }
+
+      /* checkbox */
+      #images_container .checkbox {
+        width: 34px;
+        height: 34px;
+
+        border-radius: var(--border-radius-md);
+        border: 2px solid var(--neutral);
+        background: var(--neutral-lightest);
+
+        transition: var(--transition-opacity), background 200ms ease-in-out,
+          border-color 200ms ease-in-out;
+      }
+
+      #images_container .card.checked .checkbox {
+        background: var(--accent);
+        border-color: var(--accent);
+      }
+
+      #images_container .checkbox::after {
+        position: absolute;
+        top: calc(50% - 9px);
+        left: calc(50% - 9px);
+        width: 18px;
+        height: 12px;
+        content: '';
+        transform: rotate(-45deg);
+        border: 4px solid var(--neutral-lightest);
+        border-top: 0;
+        border-right: 0;
+
+        transition: var(--transition-opacity), border-color 200ms ease-in-out;
+      }
+
+      #images_container .card:hover .checkbox::after {
+        border-color: var(--neutral-light);
+      }
+
+      #images_container .card.checked .checkbox::after {
+        border-color: var(--neutral-lightest);
+      }
+      /* checkbox */
+
+      /* actions */
+      #images_container .actions {
+        display: flex;
+        gap: 4px;
+      }
+      /* actions */
+
+      /* image_url_container */
+      #images_container .image_url_container {
         background: var(--neutral-lighter);
       }
 
@@ -119,17 +182,10 @@
         width: 100%;
         margin-bottom: 0;
       }
-
-      #images_container .actions {
-        top: 0;
-        right: 0;
-        display: flex;
-        gap: 4px;
-        padding: 4px;
-      }
+      /* image_url_container */
 
       #downloads_container {
-        bottom: 0px;
+        bottom: 0;
         display: grid;
         gap: 4px;
         border-top: 1px solid var(--border-color);
@@ -142,7 +198,6 @@
 
     <script src="/lib/jquery-3.5.1.min.js"></script>
     <script src="/lib/jquery.nouislider/jquery.nouislider.js"></script>
-    <script src="/lib/jss.js"></script>
 
     <script src="/src/defaults.js"></script>
     <script type="module" src="/src/popup.js"></script>

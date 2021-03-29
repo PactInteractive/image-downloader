@@ -101,18 +101,6 @@ const options = [
     values: ['200', '400', '600'],
     ...inputOptions,
   },
-  {
-    input: '#image_border_width_numberbox',
-    key: 'image_border_width',
-    values: ['1', '2', '3'],
-    ...inputOptions,
-  },
-  {
-    input: '#image_border_color_picker',
-    key: 'image_border_color',
-    values: ['#ff0000', '#00ff00', '#0000ff'],
-    ...inputOptions,
-  },
 ];
 
 describe(`initialize control values`, () => {
