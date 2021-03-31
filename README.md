@@ -1,21 +1,22 @@
 # Image Downloader
-If you need to bulk download images from a web page, with this extension you can:
+If you need to bulk download images, with this extension you can:
 
-- See images that the page contains and links to
-- Filter them by width, height, and URL; supports wildcard and regex
-- Optionally show only images from links
-- Select images to download by clicking on the image
-- Use dedicated buttons to download or open individual images in new tabs
-- Customize image display width, columns, border size, and color
+- See images on the current tab
+- Filter by width, height, or URL (supports wildcard and regex)
+- Only show images from links (optionally)
+- Select which images to batch download
+- One-click download or open a single image in a new tab
+- Customize image display width and number of columns
 - Hide filters, buttons and notifications you don't need
 
-When you press the "Download" button, all selected images are saved to the default download directory of Chrome, or to a directory inside it if you specify a subfolder name.
+When you press the "Download" button, all selected images are saved to the default browser download directory (or optionally to a subfolder).
 
-WARNING: If you haven't set up a default download directory, you will have to manually choose the save location for each image, which might open a lot of popup windows. It is not recommended to attempt to download too many images at once without a default download directory.
+WARNING: If you haven't set a default download directory you will have to manually choose the save location for each image. This may open many popup windows. It is recommended you set a default download directory instead.
 
 # Known Issues
-This extension can't always extract the full-resolution images that open when you click a photo (e.g. in Facebook albums). That's because the page doesn't directly link to the image, but uses a script.
-If you need that kind of functionality, there are other extensions that can be useful like Hover Zoom, even if you can't mass download images with it.
+This extension can only extract the images currently on the page. Those are not always the full-resolution images that open when you click on a photo (e.g. in Facebook albums). That's because the album page displays smaller versions of the images.
+
+If you need that kind of functionality there are other useful extensions like Hover Zoom.
 
 # Change Log
 ## 3.0.0
