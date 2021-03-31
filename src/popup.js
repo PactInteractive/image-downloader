@@ -609,6 +609,16 @@ a{3,6} → Between 3 and 6 of a`}
       } 1fr 100px`,
     }}
   >
+    <input
+      type="text"
+      placeholder="Save to subfolder"
+      title="Set the name of the subfolder you want to download the images to."
+      value=${ls.folder_name}
+      onChange=${(e) => {
+        ls.folder_name = $.trim(e.currentTarget.value);
+      }}
+    />
+
     ${ls.show_file_renaming === 'true' &&
     html`
       <input
@@ -621,16 +631,6 @@ a{3,6} → Between 3 and 6 of a`}
         }}
       />
     `}
-
-    <input
-      type="text"
-      placeholder="Save to subfolder"
-      title="Set the name of the subfolder you want to download the images to."
-      value=${ls.folder_name}
-      onChange=${(e) => {
-        ls.folder_name = $.trim(e.currentTarget.value);
-      }}
-    />
 
     <input
       type="button"
