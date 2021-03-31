@@ -18,8 +18,8 @@
     "128": "/images/icon_128.png"
   },
   "web_accessible_resources": [
-    "/images/open.png",
-    "/images/download.png"
+    "/images/open.svg",
+    "/images/download.svg"
   ],
   "background": {
     "scripts": [

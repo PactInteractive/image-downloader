@@ -83,7 +83,7 @@
         align-items: center;
 
         box-shadow: var(--elevation-1);
-        border-radius: var(--border-radius-md);
+        border-radius: var(--border-radius-sm);
         border: 1px solid var(--border-color);
         background: var(--neutral-lightest);
 
@@ -122,6 +122,23 @@
       #images_container .actions {
         top: 4px;
         right: 4px;
+      }
+
+      #images_container .actions button {
+        cursor: pointer;
+        border-radius: var(--border-radius-md);
+        border: 2px solid var(--neutral);
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: 24px;
+        padding: 15px;
+
+        transition: var(--transition-background);
+        background-color: var(--neutral-lightest);
+      }
+
+      #images_container .actions button:hover {
+        background-color: var(--neutral-lighter);
       }
 
       #images_container .image_url_container {
