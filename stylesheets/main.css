@@ -10,6 +10,7 @@
   --neutral-darkest: hsl(300, 11%, 0%);
 
   --neutral-transparent-5: hsla(0, 0%, 0%, 5%);
+  --neutral-transparent-15: hsla(0, 0%, 0%, 15%);
   --neutral-transparent-20: hsla(0, 0%, 0%, 20%);
 
   /* Accent */
@@ -37,6 +38,16 @@
 
   /* Elevations */
   --elevation-1: 0 2px 4px var(--neutral-transparent-20);
+  --elevation-2: 0 5px 14px var(--neutral-transparent-15),
+    0 3px 5px var(--neutral-transparent-20);
+
+  /* Transitions */
+  --transition-timing-ease-out: 0.25, 0.8, 0.25, 1;
+
+  --transition-background: background 200ms --transition-timing-ease-out;
+  --transition-border-color: border-color 200ms --transition-timing-ease-out;
+  --transition-box-shadow: box-shadow 200ms --transition-timing-ease-out;
+  --transition-opacity: opacity 200ms linear; /* Timing opacity looks weird */
 
   /* Misc */
   --border-color: var(--neutral-transparent-5);
@@ -44,7 +55,6 @@
   --input-background: var(--neutral-transparent-5);
   --images-container-gap: 8px;
   --images-container-padding: 12px;
-  --transition-opacity: opacity 200ms linear;
 }
 
 html {
@@ -58,7 +68,7 @@ html {
 }
 
 body {
-  min-width: 500px;
+  min-width: 400px;
   min-height: 600px;
   font: 13px/1.5em 'Lucida Grande', Arial, sans-serif;
   color: var(--foreground);
@@ -139,7 +149,7 @@ input[type='button'] {
   color: var(--neutral-lightest);
   border: 0;
   padding: 8px 12px;
-  transition: background 200ms ease-in-out;
+  transition: var(--transition-background);
 }
 input[type='button']:disabled {
   cursor: not-allowed;

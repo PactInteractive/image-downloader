@@ -86,6 +86,12 @@
         border-radius: var(--border-radius-md);
         border: 1px solid var(--border-color);
         background: var(--neutral-lightest);
+
+        transition: var(--transition-box-shadow);
+      }
+
+      #images_container .card:hover {
+        box-shadow: var(--elevation-2);
       }
 
       #images_container img {
@@ -133,8 +139,8 @@
         border: 2px solid var(--neutral);
         background: var(--neutral-lightest);
 
-        transition: var(--transition-opacity), background 200ms ease-in-out,
-          border-color 200ms ease-in-out;
+        transition: var(--transition-background), var(--transition-border-color),
+          var(--transition-opacity);
       }
 
       #images_container .card.checked .checkbox {
@@ -154,7 +160,7 @@
         border-top: 0;
         border-right: 0;
 
-        transition: var(--transition-opacity), border-color 200ms ease-in-out;
+        transition: var(--transition-border-color), var(--transition-opacity);
       }
 
       #images_container .card:hover .checkbox::after {
