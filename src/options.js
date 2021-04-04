@@ -65,57 +65,6 @@ function render() {
     </fieldset>
 
     <fieldset>
-      <legend>Filters</legend>
-
-      <${Checkbox}
-        id="show_url_filter_checkbox"
-        title="Enables filtering by image URL; supports wildcard and regex"
-        checked="${state.show_url_filter === 'true'}"
-        onChange=${(e) => {
-          state.show_url_filter = e.currentTarget.checked.toString();
-        }}
-      >
-        <span>Show image URL filter</span>
-      <//>
-
-      <br />
-      <${Checkbox}
-        id="show_image_width_filter_checkbox"
-        title="Enables filtering by image width"
-        checked="${state.show_image_width_filter === 'true'}"
-        onChange=${(e) => {
-          state.show_image_width_filter = e.currentTarget.checked.toString();
-        }}
-      >
-        <span>Show image width filter</span>
-      <//>
-
-      <br />
-      <${Checkbox}
-        id="show_image_height_filter_checkbox"
-        title="Enables filtering by image height"
-        checked="${state.show_image_height_filter === 'true'}"
-        onChange=${(e) => {
-          state.show_image_height_filter = e.currentTarget.checked.toString();
-        }}
-      >
-        <span>Show image height filter</span>
-      <//>
-
-      <br />
-      <${Checkbox}
-        id="show_only_images_from_links_checkbox"
-        title="Enables the option to only show images from direct links on the page; this can be useful on sites like Reddit"
-        checked="${state.show_only_images_from_links === 'true'}"
-        onChange=${(e) => {
-          state.show_only_images_from_links = e.currentTarget.checked.toString();
-        }}
-      >
-        <span>Show <b>Only images from links</b> option</span>
-      <//>
-    </fieldset>
-
-    <fieldset>
       <legend>Images</legend>
 
       <${Checkbox}

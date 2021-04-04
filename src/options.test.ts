@@ -49,26 +49,6 @@ const options = [
     ...checkboxOptions,
   },
   {
-    input: '#show_url_filter_checkbox',
-    key: 'show_url_filter',
-    ...checkboxOptions,
-  },
-  {
-    input: '#show_image_width_filter_checkbox',
-    key: 'show_image_width_filter',
-    ...checkboxOptions,
-  },
-  {
-    input: '#show_image_height_filter_checkbox',
-    key: 'show_image_height_filter',
-    ...checkboxOptions,
-  },
-  {
-    input: '#show_only_images_from_links_checkbox',
-    key: 'show_only_images_from_links',
-    ...checkboxOptions,
-  },
-  {
     input: '#show_image_url_checkbox',
     key: 'show_image_url',
     ...checkboxOptions,

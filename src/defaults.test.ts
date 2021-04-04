@@ -93,7 +93,7 @@ it(`matches 'localStorage' snapshot`, () => {
       "new_file_name_default": "",
       "only_images_from_links": "false",
       "only_images_from_links_default": "false",
-      "options": "[\\"folder_name\\",\\"new_file_name\\",\\"filter_url\\",\\"filter_url_mode\\",\\"filter_min_width\\",\\"filter_min_width_enabled\\",\\"filter_max_width\\",\\"filter_max_width_enabled\\",\\"filter_min_height\\",\\"filter_min_height_enabled\\",\\"filter_max_height\\",\\"filter_max_height_enabled\\",\\"only_images_from_links\\",\\"show_download_confirmation\\",\\"show_download_notification\\",\\"show_file_renaming\\",\\"show_url_filter\\",\\"show_image_width_filter\\",\\"show_image_height_filter\\",\\"show_only_images_from_links\\",\\"show_image_url\\",\\"show_open_image_button\\",\\"show_download_image_button\\",\\"columns\\",\\"image_min_width\\",\\"image_max_width\\"]",
+      "options": "[\\"folder_name\\",\\"new_file_name\\",\\"filter_url\\",\\"filter_url_mode\\",\\"filter_min_width\\",\\"filter_min_width_enabled\\",\\"filter_max_width\\",\\"filter_max_width_enabled\\",\\"filter_min_height\\",\\"filter_min_height_enabled\\",\\"filter_max_height\\",\\"filter_max_height_enabled\\",\\"only_images_from_links\\",\\"show_download_confirmation\\",\\"show_download_notification\\",\\"show_file_renaming\\",\\"show_image_url\\",\\"show_open_image_button\\",\\"show_download_image_button\\",\\"columns\\",\\"image_min_width\\",\\"image_max_width\\"]",
       "show_download_confirmation": "true",
       "show_download_confirmation_default": "true",
       "show_download_image_button": "true",
@@ -102,18 +102,10 @@ it(`matches 'localStorage' snapshot`, () => {
       "show_download_notification_default": "true",
       "show_file_renaming": "false",
       "show_file_renaming_default": "false",
-      "show_image_height_filter": "true",
-      "show_image_height_filter_default": "true",
       "show_image_url": "true",
       "show_image_url_default": "true",
-      "show_image_width_filter": "true",
-      "show_image_width_filter_default": "true",
-      "show_only_images_from_links": "true",
-      "show_only_images_from_links_default": "true",
       "show_open_image_button": "true",
       "show_open_image_button_default": "true",
-      "show_url_filter": "true",
-      "show_url_filter_default": "true",
     }
   `);
 });

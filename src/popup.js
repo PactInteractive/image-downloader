@@ -58,101 +58,84 @@ function filterImages() {
   clearTimeout(filterImagesTimeoutId); // Cancel pending filtration
   filterImagesTimeoutId = setTimeout(() => {
     const images_cache = $('#images_cache');
-    if (
-      ls.show_image_width_filter === 'true' ||
-      ls.show_image_height_filter === 'true'
-    ) {
-      const numberOfCachedImages = images_cache.children().length;
-      if (numberOfCachedImages < allImages.length) {
-        for (
-          let index = numberOfCachedImages;
-          index < allImages.length;
-          index++
-        ) {
-          // Refilter the images after they're loaded in cache
-          images_cache.append(
-            html`
-              <img src=${encodeURI(allImages[index])} onLoad=${filterImages} />
-            `
-          );
-        }
+    const numberOfCachedImages = images_cache.children().length;
+    if (numberOfCachedImages < allImages.length) {
+      for (
+        let index = numberOfCachedImages;
+        index < allImages.length;
+        index++
+      ) {
+        // Refilter the images after they're loaded in cache
+        images_cache.append(
+          html`
+            <img src=${encodeURI(allImages[index])} onLoad=${filterImages} />
+          `
+        );
       }
     }
 
     // Copy all images initially
     visibleImages = allImages.slice(0);
 
-    if (ls.show_url_filter === 'true') {
-      let filterValue = $('#filter_textbox').val();
-      if (filterValue) {
-        switch (ls.filter_url_mode) {
-          case 'normal':
-            const terms = filterValue.split(/\s+/);
-            visibleImages = visibleImages.filter((url) => {
-              for (let index = 0; index < terms.length; index++) {
-                let term = terms[index];
-                if (term.length !== 0) {
-                  const expected = term[0] !== '-';
-                  if (!expected) {
-                    term = term.substr(1);
-                    if (term.length === 0) {
-                      continue;
-                    }
-                  }
-                  const found = url.indexOf(term) !== -1;
-                  if (found !== expected) {
-                    return false;
+    let filterValue = $('#filter_textbox').val();
+    if (filterValue) {
+      switch (ls.filter_url_mode) {
+        case 'normal':
+          const terms = filterValue.split(/\s+/);
+          visibleImages = visibleImages.filter((url) => {
+            for (let index = 0; index < terms.length; index++) {
+              let term = terms[index];
+              if (term.length !== 0) {
+                const expected = term[0] !== '-';
+                if (!expected) {
+                  term = term.substr(1);
+                  if (term.length === 0) {
+                    continue;
                   }
                 }
+                const found = url.indexOf(term) !== -1;
+                if (found !== expected) {
+                  return false;
+                }
               }
-              return true;
-            });
-            break;
-          case 'wildcard':
-            filterValue = filterValue
-              .replace(/([.^$[\]\\(){}|-])/g, '\\$1')
-              .replace(/([?*+])/, '.$1');
-          /* fall through */
-          case 'regex':
-            visibleImages = visibleImages.filter((url) => {
-              try {
-                return url.match(filterValue);
-              } catch (e) {
-                return false;
-              }
-            });
-            break;
-        }
+            }
+            return true;
+          });
+          break;
+        case 'wildcard':
+          filterValue = filterValue
+            .replace(/([.^$[\]\\(){}|-])/g, '\\$1')
+            .replace(/([?*+])/, '.$1');
+        /* fall through */
+        case 'regex':
+          visibleImages = visibleImages.filter((url) => {
+            try {
+              return url.match(filterValue);
+            } catch (e) {
+              return false;
+            }
+          });
+          break;
       }
     }
 
-    if (
-      ls.show_only_images_from_links === 'true' &&
-      ls.only_images_from_links === 'true'
-    ) {
+    if (ls.only_images_from_links === 'true') {
       visibleImages = visibleImages.filter((url) => linkedImages[url]);
     }
 
-    if (
-      ls.show_image_width_filter === 'true' ||
-      ls.show_image_height_filter === 'true'
-    ) {
-      visibleImages = visibleImages.filter((url) => {
-        const image = images_cache.children(`img[src="${encodeURI(url)}"]`)[0];
-        return (
-          (ls.show_image_width_filter !== 'true' ||
-            ((ls.filter_min_width_enabled !== 'true' ||
-              ls.filter_min_width <= image.naturalWidth) &&
-              (ls.filter_max_width_enabled !== 'true' ||
-                image.naturalWidth <= ls.filter_max_width))) &&
-          (ls.show_image_height_filter !== 'true' ||
-            ((ls.filter_min_height_enabled !== 'true' ||
-              ls.filter_min_height <= image.naturalHeight) &&
-              (ls.filter_max_height_enabled !== 'true' ||
-                image.naturalHeight <= ls.filter_max_height)))
-        );
-      });
-    }
+    visibleImages = visibleImages.filter((url) => {
+      const image = images_cache.children(`img[src="${encodeURI(url)}"]`)[0];
+      return (
+        (ls.filter_min_width_enabled !== 'true' ||
+          ls.filter_min_width <= image.naturalWidth) &&
+        (ls.filter_max_width_enabled !== 'true' ||
+          image.naturalWidth <= ls.filter_max_width) &&
+        (ls.filter_min_height_enabled !== 'true' ||
+          ls.filter_min_height <= image.naturalHeight) &&
+        (ls.filter_max_height_enabled !== 'true' ||
+          image.naturalHeight <= ls.filter_max_height)
+      );
+    });
 
     displayImages();
   }, 200);
@@ -391,48 +374,46 @@ $('main').append(html`
         <col style=${{ width: '100px' }} />
       </colgroup>
 
-      ${ls.show_url_filter === 'true' &&
-      html`
-        <tr>
-          <td>
-            <input
-              type="text"
-              id="filter_textbox"
-              placeholder="Filter by URL"
-              title="Filter by parts of the URL or regular expressions."
-              value=${ls.filter_url}
-              onKeyUp=${ls.show_url_filter === 'true' && filterImages}
-              onChange=${(e) => {
-                ls.filter_url = $.trim(e.currentTarget.value);
-              }}
-            />
-          </td>
+      <tr>
+        <td>
+          <input
+            type="text"
+            id="filter_textbox"
+            placeholder="Filter by URL"
+            title="Filter by parts of the URL or regular expressions."
+            value=${ls.filter_url}
+            onKeyUp=${filterImages}
+            onChange=${(e) => {
+              ls.filter_url = $.trim(e.currentTarget.value);
+            }}
+          />
+        </td>
 
-          <td>
-            <select
-              value=${ls.filter_url_mode}
-              onChange=${(e) => {
-                ls.filter_url_mode = e.currentTarget.value;
-                filterImages();
-              }}
-            >
-              <option value="normal" title="A plain text search">
-                Normal
-              </option>
+        <td>
+          <select
+            value=${ls.filter_url_mode}
+            onChange=${(e) => {
+              ls.filter_url_mode = e.currentTarget.value;
+              filterImages();
+            }}
+          >
+            <option value="normal" title="A plain text search">
+              Normal
+            </option>
 
-              <option
-                value="wildcard"
-                title="You can also use these special symbols:
+            <option
+              value="wildcard"
+              title="You can also use these special symbols:
 * → zero or more characters
 ? → zero or one character
 + → one or more characters"
-              >
-                Wildcard
-              </option>
+            >
+              Wildcard
+            </option>
 
-              <option
-                value="regex"
-                title=${`Regular expressions (advanced):
+            <option
+              value="regex"
+              title=${`Regular expressions (advanced):
 [abc] → A single character of: a, b or c
 [^abc] → Any single character except: a, b, or c
 [a-z] → Any single character in the range a-z
@@ -457,13 +438,12 @@ a+ → One or more of a
 a{3} → Exactly 3 of a
 a{3,} → 3 or more of a
 a{3,6} → Between 3 and 6 of a`}
-              >
-                Regex
-              </option>
-            </select>
-          </td>
-        </tr>
-      `}
+            >
+              Regex
+            </option>
+          </select>
+        </td>
+      </tr>
     </table>
 
     <table class="grid">
@@ -476,125 +456,117 @@ a{3,6} → Between 3 and 6 of a`}
         <col style=${{ width: '40px' }} />
       </colgroup>
 
-      ${ls.show_image_width_filter === 'true' &&
-      html`
-        <tr id="image_width_filter">
-          <td>Width:</td>
+      <tr id="image_width_filter">
+        <td>Width:</td>
 
-          <td style=${{ textAlign: 'right' }}>
-            <label for="image_width_filter_min_checkbox">
-              <small id="image_width_filter_min"></small>
-            </label>
-          </td>
+        <td style=${{ textAlign: 'right' }}>
+          <label for="image_width_filter_min_checkbox">
+            <small id="image_width_filter_min"></small>
+          </label>
+        </td>
 
-          <td>
-            <input
-              type="checkbox"
-              id="image_width_filter_min_checkbox"
-              checked=${ls[`filter_min_width_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  e.currentTarget,
-                  `filter_min_width_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
-            />
-          </td>
+        <td>
+          <input
+            type="checkbox"
+            id="image_width_filter_min_checkbox"
+            checked=${ls[`filter_min_width_enabled`] === 'true'}
+            onChange=${(e) => {
+              toggleDimensionFilter(
+                e.currentTarget,
+                `filter_min_width_enabled`,
+                e.currentTarget.checked
+              );
+            }}
+          />
+        </td>
 
-          <td>
-            <div id="image_width_filter_slider"></div>
-          </td>
+        <td>
+          <div id="image_width_filter_slider"></div>
+        </td>
 
-          <td>
-            <input
-              type="checkbox"
-              id="image_width_filter_max_checkbox"
-              checked=${ls[`filter_max_width_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  e.currentTarget,
-                  `filter_max_width_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
-            />
-          </td>
+        <td>
+          <input
+            type="checkbox"
+            id="image_width_filter_max_checkbox"
+            checked=${ls[`filter_max_width_enabled`] === 'true'}
+            onChange=${(e) => {
+              toggleDimensionFilter(
+                e.currentTarget,
+                `filter_max_width_enabled`,
+                e.currentTarget.checked
+              );
+            }}
+          />
+        </td>
 
-          <td style=${{ textAlign: 'right' }}>
-            <label for="image_width_filter_max_checkbox">
-              <small id="image_width_filter_max"></small>
-            </label>
-          </td>
-        </tr>
-      `}
-      ${ls.show_image_height_filter === 'true' &&
-      html`
-        <tr id="image_height_filter">
-          <td>Height:</td>
+        <td style=${{ textAlign: 'right' }}>
+          <label for="image_width_filter_max_checkbox">
+            <small id="image_width_filter_max"></small>
+          </label>
+        </td>
+      </tr>
 
-          <td style=${{ textAlign: 'right' }}>
-            <label for="image_height_filter_min_checkbox">
-              <small id="image_height_filter_min"></small>
-            </label>
-          </td>
+      <tr id="image_height_filter">
+        <td>Height:</td>
 
-          <td>
-            <input
-              type="checkbox"
-              id="image_height_filter_min_checkbox"
-              checked=${ls[`filter_min_height_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  e.currentTarget,
-                  `filter_min_height_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
-            />
-          </td>
+        <td style=${{ textAlign: 'right' }}>
+          <label for="image_height_filter_min_checkbox">
+            <small id="image_height_filter_min"></small>
+          </label>
+        </td>
 
-          <td>
-            <div id="image_height_filter_slider"></div>
-          </td>
+        <td>
+          <input
+            type="checkbox"
+            id="image_height_filter_min_checkbox"
+            checked=${ls[`filter_min_height_enabled`] === 'true'}
+            onChange=${(e) => {
+              toggleDimensionFilter(
+                e.currentTarget,
+                `filter_min_height_enabled`,
+                e.currentTarget.checked
+              );
+            }}
+          />
+        </td>
 
-          <td>
-            <input
-              type="checkbox"
-              id="image_height_filter_max_checkbox"
-              checked=${ls[`filter_max_height_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  e.currentTarget,
-                  `filter_max_height_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
-            />
-          </td>
+        <td>
+          <div id="image_height_filter_slider"></div>
+        </td>
 
-          <td style=${{ textAlign: 'right' }}>
-            <label for="image_height_filter_max_checkbox">
-              <small id="image_height_filter_max"></small>
-            </label>
-          </td>
-        </tr>
-      `}
+        <td>
+          <input
+            type="checkbox"
+            id="image_height_filter_max_checkbox"
+            checked=${ls[`filter_max_height_enabled`] === 'true'}
+            onChange=${(e) => {
+              toggleDimensionFilter(
+                e.currentTarget,
+                `filter_max_height_enabled`,
+                e.currentTarget.checked
+              );
+            }}
+          />
+        </td>
+
+        <td style=${{ textAlign: 'right' }}>
+          <label for="image_height_filter_max_checkbox">
+            <small id="image_height_filter_max"></small>
+          </label>
+        </td>
+      </tr>
     </table>
 
-    ${ls.show_only_images_from_links === 'true' &&
-    html`
-      <${Checkbox}
-        title="Only show images from direct links on the page; this can be useful on sites like Reddit"
-        checked=${ls.only_images_from_links === 'true'}
-        onChange=${(e) => {
-          ls.only_images_from_links = e.currentTarget.checked;
-          filterImages();
-        }}
-      >
-        Only images from links
-      <//>
-    `}
+    <${Checkbox}
+      title="Only show images from direct links on the page; this can be useful on sites like Reddit"
+      checked=${ls.only_images_from_links === 'true'}
+      onChange=${(e) => {
+        ls.only_images_from_links = e.currentTarget.checked;
+        filterImages();
+      }}
+    >
+      Only images from links
+    <//>
   </div>
 
   <div id="images_cache"></div>
@@ -645,69 +617,58 @@ a{3,6} → Between 3 and 6 of a`}
 
 chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 
-if (
-  ls.show_image_width_filter === 'true' ||
-  ls.show_image_height_filter === 'true'
-) {
-  // Image dimension filters
-  const serializeSliderValue = (label, option) => {
-    return $.Link({
-      target(value) {
-        $(`#${label}`).html(`${value}px`);
-        ls[option] = value;
-        filterImages();
-      },
-    });
-  };
+// Image dimension filters
+const serializeSliderValue = (label, option) => {
+  return $.Link({
+    target(value) {
+      $(`#${label}`).html(`${value}px`);
+      ls[option] = value;
+      filterImages();
+    },
+  });
+};
 
-  const initializeFilter = (dimension) => {
-    $(`#image_${dimension}_filter_slider`).noUiSlider({
-      behaviour: 'extend-tap',
-      connect: true,
-      range: {
-        min: parseInt(ls[`filter_min_${dimension}_default`], 10),
-        max: parseInt(ls[`filter_max_${dimension}_default`], 10),
-      },
-      step: 10,
-      start: [ls[`filter_min_${dimension}`], ls[`filter_max_${dimension}`]],
-      serialization: {
-        lower: [
-          serializeSliderValue(
-            `image_${dimension}_filter_min`,
-            `filter_min_${dimension}`
-          ),
-        ],
-        upper: [
-          serializeSliderValue(
-            `image_${dimension}_filter_max`,
-            `filter_max_${dimension}`
-          ),
-        ],
-        format: { decimals: 0 },
-      },
-    });
+const initializeFilter = (dimension) => {
+  $(`#image_${dimension}_filter_slider`).noUiSlider({
+    behaviour: 'extend-tap',
+    connect: true,
+    range: {
+      min: parseInt(ls[`filter_min_${dimension}_default`], 10),
+      max: parseInt(ls[`filter_max_${dimension}_default`], 10),
+    },
+    step: 10,
+    start: [ls[`filter_min_${dimension}`], ls[`filter_max_${dimension}`]],
+    serialization: {
+      lower: [
+        serializeSliderValue(
+          `image_${dimension}_filter_min`,
+          `filter_min_${dimension}`
+        ),
+      ],
+      upper: [
+        serializeSliderValue(
+          `image_${dimension}_filter_max`,
+          `filter_max_${dimension}`
+        ),
+      ],
+      format: { decimals: 0 },
+    },
+  });
 
-    toggleDimensionFilter(
-      $(`image_${dimension}_filter_min`),
-      `filter_min_${dimension}_enabled`
-    );
+  toggleDimensionFilter(
+    $(`image_${dimension}_filter_min`),
+    `filter_min_${dimension}_enabled`
+  );
 
-    toggleDimensionFilter(
-      $(`image_${dimension}_filter_max`),
-      `filter_max_${dimension}_enabled`
-    );
-  };
+  toggleDimensionFilter(
+    $(`image_${dimension}_filter_max`),
+    `filter_max_${dimension}_enabled`
+  );
+};
 
-  // Image width filter
-  if (ls.show_image_width_filter === 'true') {
-    initializeFilter('width');
-  }
-
-  // Image height filter
-  if (ls.show_image_height_filter === 'true') {
-    initializeFilter('height');
-  }
-}
+// Image dimension filters
+initializeFilter('width');
+initializeFilter('height');
 
 // Get images on the page
 chrome.windows.getCurrent((currentWindow) => {
