@@ -1,5 +1,6 @@
 import html from './html.js';
 import { Checkbox } from './Checkbox.js';
+import { AdvancedFilters } from './AdvancedFilters.js';
 import {
   DownloadImageButton,
   ImageUrlTextbox,
@@ -23,14 +24,6 @@ chrome.runtime.onMessage.addListener((result) => {
   });
   filterImages();
 });
-
-function toggleDimensionFilter(element, option, value) {
-  if (value !== undefined) {
-    ls[option] = value;
-  }
-  $(element).toggleClass('light', ls[option] !== 'true');
-  filterImages();
-}
 
 function suggestNewFilename(item, suggest) {
   let newFilename = '';
@@ -368,52 +361,44 @@ function flash(element, flashes, interval, callback) {
 
 $('main').append(html`
   <div id="filters_container">
-    <table class="grid">
-      <colgroup>
-        <col />
-        <col style=${{ width: '100px' }} />
-      </colgroup>
+    <div style=${{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+      <input
+        type="text"
+        id="filter_textbox"
+        placeholder="Filter by URL"
+        title="Filter by parts of the URL or regular expressions."
+        value=${ls.filter_url}
+        style=${{ flex: '1' }}
+        onKeyUp=${filterImages}
+        onChange=${(e) => {
+          ls.filter_url = $.trim(e.currentTarget.value);
+        }}
+      />
 
-      <tr>
-        <td>
-          <input
-            type="text"
-            id="filter_textbox"
-            placeholder="Filter by URL"
-            title="Filter by parts of the URL or regular expressions."
-            value=${ls.filter_url}
-            onKeyUp=${filterImages}
-            onChange=${(e) => {
-              ls.filter_url = $.trim(e.currentTarget.value);
-            }}
-          />
-        </td>
+      <select
+        value=${ls.filter_url_mode}
+        onChange=${(e) => {
+          ls.filter_url_mode = e.currentTarget.value;
+          filterImages();
+        }}
+      >
+        <option value="normal" title="A plain text search">
+          Normal
+        </option>
 
-        <td>
-          <select
-            value=${ls.filter_url_mode}
-            onChange=${(e) => {
-              ls.filter_url_mode = e.currentTarget.value;
-              filterImages();
-            }}
-          >
-            <option value="normal" title="A plain text search">
-              Normal
-            </option>
-
-            <option
-              value="wildcard"
-              title="You can also use these special symbols:
+        <option
+          value="wildcard"
+          title="You can also use these special symbols:
 * → zero or more characters
 ? → zero or one character
 + → one or more characters"
-            >
-              Wildcard
-            </option>
+        >
+          Wildcard
+        </option>
 
-            <option
-              value="regex"
-              title=${`Regular expressions (advanced):
+        <option
+          value="regex"
+          title=${`Regular expressions (advanced):
 [abc] → A single character of: a, b or c
 [^abc] → Any single character except: a, b, or c
 [a-z] → Any single character in the range a-z
@@ -438,135 +423,40 @@ a+ → One or more of a
 a{3} → Exactly 3 of a
 a{3,} → 3 or more of a
 a{3,6} → Between 3 and 6 of a`}
-            >
-              Regex
-            </option>
-          </select>
-        </td>
-      </tr>
-    </table>
+        >
+          Regex
+        </option>
+      </select>
 
-    <table class="grid">
-      <colgroup>
-        <col style=${{ width: '45px' }} />
-        <col style=${{ width: '40px' }} />
-        <col style=${{ width: '10px' }} />
-        <col />
-        <col style=${{ width: '10px' }} />
-        <col style=${{ width: '40px' }} />
-      </colgroup>
+      <button
+        id="toggle_advanced_filters_button"
+        class=${ls.show_advanced_filters === 'true' ? '' : 'collapsed'}
+        title="Advanced filters"
+        onClick=${(e) => {
+          const slider = $(`#${AdvancedFilters.id}`);
+          if (slider.length > 0) {
+            ls.show_advanced_filters = false;
+            e.currentTarget.classList.add('collapsed');
+            slider.remove();
+          } else {
+            ls.show_advanced_filters = true;
+            e.currentTarget.classList.remove('collapsed');
+            $('#filters_container').append(
+              html`<${AdvancedFilters}
+                filterImages=${filterImages}
+                state=${ls}
+              />`
+            );
+            AdvancedFilters.initializeFilters();
+          }
+        }}
+      >
+        <div class="chevron"></div>
+      </button>
+    </div>
 
-      <tr id="image_width_filter">
-        <td>Width:</td>
-
-        <td style=${{ textAlign: 'right' }}>
-          <label for="image_width_filter_min_checkbox">
-            <small id="image_width_filter_min"></small>
-          </label>
-        </td>
-
-        <td>
-          <input
-            type="checkbox"
-            id="image_width_filter_min_checkbox"
-            checked=${ls[`filter_min_width_enabled`] === 'true'}
-            onChange=${(e) => {
-              toggleDimensionFilter(
-                e.currentTarget,
-                `filter_min_width_enabled`,
-                e.currentTarget.checked
-              );
-            }}
-          />
-        </td>
-
-        <td>
-          <div id="image_width_filter_slider"></div>
-        </td>
-
-        <td>
-          <input
-            type="checkbox"
-            id="image_width_filter_max_checkbox"
-            checked=${ls[`filter_max_width_enabled`] === 'true'}
-            onChange=${(e) => {
-              toggleDimensionFilter(
-                e.currentTarget,
-                `filter_max_width_enabled`,
-                e.currentTarget.checked
-              );
-            }}
-          />
-        </td>
-
-        <td style=${{ textAlign: 'right' }}>
-          <label for="image_width_filter_max_checkbox">
-            <small id="image_width_filter_max"></small>
-          </label>
-        </td>
-      </tr>
-
-      <tr id="image_height_filter">
-        <td>Height:</td>
-
-        <td style=${{ textAlign: 'right' }}>
-          <label for="image_height_filter_min_checkbox">
-            <small id="image_height_filter_min"></small>
-          </label>
-        </td>
-
-        <td>
-          <input
-            type="checkbox"
-            id="image_height_filter_min_checkbox"
-            checked=${ls[`filter_min_height_enabled`] === 'true'}
-            onChange=${(e) => {
-              toggleDimensionFilter(
-                e.currentTarget,
-                `filter_min_height_enabled`,
-                e.currentTarget.checked
-              );
-            }}
-          />
-        </td>
-
-        <td>
-          <div id="image_height_filter_slider"></div>
-        </td>
-
-        <td>
-          <input
-            type="checkbox"
-            id="image_height_filter_max_checkbox"
-            checked=${ls[`filter_max_height_enabled`] === 'true'}
-            onChange=${(e) => {
-              toggleDimensionFilter(
-                e.currentTarget,
-                `filter_max_height_enabled`,
-                e.currentTarget.checked
-              );
-            }}
-          />
-        </td>
-
-        <td style=${{ textAlign: 'right' }}>
-          <label for="image_height_filter_max_checkbox">
-            <small id="image_height_filter_max"></small>
-          </label>
-        </td>
-      </tr>
-    </table>
-
-    <${Checkbox}
-      title="Only show images from direct links on the page; this can be useful on sites like Reddit"
-      checked=${ls.only_images_from_links === 'true'}
-      onChange=${(e) => {
-        ls.only_images_from_links = e.currentTarget.checked;
-        filterImages();
-      }}
-    >
-      Only images from links
-    <//>
+    ${ls.show_advanced_filters === 'true' &&
+    html`<${AdvancedFilters} filterImages=${filterImages} state=${ls} />`}
   </div>
 
   <div id="images_cache"></div>
@@ -615,60 +505,9 @@ a{3,6} → Between 3 and 6 of a`}
   </div>
 `);
 
+AdvancedFilters.initializeFilters?.();
+
 chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
-
-// Image dimension filters
-const serializeSliderValue = (label, option) => {
-  return $.Link({
-    target(value) {
-      $(`#${label}`).html(`${value}px`);
-      ls[option] = value;
-      filterImages();
-    },
-  });
-};
-
-const initializeFilter = (dimension) => {
-  $(`#image_${dimension}_filter_slider`).noUiSlider({
-    behaviour: 'extend-tap',
-    connect: true,
-    range: {
-      min: parseInt(ls[`filter_min_${dimension}_default`], 10),
-      max: parseInt(ls[`filter_max_${dimension}_default`], 10),
-    },
-    step: 10,
-    start: [ls[`filter_min_${dimension}`], ls[`filter_max_${dimension}`]],
-    serialization: {
-      lower: [
-        serializeSliderValue(
-          `image_${dimension}_filter_min`,
-          `filter_min_${dimension}`
-        ),
-      ],
-      upper: [
-        serializeSliderValue(
-          `image_${dimension}_filter_max`,
-          `filter_max_${dimension}`
-        ),
-      ],
-      format: { decimals: 0 },
-    },
-  });
-
-  toggleDimensionFilter(
-    $(`image_${dimension}_filter_min`),
-    `filter_min_${dimension}_enabled`
-  );
-
-  toggleDimensionFilter(
-    $(`image_${dimension}_filter_max`),
-    `filter_max_${dimension}_enabled`
-  );
-};
-
-// Image dimension filters
-initializeFilter('width');
-initializeFilter('height');
 
 // Get images on the page
 chrome.windows.getCurrent((currentWindow) => {

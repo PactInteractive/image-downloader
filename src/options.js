@@ -75,7 +75,7 @@ function render() {
           state.show_image_url = e.currentTarget.checked.toString();
         }}
       >
-        <span>Show the URL textbox</span>
+        <span>Show the <b>URL</b> on hover</span>
       <//>
 
       <br />
@@ -87,7 +87,7 @@ function render() {
           state.show_open_image_button = e.currentTarget.checked.toString();
         }}
       >
-        <span>Show the <b>open</b> button</span>
+        <span>Show the <b>Open</b> button on hover</span>
       <//>
 
       <br />
@@ -99,7 +99,7 @@ function render() {
           state.show_download_image_button = e.currentTarget.checked.toString();
         }}
       >
-        <span>Show the <b>download</b> button</span>
+        <span>Show the <b>Download</b> button on hover</span>
       <//>
 
       <table>
@@ -231,7 +231,7 @@ function clearData() {
 }
 
 function addNotification(message, cssClass) {
-  const animation_duration = parseInt(localStorage.animation_duration);
+  const animation_duration = parseInt(localStorage.animation_duration, 10);
   // TODO: Figure out how to animate and move to state
   const container = $('<div></div>')
     .prependTo('#notifications')

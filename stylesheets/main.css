@@ -43,12 +43,16 @@
     0 3px 5px var(--neutral-transparent-20);
 
   /* Transitions */
-  --transition-timing-ease-out: 0.25, 0.8, 0.25, 1;
+  --transition-timing-ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
+  --transition-timing-linear: linear;
 
-  --transition-background: background 200ms --transition-timing-ease-out;
-  --transition-border-color: border-color 200ms --transition-timing-ease-out;
-  --transition-box-shadow: box-shadow 200ms --transition-timing-ease-out;
-  --transition-opacity: opacity 200ms linear; /* Timing opacity looks weird */
+  --transition-all: all 200ms var(--transition-timing-ease-out);
+  --transition-background: background 200ms var(--transition-timing-ease-out);
+  --transition-border-color: border-color 200ms var(--transition-timing-ease-out);
+  --transition-box-shadow: box-shadow 200ms var(--transition-timing-ease-out);
+  --transition-color: color 200ms var(--transition-timing-ease-out);
+  --transition-opacity: opacity 200ms var(--transition-timing-linear); /* Timing opacity looks weird */
+  --transition-transform: transform 200ms var(--transition-timing-ease-out);
 
   /* Misc */
   --border-color: var(--neutral-transparent-5);
@@ -73,6 +77,10 @@ body {
   min-height: 600px;
   font: 13px/1.5em 'Lucida Grande', Arial, sans-serif;
   color: var(--foreground);
+}
+
+svg {
+  fill: currentColor;
 }
 
 .left {

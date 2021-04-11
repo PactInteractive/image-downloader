@@ -4,11 +4,7 @@
     <title>Image Downloader</title>
 
     <link rel="stylesheet" href="/stylesheets/main.css" type="text/css" />
-    <link
-      rel="stylesheet"
-      href="/lib/jquery.nouislider/jquery.nouislider.css"
-      type="text/css"
-    />
+    <link rel="stylesheet" href="/lib/nouislider.min.css" type="text/css" />
     <style>
       body {
         margin: 0;
@@ -53,6 +49,71 @@
         top: 0;
         border-bottom: 1px solid var(--border-color);
         padding-bottom: 8px;
+      }
+
+      #toggle_advanced_filters_button {
+        cursor: pointer;
+        position: relative;
+        border-radius: var(--border-radius-md);
+        border: 1px solid var(--neutral-darkest);
+        width: 30px;
+        height: 30px;
+        margin-bottom: 4px;
+
+        transition: var(--transition-background);
+        background: var(--neutral-lightest);
+      }
+
+      #toggle_advanced_filters_button:hover {
+        background: var(--neutral-lighter);
+      }
+
+      #toggle_advanced_filters_button .chevron::after {
+        position: absolute;
+        width: 12px;
+        height: 12px;
+        content: '';
+        transform-origin: 5px 5px;
+        transform: translate(-5px, -4px) rotate(45deg);
+        border: 3px solid var(--neutral-darkest);
+        border-right: 0;
+        border-bottom: 0;
+
+        transition: var(--transition-transform);
+      }
+
+      #toggle_advanced_filters_button.collapsed .chevron::after {
+        transform: translate(-5px, -7px) rotate(225deg);
+      }
+
+      .noUi-horizontal {
+        height: 12px;
+      }
+
+      .noUi-connect {
+        background: var(--accent);
+      }
+
+      .noUi-horizontal .noUi-handle {
+        top: -3px;
+        right: -8px;
+        width: 17px;
+        height: 16px;
+        border-color: var(--neutral-dark);
+      }
+
+      .noUi-handle::before,
+      .noUi-handle::after {
+        top: 2px;
+        height: 10px;
+      }
+
+      .noUi-handle::before {
+        left: 6px;
+      }
+
+      .noUi-handle::after {
+        left: 8px;
       }
 
       #only_images_from_links_container {
@@ -220,7 +281,7 @@
     <main></main>
 
     <script src="/lib/jquery-3.5.1.min.js"></script>
-    <script src="/lib/jquery.nouislider/jquery.nouislider.js"></script>
+    <script src="/lib/nouislider.min.js"></script>
 
     <script src="/src/defaults.js"></script>
     <script type="module" src="/src/popup.js"></script>
