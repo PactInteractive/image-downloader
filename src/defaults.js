@@ -38,7 +38,7 @@
     // General
     show_download_confirmation: true,
     show_download_notification: true,
-    show_file_renaming: false,
+    show_file_renaming: true,
     // Images
     show_image_url: true,
     show_open_image_button: true,

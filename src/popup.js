@@ -36,7 +36,12 @@ function suggestNewFilename(item, suggest) {
     if (parseInt(ls.image_count, 10) === 1) {
       newFilename += `${ls.new_file_name}.${extension}`;
     } else {
-      newFilename += `${ls.new_file_name}${ls.image_number}.${extension}`;
+      const numberOfDigits = Math.floor(1 + Math.log10(ls.image_count));
+      const formattedImageNumber = `${ls.image_number}`.padStart(
+        numberOfDigits,
+        '0'
+      );
+      newFilename += `${ls.new_file_name}${formattedImageNumber}.${extension}`;
       ls.image_number++;
     }
   } else {
@@ -250,20 +255,21 @@ function downloadImages() {
     startDownload();
   }
 
-  function startDownload() {
-    const checkedImages = [];
-    for (let index = 0; index < visibleImages.length; index++) {
-      if ($(`#card_${index}`).hasClass('checked')) {
-        checkedImages.push(visibleImages[index]);
-      }
-    }
-    ls.image_count = checkedImages.length;
-    ls.image_number = 1;
-    checkedImages.forEach((checkedImage) => {
-      chrome.downloads.download({ url: checkedImage });
+  async function startDownload() {
+    const checkedImages = visibleImages.filter((image, index) => {
+      return $(`#card_${index}`).hasClass('checked');
     });
 
+    ls.image_count = checkedImages.length;
+    ls.image_number = 1;
+
     flashDownloadingNotification(ls.image_count);
+
+    for (const image of checkedImages) {
+      await new Promise((resolve) => {
+        chrome.downloads.download({ url: image }, resolve);
+      });
+    }
   }
 }
 
@@ -328,13 +334,13 @@ function showDownloadConfirmation(startDownload) {
 function flashDownloadingNotification(imageCount) {
   if (ls.show_download_notification !== 'true') return;
 
-  const downloading_notification = html`
-    <div class="success">
+  const downloading_notification = $(html`
+    <div class="success" style=${{ gridColumn: '1 / -1' }}>
       Downloading ${imageCount} ${imageCount > 1 ? 'images' : 'image'}...
     </div>
-  `;
+  `);
 
-  $('#filters_container').append(downloading_notification);
+  $('#downloads_container').prepend(downloading_notification);
 
   flash(downloading_notification, 3.5, 0, () => {
     downloading_notification.remove();
@@ -353,7 +359,7 @@ function flash(element, flashes, interval, callback) {
         element.fadeOut(interval, () => fade(true));
       }
     } else if (callback) {
-      callback(element);
+      callback();
     }
   };
   fade(false);
@@ -467,8 +473,8 @@ a{3,6} → Between 3 and 6 of a`}
     id="downloads_container"
     style=${{
       gridTemplateColumns: `${
-        ls.show_file_renaming === 'true' ? '1fr' : ''
-      } 1fr 100px`,
+        ls.show_file_renaming === 'true' ? 'minmax(100px, 1fr)' : ''
+      } minmax(100px, 1fr) 80px`,
     }}
   >
     <input
