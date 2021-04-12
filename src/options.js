@@ -20,8 +20,8 @@ function render() {
       targeted ads or tracking algorithms.
       <br />
       The source code can be found on GitHub:${' '}
-      <a href="https://github.com/vdsabev/image-downloader" target="_blank">
-        https://github.com/vdsabev/image-downloader
+      <a href="https://github.com/PactInteractive/image-downloader" target="_blank">
+        https://github.com/PactInteractive/image-downloader
       </a>
     </fieldset>
 

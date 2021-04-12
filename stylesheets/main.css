@@ -48,7 +48,8 @@
 
   --transition-all: all 200ms var(--transition-timing-ease-out);
   --transition-background: background 200ms var(--transition-timing-ease-out);
-  --transition-border-color: border-color 200ms var(--transition-timing-ease-out);
+  --transition-border-color: border-color 200ms
+    var(--transition-timing-ease-out);
   --transition-box-shadow: box-shadow 200ms var(--transition-timing-ease-out);
   --transition-color: color 200ms var(--transition-timing-ease-out);
   --transition-opacity: opacity 200ms var(--transition-timing-linear); /* Timing opacity looks weird */
@@ -138,10 +139,15 @@ select {
   font-size: 12px;
 }
 
-input[type='text'] {
+input[type='text'],
+input[type='number'] {
   border: 0;
   background: var(--input-background);
   padding: 8px 12px;
+}
+
+input[type='number'] {
+  padding-right: 4px;
 }
 
 select {

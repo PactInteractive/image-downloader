@@ -14,7 +14,7 @@
       for (let i = 0; i < document.styleSheets.length; i++) {
         const styleSheet = document.styleSheets[i];
         // Prevents `Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules` error. Also see:
-        // https://github.com/vdsabev/image-downloader/issues/37
+        // https://github.com/PactInteractive/image-downloader/issues/37
         // https://github.com/odoo/odoo/issues/22517
         if (styleSheet.hasOwnProperty('cssRules')) {
           const { cssRules } = styleSheet;
