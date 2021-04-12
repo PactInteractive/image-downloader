@@ -140,7 +140,8 @@ select {
 }
 
 input[type='text'],
-input[type='number'] {
+input[type='number'],
+select {
   border: 0;
   background: var(--input-background);
   padding: 8px 12px;
@@ -151,7 +152,7 @@ input[type='number'] {
 }
 
 select {
-  padding: 6px 12px;
+  padding: 7px 12px;
 }
 
 input[type='button'],

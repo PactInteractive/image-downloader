@@ -56,17 +56,11 @@
         cursor: pointer;
         position: relative;
         border-radius: var(--border-radius-md);
-        border: 1px solid var(--neutral-darkest);
+        border: 0;
         width: 30px;
         height: 30px;
         margin-bottom: 4px;
-
-        transition: var(--transition-background);
-        background: var(--neutral-lightest);
-      }
-
-      #toggle_advanced_filters_button:hover {
-        background: var(--neutral-lighter);
+        background: var(--input-background);
       }
 
       #toggle_advanced_filters_button .chevron::after {
@@ -76,7 +70,7 @@
         content: '';
         transform-origin: 5px 5px;
         transform: translate(-5px, -4px) rotate(45deg);
-        border: 3px solid var(--neutral-darkest);
+        border: 3px solid var(--neutral-dark);
         border-right: 0;
         border-bottom: 0;
 
