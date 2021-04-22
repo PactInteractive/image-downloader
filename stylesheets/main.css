@@ -2,7 +2,7 @@
   /* Colors */
   /* Neutral */
   --neutral-lightest: hsl(0, 0%, 100%);
-  --neutral-lighter: hsl(300, 11%, 96%);
+  --neutral-lighter: hsl(0, 0%, 95%);
   --neutral-light: hsl(300, 11%, 80%);
   --neutral: hsl(300, 11%, 60%);
   --neutral-dark: hsl(300, 11%, 10%);
@@ -30,8 +30,9 @@
   --danger: hsl(6, 78%, 54%);
 
   /* Foreground */
-  --foreground-light: hsl(0, 0%, 60%);
   --foreground: hsl(0, 0%, 20%);
+  --foreground-light: hsl(0, 0%, 60%);
+  --foreground-inverse: hsl(0, 0%, 100%);
 
   /* Border radii */
   --border-radius-sm: 2px;
@@ -57,10 +58,13 @@
 
   /* Misc */
   --border-color: var(--neutral-transparent-5);
-  --image-background: var(--neutralLight);
+  --image-background: var(--neutral-light);
   --input-background: var(--neutral-transparent-5);
   --images-container-gap: 8px;
   --images-container-padding: 12px;
+  --tab-background: var(--neutral-lightest);
+  --tab-border: var(--neutral-lighter);
+  --tab-header-background: var(--neutral-lighter);
 }
 
 html {
@@ -80,8 +84,43 @@ body {
   color: var(--foreground);
 }
 
+/* https://stackoverflow.com/questions/11243337/a-taller-than-its-img-child */
+a > img {
+  display: block;
+}
+
+img {
+  max-width: 100%;
+}
+
 svg {
   fill: currentColor;
+}
+
+fieldset {
+  border-color: var(--border-color);
+  border-width: 0;
+  border-top-width: 2px;
+  padding-right: 0;
+  padding-left: 0;
+}
+
+fieldset + fieldset {
+  margin-top: 12px;
+}
+
+fieldset > p:first-of-type {
+  margin-top: 0;
+}
+
+fieldset > p:last-of-type {
+  margin-bottom: 0;
+}
+
+legend {
+  margin-left: -9px;
+  padding: 0 8px;
+  font-weight: bold;
 }
 
 .left {
@@ -94,7 +133,7 @@ svg {
   clear: both;
 }
 
-/* labels */
+/* text */
 .accent {
   color: var(--accent);
 }
@@ -109,6 +148,23 @@ svg {
 }
 .light {
   color: var(--foreground-light);
+}
+.inverse {
+  color: var(--foreground-inverse);
+}
+
+/* backgrounds */
+.bg-accent {
+  background: var(--accent);
+}
+.bg-success {
+  background: var(--success);
+}
+.bg-warning {
+  background: var(--warning);
+}
+.bg-danger {
+  background: var(--danger);
 }
 
 /* links */

@@ -1,5 +1,6 @@
 import html from './html.js';
 import { Checkbox } from './Checkbox.js';
+import { SupportList } from './Support.js';
 
 let state = Object.keys(localStorage).reduce(
   (newState, key) =>
@@ -11,18 +12,14 @@ let state = Object.keys(localStorage).reduce(
 
 function render() {
   $('main').html(html`
-    <h2>Image Downloader</h2>
+    <h1>
+      <img src="/images/icon_128.png" />
+      Image Downloader
+    </h1>
 
     <fieldset>
       <legend>About</legend>
-
-      This extension is and always will be free, open-source, and without
-      targeted ads or tracking algorithms.
-      <br />
-      The source code can be found on GitHub:${' '}
-      <a href="https://github.com/PactInteractive/image-downloader" target="_blank">
-        https://github.com/PactInteractive/image-downloader
-      </a>
+      <${SupportList} />
     </fieldset>
 
     <fieldset>
@@ -204,7 +201,7 @@ function render() {
 
 function saveOptions() {
   Object.assign(localStorage, state);
-  addNotification('Options saved.', 'success');
+  addNotification('Options saved.', 'bg-success inverse');
 }
 
 function resetOptions() {
@@ -216,7 +213,7 @@ function resetOptions() {
   render();
   addNotification(
     'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.',
-    'warning'
+    'bg-accent inverse'
   );
 }
 
@@ -233,7 +230,7 @@ function clearData() {
 function addNotification(message, cssClass) {
   const animation_duration = parseInt(localStorage.animation_duration, 10);
   // TODO: Figure out how to animate and move to state
-  const container = $('<div></div>')
+  const container = $('<div class="notification"></div>')
     .prependTo('#notifications')
     .toggle(false)
     .html(message)
