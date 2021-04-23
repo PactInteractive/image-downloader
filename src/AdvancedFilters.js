@@ -45,12 +45,12 @@ export const AdvancedFilters = ({ filterImages, state }) => {
     });
 
     toggleDimensionFilter(
-      $(`image_${dimension}_filter_min`),
+      document.querySelector(`#image_${dimension}_filter_min`),
       `filter_min_${dimension}_enabled`
     );
 
     toggleDimensionFilter(
-      $(`image_${dimension}_filter_max`),
+      document.querySelector(`#image_${dimension}_filter_max`),
       `filter_max_${dimension}_enabled`
     );
   };
@@ -91,7 +91,7 @@ export const AdvancedFilters = ({ filterImages, state }) => {
               checked=${state[`filter_min_width_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.currentTarget,
+                  document.querySelector('#image_width_filter_min'),
                   `filter_min_width_enabled`,
                   e.currentTarget.checked
                 );
@@ -110,7 +110,7 @@ export const AdvancedFilters = ({ filterImages, state }) => {
               checked=${state[`filter_max_width_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.currentTarget,
+                  document.querySelector('#image_width_filter_max'),
                   `filter_max_width_enabled`,
                   e.currentTarget.checked
                 );
@@ -141,7 +141,7 @@ export const AdvancedFilters = ({ filterImages, state }) => {
               checked=${state[`filter_min_height_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.currentTarget,
+                  document.querySelector('#image_height_filter_min'),
                   `filter_min_height_enabled`,
                   e.currentTarget.checked
                 );
@@ -160,7 +160,7 @@ export const AdvancedFilters = ({ filterImages, state }) => {
               checked=${state[`filter_max_height_enabled`] === 'true'}
               onChange=${(e) => {
                 toggleDimensionFilter(
-                  e.currentTarget,
+                  document.querySelector('#image_height_filter_max'),
                   `filter_max_height_enabled`,
                   e.currentTarget.checked
                 );
