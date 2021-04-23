@@ -18,7 +18,7 @@ export const SupportList = () => html`
   </ul>
 
   <p>
-    And how much do these companies propose to pay for your data?
+    And what do these companies think the value of your data is?
     <b> 0.15¢ to 0.45¢ a month.</b>
     <br />
     Less than a penny! Do you think that's worth compromising your privacy and
@@ -36,22 +36,6 @@ export const SupportList = () => html`
 
   <div class="tab-list">
     <div class="tab-item">
-      <${SupportRadio} id="support_paypal" value="paypal" checked />
-
-      <label class="tab-header" for="support_paypal">
-        <img src="/images/paypal.png" />
-        PayPal
-      </label>
-
-      <div class="tab-content centered">
-        <${ExternalLink} href="https://www.paypal.me/vdsabev">
-          <img src="/images/paypal-wordmark.jpg" />
-          paypal.me/vdsabev
-        <//>
-      </div>
-    </div>
-
-    <div class="tab-item">
       <${SupportRadio} id="support_patreon" value="patreon" />
 
       <label class="tab-header" for="support_patreon">
@@ -65,6 +49,22 @@ export const SupportList = () => html`
           <img src="/images/patreon-wordmark.png" />
           <br /><br />
           patreon.com/vdsabev
+        <//>
+      </div>
+    </div>
+
+    <div class="tab-item">
+      <${SupportRadio} id="support_paypal" value="paypal" />
+
+      <label class="tab-header" for="support_paypal">
+        <img src="/images/paypal.png" />
+        PayPal
+      </label>
+
+      <div class="tab-content centered">
+        <${ExternalLink} href="https://www.paypal.me/vdsabev">
+          <img src="/images/paypal-wordmark.jpg" />
+          paypal.me/vdsabev
         <//>
       </div>
     </div>

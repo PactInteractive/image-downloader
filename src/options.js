@@ -23,7 +23,7 @@ function render() {
     </fieldset>
 
     <fieldset>
-      <legend>General</legend>
+      <legend>General options</legend>
 
       <${Checkbox}
         id="show_download_confirmation_checkbox"
@@ -62,7 +62,7 @@ function render() {
     </fieldset>
 
     <fieldset>
-      <legend>Images</legend>
+      <legend>Image options</legend>
 
       <${Checkbox}
         id="show_image_url_checkbox"
