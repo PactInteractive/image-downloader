@@ -457,7 +457,15 @@ a{3,6} → Between 3 and 6 of a`}
           }
         }}
       >
-        <div class="chevron"></div>
+        <img class="toggle" src="/images/times.svg" />
+      </button>
+
+      <button
+        id="open_options_button"
+        title="Options"
+        onClick=${() => chrome.runtime.openOptionsPage()}
+      >
+        <img src="/images/cog.svg" />
       </button>
     </div>
 

@@ -52,33 +52,33 @@
         padding-bottom: 8px;
       }
 
-      #toggle_advanced_filters_button {
+      #toggle_advanced_filters_button,
+      #open_options_button {
         cursor: pointer;
-        position: relative;
-        border-radius: var(--border-radius-md);
-        border: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
         width: 30px;
         height: 30px;
+
+        border-radius: var(--border-radius-md);
+        border: 0;
         margin-bottom: 4px;
         background: var(--input-background);
       }
 
-      #toggle_advanced_filters_button .chevron::after {
-        position: absolute;
-        width: 12px;
-        height: 12px;
-        content: '';
-        transform-origin: 5px 5px;
-        transform: translate(-5px, -4px) rotate(45deg);
-        border: 3px solid var(--neutral-dark);
-        border-right: 0;
-        border-bottom: 0;
+      #toggle_advanced_filters_button .toggle {
+        height: 20px;
 
         transition: var(--transition-transform);
       }
 
-      #toggle_advanced_filters_button.collapsed .chevron::after {
-        transform: translate(-5px, -7px) rotate(225deg);
+      #toggle_advanced_filters_button.collapsed .toggle {
+        transform: rotate(-135deg);
+      }
+
+      #open_options_button img {
+        height: 18px;
       }
 
       .noUi-horizontal {

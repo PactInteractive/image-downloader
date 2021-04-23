@@ -1,24 +1,26 @@
 import html from './html.js';
 import { ExternalLink } from './ExternalLink.js';
 
+const numberOfActiveUsers = '1,000,000+';
 const years = new Date().getFullYear() - 2012;
 
 export const SupportList = () => html`
   <p>
-    If you're one of the 1,000,000+ people using this extension, over the
-    past${' '} ${years} years marketing companies have been approaching me with
-    offers to pay in exchange for <b>your private data</b> like:
+    If you're one of the ${numberOfActiveUsers} people using this extension,
+    over the past${' '} ${years} years marketing companies have approached me
+    with offers to pay in exchange for <b>your private data</b> like:
   </p>
 
   <ul>
     <li>what websites you visit</li>
     <li>when you visit them</li>
-    <li>where you visit them from.</li>
+    <li>where you visit them from</li>
   </ul>
 
   <p>
-    And how much do these companies think your data is worth?
-    <b> 0.15¢ to 0.45¢ a month.</b><br />
+    And how much do these companies propose to pay for your data?
+    <b> 0.15¢ to 0.45¢ a month.</b>
+    <br />
     Less than a penny! Do you think that's worth compromising your privacy and
     trust for?
   </p>
@@ -26,9 +28,10 @@ export const SupportList = () => html`
   <p>My answer has always been a resounding <b>NO!</b></p>
 
   <p>
-    If you agree, please consider supporting me and my work so I can keep this
-    extension free, open-source, and without targeted ads or tracking algorithms
-    - as it always has been.
+    If you agree, please consider supporting this project so I can continue
+    working on it while keeping the extension <b>free</b>, <b>open-source</b>,
+    and <b>without targeted ads or tracking algorithms</b> - as it always has
+    been.
   </p>
 
   <div class="tab-list">

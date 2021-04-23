@@ -201,7 +201,7 @@ function render() {
 
 function saveOptions() {
   Object.assign(localStorage, state);
-  addNotification('Options saved.', 'bg-success inverse');
+  addNotification('Options saved', 'bg-success inverse');
 }
 
 function resetOptions() {
