@@ -1,7 +1,7 @@
 import html from './html.js';
 import { ExternalLink } from './ExternalLink.js';
 
-const numberOfActiveUsers = '1,000,000+';
+const numberOfActiveUsers = '1,200,000+';
 const years = new Date().getFullYear() - 2012;
 
 export const SupportList = () => html`

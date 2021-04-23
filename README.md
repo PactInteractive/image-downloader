@@ -1,27 +1,25 @@
 # Image Downloader
-If you need to bulk download images, with this extension you can:
+If you want to download many images at once, with this extension you can:
 
-- See images on the current tab
+- Explore images on the current page
 - Filter by width, height, or URL (supports wildcard and regex)
-- Only show images from links (optionally)
-- Select which images to batch download
-- One-click download or open a single image in a new tab
-- Customize image display width and number of columns
+- One-click download or open any single image in a new tab
+- Customize image size and number of columns in the popup
 - Hide filters, buttons and notifications you don't need
 
-When you press the "Download" button, all selected images are saved to the default browser download directory (or optionally to a subfolder).
+When you press the "Download" button, all selected images are saved to the default browser download directory (or a subfolder).
 
 WARNING: If you haven't set a default download directory you will have to manually choose the save location for each image. This may open many popup windows. It is recommended you set a default download directory instead.
 
 # Known Issues
-This extension can only extract the images currently on the page. Those are not always the full-resolution images that open when you click on a photo (e.g. in Facebook albums). That's because the album page displays smaller versions of the images.
+This extension can only extract the images currently on the page. Those are not always the full-resolution images you expect to see when you click on a photo (e.g. in Facebook albums).
 
-If you need that kind of functionality there are other useful extensions like Hover Zoom.
+If you need that kind of functionality, take a look at more specialized extensions like Hover Zoom.
 
 # Change Log
 ## 3.0.0
-- Design refresh
-- Add support for .ico and .tif / .tiff images
+- Design refresh ✨
+- Added support for .ico and .tif / .tiff images
 
 ## 2.4.2
 - Workaround for Chrome disallowing access to cross-domain CSS rules
@@ -31,27 +29,27 @@ If you need that kind of functionality there are other useful extensions like Ho
 - Updated Zepto.js to 1.2.0
 
 ## 2.4.0
-- Added an option for renaming files before downloading
+- Added an option to rename downloaded files
 
 ## 2.3.0
-- Added support for BMP, SVG, and WebP images
+- Added support for .bmp, .svg, and .webp images
 - Added support for relative URLs
-- Improved popup loading speed by searching through less elements
+- Improved popup loading speed by searching through fewer elements
 - Replaced deprecated `chrome.extension` calls with `chrome.runtime`
 
 ## 2.2.0
 - Removed the unnecessary permission to access tabs
-- Removed the donation prompt due to complains from some users that it doesn't disappear after the first time as it should; now, the options page will be opened on first install instead
+- Removed the donation prompt due to issues with it not disappearing after the first time as it should; now, the options page will be opened on first install instead
 - Save the value of the URL filter
 - Another attempt to fix some sizing issues
 
 ## 2.1.0
-- Added image width / height filters
+- Added image width / height slider filters
 - Added a one-time reset of all settings due to some people having sizing issues
 - Removed the sort by URL option
 
 ## 2.0.0
-- Added the ability to save the files to a subfolder
+- Added the ability to save downloaded files to a subfolder
 - Utilized the Google Chrome downloads API
 - Implemented a cleaner, grid-based design
 - Clicking on an image URL textbox will now automatically select the text so users can copy it
@@ -78,7 +76,7 @@ If you need that kind of functionality there are other useful extensions like Ho
 - Added wildcard filter mode (alongside normal and regex)
 - The state of the selected filters will now be saved
 - Moved the "Sort by URL" option back to the filters
-- Added a "Clear Data" button to options page. While the extension does not use a lot of local storage yet, someone might appreciate the option.
+- Added a "Clear Data" button to options page
 - Refactored a lot of code, especially the use of local storage
 
 ## 1.0.13
@@ -106,7 +104,7 @@ If you need that kind of functionality there are other useful extensions like Ho
 - Added detection of image URLs in anchor tags; note that this feature will not detect URLs that don't have .jpg, .jpeg, .gif or .png file extensions - it relies on a regular expression as to avoid possibly sending hundreds of requests to external servers
 
 ## 1.0.7
-- Removed the desktop notification system that popped up when you press "Download" in favor of a text description that should feel easier to control (through Options) and less intrusive; this should also require less permissions for the extension
+- Removed the desktop notification system that popped up when you press "Download" in favor of a text description that should feel easier to control (through Options) and less intrusive; this should also require fewer permissions for the extension
 - Added an option to hide the download notification; most people should understand the download process after only reading it once
 - Made some minor UI tweaks
 
