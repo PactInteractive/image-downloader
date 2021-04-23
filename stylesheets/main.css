@@ -238,46 +238,76 @@ input[type='button'].accent:active {
   background: var(--accent);
 }
 
+input[type='button'].accent.ghost {
+  border: 2px solid var(--accent);
+  background: var(--neutral-lightest);
+  color: var(--accent);
+}
+
 /* success */
 input[type='button'].success {
+  border: 2px solid var(--success-light);
   background: var(--success-light);
 }
 input[type='button'].success:hover,
 input[type='button'].success:focus,
 input[type='button'].success:active {
+  border: 2px solid var(--success);
   background: var(--success);
+}
+
+input[type='button'].success.ghost {
+  border: 2px solid var(--success);
+  background: var(--neutral-lightest);
+  color: var(--success);
 }
 
 /* warning */
 input[type='button'].warning {
+  border: 2px solid var(--warning-light);
   background: var(--warning-light);
 }
 input[type='button'].warning:hover,
 input[type='button'].warning:focus,
 input[type='button'].warning:active {
+  border: 2px solid var(--warning);
   background: var(--warning);
+}
+
+input[type='button'].warning.ghost {
+  border: 2px solid var(--warning);
+  background: var(--neutral-lightest);
+  color: var(--warning);
 }
 
 /* danger */
 input[type='button'].danger {
+  border: 2px solid var(--danger-light);
   background: var(--danger-light);
 }
 input[type='button'].danger:hover,
 input[type='button'].danger:focus,
 input[type='button'].danger:active {
+  border: 2px solid var(--danger);
   background: var(--danger);
 }
 
-/* ghost */
-input[type='button'].ghost {
-  border: 2px solid var(--neutral-light);
+input[type='button'].danger.ghost {
+  border: 2px solid var(--danger);
+  background: var(--neutral-lightest);
+  color: var(--danger);
+}
+
+/* neutral */
+input[type='button'].neutral {
+  border: 2px solid var(--neutral-transparent-20);
+  background: var(--neutral-transparent-20);
+}
+
+input[type='button'].neutral.ghost {
+  border: 2px solid var(--neutral-transparent-20);
   background: var(--neutral-lightest);
   color: var(--foreground);
-}
-input[type='button'].ghost:hover,
-input[type='button'].ghost:focus,
-input[type='button'].ghost:active {
-  background: var(--neutral-lighter);
 }
 
 label {

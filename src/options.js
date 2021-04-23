@@ -169,7 +169,7 @@ function render() {
       <input
         type="button"
         id="clear_data_button"
-        class="danger"
+        class="danger ghost"
         value="Clear Data"
         title="Clears all data this extension has stored on your machine"
         onClick=${clearData}
@@ -178,7 +178,7 @@ function render() {
       <input
         type="button"
         id="reset_button"
-        class="warning"
+        class="neutral ghost"
         style=${{ marginLeft: 'auto' }}
         value="Reset"
         title="Resets all settings to their defaults; save afterwards to preserve the changes"

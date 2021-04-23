@@ -306,7 +306,7 @@ function showDownloadConfirmation(startDownload) {
 
         <input
           type="button"
-          class="ghost"
+          class="neutral ghost"
           value="Cancel"
           onClick=${() => {
             saveDontShowAgainState();

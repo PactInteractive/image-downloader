@@ -18,8 +18,9 @@ export const SupportList = () => html`
 
   <p>
     And how much do these companies think your data is worth?
-    <b> 0.15¢ to 0.45¢ a month.</b> Less than a penny! Do you think that's worth
-    compromising your privacy and trust for?
+    <b> 0.15¢ to 0.45¢ a month.</b><br />
+    Less than a penny! Do you think that's worth compromising your privacy and
+    trust for?
   </p>
 
   <p>My answer has always been a resounding <b>NO!</b></p>
