@@ -50,6 +50,11 @@ export const SupportList = () => html`
           <br /><br />
           patreon.com/vdsabev
         <//>
+
+        <p>
+          Give recurring monthly donations and participate in our Discord
+          community!
+        </p>
       </div>
     </div>
 
@@ -66,6 +71,8 @@ export const SupportList = () => html`
           <img src="/images/paypal-wordmark.jpg" />
           paypal.me/vdsabev
         <//>
+
+        <p>Give a one-time donation to show your support for the project.</p>
       </div>
     </div>
 
@@ -82,7 +89,12 @@ export const SupportList = () => html`
         <${ExternalLink} href="bitcoin:3LGkKmET7sGzsJriW16mtM8Kmo2XN7258C">
           <img src="/images/btc-qr.png" />
         <//>
+
         <pre>3LGkKmET7sGzsJriW16mtM8Kmo2XN7258C</pre>
+
+        <p style=${{ maxWidth: '380px' }}>
+          Any bitcoin you send will be retained as bitcoin and hodled 💥👀
+        </p>
       </div>
     </div>
 
@@ -101,7 +113,13 @@ export const SupportList = () => html`
         >
           <img src="/images/eth-qr.png" />
         <//>
+
         <pre>0x49707Cb358e8B2F795C8FceF4D2DcfD2BADF7679</pre>
+
+        <p style=${{ maxWidth: '380px' }}>
+          Any Ethereum you send will be retained as Ethereum and hodled or used
+          as gas for running decentralized applications 💥👀
+        </p>
       </div>
     </div>
 
@@ -120,7 +138,12 @@ export const SupportList = () => html`
         >
           <img src="/images/bat-qr.png" />
         <//>
+
         <pre>0xdb54EBD0eF147599050B3629d65a73d65ef344D2</pre>
+
+        <p style=${{ maxWidth: '380px' }}>
+          Any BAT you send will be retained as BAT and hodled 💥👀
+        </p>
       </div>
     </div>
   </div>
