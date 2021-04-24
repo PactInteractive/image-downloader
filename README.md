@@ -1,4 +1,5 @@
-# Image Downloader
+Image Downloader
+================
 If you want to download many images at once, with this extension you can:
 
 - Explore images on the current page
@@ -11,12 +12,14 @@ When you press the "Download" button, all selected images are saved to the defau
 
 WARNING: If you haven't set a default download directory you will have to manually choose the save location for each image. This may open many popup windows. It is recommended you set a default download directory instead.
 
-# Known Issues
+Known Issues
+============
 This extension can only extract the images currently on the page. Those are not always the full-resolution images you expect to see when you click on a photo (e.g. in Facebook albums).
 
 If you need that kind of functionality, take a look at more specialized extensions like Hover Zoom.
 
-# Change Log
+Change Log
+==========
 ## 3.0.0
 - Design refresh ✨
 - Added support for .ico and .tif / .tiff images
@@ -117,13 +120,8 @@ If you need that kind of functionality, take a look at more specialized extensio
 ## 1.0.4
 - Added a notification that alerts the user when the download process has begun and explains where to look for the files
 
-# Credits
-This extension is and always will be free, open-source, and without targeted ads or tracking algorithms.
-You can find the source code here: https://github.com/PactInteractive/image-downloader
-
-Based on the Google Chrome Extension sample "Download Links": https://github.com/GoogleChrome/chrome-extensions-samples/tree/master/api/downloads/download_links
-
-# License
+License
+=======
 Copyright (c) 2012-2021 Vladimir Sabev
 
 Permission is hereby granted, free of charge, to any person
