@@ -1,5 +1,5 @@
 import html, { render, useState } from './html.js';
-import { Checkbox } from './Checkbox.js';
+import { Checkbox } from './components/Checkbox.js';
 import { SupportList } from './Support.js';
 
 const initialOptions = Object.keys(localStorage)
@@ -40,18 +40,12 @@ const useNotifications = (initialNotifications = []) => {
 const Options = () => {
   const [options, setOptions] = useState(initialOptions);
 
-  const setCheckboxOption = (key) => (e) => {
-    setOptions((state) => ({
-      ...state,
-      [key]: e.currentTarget.checked.toString(),
-    }));
+  const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
+    setOptions((options) => ({ ...options, [key]: checked.toString() }));
   };
 
-  const setValueOption = (key) => (e) => {
-    setOptions((state) => ({
-      ...state,
-      [key]: e.currentTarget.value,
-    }));
+  const setValueOption = (key) => ({ currentTarget: { value } }) => {
+    setOptions((state) => ({ ...state, [key]: value }));
   };
 
   function saveOptions() {

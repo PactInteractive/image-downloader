@@ -1,17 +1,19 @@
-import html from './html.js';
-import { Checkbox } from './Checkbox.js';
+import html, { useEffect, useRef, useState } from './html.js';
+import { Checkbox } from './components/Checkbox.js';
 
 // Currently a singleton. Should rewrite once we switch to a full-fledged rendering library
-export const AdvancedFilters = ({ filterImages, state }) => {
-  AdvancedFilters.id = 'advanced_filters_container';
+export const AdvancedFilters = ({ options, setOptions }) => {
+  const widthSliderRef = useRef(null);
+  useEffect(() => {
+    initializeFilter(widthSliderRef.current, 'width');
+  }, []);
 
-  AdvancedFilters.initializeFilters = () => {
-    initializeFilter('width');
-    initializeFilter('height');
-  };
+  const heightSliderRef = useRef(null);
+  useEffect(() => {
+    initializeFilter(heightSliderRef.current, 'height');
+  }, []);
 
-  const initializeFilter = (dimension) => {
-    const slider = document.querySelector(`#image_${dimension}_filter_slider`);
+  const initializeFilter = (slider, dimension) => {
     if (!slider) return;
 
     slider.noUiSlider?.destroy();
@@ -24,47 +26,32 @@ export const AdvancedFilters = ({ filterImages, state }) => {
         to: (value) => parseInt(value, 10).toString(),
       },
       range: {
-        min: parseInt(state[`filter_min_${dimension}_default`], 10),
-        max: parseInt(state[`filter_max_${dimension}_default`], 10),
+        min: parseInt(options[`filter_min_${dimension}_default`], 10),
+        max: parseInt(options[`filter_max_${dimension}_default`], 10),
       },
       step: 10,
       start: [
-        state[`filter_min_${dimension}`],
-        state[`filter_max_${dimension}`],
+        options[`filter_min_${dimension}`],
+        options[`filter_max_${dimension}`],
       ],
     });
 
     slider.noUiSlider.on('update', ([min, max]) => {
-      $(`#image_${dimension}_filter_min`).html(`${min}px`);
-      state[`filter_min_${dimension}`] = min;
-
-      $(`#image_${dimension}_filter_max`).html(`${max}px`);
-      state[`filter_max_${dimension}`] = max;
-
-      filterImages();
+      setOptions((options) => ({
+        ...options,
+        [`filter_min_${dimension}`]: min,
+        [`filter_max_${dimension}`]: max,
+      }));
     });
-
-    toggleDimensionFilter(
-      document.querySelector(`#image_${dimension}_filter_min`),
-      `filter_min_${dimension}_enabled`
-    );
-
-    toggleDimensionFilter(
-      document.querySelector(`#image_${dimension}_filter_max`),
-      `filter_max_${dimension}_enabled`
-    );
   };
 
-  const toggleDimensionFilter = (element, option, value) => {
-    if (value !== undefined) {
-      state[option] = value;
-    }
-    $(element).toggleClass('light', state[option] !== 'true');
-    filterImages();
+  // TODO: Extract and reuse in `options.js` and other components
+  const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
+    setOptions((options) => ({ ...options, [key]: checked.toString() }));
   };
 
   return html`
-    <div id=${AdvancedFilters.id}>
+    <div>
       <table class="grid">
         <colgroup>
           <col style=${{ width: '45px' }} />
@@ -79,8 +66,13 @@ export const AdvancedFilters = ({ filterImages, state }) => {
           <td>Width:</td>
 
           <td style=${{ textAlign: 'right' }}>
-            <label for="image_width_filter_min_checkbox">
-              <small id="image_width_filter_min"></small>
+            <label
+              for="image_width_filter_min_checkbox"
+              class=${options.filter_min_width_enabled === 'true'
+                ? ''
+                : 'light'}
+            >
+              <small>${options.filter_min_width}px</small>
             </label>
           </td>
 
@@ -88,39 +80,32 @@ export const AdvancedFilters = ({ filterImages, state }) => {
             <input
               type="checkbox"
               id="image_width_filter_min_checkbox"
-              checked=${state[`filter_min_width_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  document.querySelector('#image_width_filter_min'),
-                  `filter_min_width_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
+              checked=${options.filter_min_width_enabled === 'true'}
+              onChange=${setCheckboxOption('filter_min_width_enabled')}
             />
           </td>
 
           <td style=${{ padding: '0 8px' }}>
-            <div id="image_width_filter_slider"></div>
+            <div ref=${widthSliderRef}></div>
           </td>
 
           <td>
             <input
               type="checkbox"
               id="image_width_filter_max_checkbox"
-              checked=${state[`filter_max_width_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  document.querySelector('#image_width_filter_max'),
-                  `filter_max_width_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
+              checked=${options.filter_max_width_enabled === 'true'}
+              onChange=${setCheckboxOption('filter_max_width_enabled')}
             />
           </td>
 
           <td style=${{ textAlign: 'right' }}>
-            <label for="image_width_filter_max_checkbox">
-              <small id="image_width_filter_max"></small>
+            <label
+              for="image_width_filter_max_checkbox"
+              class=${options.filter_max_width_enabled === 'true'
+                ? ''
+                : 'light'}
+            >
+              <small>${options.filter_max_width}px</small>
             </label>
           </td>
         </tr>
@@ -129,8 +114,13 @@ export const AdvancedFilters = ({ filterImages, state }) => {
           <td>Height:</td>
 
           <td style=${{ textAlign: 'right' }}>
-            <label for="image_height_filter_min_checkbox">
-              <small id="image_height_filter_min"></small>
+            <label
+              for="image_height_filter_min_checkbox"
+              class=${options.filter_min_height_enabled === 'true'
+                ? ''
+                : 'light'}
+            >
+              <small>${options.filter_min_height}px</small>
             </label>
           </td>
 
@@ -138,51 +128,41 @@ export const AdvancedFilters = ({ filterImages, state }) => {
             <input
               type="checkbox"
               id="image_height_filter_min_checkbox"
-              checked=${state[`filter_min_height_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  document.querySelector('#image_height_filter_min'),
-                  `filter_min_height_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
+              checked=${options.filter_min_height_enabled === 'true'}
+              onChange=${setCheckboxOption('filter_min_height_enabled')}
             />
           </td>
 
           <td style=${{ padding: '0 8px' }}>
-            <div id="image_height_filter_slider"></div>
+            <div ref=${heightSliderRef}></div>
           </td>
 
           <td>
             <input
               type="checkbox"
               id="image_height_filter_max_checkbox"
-              checked=${state[`filter_max_height_enabled`] === 'true'}
-              onChange=${(e) => {
-                toggleDimensionFilter(
-                  document.querySelector('#image_height_filter_max'),
-                  `filter_max_height_enabled`,
-                  e.currentTarget.checked
-                );
-              }}
+              checked=${options.filter_max_height_enabled === 'true'}
+              onChange=${setCheckboxOption('filter_max_height_enabled')}
             />
           </td>
 
           <td style=${{ textAlign: 'right' }}>
-            <label for="image_height_filter_max_checkbox">
-              <small id="image_height_filter_max"></small>
+            <label
+              for="image_height_filter_max_checkbox"
+              class=${options.filter_max_height_enabled === 'true'
+                ? ''
+                : 'light'}
+            >
+              <small>${options.filter_max_height}px</small>
             </label>
           </td>
         </tr>
       </table>
 
       <${Checkbox}
-        title="Only show images from direct links on the page; this can be useful on sites like Reddit"
-        checked=${state.only_images_from_links === 'true'}
-        onChange=${(e) => {
-          state.only_images_from_links = e.currentTarget.checked;
-          filterImages();
-        }}
+        title="Only show images from direct links on the page; useful on sites like Reddit"
+        checked=${options.only_images_from_links === 'true'}
+        onChange=${setCheckboxOption('only_images_from_links')}
       >
         Only images from links
       <//>

@@ -7,6 +7,7 @@ export default html;
 
 // React hooks
 export const useEffect = React.useEffect;
+export const useRef = React.useRef;
 export const useState = React.useState;
 
 // React DOM

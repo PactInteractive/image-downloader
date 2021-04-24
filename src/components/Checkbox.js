@@ -1,4 +1,4 @@
-import html from './html.js';
+import html from '../html.js';
 
 export const Checkbox = ({ children, style, title = '', ...props }) => html`
   <label ...${{ title }}>

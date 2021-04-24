@@ -1,5 +1,5 @@
-import html from './html.js';
-import { Checkbox } from './Checkbox.js';
+import html, { render, useEffect, useState } from './html.js';
+import { Checkbox } from './components/Checkbox.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
 import {
   DownloadImageButton,
@@ -7,7 +7,8 @@ import {
   OpenImageButton,
 } from './ImageActions.js';
 
-const ls = localStorage;
+const initialOptions = localStorage;
+const ls = localStorage; // TODO: Remove
 
 const allImages = [];
 let visibleImages = [];
@@ -123,6 +124,9 @@ function filterImages() {
 
     visibleImages = visibleImages.filter((url) => {
       const image = images_cache.children(`img[src="${encodeURI(url)}"]`)[0];
+
+      if (!image) return false; // TODO: Remove after rewriting
+
       return (
         (ls.filter_min_width_enabled !== 'true' ||
           ls.filter_min_width <= image.naturalWidth) &&
@@ -365,46 +369,60 @@ function flash(element, flashes, interval, callback) {
   fade(false);
 }
 
-$('main').append(html`
-  <div id="filters_container">
-    <div style=${{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-      <input
-        type="text"
-        id="filter_textbox"
-        placeholder="Filter by URL"
-        title="Filter by parts of the URL or regular expressions."
-        value=${ls.filter_url}
-        style=${{ flex: '1' }}
-        onKeyUp=${filterImages}
-        onChange=${(e) => {
-          ls.filter_url = $.trim(e.currentTarget.value);
-        }}
-      />
+const Popup = () => {
+  const [options, setOptions] = useState(initialOptions);
 
-      <select
-        value=${ls.filter_url_mode}
-        onChange=${(e) => {
-          ls.filter_url_mode = e.currentTarget.value;
-          filterImages();
-        }}
-      >
-        <option value="normal" title="A plain text search">
-          Normal
-        </option>
+  useEffect(() => {
+    Object.assign(localStorage, options);
+  }, [options]);
 
-        <option
-          value="wildcard"
-          title="You can also use these special symbols:
+  // TODO: Keep image state, but outside of options cause those are persisted in `localStorage`
+
+  return html`
+    <div id="filters_container">
+      <div style=${{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+        <input
+          type="text"
+          id="filter_textbox"
+          placeholder="Filter by URL"
+          title="Filter by parts of the URL or regular expressions."
+          value=${options.filter_url}
+          style=${{ flex: '1' }}
+          onKeyUp=${filterImages}
+          onChange=${(e) => {
+            setOptions((options) => ({
+              ...options,
+              filter_url: $.trim(e.currentTarget.value),
+            }));
+          }}
+        />
+
+        <select
+          value=${options.filter_url_mode}
+          onChange=${(e) => {
+            setOptions((options) => ({
+              ...options,
+              filter_url_mode: e.currentTarget.value,
+            }));
+          }}
+        >
+          <option value="normal" title="A plain text search">
+            Normal
+          </option>
+
+          <option
+            value="wildcard"
+            title="You can also use these special symbols:
 * → zero or more characters
 ? → zero or one character
 + → one or more characters"
-        >
-          Wildcard
-        </option>
+          >
+            Wildcard
+          </option>
 
-        <option
-          value="regex"
-          title=${`Regular expressions (advanced):
+          <option
+            value="regex"
+            title=${`Regular expressions (advanced):
 [abc] → A single character of: a, b or c
 [^abc] → Any single character except: a, b, or c
 [a-z] → Any single character in the range a-z
@@ -429,97 +447,97 @@ a+ → One or more of a
 a{3} → Exactly 3 of a
 a{3,} → 3 or more of a
 a{3,6} → Between 3 and 6 of a`}
+          >
+            Regex
+          </option>
+        </select>
+
+        <button
+          id="toggle_advanced_filters_button"
+          class=${options.show_advanced_filters === 'true' ? '' : 'collapsed'}
+          title="Advanced filters"
+          onClick=${(e) => {
+            setOptions((options) => ({
+              ...options,
+              show_advanced_filters:
+                options.show_advanced_filters === 'true' ? 'false' : 'true',
+            }));
+          }}
         >
-          Regex
-        </option>
-      </select>
+          <img class="toggle" src="/images/times.svg" />
+        </button>
 
-      <button
-        id="toggle_advanced_filters_button"
-        class=${ls.show_advanced_filters === 'true' ? '' : 'collapsed'}
-        title="Advanced filters"
-        onClick=${(e) => {
-          const slider = $(`#${AdvancedFilters.id}`);
-          if (slider.length > 0) {
-            ls.show_advanced_filters = false;
-            e.currentTarget.classList.add('collapsed');
-            slider.remove();
-          } else {
-            ls.show_advanced_filters = true;
-            e.currentTarget.classList.remove('collapsed');
-            $('#filters_container').append(
-              html`<${AdvancedFilters}
-                filterImages=${filterImages}
-                state=${ls}
-              />`
-            );
-            AdvancedFilters.initializeFilters();
-          }
-        }}
-      >
-        <img class="toggle" src="/images/times.svg" />
-      </button>
+        <button
+          id="open_options_button"
+          title="Options"
+          onClick=${() => chrome.runtime.openOptionsPage()}
+        >
+          <img src="/images/cog.svg" />
+        </button>
+      </div>
 
-      <button
-        id="open_options_button"
-        title="Options"
-        onClick=${() => chrome.runtime.openOptionsPage()}
-      >
-        <img src="/images/cog.svg" />
-      </button>
+      ${options.show_advanced_filters === 'true' &&
+      html`<${AdvancedFilters}
+        filterImages=${filterImages}
+        options=${options}
+        setOptions=${setOptions}
+      />`}
     </div>
 
-    ${ls.show_advanced_filters === 'true' &&
-    html`<${AdvancedFilters} filterImages=${filterImages} state=${ls} />`}
-  </div>
+    <div id="images_cache"></div>
 
-  <div id="images_cache"></div>
+    <div id="images_container"></div>
 
-  <div id="images_container"></div>
-
-  <div
-    id="downloads_container"
-    style=${{
-      gridTemplateColumns: `${
-        ls.show_file_renaming === 'true' ? 'minmax(100px, 1fr)' : ''
-      } minmax(100px, 1fr) 80px`,
-    }}
-  >
-    <input
-      type="text"
-      placeholder="Save to subfolder"
-      title="Set the name of the subfolder you want to download the images to."
-      value=${ls.folder_name}
-      onChange=${(e) => {
-        ls.folder_name = $.trim(e.currentTarget.value);
+    <div
+      id="downloads_container"
+      style=${{
+        gridTemplateColumns: `${
+          options.show_file_renaming === 'true' ? 'minmax(100px, 1fr)' : ''
+        } minmax(100px, 1fr) 80px`,
       }}
-    />
-
-    ${ls.show_file_renaming === 'true' &&
-    html`
+    >
       <input
         type="text"
-        placeholder="Rename files"
-        title="Set a new file name for the images you want to download."
-        value=${ls.new_file_name}
+        placeholder="Save to subfolder"
+        title="Set the name of the subfolder you want to download the images to."
+        value=${options.folder_name}
         onChange=${(e) => {
-          ls.new_file_name = $.trim(e.currentTarget.value);
+          setOptions((options) => ({
+            ...options,
+            folder_name: $.trim(e.currentTarget.value),
+          }));
         }}
       />
-    `}
 
-    <input
-      type="button"
-      id="download_button"
-      class="accent"
-      value="Download"
-      disabled="true"
-      onClick=${downloadImages}
-    />
-  </div>
-`);
+      ${options.show_file_renaming === 'true' &&
+      html`
+        <input
+          type="text"
+          placeholder="Rename files"
+          title="Set a new file name for the images you want to download."
+          value=${options.new_file_name}
+          onChange=${(e) => {
+            setOptions((options) => ({
+              ...options,
+              new_file_name: $.trim(e.currentTarget.value),
+            }));
+          }}
+        />
+      `}
 
-AdvancedFilters.initializeFilters?.();
+      <input
+        type="button"
+        id="download_button"
+        class="accent"
+        value="Download"
+        disabled="true"
+        onClick=${downloadImages}
+      />
+    </div>
+  `;
+};
+
+render(html`<${Popup} />`, document.querySelector('main'));
 
 chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 

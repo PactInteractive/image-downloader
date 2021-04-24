@@ -1,5 +1,5 @@
 import html from './html.js';
-import { ExternalLink } from './ExternalLink.js';
+import { ExternalLink } from './components/ExternalLink.js';
 
 const numberOfActiveUsers = '1,200,000+';
 const years = new Date().getFullYear() - 2012;
