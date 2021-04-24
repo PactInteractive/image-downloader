@@ -16,6 +16,27 @@ const defaultState = Object.keys(localStorage)
     {}
   );
 
+const useNotifications = (initialNotifications = []) => {
+  const [notifications, setNotifications] = useState(initialNotifications);
+
+  function addNotification(type, message) {
+    setNotifications((notifications) => {
+      const notification = { message, type };
+      const removeNotificationAfterMs = 10_000;
+
+      setTimeout(() => {
+        setNotifications((notifications) =>
+          notifications.filter((n) => n !== notification)
+        );
+      }, removeNotificationAfterMs);
+
+      return [notification, ...notifications];
+    });
+  }
+
+  return { notifications, addNotification };
+};
+
 const Options = () => {
   const [state, setState] = useState(initialState);
 
@@ -42,22 +63,7 @@ const Options = () => {
     }
   }
 
-  const [notifications, setNotifications] = useState([]);
-
-  function addNotification(type, message) {
-    setNotifications((notifications) => {
-      const notification = { message, type };
-      const removeNotificationAfterMs = 10_000;
-
-      setTimeout(() => {
-        setNotifications((notifications) =>
-          notifications.filter((n) => n !== notification)
-        );
-      }, removeNotificationAfterMs);
-
-      return [...notifications, notification];
-    });
-  }
+  const { notifications, addNotification } = useNotifications();
 
   return html`
     <h1>
