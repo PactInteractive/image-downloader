@@ -39,11 +39,6 @@ const options = [
     ...checkboxOptions,
   },
   {
-    input: '#show_download_notification_checkbox',
-    key: 'show_download_notification',
-    ...checkboxOptions,
-  },
-  {
     input: '#show_file_renaming_checkbox',
     key: 'show_file_renaming',
     ...checkboxOptions,

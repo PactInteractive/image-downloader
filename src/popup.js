@@ -14,43 +14,6 @@ import { UrlFilterMode } from './UrlFilterMode.js';
 import { isIncludedIn } from './utils.js';
 
 const initialOptions = localStorage;
-const ls = localStorage; // TODO: Remove
-
-// TODO: Implement
-function flashDownloadingNotification(imageCount) {
-  if (ls.show_download_notification !== 'true') return;
-
-  const downloading_notification = $(html`
-    <div class="success" style=${{ gridColumn: '1 / -1' }}>
-      Downloading ${imageCount} ${imageCount > 1 ? 'images' : 'image'}...
-    </div>
-  `);
-
-  $('#downloads_container').prepend(downloading_notification);
-
-  flash(downloading_notification, 3.5, 0, () => {
-    downloading_notification.remove();
-  });
-}
-
-// TODO: Implement
-function flash(element, flashes, interval, callback) {
-  if (!interval) interval = parseInt(ls.animation_duration, 10);
-
-  const fade = (fadeIn) => {
-    if (flashes > 0) {
-      flashes -= 0.5;
-      if (fadeIn) {
-        element.fadeIn(interval, () => fade(false));
-      } else {
-        element.fadeOut(interval, () => fade(true));
-      }
-    } else if (callback) {
-      callback();
-    }
-  };
-  fade(false);
-}
 
 const Popup = () => {
   const [options, setOptions] = useState(initialOptions);
@@ -164,67 +127,65 @@ const Popup = () => {
 
   useEffect(filterImages, [allImages, linkedImages]);
 
-  // TODO: Disable Download button while download is ongoing
+  const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
   const imagesToDownload = useMemo(
     () => visibleImages.filter(isIncludedIn(selectedImages)),
     [visibleImages, selectedImages]
   );
 
   const [
-    isDownloadConfirmationShown,
-    setIsDownloadConfirmationShown,
+    downloadConfirmationIsShown,
+    setDownloadConfirmationIsShown,
   ] = useState(false);
 
   function downloadImages() {
     if (options.show_download_confirmation === 'true') {
-      setIsDownloadConfirmationShown(true);
+      setDownloadConfirmationIsShown(true);
     } else {
       startDownload(imagesToDownload);
     }
+  }
 
-    async function startDownload(images) {
-      // flashDownloadingNotification(images.length);
+  async function startDownload(images) {
+    let currentImageNumber = 1;
+    chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+    setDownloadIsInProgress(true);
 
-      let currentImageNumber = 1;
-      chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+    for (const image of images) {
+      await new Promise((resolve) => {
+        chrome.downloads.download({ url: image }, resolve);
+      });
+    }
 
-      for (const image of images) {
-        await new Promise((resolve) => {
-          chrome.downloads.download({ url: image }, resolve);
-        });
+    // TODO: The listener is being removed prematurely - find a cleaner way to fix the race condition
+    setTimeout(() => {
+      chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
+      setDownloadIsInProgress(false);
+    }, 200);
+
+    function suggestNewFilename(item, suggest) {
+      let newFilename = '';
+      if (options.folder_name) {
+        newFilename += `${options.folder_name}/`;
       }
-
-      // TODO: The listener is being removed prematurely - find a cleaner way to fix the race condition
-      setTimeout(() => {
-        chrome.downloads.onDeterminingFilename.removeListener(
-          suggestNewFilename
-        );
-      }, 200);
-
-      function suggestNewFilename(item, suggest) {
-        let newFilename = '';
-        if (options.folder_name) {
-          newFilename += `${options.folder_name}/`;
-        }
-        if (options.new_file_name) {
-          const regex = /(?:\.([^.]+))?$/;
-          const extension = regex.exec(item.filename)[1];
-          if (images.length === 1) {
-            newFilename += `${options.new_file_name}.${extension}`;
-          } else {
-            const numberOfDigits = images.length.toString().length;
-            const formattedImageNumber = `${currentImageNumber}`.padStart(
-              numberOfDigits,
-              '0'
-            );
-            newFilename += `${options.new_file_name}${formattedImageNumber}.${extension}`;
-            currentImageNumber += 1;
-          }
+      if (options.new_file_name) {
+        const regex = /(?:\.([^.]+))?$/;
+        const extension = regex.exec(item.filename)[1];
+        if (images.length === 1) {
+          newFilename += `${options.new_file_name}.${extension}`;
         } else {
-          newFilename += item.filename;
+          const numberOfDigits = images.length.toString().length;
+          const formattedImageNumber = `${currentImageNumber}`.padStart(
+            numberOfDigits,
+            '0'
+          );
+          newFilename += `${options.new_file_name}${formattedImageNumber}.${extension}`;
+          currentImageNumber += 1;
         }
-        suggest({ filename: newFilename });
+      } else {
+        newFilename += item.filename;
       }
+      suggest({ filename: newFilename });
     }
   }
 
@@ -233,7 +194,6 @@ const Popup = () => {
       <div style=${{ display: 'flex', alignItems: 'center', gap: '4px' }}>
         <input
           type="text"
-          id="filter_textbox"
           placeholder="Filter by URL"
           title="Filter by parts of the URL or regular expressions."
           value=${options.filter_url}
@@ -325,26 +285,28 @@ const Popup = () => {
         />
       `}
 
+      <!-- TODO: Implement loading animation -->
       <input
         type="button"
-        id="download_button"
-        class="accent"
-        value="Download"
-        disabled=${imagesToDownload.length === 0}
+        class="accent ${downloadIsInProgress ? 'loading' : ''}"
+        value=${downloadIsInProgress ? '•••' : 'Download'}
+        disabled=${imagesToDownload.length === 0 || downloadIsInProgress}
         onClick=${downloadImages}
       />
 
-      ${isDownloadConfirmationShown &&
-      html`<${DownloadConfirmation}
-        onCheckboxChange=${({ currentTarget: { checked } }) => {
-          setOptions((options) => ({
-            ...options,
-            show_download_confirmation: checked.toString(),
-          }));
-        }}
-        onClose=${() => setIsDownloadConfirmationShown(false)}
-        onConfirm=${() => startDownload(imagesToDownload)}
-      />`}
+      ${downloadConfirmationIsShown &&
+      html`
+        <${DownloadConfirmation}
+          onCheckboxChange=${({ currentTarget: { checked } }) => {
+            setOptions((options) => ({
+              ...options,
+              show_download_confirmation: (!checked).toString(),
+            }));
+          }}
+          onClose=${() => setDownloadConfirmationIsShown(false)}
+          onConfirm=${() => startDownload(imagesToDownload)}
+        />
+      `}
     </div>
   `;
 };

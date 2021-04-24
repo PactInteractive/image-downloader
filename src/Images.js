@@ -94,25 +94,33 @@ export const Images = ({
             <div class="checkbox"></div>
 
             ${(showOpenImageButton || showDownloadImageButton) &&
-            html`<div class="actions">
-              ${showOpenImageButton &&
-              html`<${OpenImageButton}
-                imageUrl=${imageUrl}
-                onClick=${stopPropagation}
-              />`}
-              ${showDownloadImageButton &&
-              html`<${DownloadImageButton}
-                imageUrl=${imageUrl}
-                onClick=${stopPropagation}
-              />`}
-            </div>`}
+            html`
+              <div class="actions">
+                ${showOpenImageButton &&
+                html`
+                  <${OpenImageButton}
+                    imageUrl=${imageUrl}
+                    onClick=${stopPropagation}
+                  />
+                `}
+                ${showDownloadImageButton &&
+                html`
+                  <${DownloadImageButton}
+                    imageUrl=${imageUrl}
+                    onClick=${stopPropagation}
+                  />
+                `}
+              </div>
+            `}
             ${showImageUrl &&
-            html`<div class="image_url_container">
-              <${ImageUrlTextbox}
-                value=${imageUrl}
-                onClick=${stopPropagation}
-              />
-            </div>`}
+            html`
+              <div class="image_url_container">
+                <${ImageUrlTextbox}
+                  value=${imageUrl}
+                  onClick=${stopPropagation}
+                />
+              </div>
+            `}
           </div>
         `
       )}

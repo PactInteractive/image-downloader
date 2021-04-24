@@ -100,16 +100,6 @@ const Options = () => {
 
       <br />
       <${Checkbox}
-        id="show_download_notification_checkbox"
-        title="Flashes a message to let you know your download is starting"
-        checked="${options.show_download_notification === 'true'}"
-        onChange=${setCheckboxOption('show_download_notification')}
-      >
-        <span>Show <b>downloading</b> message</span>
-      <//>
-
-      <br />
-      <${Checkbox}
         id="show_file_renaming_checkbox"
         title="Lets you specify a new file name for downloaded files"
         checked="${options.show_file_renaming === 'true'}"

@@ -60,7 +60,6 @@ it(`matches 'localStorage' snapshot`, () => {
   require('./defaults');
   expect(global.localStorage).toMatchInlineSnapshot(`
     Storage {
-      "animation_duration": "500",
       "columns": "2",
       "columns_default": "2",
       "filter_max_height": "3000",
@@ -93,13 +92,11 @@ it(`matches 'localStorage' snapshot`, () => {
       "new_file_name_default": "",
       "only_images_from_links": "false",
       "only_images_from_links_default": "false",
-      "options": "[\\"folder_name\\",\\"new_file_name\\",\\"filter_url\\",\\"filter_url_mode\\",\\"filter_min_width\\",\\"filter_min_width_enabled\\",\\"filter_max_width\\",\\"filter_max_width_enabled\\",\\"filter_min_height\\",\\"filter_min_height_enabled\\",\\"filter_max_height\\",\\"filter_max_height_enabled\\",\\"only_images_from_links\\",\\"show_download_confirmation\\",\\"show_download_notification\\",\\"show_file_renaming\\",\\"show_image_url\\",\\"show_open_image_button\\",\\"show_download_image_button\\",\\"columns\\",\\"image_min_width\\",\\"image_max_width\\"]",
+      "options": "[\\"folder_name\\",\\"new_file_name\\",\\"filter_url\\",\\"filter_url_mode\\",\\"filter_min_width\\",\\"filter_min_width_enabled\\",\\"filter_max_width\\",\\"filter_max_width_enabled\\",\\"filter_min_height\\",\\"filter_min_height_enabled\\",\\"filter_max_height\\",\\"filter_max_height_enabled\\",\\"only_images_from_links\\",\\"show_download_confirmation\\",\\"show_file_renaming\\",\\"show_image_url\\",\\"show_open_image_button\\",\\"show_download_image_button\\",\\"columns\\",\\"image_min_width\\",\\"image_max_width\\"]",
       "show_download_confirmation": "true",
       "show_download_confirmation_default": "true",
       "show_download_image_button": "true",
       "show_download_image_button_default": "true",
-      "show_download_notification": "true",
-      "show_download_notification_default": "true",
       "show_file_renaming": "true",
       "show_file_renaming_default": "true",
       "show_image_url": "true",

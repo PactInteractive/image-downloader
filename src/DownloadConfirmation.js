@@ -12,12 +12,12 @@ export const DownloadConfirmation = ({
     <div style=${{ gridColumn: '1 / -1', ...style }} ...${props}>
       <div>
         <hr />
-        Take a quick look at your browser settings.
-        <span class="danger">
-          If the <b>Ask where to save each file before downloading</b> option is
+        <p>Take a quick look at your browser settings.</p>
+        <p class="danger">
+         If the <b>Ask where to save each file before downloading</b> option is
           checked, proceeding might open a lot of popup windows. Continue with
           the download?
-        </span>
+        </p>
       </div>
 
       <div style=${{ display: 'flex', gap: '4px', alignItems: 'center' }}>
