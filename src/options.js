@@ -2,15 +2,15 @@ import html, { render, useState } from './html.js';
 import { Checkbox } from './Checkbox.js';
 import { SupportList } from './Support.js';
 
-const initialState = Object.keys(localStorage)
+const initialOptions = Object.keys(localStorage)
   .filter((key) => !key.endsWith('_default'))
-  .reduce((state, key) => ({ ...state, [key]: localStorage[key] }), {});
+  .reduce((options, key) => ({ ...options, [key]: localStorage[key] }), {});
 
-const defaultState = Object.keys(localStorage)
+const defaultOptions = Object.keys(localStorage)
   .filter((key) => key.endsWith('_default'))
   .reduce(
-    (state, key) => ({
-      ...state,
+    (options, key) => ({
+      ...options,
       [key.replace('_default', '')]: localStorage[key],
     }),
     {}
@@ -38,15 +38,29 @@ const useNotifications = (initialNotifications = []) => {
 };
 
 const Options = () => {
-  const [state, setState] = useState(initialState);
+  const [options, setOptions] = useState(initialOptions);
+
+  const setCheckboxOption = (key) => (e) => {
+    setOptions((state) => ({
+      ...state,
+      [key]: e.currentTarget.checked.toString(),
+    }));
+  };
+
+  const setValueOption = (key) => (e) => {
+    setOptions((state) => ({
+      ...state,
+      [key]: e.currentTarget.value,
+    }));
+  };
 
   function saveOptions() {
-    Object.assign(localStorage, state);
+    Object.assign(localStorage, options);
     addNotification('success', 'Options saved');
   }
 
   function resetOptions() {
-    setState(defaultState);
+    setOptions(defaultOptions);
     addNotification(
       'accent',
       'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.'
@@ -82,13 +96,8 @@ const Options = () => {
       <${Checkbox}
         id="show_download_confirmation_checkbox"
         title="Requires confirmation when you press the Download button"
-        checked="${state.show_download_confirmation === 'true'}"
-        onChange=${(e) => {
-          setState((state) => ({
-            ...state,
-            show_download_confirmation: e.currentTarget.checked.toString(),
-          }));
-        }}
+        checked="${options.show_download_confirmation === 'true'}"
+        onChange=${setCheckboxOption('show_download_confirmation')}
       >
         <span>Show download confirmation</span>
       <//>
@@ -97,13 +106,8 @@ const Options = () => {
       <${Checkbox}
         id="show_download_notification_checkbox"
         title="Flashes a message to let you know your download is starting"
-        checked="${state.show_download_notification === 'true'}"
-        onChange=${(e) => {
-          setState((state) => ({
-            ...state,
-            show_download_notification: e.currentTarget.checked.toString(),
-          }));
-        }}
+        checked="${options.show_download_notification === 'true'}"
+        onChange=${setCheckboxOption('show_download_notification')}
       >
         <span>Show <b>downloading</b> message</span>
       <//>
@@ -112,13 +116,8 @@ const Options = () => {
       <${Checkbox}
         id="show_file_renaming_checkbox"
         title="Lets you specify a new file name for downloaded files"
-        checked="${state.show_file_renaming === 'true'}"
-        onChange=${(e) => {
-          setState((state) => ({
-            ...state,
-            show_file_renaming: e.currentTarget.checked.toString(),
-          }));
-        }}
+        checked="${options.show_file_renaming === 'true'}"
+        onChange=${setCheckboxOption('show_file_renaming')}
       >
         <span>Show file renaming textbox</span>
       <//>
@@ -130,13 +129,8 @@ const Options = () => {
       <${Checkbox}
         id="show_image_url_checkbox"
         title="Displays the URL above each image"
-        checked="${state.show_image_url === 'true'}"
-        onChange=${(e) => {
-          setState((state) => ({
-            ...state,
-            show_image_url: e.currentTarget.checked.toString(),
-          }));
-        }}
+        checked="${options.show_image_url === 'true'}"
+        onChange=${setCheckboxOption('show_image_url')}
       >
         <span>Show the <b>URL</b> on hover</span>
       <//>
@@ -145,13 +139,8 @@ const Options = () => {
       <${Checkbox}
         id="show_open_image_button_checkbox"
         title="Displays a button next to each image to open it in a new tab"
-        checked="${state.show_open_image_button === 'true'}"
-        onChange=${(e) => {
-          setState((state) => ({
-            ...state,
-            show_open_image_button: e.currentTarget.checked.toString(),
-          }));
-        }}
+        checked="${options.show_open_image_button === 'true'}"
+        onChange=${setCheckboxOption('show_open_image_button')}
       >
         <span>Show the <b>Open</b> button on hover</span>
       <//>
@@ -160,13 +149,8 @@ const Options = () => {
       <${Checkbox}
         id="show_download_image_button_checkbox"
         title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
-        checked="${state.show_download_image_button === 'true'}"
-        onChange=${(e) => {
-          setState((state) => ({
-            ...state,
-            show_download_image_button: e.currentTarget.checked.toString(),
-          }));
-        }}
+        checked="${options.show_download_image_button === 'true'}"
+        onChange=${setCheckboxOption('show_download_image_button')}
       >
         <span>Show the <b>Download</b> button on hover</span>
       <//>
@@ -181,13 +165,8 @@ const Options = () => {
               required
               min="1"
               max="10"
-              value="${state.columns}"
-              onChange=${(e) => {
-                setState((state) => ({
-                  ...state,
-                  columns: e.currentTarget.value,
-                }));
-              }}
+              value="${options.columns}"
+              onChange=${setValueOption('columns')}
             />
           </td>
         </tr>
@@ -207,13 +186,8 @@ const Options = () => {
               required
               min="0"
               max="720"
-              value="${state.image_min_width}"
-              onChange=${(e) => {
-                setState((state) => ({
-                  ...state,
-                  image_min_width: e.currentTarget.value,
-                }));
-              }}
+              value="${options.image_min_width}"
+              onChange=${setValueOption('image_min_width')}
             />px
           </td>
         </tr>
@@ -233,13 +207,8 @@ const Options = () => {
               required
               min="30"
               max="720"
-              value="${state.image_max_width}"
-              onChange=${(e) => {
-                setState((state) => ({
-                  ...state,
-                  image_max_width: e.currentTarget.value,
-                }));
-              }}
+              value="${options.image_max_width}"
+              onChange=${setValueOption('image_max_width')}
             />px
           </td>
         </tr>
