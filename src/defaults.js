@@ -55,5 +55,6 @@
     ls[`${option}_default`] = defaults[option];
   });
 
+  // TODO: Remove if not needed
   ls.options = JSON.stringify(Object.keys(defaults));
 })(localStorage);
