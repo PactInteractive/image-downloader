@@ -17,32 +17,6 @@ const initialOptions = localStorage;
 const ls = localStorage; // TODO: Remove
 
 // TODO: Implement
-function suggestNewFilename(item, suggest) {
-  let newFilename = '';
-  if (ls.folder_name) {
-    newFilename = `${ls.folder_name}/`;
-  }
-  if (ls.new_file_name) {
-    const regex = /(?:\.([^.]+))?$/;
-    const extension = regex.exec(item.filename)[1];
-    if (parseInt(ls.image_count, 10) === 1) {
-      newFilename += `${ls.new_file_name}.${extension}`;
-    } else {
-      const numberOfDigits = Math.floor(1 + Math.log10(ls.image_count));
-      const formattedImageNumber = `${ls.image_number}`.padStart(
-        numberOfDigits,
-        '0'
-      );
-      newFilename += `${ls.new_file_name}${formattedImageNumber}.${extension}`;
-      ls.image_number++;
-    }
-  } else {
-    newFilename += item.filename;
-  }
-  suggest({ filename: newFilename });
-}
-
-// TODO: Implement
 function flashDownloadingNotification(imageCount) {
   if (ls.show_download_notification !== 'true') return;
 
@@ -116,8 +90,6 @@ const Popup = () => {
         }
       );
     });
-
-    chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
   }, []);
 
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
@@ -192,6 +164,7 @@ const Popup = () => {
 
   useEffect(filterImages, [allImages, linkedImages]);
 
+  // TODO: Disable Download button while download is ongoing
   const imagesToDownload = useMemo(
     () => visibleImages.filter(isIncludedIn(selectedImages)),
     [visibleImages, selectedImages]
@@ -210,16 +183,47 @@ const Popup = () => {
     }
 
     async function startDownload(images) {
-      // TODO: Replace with internal state
-      ls.image_count = images.length;
-      ls.image_number = 1;
+      // flashDownloadingNotification(images.length);
 
-      // flashDownloadingNotification(ls.image_count);
+      let currentImageNumber = 1;
+      chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 
       for (const image of images) {
         await new Promise((resolve) => {
           chrome.downloads.download({ url: image }, resolve);
         });
+      }
+
+      // TODO: The listener is being removed prematurely - find a cleaner way to fix the race condition
+      setTimeout(() => {
+        chrome.downloads.onDeterminingFilename.removeListener(
+          suggestNewFilename
+        );
+      }, 200);
+
+      function suggestNewFilename(item, suggest) {
+        let newFilename = '';
+        if (options.folder_name) {
+          newFilename += `${options.folder_name}/`;
+        }
+        if (options.new_file_name) {
+          const regex = /(?:\.([^.]+))?$/;
+          const extension = regex.exec(item.filename)[1];
+          if (images.length === 1) {
+            newFilename += `${options.new_file_name}.${extension}`;
+          } else {
+            const numberOfDigits = images.length.toString().length;
+            const formattedImageNumber = `${currentImageNumber}`.padStart(
+              numberOfDigits,
+              '0'
+            );
+            newFilename += `${options.new_file_name}${formattedImageNumber}.${extension}`;
+            currentImageNumber += 1;
+          }
+        } else {
+          newFilename += item.filename;
+        }
+        suggest({ filename: newFilename });
       }
     }
   }
