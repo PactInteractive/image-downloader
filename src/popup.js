@@ -7,16 +7,16 @@ import html, {
   useState,
 } from './html.js';
 
-import { Checkbox } from './components/Checkbox.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
+import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { Images } from './Images.js';
+import { UrlFilterMode } from './UrlFilterMode.js';
+import { isIncludedIn } from './utils.js';
 
 const initialOptions = localStorage;
 const ls = localStorage; // TODO: Remove
-const allImages = []; // TODO: Remove
-const visibleImages = []; // TODO: Remove
-const linkedImages = {}; // TODO: Remove
 
+// TODO: Implement
 function suggestNewFilename(item, suggest) {
   let newFilename = '';
   if (ls.folder_name) {
@@ -42,89 +42,7 @@ function suggestNewFilename(item, suggest) {
   suggest({ filename: newFilename });
 }
 
-function downloadImages() {
-  if (ls.show_download_confirmation === 'true') {
-    showDownloadConfirmation(startDownload);
-  } else {
-    startDownload();
-  }
-
-  async function startDownload() {
-    const checkedImages = visibleImages.filter((image, index) => {
-      return $(`#card_${index}`).hasClass('checked');
-    });
-
-    ls.image_count = checkedImages.length;
-    ls.image_number = 1;
-
-    flashDownloadingNotification(ls.image_count);
-
-    for (const image of checkedImages) {
-      await new Promise((resolve) => {
-        chrome.downloads.download({ url: image }, resolve);
-      });
-    }
-  }
-}
-
-function showDownloadConfirmation(startDownload) {
-  const saveDontShowAgainState = () => {
-    ls.show_download_confirmation = !$('#dont_show_again_checkbox').prop(
-      'checked'
-    );
-  };
-
-  const removeNotificationContainer = () => {
-    notification_container.remove();
-  };
-
-  const notification_container = html`
-    <div style=${{ gridColumn: '1 / -1' }}>
-      <div>
-        <hr />
-        Take a quick look at your browser settings and search for
-        <b> download location</b>.
-        <span class="danger">
-          If the <b>Ask where to save each file before downloading</b> option is
-          checked, proceeding might open a lot of popup windows. Proceed with
-          the download?
-        </span>
-      </div>
-
-      <div style=${{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-        <div style=${{ marginRight: 'auto' }}>
-          <${Checkbox} id="dont_show_again_checkbox">
-            Got it, don't show again
-          <//>
-        </div>
-
-        <input
-          type="button"
-          class="neutral ghost"
-          value="Cancel"
-          onClick=${() => {
-            saveDontShowAgainState();
-            removeNotificationContainer();
-          }}
-        />
-
-        <input
-          type="button"
-          class="success"
-          value="Yes, Download"
-          onClick=${() => {
-            saveDontShowAgainState();
-            removeNotificationContainer();
-            startDownload();
-          }}
-        />
-      </div>
-    </div>
-  `;
-
-  $('#downloads_container').append(notification_container);
-}
-
+// TODO: Implement
 function flashDownloadingNotification(imageCount) {
   if (ls.show_download_notification !== 'true') return;
 
@@ -141,6 +59,7 @@ function flashDownloadingNotification(imageCount) {
   });
 }
 
+// TODO: Implement
 function flash(element, flashes, interval, callback) {
   if (!interval) interval = parseInt(ls.animation_duration, 10);
 
@@ -168,7 +87,7 @@ const Popup = () => {
 
   const [allImages, setAllImages] = useState([]);
   const [linkedImages, setLinkedImages] = useState({});
-  const [selectedImages, setSelectedImages] = useState([]); // TODO: Use
+  const [selectedImages, setSelectedImages] = useState([]);
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
     // Add images to state and trigger filtration.
@@ -184,6 +103,21 @@ const Popup = () => {
         ...result.images.filter((image) => !allImages.includes(image)),
       ]);
     });
+
+    // Get images on the page
+    chrome.windows.getCurrent((currentWindow) => {
+      chrome.tabs.query(
+        { active: true, windowId: currentWindow.id },
+        (activeTabs) => {
+          chrome.tabs.executeScript(activeTabs[0].id, {
+            file: '/src/send_images.js',
+            allFrames: true,
+          });
+        }
+      );
+    });
+
+    chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
   }, []);
 
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
@@ -224,7 +158,7 @@ const Popup = () => {
           visibleImages = visibleImages.filter((url) => {
             try {
               return url.match(filterValue);
-            } catch (e) {
+            } catch (error) {
               return false;
             }
           });
@@ -258,13 +192,37 @@ const Popup = () => {
 
   useEffect(filterImages, [allImages, linkedImages]);
 
-  const anyImagesCanBeDownloaded = useMemo(() => {
-    return (
-      visibleImages.length > 0 &&
-      selectedImages.length > 0 &&
-      visibleImages.some((imageUrl) => selectedImages.includes(imageUrl))
-    );
-  }, [visibleImages, selectedImages]);
+  const imagesToDownload = useMemo(
+    () => visibleImages.filter(isIncludedIn(selectedImages)),
+    [visibleImages, selectedImages]
+  );
+
+  const [
+    isDownloadConfirmationShown,
+    setIsDownloadConfirmationShown,
+  ] = useState(false);
+
+  function downloadImages() {
+    if (options.show_download_confirmation === 'true') {
+      setIsDownloadConfirmationShown(true);
+    } else {
+      startDownload(imagesToDownload);
+    }
+
+    async function startDownload(images) {
+      // TODO: Replace with internal state
+      ls.image_count = images.length;
+      ls.image_number = 1;
+
+      // flashDownloadingNotification(ls.image_count);
+
+      for (const image of images) {
+        await new Promise((resolve) => {
+          chrome.downloads.download({ url: image }, resolve);
+        });
+      }
+    }
+  }
 
   return html`
     <div id="filters_container">
@@ -276,74 +234,23 @@ const Popup = () => {
           title="Filter by parts of the URL or regular expressions."
           value=${options.filter_url}
           style=${{ flex: '1' }}
-          onChange=${(e) => {
-            setOptions((options) => ({
-              ...options,
-              filter_url: $.trim(e.currentTarget.value),
-            }));
+          onChange=${({ currentTarget: { value } }) => {
+            setOptions((options) => ({ ...options, filter_url: value.trim() }));
           }}
         />
 
-        <select
+        <${UrlFilterMode}
           value=${options.filter_url_mode}
-          onChange=${(e) => {
-            setOptions((options) => ({
-              ...options,
-              filter_url_mode: e.currentTarget.value,
-            }));
+          onChange=${({ currentTarget: { value } }) => {
+            setOptions((options) => ({ ...options, filter_url_mode: value }));
           }}
-        >
-          <option value="normal" title="A plain text search">
-            Normal
-          </option>
-
-          <option
-            value="wildcard"
-            title="You can also use these special symbols:
-* → zero or more characters
-? → zero or one character
-+ → one or more characters"
-          >
-            Wildcard
-          </option>
-
-          <option
-            value="regex"
-            title=${`Regular expressions (advanced):
-[abc] → A single character of: a, b or c
-[^abc] → Any single character except: a, b, or c
-[a-z] → Any single character in the range a-z
-[a-zA-Z] → Any single character in the range a-z or A-Z
-^ → Start of line
-$ → End of line
-A → Start of string
-z → End of string
-. → Any single character
-s → Any whitespace character
-S → Any non-whitespace character
-d → Any digit
-D → Any non-digit
-w → Any word character (letter, number, underscore)
-W → Any non-word character
- → Any word boundary character
-(...) → Capture everything enclosed
-(a|b) → a or b
-a? → Zero or one of a
-a* → Zero or more of a
-a+ → One or more of a
-a{3} → Exactly 3 of a
-a{3,} → 3 or more of a
-a{3,6} → Between 3 and 6 of a`}
-          >
-            Regex
-          </option>
-        </select>
+        />
 
         <button
           id="toggle_advanced_filters_button"
           class=${options.show_advanced_filters === 'true' ? '' : 'collapsed'}
           title="Advanced filters"
-          onClick=${(e) => {
+          onClick=${() => {
             setOptions((options) => ({
               ...options,
               show_advanced_filters:
@@ -393,11 +300,8 @@ a{3,6} → Between 3 and 6 of a`}
         placeholder="Save to subfolder"
         title="Set the name of the subfolder you want to download the images to."
         value=${options.folder_name}
-        onChange=${(e) => {
-          setOptions((options) => ({
-            ...options,
-            folder_name: $.trim(e.currentTarget.value),
-          }));
+        onChange=${({ currentTarget: { value } }) => {
+          setOptions((options) => ({ ...options, folder_name: value.trim() }));
         }}
       />
 
@@ -408,10 +312,10 @@ a{3,6} → Between 3 and 6 of a`}
           placeholder="Rename files"
           title="Set a new file name for the images you want to download."
           value=${options.new_file_name}
-          onChange=${(e) => {
+          onChange=${({ currentTarget: { value } }) => {
             setOptions((options) => ({
               ...options,
-              new_file_name: $.trim(e.currentTarget.value),
+              new_file_name: value.trim(),
             }));
           }}
         />
@@ -422,26 +326,23 @@ a{3,6} → Between 3 and 6 of a`}
         id="download_button"
         class="accent"
         value="Download"
-        disabled=${!anyImagesCanBeDownloaded}
+        disabled=${imagesToDownload.length === 0}
         onClick=${downloadImages}
       />
+
+      ${isDownloadConfirmationShown &&
+      html`<${DownloadConfirmation}
+        onCheckboxChange=${({ currentTarget: { checked } }) => {
+          setOptions((options) => ({
+            ...options,
+            show_download_confirmation: checked.toString(),
+          }));
+        }}
+        onClose=${() => setIsDownloadConfirmationShown(false)}
+        onConfirm=${() => startDownload(imagesToDownload)}
+      />`}
     </div>
   `;
 };
 
 render(html`<${Popup} />`, document.querySelector('main'));
-
-chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
-
-// Get images on the page
-chrome.windows.getCurrent((currentWindow) => {
-  chrome.tabs.query(
-    { active: true, windowId: currentWindow.id },
-    (activeTabs) => {
-      chrome.tabs.executeScript(activeTabs[0].id, {
-        file: '/src/send_images.js',
-        allFrames: true,
-      });
-    }
-  );
-});

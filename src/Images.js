@@ -27,16 +27,16 @@ export const Images = ({
     };
   }, [options.columns, options.image_max_width, style]);
 
-  const show_image_url = useMemo(() => options.show_image_url === 'true', [
+  const showImageUrl = useMemo(() => options.show_image_url === 'true', [
     options.show_image_url,
   ]);
 
-  const show_open_image_button = useMemo(
+  const showOpenImageButton = useMemo(
     () => options.show_open_image_button === 'true',
     [options.show_open_image_button]
   );
 
-  const show_download_image_button = useMemo(
+  const showDownloadImageButton = useMemo(
     () => options.show_download_image_button === 'true',
     [options.show_download_image_button]
   );
@@ -61,8 +61,8 @@ export const Images = ({
         <${Checkbox}
           checked=${allImagesAreSelected}
           indeterminate=${someImagesAreSelected && !allImagesAreSelected}
-          onChange=${(e) => {
-            setSelectedImages(e.currentTarget.checked ? visibleImages : []);
+          onChange=${({ currentTarget: { checked } }) => {
+            setSelectedImages(checked ? visibleImages : []);
           }}
         >
           Select all (${visibleImages.length})
@@ -75,7 +75,7 @@ export const Images = ({
             id=${`card_${index}`}
             class="card ${selectedImages.includes(imageUrl) ? 'checked' : ''}"
             style=${{ minHeight: `${options.image_max_width}px` }}
-            onClick=${(e) => {
+            onClick=${() => {
               setSelectedImages((selectedImages) =>
                 selectedImages.includes(imageUrl)
                   ? selectedImages.filter(isNotStrictEqual(imageUrl))
@@ -93,20 +93,20 @@ export const Images = ({
 
             <div class="checkbox"></div>
 
-            ${(show_open_image_button || show_download_image_button) &&
+            ${(showOpenImageButton || showDownloadImageButton) &&
             html`<div class="actions">
-              ${show_open_image_button &&
+              ${showOpenImageButton &&
               html`<${OpenImageButton}
                 imageUrl=${imageUrl}
                 onClick=${stopPropagation}
               />`}
-              ${show_download_image_button &&
+              ${showDownloadImageButton &&
               html`<${DownloadImageButton}
                 imageUrl=${imageUrl}
                 onClick=${stopPropagation}
               />`}
             </div>`}
-            ${show_image_url &&
+            ${showImageUrl &&
             html`<div class="image_url_container">
               <${ImageUrlTextbox}
                 value=${imageUrl}
