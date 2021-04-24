@@ -133,6 +133,10 @@ legend {
   clear: both;
 }
 
+.hidden {
+  display: none;
+}
+
 /* text */
 .accent {
   color: var(--accent);
@@ -226,6 +230,9 @@ input[type='button'] {
 input[type='button']:disabled {
   cursor: not-allowed;
   opacity: 0.6;
+}
+input[type='button'].loading:disabled {
+  cursor: wait;
 }
 
 /* accent */

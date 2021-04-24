@@ -1,17 +1,81 @@
-import html from './html.js';
-import { Checkbox } from './Checkbox.js';
+import html, { render, useState } from './html.js';
+
+import { Checkbox } from './components/Checkbox.js';
 import { SupportList } from './Support.js';
+import { isNotStrictEqual } from './utils.js';
 
-let state = Object.keys(localStorage).reduce(
-  (newState, key) =>
-    key.endsWith('_default')
-      ? newState
-      : { ...newState, [key]: localStorage[key] },
-  {}
-);
+const initialOptions = Object.keys(localStorage)
+  .filter((key) => !key.endsWith('_default'))
+  .reduce((options, key) => ({ ...options, [key]: localStorage[key] }), {});
 
-function render() {
-  $('main').html(html`
+const defaultOptions = Object.keys(localStorage)
+  .filter((key) => key.endsWith('_default'))
+  .reduce(
+    (options, key) => ({
+      ...options,
+      [key.replace('_default', '')]: localStorage[key],
+    }),
+    {}
+  );
+
+const useNotifications = (initialNotifications = []) => {
+  const [notifications, setNotifications] = useState(initialNotifications);
+
+  function addNotification(type, message) {
+    setNotifications((notifications) => {
+      const notification = { message, type };
+      const removeNotificationAfterMs = 10_000;
+
+      setTimeout(() => {
+        setNotifications((notifications) =>
+          notifications.filter(isNotStrictEqual(notification))
+        );
+      }, removeNotificationAfterMs);
+
+      return [notification, ...notifications];
+    });
+  }
+
+  return { notifications, addNotification };
+};
+
+const Options = () => {
+  const [options, setOptions] = useState(initialOptions);
+
+  const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
+    setOptions((options) => ({ ...options, [key]: checked.toString() }));
+  };
+
+  const setValueOption = (key) => ({ currentTarget: { value } }) => {
+    setOptions((state) => ({ ...state, [key]: value }));
+  };
+
+  function saveOptions() {
+    Object.assign(localStorage, options);
+    addNotification('success', 'Options saved');
+  }
+
+  function resetOptions() {
+    setOptions(defaultOptions);
+    addNotification(
+      'accent',
+      'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.'
+    );
+  }
+
+  function clearData() {
+    const userHasConfirmed = window.confirm(
+      'This will delete all extension data related to filters, options, and the name of the default folder where files are saved. Continue?'
+    );
+    if (userHasConfirmed) {
+      localStorage.clear();
+      window.location.reload();
+    }
+  }
+
+  const { notifications, addNotification } = useNotifications();
+
+  return html`
     <h1>
       <img src="/images/icon_128.png" />
       Image Downloader
@@ -28,34 +92,18 @@ function render() {
       <${Checkbox}
         id="show_download_confirmation_checkbox"
         title="Requires confirmation when you press the Download button"
-        checked="${state.show_download_confirmation === 'true'}"
-        onChange=${(e) => {
-          state.show_download_confirmation = e.currentTarget.checked.toString();
-        }}
+        checked="${options.show_download_confirmation === 'true'}"
+        onChange=${setCheckboxOption('show_download_confirmation')}
       >
         <span>Show download confirmation</span>
       <//>
 
       <br />
       <${Checkbox}
-        id="show_download_notification_checkbox"
-        title="Flashes a message to let you know your download is starting"
-        checked="${state.show_download_notification === 'true'}"
-        onChange=${(e) => {
-          state.show_download_notification = e.currentTarget.checked.toString();
-        }}
-      >
-        <span>Show <b>downloading</b> message</span>
-      <//>
-
-      <br />
-      <${Checkbox}
         id="show_file_renaming_checkbox"
         title="Lets you specify a new file name for downloaded files"
-        checked="${state.show_file_renaming === 'true'}"
-        onChange=${(e) => {
-          state.show_file_renaming = e.currentTarget.checked.toString();
-        }}
+        checked="${options.show_file_renaming === 'true'}"
+        onChange=${setCheckboxOption('show_file_renaming')}
       >
         <span>Show file renaming textbox</span>
       <//>
@@ -67,10 +115,8 @@ function render() {
       <${Checkbox}
         id="show_image_url_checkbox"
         title="Displays the URL above each image"
-        checked="${state.show_image_url === 'true'}"
-        onChange=${(e) => {
-          state.show_image_url = e.currentTarget.checked.toString();
-        }}
+        checked="${options.show_image_url === 'true'}"
+        onChange=${setCheckboxOption('show_image_url')}
       >
         <span>Show the <b>URL</b> on hover</span>
       <//>
@@ -79,10 +125,8 @@ function render() {
       <${Checkbox}
         id="show_open_image_button_checkbox"
         title="Displays a button next to each image to open it in a new tab"
-        checked="${state.show_open_image_button === 'true'}"
-        onChange=${(e) => {
-          state.show_open_image_button = e.currentTarget.checked.toString();
-        }}
+        checked="${options.show_open_image_button === 'true'}"
+        onChange=${setCheckboxOption('show_open_image_button')}
       >
         <span>Show the <b>Open</b> button on hover</span>
       <//>
@@ -91,10 +135,8 @@ function render() {
       <${Checkbox}
         id="show_download_image_button_checkbox"
         title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
-        checked="${state.show_download_image_button === 'true'}"
-        onChange=${(e) => {
-          state.show_download_image_button = e.currentTarget.checked.toString();
-        }}
+        checked="${options.show_download_image_button === 'true'}"
+        onChange=${setCheckboxOption('show_download_image_button')}
       >
         <span>Show the <b>Download</b> button on hover</span>
       <//>
@@ -109,10 +151,8 @@ function render() {
               required
               min="1"
               max="10"
-              value="${state.columns}"
-              onChange=${(e) => {
-                state.columns = e.currentTarget.value;
-              }}
+              value="${options.columns}"
+              onChange=${setValueOption('columns')}
             />
           </td>
         </tr>
@@ -132,10 +172,8 @@ function render() {
               required
               min="0"
               max="720"
-              value="${state.image_min_width}"
-              onChange=${(e) => {
-                state.image_min_width = e.currentTarget.value;
-              }}
+              value="${options.image_min_width}"
+              onChange=${setValueOption('image_min_width')}
             />px
           </td>
         </tr>
@@ -155,10 +193,8 @@ function render() {
               required
               min="30"
               max="720"
-              value="${state.image_max_width}"
-              onChange=${(e) => {
-                state.image_max_width = e.currentTarget.value;
-              }}
+              value="${options.image_max_width}"
+              onChange=${setValueOption('image_max_width')}
             />px
           </td>
         </tr>
@@ -195,53 +231,17 @@ function render() {
       />
     </div>
 
-    <div id="notifications"></div>
-  `);
-}
+    <!-- TODO: Animate -->
+    <div id="notifications">
+      ${notifications.map(
+        (notification) => html`
+          <div class="notification ${`bg-${notification.type}`} inverse">
+            ${notification.message}
+          </div>
+        `
+      )}
+    </div>
+  `;
+};
 
-function saveOptions() {
-  Object.assign(localStorage, state);
-  addNotification('Options saved', 'bg-success inverse');
-}
-
-function resetOptions() {
-  const options = JSON.parse(localStorage.options);
-  state = options.reduce(
-    (newState, key) => ({ ...newState, [key]: localStorage[`${key}_default`] }),
-    {}
-  );
-  render();
-  addNotification(
-    'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.',
-    'bg-accent inverse'
-  );
-}
-
-function clearData() {
-  const userHasConfirmed = window.confirm(
-    'This will delete all extension data related to filters, options, and the name of the default folder where files are saved. Continue?'
-  );
-  if (userHasConfirmed) {
-    localStorage.clear();
-    window.location.reload();
-  }
-}
-
-function addNotification(message, cssClass) {
-  const animation_duration = parseInt(localStorage.animation_duration, 10);
-  // TODO: Figure out how to animate and move to state
-  const container = $('<div class="notification"></div>')
-    .prependTo('#notifications')
-    .toggle(false)
-    .html(message)
-    .addClass(cssClass)
-    .fadeIn(animation_duration, () => {
-      setTimeout(() => {
-        container.fadeOut(animation_duration, () => {
-          container.remove();
-        });
-      }, 10_000);
-    });
-}
-
-render();
+render(html`<${Options} />`, document.querySelector('main'));

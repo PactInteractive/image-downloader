@@ -1,3 +1,4 @@
+// TODO: Rename to avoid potential conflict with `utils.js`
 import { mockRecursivePartial } from 'sneer';
 
 export const mockChrome = () =>

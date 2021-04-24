@@ -15,9 +15,6 @@
     }
   });
 
-  // Global
-  ls.animation_duration = '500';
-
   // Popup
   const defaults = {
     // Filters
@@ -37,7 +34,6 @@
     // Options
     // General
     show_download_confirmation: true,
-    show_download_notification: true,
     show_file_renaming: true,
     // Images
     show_image_url: true,
@@ -54,6 +50,4 @@
     }
     ls[`${option}_default`] = defaults[option];
   });
-
-  ls.options = JSON.stringify(Object.keys(defaults));
 })(localStorage);
