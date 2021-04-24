@@ -6,9 +6,8 @@ import {
   ImageUrlTextbox,
   OpenImageButton,
 } from './ImageActions.js';
-import { isNotStrictEqual, stopPropagation } from './utils.js';
+import { isIncludedIn, isNotStrictEqual, stopPropagation } from './utils.js';
 
-// TODO: Disable Download button based on how many images are selected
 export const Images = ({
   options,
   visibleImages,
@@ -42,29 +41,29 @@ export const Images = ({
     [options.show_download_image_button]
   );
 
-  const { allImagesAreSelected, allImagesAreUnselected } = useMemo(() => {
-    let allImagesAreSelected = visibleImages.length > 0;
-    let allImagesAreUnselected = true;
-    for (const imageUrl of visibleImages) {
-      if (selectedImages.includes(imageUrl)) {
-        allImagesAreUnselected = false;
-      } else {
-        allImagesAreSelected = false;
-      }
-      // Exit the loop early
-      if (!(allImagesAreSelected || allImagesAreUnselected)) break;
-    }
+  const someImagesAreSelected = useMemo(
+    () =>
+      visibleImages.length > 0 &&
+      visibleImages.some(isIncludedIn(selectedImages)),
+    [visibleImages, selectedImages]
+  );
 
-    return { allImagesAreSelected, allImagesAreUnselected };
-  }, [visibleImages, selectedImages]);
+  const allImagesAreSelected = useMemo(
+    () =>
+      visibleImages.length > 0 &&
+      visibleImages.every(isIncludedIn(selectedImages)),
+    [visibleImages, selectedImages]
+  );
 
   return html`
     <div id="images_container" style=${containerStyle} ...${props}>
       <div style=${{ gridColumn: '1 / -1', fontWeight: 'bold' }}>
         <${Checkbox}
           checked=${allImagesAreSelected}
-          indeterminate=${!(allImagesAreSelected || allImagesAreUnselected)}
-          onChange=${() => setSelectedImages(visibleImages)}
+          indeterminate=${someImagesAreSelected && !allImagesAreSelected}
+          onChange=${(e) => {
+            setSelectedImages(e.currentTarget.checked ? visibleImages : []);
+          }}
         >
           Select all (${visibleImages.length})
         <//>
