@@ -1,30 +1,21 @@
-import html, { render, useEffect, useState } from './html.js';
+import html, {
+  render,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from './html.js';
+
 import { Checkbox } from './components/Checkbox.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
-import {
-  DownloadImageButton,
-  ImageUrlTextbox,
-  OpenImageButton,
-} from './ImageActions.js';
+import { Images } from './Images.js';
 
 const initialOptions = localStorage;
 const ls = localStorage; // TODO: Remove
-
-const allImages = [];
-let visibleImages = [];
-const linkedImages = {};
-
-// Add images to `allImages` and trigger filtration
-// `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times
-chrome.runtime.onMessage.addListener((result) => {
-  Object.assign(linkedImages, result.linkedImages);
-  result.images.forEach((image) => {
-    if (!allImages.includes(image)) {
-      allImages.push(image);
-    }
-  });
-  filterImages();
-});
+const allImages = []; // TODO: Remove
+const visibleImages = []; // TODO: Remove
+const linkedImages = {}; // TODO: Remove
 
 function suggestNewFilename(item, suggest) {
   let newFilename = '';
@@ -49,207 +40,6 @@ function suggestNewFilename(item, suggest) {
     newFilename += item.filename;
   }
   suggest({ filename: newFilename });
-}
-
-// TODO: Use debounce
-let filterImagesTimeoutId;
-function filterImages() {
-  clearTimeout(filterImagesTimeoutId); // Cancel pending filtration
-  filterImagesTimeoutId = setTimeout(() => {
-    const images_cache = $('#images_cache');
-    const numberOfCachedImages = images_cache.children().length;
-    if (numberOfCachedImages < allImages.length) {
-      for (
-        let index = numberOfCachedImages;
-        index < allImages.length;
-        index++
-      ) {
-        // Refilter the images after they're loaded in cache
-        images_cache.append(
-          html`
-            <img src=${encodeURI(allImages[index])} onLoad=${filterImages} />
-          `
-        );
-      }
-    }
-
-    // Copy all images initially
-    visibleImages = allImages.slice(0);
-
-    let filterValue = $('#filter_textbox').val();
-    if (filterValue) {
-      switch (ls.filter_url_mode) {
-        case 'normal':
-          const terms = filterValue.split(/\s+/);
-          visibleImages = visibleImages.filter((url) => {
-            for (let index = 0; index < terms.length; index++) {
-              let term = terms[index];
-              if (term.length !== 0) {
-                const expected = term[0] !== '-';
-                if (!expected) {
-                  term = term.substr(1);
-                  if (term.length === 0) {
-                    continue;
-                  }
-                }
-                const found = url.indexOf(term) !== -1;
-                if (found !== expected) {
-                  return false;
-                }
-              }
-            }
-            return true;
-          });
-          break;
-        case 'wildcard':
-          filterValue = filterValue
-            .replace(/([.^$[\]\\(){}|-])/g, '\\$1')
-            .replace(/([?*+])/, '.$1');
-        /* fall through */
-        case 'regex':
-          visibleImages = visibleImages.filter((url) => {
-            try {
-              return url.match(filterValue);
-            } catch (e) {
-              return false;
-            }
-          });
-          break;
-      }
-    }
-
-    if (ls.only_images_from_links === 'true') {
-      visibleImages = visibleImages.filter((url) => linkedImages[url]);
-    }
-
-    visibleImages = visibleImages.filter((url) => {
-      const image = images_cache.children(`img[src="${encodeURI(url)}"]`)[0];
-
-      if (!image) return false; // TODO: Remove after rewriting
-
-      return (
-        (ls.filter_min_width_enabled !== 'true' ||
-          ls.filter_min_width <= image.naturalWidth) &&
-        (ls.filter_max_width_enabled !== 'true' ||
-          image.naturalWidth <= ls.filter_max_width) &&
-        (ls.filter_min_height_enabled !== 'true' ||
-          ls.filter_min_height <= image.naturalHeight) &&
-        (ls.filter_max_height_enabled !== 'true' ||
-          image.naturalHeight <= ls.filter_max_height)
-      );
-    });
-
-    displayImages();
-  }, 200);
-}
-
-function displayImages() {
-  $('#download_button').prop('disabled', true);
-
-  const imagesContainer = $('#images_container');
-  imagesContainer.empty();
-
-  const columns = parseInt(ls.columns, 10);
-  imagesContainer.css({
-    gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-    width: `calc(2 * var(--images-container-padding) + ${columns} * ${
-      ls.image_max_width
-    }px + ${columns - 1} * var(--images-container-gap))`,
-  });
-
-  const selectAllCheckbox = html`
-    <div style=${{ gridColumn: '1 / -1', fontWeight: 'bold' }}>
-      <${Checkbox}
-        id="select_all_checkbox"
-        onChange=${(e) => {
-          $('#download_button').prop('disabled', !e.currentTarget.checked);
-          for (let index = 0; index < visibleImages.length; index++) {
-            $(`#card_${index}`).toggleClass('checked', e.currentTarget.checked);
-          }
-        }}
-      >
-        Select all (${visibleImages.length})
-      <//>
-    </div>
-  `;
-  imagesContainer.append(selectAllCheckbox);
-
-  // Actions
-  const show_image_url = ls.show_image_url === 'true';
-  const show_open_image_button = ls.show_open_image_button === 'true';
-  const show_download_image_button = ls.show_download_image_button === 'true';
-
-  // Images
-  visibleImages.forEach((imageUrl, index) => {
-    const image = html`
-      <div
-        id=${`card_${index}`}
-        class="card"
-        style=${{ minHeight: `${ls.image_max_width}px` }}
-        onClick=${(e) => {
-          $(e.currentTarget).toggleClass(
-            'checked',
-            !$(e.currentTarget).hasClass('checked')
-          );
-
-          let allAreChecked = true;
-          let allAreUnchecked = true;
-          for (let index = 0; index < visibleImages.length; index++) {
-            if ($(`#card_${index}`).hasClass('checked')) {
-              allAreUnchecked = false;
-            } else {
-              allAreChecked = false;
-            }
-            // Exit the loop early
-            if (!(allAreChecked || allAreUnchecked)) break;
-          }
-
-          $('#download_button').prop('disabled', allAreUnchecked);
-
-          const select_all_checkbox = $('#select_all_checkbox');
-          select_all_checkbox.prop(
-            'indeterminate',
-            !(allAreChecked || allAreUnchecked)
-          );
-          if (allAreChecked) {
-            select_all_checkbox.prop('checked', true);
-          } else if (allAreUnchecked) {
-            select_all_checkbox.prop('checked', false);
-          }
-        }}
-      >
-        <img
-          src=${imageUrl}
-          style=${{
-            minWidth: `${ls.image_min_width}px`,
-            maxWidth: `${ls.image_max_width}px`,
-          }}
-        />
-        <div key=${index} class="checkbox"></div>
-        ${(show_open_image_button || show_download_image_button) &&
-        html`<div class="actions">
-          ${show_open_image_button &&
-          html`<${OpenImageButton}
-            imageUrl=${imageUrl}
-            onClick=${(e) => e.stopPropagation()}
-          />`}
-          ${show_download_image_button &&
-          html`<${DownloadImageButton}
-            imageUrl=${imageUrl}
-            onClick=${(e) => e.stopPropagation()}
-          />`}
-        </div>`}
-        ${show_image_url &&
-        html`<div class="image_url_container">
-          <${ImageUrlTextbox}
-            value=${imageUrl}
-            onClick=${(e) => e.stopPropagation()}
-          />
-        </div>`}
-      </div>
-    `;
-    imagesContainer.append(image);
-  });
 }
 
 function downloadImages() {
@@ -376,7 +166,105 @@ const Popup = () => {
     Object.assign(localStorage, options);
   }, [options]);
 
-  // TODO: Keep image state, but outside of options cause those are persisted in `localStorage`
+  const [allImages, setAllImages] = useState([]);
+  const [linkedImages, setLinkedImages] = useState({});
+  const [selectedImages, setSelectedImages] = useState([]); // TODO: Use
+  const [visibleImages, setVisibleImages] = useState([]);
+  useEffect(() => {
+    // Add images to state and trigger filtration.
+    // `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times.
+    chrome.runtime.onMessage.addListener((result) => {
+      setLinkedImages((linkedImages) => ({
+        ...linkedImages,
+        ...result.linkedImages,
+      }));
+
+      setAllImages((allImages) => [
+        ...allImages,
+        ...result.images.filter((image) => !allImages.includes(image)),
+      ]);
+    });
+  }, []);
+
+  const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
+  const filterImages = useCallback(() => {
+    // TODO: Debounce
+    let visibleImages = allImages;
+    let filterValue = options.filter_url;
+    if (filterValue) {
+      switch (options.filter_url_mode) {
+        case 'normal':
+          const terms = filterValue.split(/\s+/);
+          visibleImages = visibleImages.filter((url) => {
+            for (let index = 0; index < terms.length; index++) {
+              let term = terms[index];
+              if (term.length !== 0) {
+                const expected = term[0] !== '-';
+                if (!expected) {
+                  term = term.substr(1);
+                  if (term.length === 0) {
+                    continue;
+                  }
+                }
+                const found = url.indexOf(term) !== -1;
+                if (found !== expected) {
+                  return false;
+                }
+              }
+            }
+            return true;
+          });
+          break;
+        case 'wildcard':
+          filterValue = filterValue
+            .replace(/([.^$[\]\\(){}|-])/g, '\\$1')
+            .replace(/([?*+])/, '.$1');
+        /* fall through */
+        case 'regex':
+          visibleImages = visibleImages.filter((url) => {
+            try {
+              return url.match(filterValue);
+            } catch (e) {
+              return false;
+            }
+          });
+          break;
+      }
+    }
+
+    if (options.only_images_from_links === 'true') {
+      visibleImages = visibleImages.filter((url) => linkedImages[url]);
+    }
+
+    visibleImages = visibleImages.filter((url) => {
+      const image = imagesCacheRef.current.querySelector(
+        `img[src="${encodeURI(url)}"]`
+      );
+
+      return (
+        (options.filter_min_width_enabled !== 'true' ||
+          options.filter_min_width <= image.naturalWidth) &&
+        (options.filter_max_width_enabled !== 'true' ||
+          image.naturalWidth <= options.filter_max_width) &&
+        (options.filter_min_height_enabled !== 'true' ||
+          options.filter_min_height <= image.naturalHeight) &&
+        (options.filter_max_height_enabled !== 'true' ||
+          image.naturalHeight <= options.filter_max_height)
+      );
+    });
+
+    setVisibleImages(visibleImages);
+  }, [visibleImages, linkedImages, options]);
+
+  useEffect(filterImages, [allImages, linkedImages]);
+
+  const anyImagesCanBeDownloaded = useMemo(() => {
+    return (
+      visibleImages.length > 0 &&
+      selectedImages.length > 0 &&
+      visibleImages.some((imageUrl) => selectedImages.includes(imageUrl))
+    );
+  }, [visibleImages, selectedImages]);
 
   return html`
     <div id="filters_container">
@@ -388,7 +276,6 @@ const Popup = () => {
           title="Filter by parts of the URL or regular expressions."
           value=${options.filter_url}
           style=${{ flex: '1' }}
-          onKeyUp=${filterImages}
           onChange=${(e) => {
             setOptions((options) => ({
               ...options,
@@ -477,16 +364,21 @@ a{3,6} → Between 3 and 6 of a`}
       </div>
 
       ${options.show_advanced_filters === 'true' &&
-      html`<${AdvancedFilters}
-        filterImages=${filterImages}
-        options=${options}
-        setOptions=${setOptions}
-      />`}
+      html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}
     </div>
 
-    <div id="images_cache"></div>
+    <div ref=${imagesCacheRef} class="hidden">
+      ${allImages.map(
+        (url) => html`<img src=${encodeURI(url)} onLoad=${filterImages} />`
+      )}
+    </div>
 
-    <div id="images_container"></div>
+    <${Images}
+      options=${options}
+      visibleImages=${visibleImages}
+      selectedImages=${selectedImages}
+      setSelectedImages=${setSelectedImages}
+    />
 
     <div
       id="downloads_container"
@@ -530,7 +422,7 @@ a{3,6} → Between 3 and 6 of a`}
         id="download_button"
         class="accent"
         value="Download"
-        disabled="true"
+        disabled=${!anyImagesCanBeDownloaded}
         onClick=${downloadImages}
       />
     </div>

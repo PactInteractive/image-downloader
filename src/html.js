@@ -6,7 +6,9 @@ const html = htm.bind(React.createElement);
 export default html;
 
 // React hooks
+export const useCallback = React.useCallback;
 export const useEffect = React.useEffect;
+export const useMemo = React.useMemo;
 export const useRef = React.useRef;
 export const useState = React.useState;
 

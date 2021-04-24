@@ -133,6 +133,10 @@ legend {
   clear: both;
 }
 
+.hidden {
+  display: none;
+}
+
 /* text */
 .accent {
   color: var(--accent);

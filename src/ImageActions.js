@@ -22,9 +22,7 @@ export const OpenImageButton = ({ imageUrl, onClick, ...props }) => {
         onClick?.(e);
       }}
       ...${props}
-    >
-      &nbsp;
-    </button>
+    />
   `;
 };
 
@@ -39,8 +37,6 @@ export const DownloadImageButton = ({ imageUrl, onClick, ...props }) => {
         onClick?.(e);
       }}
       ...${props}
-    >
-      &nbsp;
-    </button>
+    />
   `;
 };
