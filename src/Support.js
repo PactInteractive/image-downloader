@@ -116,9 +116,10 @@ export const SupportList = () => html`
 
         <pre>0x49707Cb358e8B2F795C8FceF4D2DcfD2BADF7679</pre>
 
-        <p style=${{ maxWidth: '380px' }}>
-          Any Ethereum you send will be retained as Ethereum and hodled or used
-          as gas for running decentralized applications 💥👀
+        <p>
+          Any Ethereum you send will be retained as Ethereum and hodled
+          <br />
+          or used as gas for running decentralized applications 💥👀
         </p>
       </div>
     </div>
@@ -141,9 +142,19 @@ export const SupportList = () => html`
 
         <pre>0xdb54EBD0eF147599050B3629d65a73d65ef344D2</pre>
 
-        <p style=${{ maxWidth: '380px' }}>
-          Any BAT you send will be retained as BAT and hodled 💥👀
-        </p>
+        <div>
+          <p>
+            Alternatively, you can send a tip on my GitHub profile page:
+            <br />
+            <${ExternalLink} href="https://github.com/vdsabev" />
+          </p>
+
+          <p>
+            Any BAT you send will be retained as BAT and hodled
+            <br />
+            or used to tip other creators 💥👀
+          </p>
+        </div>
       </div>
     </div>
   </div>
