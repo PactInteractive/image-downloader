@@ -123,9 +123,9 @@ const Popup = () => {
     });
 
     setVisibleImages(visibleImages);
-  }, [visibleImages, linkedImages, options]);
+  }, [allImages, linkedImages, options]);
 
-  useEffect(filterImages, [allImages, linkedImages]);
+  useEffect(filterImages, [allImages, linkedImages, options]);
 
   const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
   const imagesToDownload = useMemo(
