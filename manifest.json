@@ -1,7 +1,7 @@
 {
   "name": "Image Downloader",
   "description": "Browse and download images on a web page.",
-  "version": "3.0.0",
+  "version": "3.0.1",
   "minimum_chrome_version": "31",
   "manifest_version": 2,
   "permissions": [
@@ -17,10 +17,6 @@
     "48": "/images/icon_48.png",
     "128": "/images/icon_128.png"
   },
-  "web_accessible_resources": [
-    "/images/open.svg",
-    "/images/download.svg"
-  ],
   "background": {
     "scripts": [
       "/src/defaults.js"

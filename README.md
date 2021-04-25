@@ -20,6 +20,9 @@ If you need that kind of functionality, take a look at more specialized extensio
 
 Change Log
 ==========
+## 3.0.1
+- Prevent typing special characters in text inputs
+
 ## 3.0.0
 - Design refresh ✨
 - Added support for .ico and .tif / .tiff images

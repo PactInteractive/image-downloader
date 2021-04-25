@@ -7,11 +7,13 @@ import html, {
   useState,
 } from './html.js';
 
+import { useRunAfterUpdate } from './hooks/useRunAfterUpdate.js';
+import { isIncludedIn, removeSpecialCharacters } from './utils.js';
+
 import { AdvancedFilters } from './AdvancedFilters.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { Images } from './Images.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
-import { isIncludedIn } from './utils.js';
 
 const initialOptions = localStorage;
 
@@ -189,6 +191,8 @@ const Popup = () => {
     }
   }
 
+  const runAfterUpdate = useRunAfterUpdate();
+
   return html`
     <div id="filters_container">
       <div style=${{ display: 'flex', alignItems: 'center', gap: '4px' }}>
@@ -264,8 +268,19 @@ const Popup = () => {
         placeholder="Save to subfolder"
         title="Set the name of the subfolder you want to download the images to."
         value=${options.folder_name}
-        onChange=${({ currentTarget: { value } }) => {
-          setOptions((options) => ({ ...options, folder_name: value.trim() }));
+        onChange=${({ currentTarget: input }) => {
+          const savedSelectionStart = removeSpecialCharacters(
+            input.value.slice(0, input.selectionStart)
+          ).length;
+
+          runAfterUpdate(() => {
+            input.selectionStart = input.selectionEnd = savedSelectionStart;
+          });
+
+          setOptions((options) => ({
+            ...options,
+            folder_name: removeSpecialCharacters(input.value),
+          }));
         }}
       />
 
@@ -276,10 +291,18 @@ const Popup = () => {
           placeholder="Rename files"
           title="Set a new file name for the images you want to download."
           value=${options.new_file_name}
-          onChange=${({ currentTarget: { value } }) => {
+          onChange=${({ currentTarget: input }) => {
+            const savedSelectionStart = removeSpecialCharacters(
+              input.value.slice(0, input.selectionStart)
+            ).length;
+
+            runAfterUpdate(() => {
+              input.selectionStart = input.selectionEnd = savedSelectionStart;
+            });
+
             setOptions((options) => ({
               ...options,
-              new_file_name: value.trim(),
+              new_file_name: removeSpecialCharacters(input.value),
             }));
           }}
         />
