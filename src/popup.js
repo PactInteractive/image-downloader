@@ -32,15 +32,17 @@ const Popup = () => {
     // Add images to state and trigger filtration.
     // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
     chrome.runtime.onMessage.addListener((result) => {
+      setAllImages((allImages) => [
+        ...allImages,
+        ...result.images.filter((image) => !allImages.includes(image)),
+      ]);
+
       setLinkedImages((linkedImages) => ({
         ...linkedImages,
         ...result.linkedImages,
       }));
 
-      setAllImages((allImages) => [
-        ...allImages,
-        ...result.images.filter((image) => !allImages.includes(image)),
-      ]);
+      localStorage.active_tab_origin = result.origin;
     });
 
     // Get images on the page

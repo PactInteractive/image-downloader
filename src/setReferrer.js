@@ -1,22 +1,21 @@
+// https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer
+const referrerHeaderName = 'Referer';
+
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (details) => {
-    console.log(window.location.origin);
+    if (details.initiator === window.location.origin) {
+      const activeTabOrigin = localStorage.active_tab_origin;
+      const referrerHeader = details.requestHeaders.find(
+        (header) => header.name === referrerHeaderName
+      );
 
-    for (let index = 0; index < details.requestHeaders.length; ++index) {
-      // console.log(
-      //   `${details.requestHeaders[index].name === 'Referer'} && ${
-      //     details.initiator === chrome.extension.getURL('')
-      //   } && ${details.url.includes('instagram.com')}`
-      // );
-      if (
-        details.requestHeaders[index].name === 'Referer' &&
-        // details.initiator === chrome.extension.getURL('') &&
-        details.url.includes('cdninstagram.com') // && if it's an external URL?
-      ) {
-        // TODO: Set referer to the active tab URL's origin
-        // console.log(details.url);
-        details.requestHeaders[index].value = 'https://www.instagram.com/';
-        break;
+      if (referrerHeader) {
+        referrerHeader.value = activeTabOrigin;
+      } else {
+        details.requestHeaders.push({
+          name: referrerHeaderName,
+          value: activeTabOrigin,
+        });
       }
     }
 
