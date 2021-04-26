@@ -103,8 +103,9 @@
   );
 
   chrome.runtime.sendMessage({
-    linkedImages: imageDownloader.linkedImages,
     images: imageDownloader.images,
+    linkedImages: imageDownloader.linkedImages,
+    origin: window.location.origin,
   });
 
   imageDownloader.linkedImages = null;

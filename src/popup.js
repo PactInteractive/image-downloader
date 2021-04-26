@@ -30,17 +30,19 @@ const Popup = () => {
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
     // Add images to state and trigger filtration.
-    // `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times.
+    // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
     chrome.runtime.onMessage.addListener((result) => {
+      setAllImages((allImages) => [
+        ...allImages,
+        ...result.images.filter((image) => !allImages.includes(image)),
+      ]);
+
       setLinkedImages((linkedImages) => ({
         ...linkedImages,
         ...result.linkedImages,
       }));
 
-      setAllImages((allImages) => [
-        ...allImages,
-        ...result.images.filter((image) => !allImages.includes(image)),
-      ]);
+      localStorage.active_tab_origin = result.origin;
     });
 
     // Get images on the page
@@ -49,7 +51,7 @@ const Popup = () => {
         { active: true, windowId: currentWindow.id },
         (activeTabs) => {
           chrome.tabs.executeScript(activeTabs[0].id, {
-            file: '/src/send_images.js',
+            file: '/src/sendImages.js',
             allFrames: true,
           });
         }

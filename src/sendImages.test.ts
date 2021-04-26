@@ -5,7 +5,7 @@ declare var global: any;
 
 const expectExtractedImages = (...elements: HTMLElement[]) => {
   document.body.append(...elements);
-  require('./send_images');
+  require('./sendImages');
   return expect(asMockedFunction(chrome.runtime.sendMessage).mock.calls[0][0]);
 };
 
@@ -19,8 +19,9 @@ describe(`'img' elements`, () => {
     expectExtractedImages(
       html`<img src="http://example.com/image-src.png" />`
     ).toEqual({
-      linkedImages: {},
       images: ['http://example.com/image-src.png'],
+      linkedImages: {},
+      origin: 'TODO',
     });
   });
 
@@ -28,8 +29,9 @@ describe(`'img' elements`, () => {
     expectExtractedImages(
       html`<img src="http://example.com/image-with-hash.png#irrelevant-hash" />`
     ).toEqual({
-      linkedImages: {},
       images: ['http://example.com/image-with-hash.png'],
+      linkedImages: {},
+      origin: 'TODO',
     });
   });
 });
@@ -39,8 +41,9 @@ describe(`'a' elements`, () => {
     expectExtractedImages(
       html`<a href="http://example.com/image-link.png" />`
     ).toEqual({
-      linkedImages: { 'http://example.com/image-link.png': '0' },
       images: ['http://example.com/image-link.png'],
+      linkedImages: { 'http://example.com/image-link.png': '0' },
+      origin: 'TODO',
     });
   });
 
@@ -48,8 +51,9 @@ describe(`'a' elements`, () => {
     expectExtractedImages(
       html`<a href="http://example.com/not-an-image.html" />`
     ).toEqual({
-      linkedImages: {},
       images: [],
+      linkedImages: {},
+      origin: 'TODO',
     });
   });
 });
@@ -63,8 +67,9 @@ describe(`background images`, () => {
         }}
       />`
     ).toEqual({
-      linkedImages: {},
       images: ['http://example.com/background-image-double-quotes.png'],
+      linkedImages: {},
+      origin: 'TODO',
     });
   });
 
@@ -76,8 +81,9 @@ describe(`background images`, () => {
         }}
       />`
     ).toEqual({
-      linkedImages: {},
       images: ['http://example.com/background-image-single-quotes.png'],
+      linkedImages: {},
+      origin: 'TODO',
     });
   });
 
@@ -89,8 +95,9 @@ describe(`background images`, () => {
         }}
       />`
     ).toEqual({
-      linkedImages: {},
       images: ['http://example.com/background-image-no-quotes.png'],
+      linkedImages: {},
+      origin: 'TODO',
     });
   });
 });
@@ -105,8 +112,9 @@ it.skip(`extracts images from CSS rules`, () => {
     }
   `);
   expectExtractedImages().toEqual({
-    linkedImages: {},
     images: ['http://example.com/background-image-from-css-rules.png'],
+    linkedImages: {},
+    origin: 'TODO',
   });
 });
 
@@ -119,21 +127,24 @@ it(`removes duplicates`, () => {
       }}
     />`
   ).toEqual({
-    linkedImages: {},
     images: ['http://example.com/image-src.png'],
+    linkedImages: {},
+    origin: 'TODO',
   });
 });
 
 it(`removes empty images`, () => {
   expectExtractedImages(html`<img />`, html`<img />`).toEqual({
-    linkedImages: {},
     images: [],
+    linkedImages: {},
+    origin: 'TODO',
   });
 });
 
 it(`maps relative URLs to absolute`, () => {
   expectExtractedImages(html`<img src="/image-relative.png" />`).toEqual({
-    linkedImages: {},
     images: ['http://localhost/image-relative.png'],
+    linkedImages: {},
+    origin: 'TODO',
   });
 });
