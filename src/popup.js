@@ -163,7 +163,7 @@ const Popup = () => {
     setTimeout(() => {
       chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
       setDownloadIsInProgress(false);
-    }, 200);
+    }, 1000);
 
     function suggestNewFilename(item, suggest) {
       let newFilename = '';
