@@ -120,11 +120,17 @@
 
       #images_container {
         flex: 1;
+
         display: grid;
         gap: var(--images-container-gap);
         padding: var(--images-container-padding);
         padding-top: 9px; /* Account for checkbox 3px margin */
         background: var(--neutral-lighter);
+      }
+
+      #images_container .select_all_checkbox {
+        grid-column: 1 / -1;
+        font-weight: bold;
       }
 
       #images_container .card {
@@ -139,14 +145,18 @@
 
         box-shadow: var(--elevation-1);
         border-radius: var(--border-radius-sm);
-        border: 1px solid var(--border-color);
+        border: 2px solid transparent;
         background: var(--neutral-lightest);
 
-        transition: var(--transition-box-shadow);
+        transition: var(--transition-border-color), var(--transition-box-shadow);
       }
 
       #images_container .card:hover {
         box-shadow: var(--elevation-2);
+      }
+
+      #images_container .card.checked {
+        border-color: var(--accent);
       }
 
       #images_container img {

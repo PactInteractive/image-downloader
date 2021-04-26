@@ -22,6 +22,8 @@ Change Log
 ==========
 ## 3.0.6
 - Allow forward and back slashes in subfolder and file paths
+- Bring back blue border around selected images
+- Show number of selected images
 
 ## 3.0.5
 - Fixed an issue with previewing images in Instagram (and other websites). Requires additional permissions to treat image requests as if they're coming directly from Instagram, not from the extension.

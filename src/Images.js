@@ -12,6 +12,7 @@ export const Images = ({
   options,
   visibleImages,
   selectedImages,
+  imagesToDownload,
   setSelectedImages,
   style,
   ...props
@@ -57,17 +58,16 @@ export const Images = ({
 
   return html`
     <div id="images_container" style=${containerStyle} ...${props}>
-      <div style=${{ gridColumn: '1 / -1', fontWeight: 'bold' }}>
-        <${Checkbox}
-          checked=${allImagesAreSelected}
-          indeterminate=${someImagesAreSelected && !allImagesAreSelected}
-          onChange=${({ currentTarget: { checked } }) => {
-            setSelectedImages(checked ? visibleImages : []);
-          }}
-        >
-          Select all (${visibleImages.length})
-        <//>
-      </div>
+      <${Checkbox}
+        class="select_all_checkbox"
+        checked=${allImagesAreSelected}
+        indeterminate=${someImagesAreSelected && !allImagesAreSelected}
+        onChange=${({ currentTarget: { checked } }) => {
+          setSelectedImages(checked ? visibleImages : []);
+        }}
+      >
+        Select all (${imagesToDownload.length} / ${visibleImages.length})
+      <//>
 
       ${visibleImages.map(
         (imageUrl, index) => html`

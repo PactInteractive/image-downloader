@@ -254,6 +254,7 @@ const Popup = () => {
       options=${options}
       visibleImages=${visibleImages}
       selectedImages=${selectedImages}
+      imagesToDownload=${imagesToDownload}
       setSelectedImages=${setSelectedImages}
     />
 

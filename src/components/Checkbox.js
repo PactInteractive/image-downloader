@@ -2,12 +2,13 @@ import html from '../html.js';
 
 export const Checkbox = ({
   children,
+  class: className,
   indeterminate,
   style,
   title = '',
   ...props
 }) => html`
-  <label ...${{ title }}>
+  <label ...${{ className, title }}>
     <input
       ref=${setIndeterminate(indeterminate)}
       type="checkbox"
