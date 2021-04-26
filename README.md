@@ -20,6 +20,9 @@ If you need that kind of functionality, take a look at more specialized extensio
 
 Change Log
 ==========
+## 3.0.6
+- Allow forward and back slashes in subfolder and file paths
+
 ## 3.0.5
 - Fixed an issue with previewing images in Instagram (and other websites). Requires additional permissions to treat image requests as if they're coming directly from Instagram, not from the extension.
 
