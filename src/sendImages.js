@@ -16,7 +16,7 @@
         // Prevents `Failed to read the 'cssRules' property from 'CSSStyleSheet': Cannot access rules` error. Also see:
         // https://github.com/PactInteractive/image-downloader/issues/37
         // https://github.com/odoo/odoo/issues/22517
-        if (styleSheet.hasOwnProperty('cssRules')) {
+        try {
           const { cssRules } = styleSheet;
           for (let j = 0; j < cssRules.length; j++) {
             const style = cssRules[j].style;
@@ -29,6 +29,8 @@
               }
             }
           }
+        } catch (error) {
+          // Ignore error - expected with some cross-domain styles
         }
       }
 
@@ -94,12 +96,10 @@
 
   imageDownloader.linkedImages = {}; // TODO: Avoid mutating this object in `extractImageFromElement`
   imageDownloader.images = imageDownloader.removeDuplicateOrEmpty(
-    []
-      .concat(
-        imageDownloader.extractImagesFromTags(),
-        imageDownloader.extractImagesFromStyles()
-      )
-      .map(imageDownloader.relativeUrlToAbsolute)
+    [
+      ...imageDownloader.extractImagesFromTags(),
+      ...imageDownloader.extractImagesFromStyles(),
+    ].map(imageDownloader.relativeUrlToAbsolute)
   );
 
   chrome.runtime.sendMessage({

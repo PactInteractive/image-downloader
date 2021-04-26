@@ -1,4 +1,4 @@
-import { asMockedFunction, mockChrome } from './utils';
+import { asMockedFunction, mockChrome } from './test-utils';
 
 jest.useFakeTimers();
 

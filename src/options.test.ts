@@ -1,4 +1,4 @@
-import { mockChrome } from './utils';
+import { mockChrome } from './test-utils';
 
 declare var global: any;
 

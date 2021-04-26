@@ -21,6 +21,7 @@ If you need that kind of functionality, take a look at more specialized extensio
 Change Log
 ==========
 ## 3.0.6
+- "Now with even more images!" - find additional background images on the page
 - Allow forward and back slashes in subfolder and file paths
 - Bring back blue border around selected images
 - Show number of selected images
