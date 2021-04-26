@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "image-downloader",
-  "version": "3.0.3",
+  "version": "3.0.4",
   "license": "MIT",
   "scripts": {
     "start": "npm run build && node scripts/watch.js",

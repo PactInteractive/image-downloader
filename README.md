@@ -20,6 +20,9 @@ If you need that kind of functionality, take a look at more specialized extensio
 
 Change Log
 ==========
+## 3.0.4
+- Fixed scrollbar issue
+
 ## 3.0.3
 - Show advanced filters by default
 
