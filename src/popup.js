@@ -217,7 +217,7 @@ const Popup = () => {
         <button
           id="toggle_advanced_filters_button"
           class=${options.show_advanced_filters === 'true' ? '' : 'collapsed'}
-          title="Advanced filters"
+          title="Toggle advanced filters"
           onClick=${() => {
             setOptions((options) => ({
               ...options,

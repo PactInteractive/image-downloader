@@ -31,6 +31,7 @@
     filter_max_height: 3000,
     filter_max_height_enabled: false,
     only_images_from_links: false,
+    show_advanced_filters: true,
     // Options
     // General
     show_download_confirmation: true,

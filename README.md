@@ -20,6 +20,9 @@ If you need that kind of functionality, take a look at more specialized extensio
 
 Change Log
 ==========
+## 3.0.3
+- Show advanced filters by default
+
 ## 3.0.2
 - Fixed an issue with some files being saved outside of the targeted subfolder
 
