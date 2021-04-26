@@ -1,12 +1,15 @@
 {
   "name": "Image Downloader",
   "description": "Browse and download images on a web page.",
-  "version": "3.0.4",
-  "minimum_chrome_version": "31",
+  "version": "3.1.0",
+  "minimum_chrome_version": "72",
   "manifest_version": 2,
   "permissions": [
     "activeTab",
-    "downloads"
+    "downloads",
+    "webRequest",
+    "webRequestBlocking",
+    "<all_urls>"
   ],
   "browser_action": {
     "default_icon": "/images/icon_128.png",
@@ -19,7 +22,8 @@
   },
   "background": {
     "scripts": [
-      "/src/defaults.js"
+      "/src/defaults.js",
+      "/src/setReferrer.js"
     ]
   },
   "options_page": "/views/options.html"

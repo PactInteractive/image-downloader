@@ -30,7 +30,7 @@ const Popup = () => {
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
     // Add images to state and trigger filtration.
-    // `send_images.js` is injected into all frames of the active tab, so this listener may be called multiple times.
+    // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
     chrome.runtime.onMessage.addListener((result) => {
       setLinkedImages((linkedImages) => ({
         ...linkedImages,
@@ -49,7 +49,7 @@ const Popup = () => {
         { active: true, windowId: currentWindow.id },
         (activeTabs) => {
           chrome.tabs.executeScript(activeTabs[0].id, {
-            file: '/src/send_images.js',
+            file: '/src/sendImages.js',
             allFrames: true,
           });
         }

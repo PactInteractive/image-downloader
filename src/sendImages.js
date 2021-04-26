@@ -103,8 +103,9 @@
   );
 
   chrome.runtime.sendMessage({
-    linkedImages: imageDownloader.linkedImages,
     images: imageDownloader.images,
+    linkedImages: imageDownloader.linkedImages,
+    origin: window.location.origin, // TODO: Test what happens when subframes call this
   });
 
   imageDownloader.linkedImages = null;
