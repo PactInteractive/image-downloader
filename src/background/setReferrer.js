@@ -23,6 +23,6 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       requestHeaders: details.requestHeaders,
     };
   },
-  { urls: ['<all_urls>'] },
+  { types: ['image', /* 'imageset', */ 'media', 'object'], urls: [] },
   ['blocking', 'requestHeaders', 'extraHeaders']
 );
