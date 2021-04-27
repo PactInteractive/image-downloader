@@ -14,9 +14,7 @@ WARNING: If you haven't set a default download directory you will have to manual
 
 Known Issues
 ============
-This extension can only extract the images currently on the page. Those are not always the full-resolution images you expect to see when you click on a photo (e.g. in Facebook albums).
-
-If you need that kind of functionality, take a look at more specialized extensions like Hover Zoom.
+This extension can only extract the images currently on the page. Those may sometimes be smaller thumbnails of the full-resolution images you'd expect to see when you click on a photo (e.g. in Facebook albums). If you need that kind of functionality, take a look at more specialized extensions.
 
 Change Log
 ==========

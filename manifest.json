@@ -1,6 +1,6 @@
 {
   "name": "Image Downloader",
-  "description": "Browse and download images on a web page.",
+  "description": "Browse and download images on the web",
   "version": "3.0.6",
   "minimum_chrome_version": "72",
   "manifest_version": 2,
