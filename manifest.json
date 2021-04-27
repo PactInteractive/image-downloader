@@ -23,8 +23,8 @@
   },
   "background": {
     "scripts": [
-      "/src/defaults.js",
-      "/src/setReferrer.js"
+      "/src/background/handleUpdates.js",
+      "/src/background/setReferrer.js"
     ]
   },
   "options_page": "/views/options.html"
