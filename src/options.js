@@ -79,6 +79,7 @@ const Options = () => {
     <h1>
       <img src="/images/icon_128.png" />
       Image Downloader
+      <small class="light">v${chrome.runtime.getManifest().version}</small>
     </h1>
 
     <fieldset>
