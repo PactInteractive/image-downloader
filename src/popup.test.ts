@@ -28,12 +28,12 @@ it(`renders images`, () => {
     .mock.calls[0][0];
   renderImages(
     {
-      linkedImages: {},
-      images: [
+      allImages: [
         'http://example.com/image-1.png',
         'http://example.com/image-2.png',
         'http://example.com/image-3.png',
       ],
+      linkedImages: [],
     },
     {},
     () => {}

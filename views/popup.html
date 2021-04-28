@@ -84,8 +84,16 @@
         height: 18px;
       }
 
+      .noUi-state-drag {
+        cursor: grabbing;
+      }
+
       .noUi-horizontal {
         height: 12px;
+      }
+
+      .noUi-connects {
+        cursor: pointer;
       }
 
       .noUi-connect {
@@ -93,10 +101,12 @@
       }
 
       .noUi-horizontal .noUi-handle {
-        top: -3px;
-        right: -8px;
-        width: 17px;
-        height: 16px;
+        cursor: grab;
+        top: -5px;
+        right: -9px;
+        width: 18px;
+        height: 18px;
+        border-radius: 50%;
         border-color: var(--neutral-dark);
       }
 
@@ -107,7 +117,7 @@
       }
 
       .noUi-handle::before {
-        left: 6px;
+        left: 5px;
       }
 
       .noUi-handle::after {
