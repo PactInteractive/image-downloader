@@ -23,6 +23,8 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       requestHeaders: details.requestHeaders,
     };
   },
-  { urls: ['<all_urls>'] },
+  // https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/API/webRequest/ResourceType
+  // `imageset` isn't supported in all browsers, and we're not using it yet anyway
+  { types: ['image', /* 'imageset', */ 'media', 'object'], urls: [] },
   ['blocking', 'requestHeaders', 'extraHeaders']
 );
