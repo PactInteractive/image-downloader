@@ -26,8 +26,8 @@ describe(`'img' elements`, () => {
     expectExtractedImages(html`
       <img src="http://example.com/image-src.png" />
     `).toEqual({
-      images: ['http://example.com/image-src.png'],
-      linkedImages: {},
+      allImages: ['http://example.com/image-src.png'],
+      linkedImages: [],
       origin: 'http://localhost',
     });
   });
@@ -36,8 +36,43 @@ describe(`'img' elements`, () => {
     expectExtractedImages(html`
       <img src="http://example.com/image-with-hash.png#irrelevant-hash" />
     `).toEqual({
-      images: ['http://example.com/image-with-hash.png'],
-      linkedImages: {},
+      allImages: ['http://example.com/image-with-hash.png'],
+      linkedImages: [],
+      origin: 'http://localhost',
+    });
+  });
+});
+
+describe(`'image' elements`, () => {
+  // Supress error messages due to React not supporting `image` tags
+  let consoleErrorSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    consoleErrorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+  });
+
+  afterEach(() => {
+    consoleErrorSpy.mockRestore();
+  });
+
+  it(`extracts image URLs from the 'xlink:href' attribute`, () => {
+    expectExtractedImages(html`
+      <image xlinkHref="http://example.com/image-src.png" />
+    `).toEqual({
+      allImages: ['http://example.com/image-src.png'],
+      linkedImages: [],
+      origin: 'http://localhost',
+    });
+  });
+
+  it(`removes the hash from the 'src' property`, () => {
+    expectExtractedImages(html`
+      <image
+        xlinkHref="http://example.com/image-with-hash.png#irrelevant-hash"
+      />
+    `).toEqual({
+      allImages: ['http://example.com/image-with-hash.png'],
+      linkedImages: [],
       origin: 'http://localhost',
     });
   });
@@ -48,8 +83,8 @@ describe(`'a' elements`, () => {
     expectExtractedImages(html`
       <a href="http://example.com/image-link.png" />
     `).toEqual({
-      images: ['http://example.com/image-link.png'],
-      linkedImages: { 'http://example.com/image-link.png': '0' },
+      allImages: ['http://example.com/image-link.png'],
+      linkedImages: ['http://example.com/image-link.png'],
       origin: 'http://localhost',
     });
   });
@@ -58,8 +93,8 @@ describe(`'a' elements`, () => {
     expectExtractedImages(html`
       <a href="http://example.com/not-an-image.html" />
     `).toEqual({
-      images: [],
-      linkedImages: {},
+      allImages: [],
+      linkedImages: [],
       origin: 'http://localhost',
     });
   });
@@ -74,8 +109,8 @@ describe(`background images`, () => {
         }}
       />
     `).toEqual({
-      images: ['http://example.com/background-image-double-quotes.png'],
-      linkedImages: {},
+      allImages: ['http://example.com/background-image-double-quotes.png'],
+      linkedImages: [],
       origin: 'http://localhost',
     });
   });
@@ -88,8 +123,8 @@ describe(`background images`, () => {
         }}
       />
     `).toEqual({
-      images: ['http://example.com/background-image-single-quotes.png'],
-      linkedImages: {},
+      allImages: ['http://example.com/background-image-single-quotes.png'],
+      linkedImages: [],
       origin: 'http://localhost',
     });
   });
@@ -102,8 +137,8 @@ describe(`background images`, () => {
         }}
       />
     `).toEqual({
-      images: ['http://example.com/background-image-no-quotes.png'],
-      linkedImages: {},
+      allImages: ['http://example.com/background-image-no-quotes.png'],
+      linkedImages: [],
       origin: 'http://localhost',
     });
   });
@@ -119,8 +154,8 @@ it.skip(`extracts images from CSS rules`, () => {
     }
   `);
   expectExtractedImages().toEqual({
-    images: ['http://example.com/background-image-from-css-rules.png'],
-    linkedImages: {},
+    allImages: ['http://example.com/background-image-from-css-rules.png'],
+    linkedImages: [],
     origin: 'http://localhost',
   });
 });
@@ -133,24 +168,24 @@ it(`removes duplicates`, () => {
       style=${{ backgroundImage: 'url("http://example.com/image-src.png")' }}
     />
   `).toEqual({
-    images: ['http://example.com/image-src.png'],
-    linkedImages: {},
+    allImages: ['http://example.com/image-src.png'],
+    linkedImages: [],
     origin: 'http://localhost',
   });
 });
 
 it(`removes empty images`, () => {
   expectExtractedImages(html`<img key="img1" /><img key="img2" />`).toEqual({
-    images: [],
-    linkedImages: {},
+    allImages: [],
+    linkedImages: [],
     origin: 'http://localhost',
   });
 });
 
 it(`maps relative URLs to absolute`, () => {
   expectExtractedImages(html`<img src="/image-relative.png" />`).toEqual({
-    images: ['http://localhost/image-relative.png'],
-    linkedImages: {},
+    allImages: ['http://localhost/image-relative.png'],
+    linkedImages: [],
     origin: 'http://localhost',
   });
 });

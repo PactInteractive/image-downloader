@@ -28,6 +28,7 @@ If you need that kind of functionality, take a look at more specialized extensio
 📝 Change Log
 ━━━━━━━
 3.1.0:
+- Removed unnecessary images from styles
 - Made slider handles round and change cursor based on active state
 
 3.0.6:

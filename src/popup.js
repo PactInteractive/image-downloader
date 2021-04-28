@@ -6,9 +6,8 @@ import html, {
   useRef,
   useState,
 } from './html.js';
-
 import { useRunAfterUpdate } from './hooks/useRunAfterUpdate.js';
-import { isIncludedIn, removeSpecialCharacters } from './utils.js';
+import { isIncludedIn, removeSpecialCharacters, unique } from './utils.js';
 
 import { AdvancedFilters } from './AdvancedFilters.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
@@ -25,22 +24,18 @@ const Popup = () => {
   }, [options]);
 
   const [allImages, setAllImages] = useState([]);
-  const [linkedImages, setLinkedImages] = useState({});
+  const [linkedImages, setLinkedImages] = useState([]);
   const [selectedImages, setSelectedImages] = useState([]);
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
     // Add images to state and trigger filtration.
     // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
     chrome.runtime.onMessage.addListener((result) => {
-      setAllImages((allImages) => [
-        ...allImages,
-        ...result.images.filter((image) => !allImages.includes(image)),
-      ]);
+      setAllImages((allImages) => unique([...allImages, ...result.allImages]));
 
-      setLinkedImages((linkedImages) => ({
-        ...linkedImages,
-        ...result.linkedImages,
-      }));
+      setLinkedImages((linkedImages) =>
+        unique([...linkedImages, ...result.linkedImages])
+      );
 
       localStorage.active_tab_origin = result.origin;
     });
@@ -62,7 +57,9 @@ const Popup = () => {
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
   const filterImages = useCallback(() => {
     // TODO: Debounce
-    let visibleImages = allImages;
+    let visibleImages =
+      options.only_images_from_links === 'true' ? linkedImages : allImages;
+
     let filterValue = options.filter_url;
     if (filterValue) {
       switch (options.filter_url_mode) {
@@ -103,10 +100,6 @@ const Popup = () => {
           });
           break;
       }
-    }
-
-    if (options.only_images_from_links === 'true') {
-      visibleImages = visibleImages.filter((url) => linkedImages[url]);
     }
 
     visibleImages = visibleImages.filter((url) => {
