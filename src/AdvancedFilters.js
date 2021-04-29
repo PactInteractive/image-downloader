@@ -3,47 +3,8 @@ import { Checkbox } from './components/Checkbox.js';
 
 // Currently a singleton. Should rewrite once we switch to a full-fledged rendering library
 export const AdvancedFilters = ({ options, setOptions }) => {
-  const widthSliderRef = useRef(null);
-  useEffect(() => {
-    initializeFilter(widthSliderRef.current, 'width');
-  }, []);
-
-  const heightSliderRef = useRef(null);
-  useEffect(() => {
-    initializeFilter(heightSliderRef.current, 'height');
-  }, []);
-
-  const initializeFilter = (slider, dimension) => {
-    if (!slider) return;
-
-    slider.noUiSlider?.destroy();
-
-    noUiSlider.create(slider, {
-      behaviour: 'extend-tap',
-      connect: true,
-      format: {
-        from: (value) => parseInt(value, 10),
-        to: (value) => parseInt(value, 10).toString(),
-      },
-      range: {
-        min: parseInt(options[`filter_min_${dimension}_default`], 10),
-        max: parseInt(options[`filter_max_${dimension}_default`], 10),
-      },
-      step: 10,
-      start: [
-        options[`filter_min_${dimension}`],
-        options[`filter_max_${dimension}`],
-      ],
-    });
-
-    slider.noUiSlider.on('update', ([min, max]) => {
-      setOptions((options) => ({
-        ...options,
-        [`filter_min_${dimension}`]: min,
-        [`filter_max_${dimension}`]: max,
-      }));
-    });
-  };
+  const widthSliderRef = useSlider('width', options, setOptions);
+  const heightSliderRef = useSlider('height', options, setOptions);
 
   // TODO: Extract and reuse in `options.js` and other components
   const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
@@ -77,11 +38,11 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           </td>
 
           <td>
-            <input
-              type="checkbox"
+            <${SliderCheckbox}
               id="image_width_filter_min_checkbox"
-              checked=${options.filter_min_width_enabled === 'true'}
-              onChange=${setCheckboxOption('filter_min_width_enabled')}
+              options=${options}
+              optionKey="filter_min_width_enabled"
+              setCheckboxOption=${setCheckboxOption}
             />
           </td>
 
@@ -90,11 +51,11 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           </td>
 
           <td>
-            <input
-              type="checkbox"
+            <${SliderCheckbox}
               id="image_width_filter_max_checkbox"
-              checked=${options.filter_max_width_enabled === 'true'}
-              onChange=${setCheckboxOption('filter_max_width_enabled')}
+              options=${options}
+              optionKey="filter_max_width_enabled"
+              setCheckboxOption=${setCheckboxOption}
             />
           </td>
 
@@ -125,11 +86,11 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           </td>
 
           <td>
-            <input
-              type="checkbox"
+            <${SliderCheckbox}
               id="image_height_filter_min_checkbox"
-              checked=${options.filter_min_height_enabled === 'true'}
-              onChange=${setCheckboxOption('filter_min_height_enabled')}
+              options=${options}
+              optionKey="filter_min_height_enabled"
+              setCheckboxOption=${setCheckboxOption}
             />
           </td>
 
@@ -138,11 +99,11 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           </td>
 
           <td>
-            <input
-              type="checkbox"
+            <${SliderCheckbox}
               id="image_height_filter_max_checkbox"
-              checked=${options.filter_max_height_enabled === 'true'}
-              onChange=${setCheckboxOption('filter_max_height_enabled')}
+              options=${options}
+              optionKey="filter_max_height_enabled"
+              setCheckboxOption=${setCheckboxOption}
             />
           </td>
 
@@ -168,4 +129,92 @@ export const AdvancedFilters = ({ options, setOptions }) => {
       <//>
     </div>
   `;
+};
+
+const SliderCheckbox = ({
+  options,
+  optionKey,
+  setCheckboxOption,
+  ...props
+}) => {
+  const enabled = options[optionKey] === 'true';
+  return html`
+    <input
+      type="checkbox"
+      checked=${enabled}
+      title=${`Click this checkbox to ${
+        enabled ? 'disable' : 'enable'
+      } filtering by this value`}
+      onChange=${setCheckboxOption(optionKey, setCheckboxOption)}
+      ...${props}
+    />
+  `;
+};
+
+const useSlider = (dimension, options, setOptions) => {
+  const sliderRef = useRef(null);
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    noUiSlider.create(slider, {
+      behaviour: 'extend-tap',
+      connect: true,
+      format: {
+        from: (value) => parseInt(value, 10),
+        to: (value) => parseInt(value, 10).toString(),
+      },
+      range: {
+        min: parseInt(options[`filter_min_${dimension}_default`], 10),
+        max: parseInt(options[`filter_max_${dimension}_default`], 10),
+      },
+      step: 10,
+      start: [
+        options[`filter_min_${dimension}`],
+        options[`filter_max_${dimension}`],
+      ],
+    });
+
+    slider.noUiSlider.on('update', ([min, max]) => {
+      setOptions((options) => ({
+        ...options,
+        [`filter_min_${dimension}`]: min,
+        [`filter_max_${dimension}`]: max,
+      }));
+    });
+
+    return () => slider.noUiSlider?.destroy();
+  }, []);
+
+  useDisableSliderHandle(
+    () => sliderRef.current?.querySelectorAll('.noUi-origin')[0],
+    options[`filter_min_${dimension}_enabled`]
+  );
+
+  useDisableSliderHandle(
+    () => sliderRef.current?.querySelectorAll('.noUi-origin')[1],
+    options[`filter_max_${dimension}_enabled`]
+  );
+
+  return sliderRef;
+};
+
+const useDisableSliderHandle = (
+  getHandle,
+  option,
+  tooltipText = 'Click the checkbox next to this slider to enable it'
+) => {
+  useEffect(() => {
+    const handle = getHandle();
+    if (!handle) return;
+
+    if (option === 'true') {
+      handle.removeAttribute('disabled');
+      handle.removeAttribute('title');
+    } else {
+      handle.setAttribute('disabled', true);
+      handle.setAttribute('title', tooltipText);
+    }
+  }, [option]);
 };

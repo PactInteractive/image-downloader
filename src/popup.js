@@ -317,11 +317,9 @@ const Popup = () => {
       `}
 
       <!-- TODO: Implement loading animation -->
-      <input
-        type="button"
-        class="accent ${downloadIsInProgress ? 'loading' : ''}"
-        value=${downloadIsInProgress ? '•••' : 'Download'}
-        disabled=${imagesToDownload.length === 0 || downloadIsInProgress}
+      <${DownloadButton}
+        disabled=${imagesToDownload.length === 0}
+        loading=${downloadIsInProgress}
         onClick=${downloadImages}
       />
 
@@ -339,6 +337,25 @@ const Popup = () => {
         />
       `}
     </div>
+  `;
+};
+
+const DownloadButton = ({ disabled, loading, ...props }) => {
+  const tooltipText = disabled
+    ? 'Select some images to download first'
+    : loading
+    ? 'Remember to keep the extension popup open\nwhile the images are downloading'
+    : '';
+
+  return html`
+    <input
+      type="button"
+      class="accent ${loading ? 'loading' : ''}"
+      value=${loading ? '•••' : 'Download'}
+      disabled=${disabled || loading}
+      title=${tooltipText}
+      ...${props}
+    />
   `;
 };
 

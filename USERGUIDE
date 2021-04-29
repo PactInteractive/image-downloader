@@ -26,6 +26,10 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 
 📝 Change Log
 ━━━━━━━
+3.2.0:
+- Disable slider handles when the checkbox is unchecked
+- Add tooltips to slider handles, slider checkboxes, and the Download button
+
 3.1.1:
 - Fix images sometimes being saved outside the specified subfolder
 

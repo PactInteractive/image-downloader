@@ -100,7 +100,7 @@
         background: var(--accent);
       }
 
-      .noUi-horizontal .noUi-handle {
+      .noUi-horizontal .noUi-origin .noUi-handle {
         cursor: grab;
         top: -5px;
         right: -9px;
@@ -108,20 +108,27 @@
         height: 18px;
         border-radius: 50%;
         border-color: var(--neutral-dark);
+
+        transition: var(--transition-border-color);
+      }
+
+      .noUi-horizontal .noUi-origin[disabled] .noUi-handle {
+        cursor: help;
+        border-color: var(--neutral-light);
       }
 
       .noUi-handle::before,
       .noUi-handle::after {
-        top: 2px;
+        top: 3px;
         height: 10px;
       }
 
       .noUi-handle::before {
-        left: 5px;
+        left: 6px;
       }
 
       .noUi-handle::after {
-        left: 8px;
+        left: 9px;
       }
 
       #only_images_from_links_container {

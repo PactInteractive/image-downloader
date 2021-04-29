@@ -212,6 +212,7 @@ input[type='number'] {
 }
 
 select {
+  cursor: pointer;
   padding: 7px 12px;
 }
 
@@ -228,7 +229,7 @@ input[type='button'] {
   transition: var(--transition-background);
 }
 input[type='button']:disabled {
-  cursor: not-allowed;
+  cursor: help;
   opacity: 0.6;
 }
 input[type='button'].loading:disabled {
