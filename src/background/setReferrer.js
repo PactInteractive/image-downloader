@@ -1,9 +1,11 @@
 // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referer
 const referrerHeaderName = 'Referer';
 
+// Modify the referrer header so images can be requested using the original website's origin
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (details) => {
-    if (details.initiator === window.location.origin) {
+    const extensionOrigin = window.location.origin;
+    if (details.initiator === extensionOrigin) {
       const activeTabOrigin = localStorage.active_tab_origin;
       const referrerHeader = details.requestHeaders.find(
         (header) => header.name === referrerHeaderName
