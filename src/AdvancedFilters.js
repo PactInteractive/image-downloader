@@ -1,4 +1,4 @@
-import html, { useEffect, useRef, useState } from './html.js';
+import html, { useEffect, useRef } from './html.js';
 import { Checkbox } from './components/Checkbox.js';
 
 // Currently a singleton. Should rewrite once we switch to a full-fledged rendering library

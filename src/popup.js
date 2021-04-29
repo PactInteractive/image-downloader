@@ -28,9 +28,7 @@ const Popup = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
-    // Add images to state and trigger filtration.
-    // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
-    chrome.runtime.onMessage.addListener((result) => {
+    const setMessageResult = (result) => {
       setAllImages((allImages) => unique([...allImages, ...result.allImages]));
 
       setLinkedImages((linkedImages) =>
@@ -38,7 +36,11 @@ const Popup = () => {
       );
 
       localStorage.active_tab_origin = result.origin;
-    });
+    };
+
+    // Add images to state and trigger filtration.
+    // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
+    chrome.runtime.onMessage.addListener(setMessageResult);
 
     // Get images on the page
     chrome.windows.getCurrent((currentWindow) => {
@@ -52,11 +54,15 @@ const Popup = () => {
         }
       );
     });
+
+    return () => {
+      chrome.runtime.onMessage.removeListener(setMessageResult);
+    };
   }, []);
 
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
+  // TODO: Debounce
   const filterImages = useCallback(() => {
-    // TODO: Debounce
     let visibleImages =
       options.only_images_from_links === 'true' ? linkedImages : allImages;
 
@@ -139,28 +145,26 @@ const Popup = () => {
     if (options.show_download_confirmation === 'true') {
       setDownloadConfirmationIsShown(true);
     } else {
-      startDownload(imagesToDownload);
+      startDownload();
     }
   }
 
-  async function startDownload(images) {
-    let currentImageNumber = 1;
-    chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+  async function startDownload() {
     setDownloadIsInProgress(true);
+    currentImageNumberRef.current = 1;
 
-    for (const image of images) {
+    for (const image of imagesToDownload) {
       await new Promise((resolve) => {
         chrome.downloads.download({ url: image }, resolve);
       });
     }
 
-    // TODO: The listener is being removed prematurely - find a cleaner way to fix the race condition
-    setTimeout(() => {
-      chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
-      setDownloadIsInProgress(false);
-    }, 1000);
+    setDownloadIsInProgress(false);
+  }
 
-    function suggestNewFilename(item, suggest) {
+  const currentImageNumberRef = useRef(1);
+  const suggestNewFilename = useCallback(
+    (item, suggest) => {
       let newFilename = '';
       if (options.folder_name) {
         newFilename += `${options.folder_name}/`;
@@ -168,23 +172,31 @@ const Popup = () => {
       if (options.new_file_name) {
         const regex = /(?:\.([^.]+))?$/;
         const extension = regex.exec(item.filename)[1];
-        if (images.length === 1) {
+        if (imagesToDownload.length === 1) {
           newFilename += `${options.new_file_name}.${extension}`;
         } else {
-          const numberOfDigits = images.length.toString().length;
-          const formattedImageNumber = `${currentImageNumber}`.padStart(
+          const numberOfDigits = imagesToDownload.length.toString().length;
+          const formattedImageNumber = `${currentImageNumberRef.current}`.padStart(
             numberOfDigits,
             '0'
           );
           newFilename += `${options.new_file_name}${formattedImageNumber}.${extension}`;
-          currentImageNumber += 1;
+          currentImageNumberRef.current += 1;
         }
       } else {
         newFilename += item.filename;
       }
       suggest({ filename: newFilename });
-    }
-  }
+    },
+    [imagesToDownload, options.folder_name, options.new_file_name]
+  );
+
+  useEffect(() => {
+    chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+    return () => {
+      chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
+    };
+  }, [suggestNewFilename]);
 
   const runAfterUpdate = useRunAfterUpdate();
 
@@ -323,7 +335,7 @@ const Popup = () => {
             }));
           }}
           onClose=${() => setDownloadConfirmationIsShown(false)}
-          onConfirm=${() => startDownload(imagesToDownload)}
+          onConfirm=${startDownload}
         />
       `}
     </div>
