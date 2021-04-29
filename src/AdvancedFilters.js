@@ -16,57 +16,55 @@ export const AdvancedFilters = ({ options, setOptions }) => {
       <table class="grid">
         <colgroup>
           <col style=${{ width: '45px' }} />
-          <col style=${{ width: '40px' }} />
-          <col style=${{ width: '10px' }} />
+          <col style=${{ width: '70px' }} />
           <col />
-          <col style=${{ width: '10px' }} />
-          <col style=${{ width: '40px' }} />
+          <col style=${{ width: '70px' }} />
         </colgroup>
 
         <tr id="image_width_filter">
           <td>Width:</td>
 
-          <td style=${{ textAlign: 'right' }}>
+          <td>
             <label
-              for="image_width_filter_min_checkbox"
               class=${options.filter_min_width_enabled === 'true'
                 ? ''
                 : 'light'}
+              style=${{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+              }}
             >
-              <small>${options.filter_min_width}px</small>
+              <small>≥ ${options.filter_min_width}px</small>
+              <${SliderCheckbox}
+                options=${options}
+                optionKey="filter_min_width_enabled"
+                setCheckboxOption=${setCheckboxOption}
+              />
             </label>
           </td>
 
-          <td>
-            <${SliderCheckbox}
-              id="image_width_filter_min_checkbox"
-              options=${options}
-              optionKey="filter_min_width_enabled"
-              setCheckboxOption=${setCheckboxOption}
-            />
-          </td>
-
-          <td style=${{ padding: '0 8px' }}>
+          <td style=${{ padding: '1px 8px 0 8px' }}>
             <div ref=${widthSliderRef}></div>
           </td>
 
           <td>
-            <${SliderCheckbox}
-              id="image_width_filter_max_checkbox"
-              options=${options}
-              optionKey="filter_max_width_enabled"
-              setCheckboxOption=${setCheckboxOption}
-            />
-          </td>
-
-          <td style=${{ textAlign: 'right' }}>
             <label
-              for="image_width_filter_max_checkbox"
               class=${options.filter_max_width_enabled === 'true'
                 ? ''
                 : 'light'}
+              style=${{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
-              <small>${options.filter_max_width}px</small>
+              <${SliderCheckbox}
+                options=${options}
+                optionKey="filter_max_width_enabled"
+                setCheckboxOption=${setCheckboxOption}
+              />
+              <small>≤ ${options.filter_max_width}px</small>
             </label>
           </td>
         </tr>
@@ -74,47 +72,47 @@ export const AdvancedFilters = ({ options, setOptions }) => {
         <tr id="image_height_filter">
           <td>Height:</td>
 
-          <td style=${{ textAlign: 'right' }}>
+          <td>
             <label
-              for="image_height_filter_min_checkbox"
               class=${options.filter_min_height_enabled === 'true'
                 ? ''
                 : 'light'}
+              style=${{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+              }}
             >
-              <small>${options.filter_min_height}px</small>
+              <small>≥ ${options.filter_min_height}px</small>
+              <${SliderCheckbox}
+                options=${options}
+                optionKey="filter_min_height_enabled"
+                setCheckboxOption=${setCheckboxOption}
+              />
             </label>
           </td>
 
-          <td>
-            <${SliderCheckbox}
-              id="image_height_filter_min_checkbox"
-              options=${options}
-              optionKey="filter_min_height_enabled"
-              setCheckboxOption=${setCheckboxOption}
-            />
-          </td>
-
-          <td style=${{ padding: '0 8px' }}>
+          <td style=${{ padding: '1px 8px 0 8px' }}>
             <div ref=${heightSliderRef}></div>
           </td>
 
           <td>
-            <${SliderCheckbox}
-              id="image_height_filter_max_checkbox"
-              options=${options}
-              optionKey="filter_max_height_enabled"
-              setCheckboxOption=${setCheckboxOption}
-            />
-          </td>
-
-          <td style=${{ textAlign: 'right' }}>
             <label
-              for="image_height_filter_max_checkbox"
               class=${options.filter_max_height_enabled === 'true'
                 ? ''
                 : 'light'}
+              style=${{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+              }}
             >
-              <small>${options.filter_max_height}px</small>
+              <${SliderCheckbox}
+                options=${options}
+                optionKey="filter_max_height_enabled"
+                setCheckboxOption=${setCheckboxOption}
+              />
+              <small>≤ ${options.filter_max_height}px</small>
             </label>
           </td>
         </tr>
@@ -186,6 +184,23 @@ const useSlider = (dimension, options, setOptions) => {
 
     return () => slider.noUiSlider?.destroy();
   }, []);
+
+  useEffect(() => {
+    const slider = sliderRef.current;
+    if (!slider) return;
+
+    if (
+      options[`filter_min_${dimension}_enabled`] === 'true' ||
+      options[`filter_max_${dimension}_enabled`] === 'true'
+    ) {
+      slider.removeAttribute('disabled');
+    } else {
+      slider.setAttribute('disabled', true);
+    }
+  }, [
+    options[`filter_min_${dimension}_enabled`],
+    options[`filter_max_${dimension}_enabled`],
+  ]);
 
   useDisableSliderHandle(
     () => sliderRef.current?.querySelectorAll('.noUi-origin')[0],

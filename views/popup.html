@@ -92,12 +92,26 @@
         height: 12px;
       }
 
+      .noUi-target {
+        border-color: var(--accent);
+        transition: var(--transition-border-color);
+      }
+
+      .noUi-target[disabled] {
+        border-color: var(--border-color);
+      }
+
       .noUi-connects {
         cursor: pointer;
       }
 
       .noUi-connect {
         background: var(--accent);
+        transition: var(--transition-background);
+      }
+
+      .noUi-target[disabled] .noUi-connect {
+        background: var(--input-background);
       }
 
       .noUi-horizontal .noUi-origin .noUi-handle {
@@ -107,14 +121,14 @@
         width: 18px;
         height: 18px;
         border-radius: 50%;
-        border-color: var(--neutral-dark);
+        border-color: var(--accent);
 
         transition: var(--transition-border-color);
       }
 
       .noUi-horizontal .noUi-origin[disabled] .noUi-handle {
         cursor: help;
-        border-color: var(--neutral-light);
+        border-color: var(--border-color);
       }
 
       .noUi-handle::before,
