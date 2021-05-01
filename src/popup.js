@@ -6,6 +6,7 @@ import html, {
   useRef,
   useState,
 } from './html.js';
+import { useDebouncedCallback } from './hooks/useDebouncedCallback.js';
 import { useRunAfterUpdate } from './hooks/useRunAfterUpdate.js';
 import { isIncludedIn, removeSpecialCharacters, unique } from './utils.js';
 
@@ -61,74 +62,77 @@ const Popup = () => {
   }, []);
 
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
-  // TODO: Debounce
-  const filterImages = useCallback(() => {
-    let visibleImages =
-      options.only_images_from_links === 'true' ? linkedImages : allImages;
+  const filterImages = useDebouncedCallback(
+    100,
+    () => {
+      let visibleImages =
+        options.only_images_from_links === 'true' ? linkedImages : allImages;
 
-    let filterValue = options.filter_url;
-    if (filterValue) {
-      switch (options.filter_url_mode) {
-        case 'normal':
-          const terms = filterValue.split(/\s+/);
-          visibleImages = visibleImages.filter((url) => {
-            for (let index = 0; index < terms.length; index++) {
-              let term = terms[index];
-              if (term.length !== 0) {
-                const expected = term[0] !== '-';
-                if (!expected) {
-                  term = term.substr(1);
-                  if (term.length === 0) {
-                    continue;
+      let filterValue = options.filter_url;
+      if (filterValue) {
+        switch (options.filter_url_mode) {
+          case 'normal':
+            const terms = filterValue.split(/\s+/);
+            visibleImages = visibleImages.filter((url) => {
+              for (let index = 0; index < terms.length; index++) {
+                let term = terms[index];
+                if (term.length !== 0) {
+                  const expected = term[0] !== '-';
+                  if (!expected) {
+                    term = term.substr(1);
+                    if (term.length === 0) {
+                      continue;
+                    }
+                  }
+                  const found = url.indexOf(term) !== -1;
+                  if (found !== expected) {
+                    return false;
                   }
                 }
-                const found = url.indexOf(term) !== -1;
-                if (found !== expected) {
-                  return false;
-                }
               }
-            }
-            return true;
-          });
-          break;
-        case 'wildcard':
-          filterValue = filterValue
-            .replace(/([.^$[\]\\(){}|-])/g, '\\$1')
-            .replace(/([?*+])/, '.$1');
-        /* fall through */
-        case 'regex':
-          visibleImages = visibleImages.filter((url) => {
-            try {
-              return url.match(filterValue);
-            } catch (error) {
-              return false;
-            }
-          });
-          break;
+              return true;
+            });
+            break;
+          case 'wildcard':
+            filterValue = filterValue
+              .replace(/([.^$[\]\\(){}|-])/g, '\\$1')
+              .replace(/([?*+])/, '.$1');
+          /* fall through */
+          case 'regex':
+            visibleImages = visibleImages.filter((url) => {
+              try {
+                return url.match(filterValue);
+              } catch (error) {
+                return false;
+              }
+            });
+            break;
+        }
       }
-    }
 
-    visibleImages = visibleImages.filter((url) => {
-      const image = imagesCacheRef.current.querySelector(
-        `img[src="${encodeURI(url)}"]`
-      );
+      visibleImages = visibleImages.filter((url) => {
+        const image = imagesCacheRef.current.querySelector(
+          `img[src="${encodeURI(url)}"]`
+        );
 
-      return (
-        (options.filter_min_width_enabled !== 'true' ||
-          options.filter_min_width <= image.naturalWidth) &&
-        (options.filter_max_width_enabled !== 'true' ||
-          image.naturalWidth <= options.filter_max_width) &&
-        (options.filter_min_height_enabled !== 'true' ||
-          options.filter_min_height <= image.naturalHeight) &&
-        (options.filter_max_height_enabled !== 'true' ||
-          image.naturalHeight <= options.filter_max_height)
-      );
-    });
+        return (
+          (options.filter_min_width_enabled !== 'true' ||
+            options.filter_min_width <= image.naturalWidth) &&
+          (options.filter_max_width_enabled !== 'true' ||
+            image.naturalWidth <= options.filter_max_width) &&
+          (options.filter_min_height_enabled !== 'true' ||
+            options.filter_min_height <= image.naturalHeight) &&
+          (options.filter_max_height_enabled !== 'true' ||
+            image.naturalHeight <= options.filter_max_height)
+        );
+      });
 
-    setVisibleImages(visibleImages);
-  }, [allImages, linkedImages, options]);
+      setVisibleImages(visibleImages);
+    },
+    [allImages, linkedImages, options]
+  );
 
-  useEffect(filterImages, [allImages, linkedImages, options]);
+  useEffect(filterImages, [filterImages]);
 
   const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
   const imagesToDownload = useMemo(

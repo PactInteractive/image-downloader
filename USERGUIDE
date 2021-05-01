@@ -26,6 +26,9 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 
 📝 Change Log
 ━━━━━━━
+3.1.2:
+- Improve performance by preventing images from being filtered too often
+
 3.1.1:
 - Fix images sometimes being saved outside the specified subfolder
 
