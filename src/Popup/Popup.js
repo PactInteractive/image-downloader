@@ -67,7 +67,6 @@ const Popup = () => {
   }, []);
 
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
-  // TODO: Debounce
   const filterImages = useCallback(() => {
     let visibleImages =
       options.only_images_from_links === 'true' ? linkedImages : allImages;
@@ -248,7 +247,6 @@ const Popup = () => {
             input.selectionStart = input.selectionEnd = savedSelectionStart;
           });
 
-          // TODO: Remove `//` or `\\` so the path is valid. Also what if the `/` is at the end?
           setOptions((options) => ({
             ...options,
             folder_name: removeSpecialCharacters(input.value),

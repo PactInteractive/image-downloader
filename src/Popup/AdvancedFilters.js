@@ -45,7 +45,7 @@ export const AdvancedFilters = ({ options, setOptions }) => {
     });
   };
 
-  // TODO: Extract and reuse in `options.js` and other components
+  // TODO: Extract and reuse in `Options.js` and other components
   const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
     setOptions((options) => ({ ...options, [key]: checked.toString() }));
   };

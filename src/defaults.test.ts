@@ -1,4 +1,4 @@
-import { asMockedFunction, mockChrome } from './test-utils';
+import { asMockedFunction, mockChrome } from './test';
 
 declare var global: any;
 
@@ -92,8 +92,8 @@ it(`matches 'localStorage' snapshot`, () => {
       "new_file_name_default": "",
       "only_images_from_links": "false",
       "only_images_from_links_default": "false",
-      "show_advanced_filters": "false",
-      "show_advanced_filters_default": "false",
+      "show_advanced_filters": "true",
+      "show_advanced_filters_default": "true",
       "show_download_confirmation": "true",
       "show_download_confirmation_default": "true",
       "show_download_image_button": "true",

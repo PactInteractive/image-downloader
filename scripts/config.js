@@ -7,7 +7,7 @@ module.exports = {
     manifestPath,
     './images/**/*',
     './lib/**/*',
-    './src/**/!(test-utils.ts|*.test.ts)',
+    './src/**/!(test.ts|*.test.ts)',
     './stylesheets/**/*',
   ],
   paths: {
