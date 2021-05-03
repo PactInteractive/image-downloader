@@ -108,7 +108,7 @@ export const Images = ({
                 html`
                   <${DownloadImageButton}
                     imageUrl=${imageUrl}
-                    folderName=${options.folder_name}
+                    options=${options}
                     onClick=${stopPropagation}
                   />
                 `}

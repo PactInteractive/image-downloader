@@ -18,7 +18,7 @@ it(`opens options page on install`, () => {
     .calls[0][0];
   handler({ reason: 'install' });
   expect(chrome.tabs.create).toHaveBeenCalledWith({
-    url: '/views/options.html',
+    url: '/src/Options/index.html',
   });
 });
 

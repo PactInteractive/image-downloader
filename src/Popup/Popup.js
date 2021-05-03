@@ -12,6 +12,7 @@ import html, {
 import { useRunAfterUpdate } from '../hooks/useRunAfterUpdate.js';
 import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
 
+import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { Images } from './Images.js';
@@ -31,7 +32,7 @@ const Popup = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
-    const setMessage = (message) => {
+    const updatePopupData = (message) => {
       if (message.type !== 'sendImages') return;
 
       setAllImages((allImages) => unique([...allImages, ...message.allImages]));
@@ -45,7 +46,7 @@ const Popup = () => {
 
     // Add images to state and trigger filtration.
     // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
-    chrome.runtime.onMessage.addListener(setMessage);
+    chrome.runtime.onMessage.addListener(updatePopupData);
 
     // Get images on the page
     chrome.windows.getCurrent((currentWindow) => {
@@ -61,7 +62,7 @@ const Popup = () => {
     });
 
     return () => {
-      chrome.runtime.onMessage.removeListener(setMessage);
+      chrome.runtime.onMessage.removeListener(updatePopupData);
     };
   }, []);
 
@@ -156,10 +157,8 @@ const Popup = () => {
 
   async function downloadImages() {
     setDownloadIsInProgress(true);
-    chrome.runtime.sendMessage(
-      { type: 'downloadImages', imagesToDownload, options },
-      () => setDownloadIsInProgress(false)
-    );
+    await actions.downloadImages(imagesToDownload, options);
+    setDownloadIsInProgress(false);
   }
 
   const runAfterUpdate = useRunAfterUpdate();

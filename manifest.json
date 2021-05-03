@@ -1,26 +1,19 @@
 {
   "name": "Image Downloader",
   "description": "Browse and download images on the web",
-  "version": "3.1.1",
+  "version": "3.2.0",
   "minimum_chrome_version": "72",
   "manifest_version": 2,
-  "permissions": [
-    "activeTab",
-    "downloads",
-    "webRequest",
-    "webRequestBlocking",
-    "http://*/*",
-    "https://*/*"
-  ],
-  "browser_action": {
-    "default_icon": "/images/icon_128.png",
-    "default_popup": "/views/popup.html"
-  },
   "icons": {
     "16": "/images/icon_16.png",
     "48": "/images/icon_48.png",
     "128": "/images/icon_128.png"
   },
+  "browser_action": {
+    "default_icon": "/images/icon_128.png",
+    "default_popup": "/src/Popup/index.html"
+  },
+  "options_page": "/src/Options/index.html",
   "background": {
     "persistent": true,
     "scripts": [
@@ -28,5 +21,12 @@
       "/src/background/handleUpdates.js"
     ]
   },
-  "options_page": "/views/options.html"
+  "permissions": [
+    "activeTab",
+    "downloads",
+    "webRequest",
+    "webRequestBlocking",
+    "http://*/*",
+    "https://*/*"
+  ]
 }

@@ -1,51 +1,60 @@
-chrome.runtime.onMessage.addListener(startDownload);
+/** @type {Set<{ currentImageNumber: number, imagesToDownload: string[], options: any }>} */
+const tasks = new Set();
 
-// TODO: Handle the case where this is called again before the previous downloads have finished.
-// We need to only have 1 handler, so make it global and figure out a way to communicate images to download and options.
-async function startDownload(message, sender, reply) {
+// NOTE: Don't directly use an `async` function as a listener:
+// https://stackoverflow.com/a/56483156
+chrome.runtime.onMessage.addListener(startDownload);
+chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+
+function startDownload(message, sender, resolve) {
   if (message?.type !== 'downloadImages') return;
 
-  const { imagesToDownload, options } = message;
+  downloadImages({
+    currentImageNumber: 1,
+    imagesToDownload: message.imagesToDownload,
+    options: message.options,
+  }).then(resolve);
 
-  chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
-  let currentImageNumber = 1;
+  return true;
+}
 
-  for (const image of imagesToDownload) {
+async function downloadImages(task) {
+  tasks.add(task);
+  for (const image of task.imagesToDownload) {
     await new Promise((resolve) => {
       chrome.downloads.download({ url: image }, resolve);
     });
   }
+}
 
-  console.log(
-    `currentImageNumber ${currentImageNumber} === images.length ${imagesToDownload.length}`
-  );
-  // Check if suggest has been called enough time before unsubscribing, but make sure it's reliable!
-  // If this doesn't work, try subscribing to `onCreated` for each item and unsubscribe after they're all done.
-  chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
-  reply();
+function suggestNewFilename(item, suggest) {
+  const task = [...tasks][0];
+  if (!task) return;
 
-  function suggestNewFilename(item, suggest) {
-    let newFilename = '';
-    if (options.folder_name) {
-      newFilename += `${options.folder_name}/`;
-    }
-    if (options.new_file_name) {
-      const regex = /(?:\.([^.]+))?$/;
-      const extension = regex.exec(item.filename)[1];
-      if (imagesToDownload.length === 1) {
-        newFilename += `${options.new_file_name}.${extension}`;
-      } else {
-        const numberOfDigits = imagesToDownload.length.toString().length;
-        const formattedImageNumber = `${currentImageNumber}`.padStart(
-          numberOfDigits,
-          '0'
-        );
-        newFilename += `${options.new_file_name}${formattedImageNumber}.${extension}`;
-        currentImageNumber += 1;
-      }
-    } else {
-      newFilename += item.filename;
-    }
-    suggest({ filename: newFilename });
+  if (task.currentImageNumber === task.imagesToDownload.length) {
+    tasks.delete(task); // Task will be done after this run, remove from queue
   }
+
+  let newFilename = '';
+  if (task.options.folder_name) {
+    newFilename += `${task.options.folder_name}/`;
+  }
+  if (task.options.new_file_name) {
+    const regex = /(?:\.([^.]+))?$/;
+    const extension = regex.exec(item.filename)[1];
+    if (task.imagesToDownload.length === 1) {
+      newFilename += `${task.options.new_file_name}.${extension}`;
+    } else {
+      const numberOfDigits = task.imagesToDownload.length.toString().length;
+      const formattedImageNumber = `${task.currentImageNumber}`.padStart(
+        numberOfDigits,
+        '0'
+      );
+      newFilename += `${task.options.new_file_name}${formattedImageNumber}.${extension}`;
+      task.currentImageNumber += 1;
+    }
+  } else {
+    newFilename += item.filename;
+  }
+  suggest({ filename: newFilename });
 }

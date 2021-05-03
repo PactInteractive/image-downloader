@@ -9,7 +9,6 @@ module.exports = {
     './lib/**/*',
     './src/**/!(test-utils.ts|*.test.ts)',
     './stylesheets/**/*',
-    './views/**/*',
   ],
   paths: {
     package: packagePath,
