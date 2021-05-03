@@ -1,4 +1,5 @@
-import html from './html.js';
+import html from '../html.js';
+import * as actions from './actions.js';
 
 export const ImageUrlTextbox = (props) => html`
   <input
@@ -26,14 +27,19 @@ export const OpenImageButton = ({ imageUrl, onClick, ...props }) => {
   `;
 };
 
-export const DownloadImageButton = ({ imageUrl, onClick, ...props }) => {
+export const DownloadImageButton = ({
+  imageUrl,
+  options,
+  onClick,
+  ...props
+}) => {
   return html`
     <button
       type="button"
       title="Download"
       style=${{ backgroundImage: `url("/images/download.svg")` }}
       onClick=${(e) => {
-        chrome.downloads.download({ url: imageUrl });
+        actions.downloadImages([imageUrl], options);
         onClick?.(e);
       }}
       ...${props}

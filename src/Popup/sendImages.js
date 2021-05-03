@@ -65,6 +65,7 @@
   }
 
   chrome.runtime.sendMessage({
+    type: 'sendImages',
     allImages: extractImagesFromSelector('img, image, a, [class], [style]'),
     linkedImages: extractImagesFromSelector('a'),
     origin: window.location.origin,

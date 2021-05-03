@@ -1,12 +1,13 @@
-import html, { useMemo } from './html.js';
+import html, { useMemo } from '../html.js';
 
-import { Checkbox } from './components/Checkbox.js';
+import { Checkbox } from '../components/Checkbox.js';
+import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
+
 import {
   DownloadImageButton,
   ImageUrlTextbox,
   OpenImageButton,
 } from './ImageActions.js';
-import { isIncludedIn, isNotStrictEqual, stopPropagation } from './utils.js';
 
 export const Images = ({
   options,
@@ -107,6 +108,7 @@ export const Images = ({
                 html`
                   <${DownloadImageButton}
                     imageUrl=${imageUrl}
+                    options=${options}
                     onClick=${stopPropagation}
                   />
                 `}

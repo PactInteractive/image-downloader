@@ -1,5 +1,5 @@
-import html, { useEffect, useRef } from './html.js';
-import { Checkbox } from './components/Checkbox.js';
+import html, { useEffect, useRef } from '../html.js';
+import { Checkbox } from '../components/Checkbox.js';
 
 // Currently a singleton. Should rewrite once we switch to a full-fledged rendering library
 export const AdvancedFilters = ({ options, setOptions }) => {
@@ -45,7 +45,7 @@ export const AdvancedFilters = ({ options, setOptions }) => {
     });
   };
 
-  // TODO: Extract and reuse in `options.js` and other components
+  // TODO: Extract and reuse in `Options.js` and other components
   const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
     setOptions((options) => ({ ...options, [key]: checked.toString() }));
   };

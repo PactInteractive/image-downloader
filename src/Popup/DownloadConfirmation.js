@@ -1,5 +1,5 @@
-import html from './html.js';
-import { Checkbox } from './components/Checkbox.js';
+import html from '../html.js';
+import { Checkbox } from '../components/Checkbox.js';
 
 export const DownloadConfirmation = ({
   onCheckboxChange,
