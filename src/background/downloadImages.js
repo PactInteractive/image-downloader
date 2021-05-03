@@ -56,5 +56,10 @@ function suggestNewFilename(item, suggest) {
   } else {
     newFilename += item.filename;
   }
-  suggest({ filename: newFilename });
+
+  suggest({ filename: normalizeSlashes(newFilename) });
+}
+
+function normalizeSlashes(filename) {
+  return filename.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
 }
