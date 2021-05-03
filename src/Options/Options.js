@@ -1,8 +1,9 @@
-import html, { render, useState } from './html.js';
+import html, { render, useState } from '../html.js';
 
-import { Checkbox } from './components/Checkbox.js';
+import { Checkbox } from '../components/Checkbox.js';
+import { isNotStrictEqual } from '../utils.js';
+
 import { SupportList } from './Support.js';
-import { isNotStrictEqual } from './utils.js';
 
 const initialOptions = Object.keys(localStorage)
   .filter((key) => !key.endsWith('_default'))

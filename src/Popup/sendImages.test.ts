@@ -1,14 +1,14 @@
-import { asMockedFunction, mockChrome } from './test-utils';
+import { asMockedFunction, mockChrome } from '../test-utils';
 
 declare var global: any;
 
 global.React = require('react');
-jest.mock('../lib/react-17.0.2.min.js', () => require('react'));
+jest.mock('../../lib/react-17.0.2.min.js', () => require('react'));
 
 global.ReactDOM = require('react-dom');
-jest.mock('../lib/react-dom-17.0.2.min.js', () => require('react-dom'));
+jest.mock('../../lib/react-dom-17.0.2.min.js', () => require('react-dom'));
 
-const { default: html, render } = require('./html.js');
+const { default: html, render } = require('../html.js');
 
 const expectExtractedImages = (elements?: React.ReactNode) => {
   render(elements, document.querySelector('main'));
@@ -26,6 +26,7 @@ describe(`'img' elements`, () => {
     expectExtractedImages(html`
       <img src="http://example.com/image-src.png" />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/image-src.png'],
       linkedImages: [],
       origin: 'http://localhost',
@@ -36,6 +37,7 @@ describe(`'img' elements`, () => {
     expectExtractedImages(html`
       <img src="http://example.com/image-with-hash.png#irrelevant-hash" />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/image-with-hash.png'],
       linkedImages: [],
       origin: 'http://localhost',
@@ -59,6 +61,7 @@ describe(`'image' elements`, () => {
     expectExtractedImages(html`
       <image xlinkHref="http://example.com/image-src.png" />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/image-src.png'],
       linkedImages: [],
       origin: 'http://localhost',
@@ -71,6 +74,7 @@ describe(`'image' elements`, () => {
         xlinkHref="http://example.com/image-with-hash.png#irrelevant-hash"
       />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/image-with-hash.png'],
       linkedImages: [],
       origin: 'http://localhost',
@@ -83,6 +87,7 @@ describe(`'a' elements`, () => {
     expectExtractedImages(html`
       <a href="http://example.com/image-link.png" />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/image-link.png'],
       linkedImages: ['http://example.com/image-link.png'],
       origin: 'http://localhost',
@@ -93,6 +98,7 @@ describe(`'a' elements`, () => {
     expectExtractedImages(html`
       <a href="http://example.com/not-an-image.html" />
     `).toEqual({
+      type: 'sendImages',
       allImages: [],
       linkedImages: [],
       origin: 'http://localhost',
@@ -109,6 +115,7 @@ describe(`background images`, () => {
         }}
       />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/background-image-double-quotes.png'],
       linkedImages: [],
       origin: 'http://localhost',
@@ -123,6 +130,7 @@ describe(`background images`, () => {
         }}
       />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/background-image-single-quotes.png'],
       linkedImages: [],
       origin: 'http://localhost',
@@ -137,6 +145,7 @@ describe(`background images`, () => {
         }}
       />
     `).toEqual({
+      type: 'sendImages',
       allImages: ['http://example.com/background-image-no-quotes.png'],
       linkedImages: [],
       origin: 'http://localhost',
@@ -154,6 +163,7 @@ it.skip(`extracts images from CSS rules`, () => {
     }
   `);
   expectExtractedImages().toEqual({
+    type: 'sendImages',
     allImages: ['http://example.com/background-image-from-css-rules.png'],
     linkedImages: [],
     origin: 'http://localhost',
@@ -168,6 +178,7 @@ it(`removes duplicates`, () => {
       style=${{ backgroundImage: 'url("http://example.com/image-src.png")' }}
     />
   `).toEqual({
+    type: 'sendImages',
     allImages: ['http://example.com/image-src.png'],
     linkedImages: [],
     origin: 'http://localhost',
@@ -176,6 +187,7 @@ it(`removes duplicates`, () => {
 
 it(`removes empty images`, () => {
   expectExtractedImages(html`<img key="img1" /><img key="img2" />`).toEqual({
+    type: 'sendImages',
     allImages: [],
     linkedImages: [],
     origin: 'http://localhost',
@@ -184,6 +196,7 @@ it(`removes empty images`, () => {
 
 it(`maps relative URLs to absolute`, () => {
   expectExtractedImages(html`<img src="/image-relative.png" />`).toEqual({
+    type: 'sendImages',
     allImages: ['http://localhost/image-relative.png'],
     linkedImages: [],
     origin: 'http://localhost',

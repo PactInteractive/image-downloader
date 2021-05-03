@@ -22,9 +22,10 @@
     "128": "/images/icon_128.png"
   },
   "background": {
+    "persistent": true,
     "scripts": [
-      "/src/background/handleUpdates.js",
-      "/src/background/setReferrer.js"
+      "/src/background/downloadImages.js",
+      "/src/background/handleUpdates.js"
     ]
   },
   "options_page": "/views/options.html"

@@ -1,4 +1,4 @@
-import html from './html.js';
+import html from '../html.js';
 
 export const ImageUrlTextbox = (props) => html`
   <input
@@ -26,14 +26,14 @@ export const OpenImageButton = ({ imageUrl, onClick, ...props }) => {
   `;
 };
 
-export const DownloadImageButton = ({ imageUrl, onClick, ...props }) => {
+export const DownloadImageButton = ({ imageUrl, folderName, onClick, ...props }) => {
   return html`
     <button
       type="button"
       title="Download"
       style=${{ backgroundImage: `url("/images/download.svg")` }}
       onClick=${(e) => {
-        chrome.downloads.download({ url: imageUrl });
+        chrome.downloads.download({ url: imageUrl, filename: folderName });
         onClick?.(e);
       }}
       ...${props}

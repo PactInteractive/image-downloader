@@ -1,3 +1,5 @@
+// TODO: Convert to a module and split into 2 - the default values and setting `localStorage` based on the default values initially
+
 const defaults = {
   // Filters
   folder_name: '',
