@@ -4,9 +4,9 @@ If you want to download many images at once, with this extension you can:
 - Explore images on the current page
 - Filter by width, height, or URL
 - One-click download or open any single image in a new tab
-- Customize image size and number of columns in the popup
-
-When you press the "Download" button, all selected images will be saved to the browser download directory (or a subfolder of your choice).
+- Save to a subfolder
+- Rename downloaded files
+- Download in background!
 
 Note: if you haven't set a default download directory you will have to choose the save location for each image. This may open many popup windows! We recommend you set a download directory in your browser settings instead.
 
