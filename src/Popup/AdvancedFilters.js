@@ -34,6 +34,9 @@ export const AdvancedFilters = ({ options, setOptions }) => {
                 justifyContent: 'flex-end',
                 alignItems: 'center',
               }}
+              title=${getSliderCheckboxTooltip(
+                options.filter_min_width_enabled
+              )}
             >
               <small>≥ ${options.filter_min_width}px</small>
               <${SliderCheckbox}
@@ -58,6 +61,9 @@ export const AdvancedFilters = ({ options, setOptions }) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
+              title=${getSliderCheckboxTooltip(
+                options.filter_max_width_enabled
+              )}
             >
               <${SliderCheckbox}
                 options=${options}
@@ -82,6 +88,9 @@ export const AdvancedFilters = ({ options, setOptions }) => {
                 justifyContent: 'flex-end',
                 alignItems: 'center',
               }}
+              title=${getSliderCheckboxTooltip(
+                options.filter_min_height_enabled
+              )}
             >
               <small>≥ ${options.filter_min_height}px</small>
               <${SliderCheckbox}
@@ -106,6 +115,9 @@ export const AdvancedFilters = ({ options, setOptions }) => {
                 justifyContent: 'space-between',
                 alignItems: 'center',
               }}
+              title=${getSliderCheckboxTooltip(
+                options.filter_max_height_enabled
+              )}
             >
               <${SliderCheckbox}
                 options=${options}
@@ -140,9 +152,6 @@ const SliderCheckbox = ({
     <input
       type="checkbox"
       checked=${enabled}
-      title=${`Click this checkbox to ${
-        enabled ? 'disable' : 'enable'
-      } filtering by this value`}
       onChange=${setCheckboxOption(optionKey, setCheckboxOption)}
       ...${props}
     />
@@ -233,3 +242,8 @@ const useDisableSliderHandle = (
     }
   }, [option]);
 };
+
+const getSliderCheckboxTooltip = (option) =>
+  `Click this checkbox to ${
+    option === 'true' ? 'disable' : 'enable'
+  } filtering by this value`;
