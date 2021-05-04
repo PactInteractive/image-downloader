@@ -4,9 +4,9 @@ If you want to download many images at once, with this extension you can:
 - Explore images on the current page
 - Filter by width, height, or URL
 - One-click download or open any single image in a new tab
-- Customize image size and number of columns in the popup
-
-When you press the "Download" button, all selected images will be saved to the browser download directory (or a subfolder of your choice).
+- Save to a subfolder
+- Rename downloaded files
+- Download in background!
 
 Note: if you haven't set a default download directory you will have to choose the save location for each image. This may open many popup windows! We recommend you set a download directory in your browser settings instead.
 
@@ -26,9 +26,13 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 
 📝 Change Log
 ━━━━━━━
-3.2.0:
+3.3.0:
 - Disable slider handles when the checkbox is unchecked
 - Add tooltips to slider handles, slider checkboxes, and the Download button
+
+3.2.0:
+- Download in the background - you can now close the popup and the images will keep downloading!
+- Download single images into subfolder - previously they were saved into the browser's default directory
 
 3.1.1:
 - Fix images sometimes being saved outside the specified subfolder
@@ -63,7 +67,7 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 - Added support for .ico and .tif / .tiff images
 
 2.4.2:
-- Workaround for Chrome disallowing access to cross-domain CSS rules
+- Workaround for browser disallowing access to cross-domain CSS rules
 
 2.4.1:
 - Fixed an issue where invalid URLs would break the extension - https://github.com/PactInteractive/image-downloader/issues/23
@@ -76,7 +80,6 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 - Added support for .bmp, .svg, and .webp images
 - Added support for relative URLs
 - Improved popup loading speed by searching through fewer elements
-- Replaced deprecated `chrome.extension` calls with `chrome.runtime`
 
 2.2.0:
 - Removed the unnecessary permission to access tabs
@@ -91,7 +94,7 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 
 2.0.0:
 - Added the ability to save downloaded files to a subfolder
-- Utilized the Google Chrome downloads API
+- Utilized the browser downloads API
 - Implemented a cleaner, grid-based design
 - Clicking on an image URL textbox will now automatically select the text so users can copy it
 - Fixed a few minor display issues
@@ -132,7 +135,7 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 - Fixed a bug with reseting options - now the user can choose to save the reset values or simply cancel the reset by reloading the page - just like it says in the notification
 
 1.0.11:
-- Changed the download mechanism to support Chrome v21+
+- Changed the download mechanism to support browser versions 21+
 - Added an "Only show linked images" filter option that can be useful when you only want to download images that are in a URL on the page.
 
 1.0.10:

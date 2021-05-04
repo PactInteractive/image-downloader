@@ -1,3 +1,5 @@
+import './setReferrer.js';
+
 import html, {
   render,
   useCallback,
@@ -5,11 +7,14 @@ import html, {
   useMemo,
   useRef,
   useState,
-} from './html.js';
-import { useRunAfterUpdate } from './hooks/useRunAfterUpdate.js';
-import { isIncludedIn, removeSpecialCharacters, unique } from './utils.js';
+} from '../html.js';
 
+import { useRunAfterUpdate } from '../hooks/useRunAfterUpdate.js';
+import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
+
+import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
+import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { Images } from './Images.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
@@ -28,19 +33,21 @@ const Popup = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
-    const setMessageResult = (result) => {
-      setAllImages((allImages) => unique([...allImages, ...result.allImages]));
+    const updatePopupData = (message) => {
+      if (message.type !== 'sendImages') return;
+
+      setAllImages((allImages) => unique([...allImages, ...message.allImages]));
 
       setLinkedImages((linkedImages) =>
-        unique([...linkedImages, ...result.linkedImages])
+        unique([...linkedImages, ...message.linkedImages])
       );
 
-      localStorage.active_tab_origin = result.origin;
+      localStorage.active_tab_origin = message.origin;
     };
 
     // Add images to state and trigger filtration.
     // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
-    chrome.runtime.onMessage.addListener(setMessageResult);
+    chrome.runtime.onMessage.addListener(updatePopupData);
 
     // Get images on the page
     chrome.windows.getCurrent((currentWindow) => {
@@ -48,7 +55,7 @@ const Popup = () => {
         { active: true, windowId: currentWindow.id },
         (activeTabs) => {
           chrome.tabs.executeScript(activeTabs[0].id, {
-            file: '/src/sendImages.js',
+            file: '/src/Popup/sendImages.js',
             allFrames: true,
           });
         }
@@ -56,12 +63,11 @@ const Popup = () => {
     });
 
     return () => {
-      chrome.runtime.onMessage.removeListener(setMessageResult);
+      chrome.runtime.onMessage.removeListener(updatePopupData);
     };
   }, []);
 
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
-  // TODO: Debounce
   const filterImages = useCallback(() => {
     let visibleImages =
       options.only_images_from_links === 'true' ? linkedImages : allImages;
@@ -141,62 +147,19 @@ const Popup = () => {
     setDownloadConfirmationIsShown,
   ] = useState(false);
 
-  function downloadImages() {
+  function maybeDownloadImages() {
     if (options.show_download_confirmation === 'true') {
       setDownloadConfirmationIsShown(true);
     } else {
-      startDownload();
+      downloadImages();
     }
   }
 
-  async function startDownload() {
+  async function downloadImages() {
     setDownloadIsInProgress(true);
-    currentImageNumberRef.current = 1;
-
-    for (const image of imagesToDownload) {
-      await new Promise((resolve) => {
-        chrome.downloads.download({ url: image }, resolve);
-      });
-    }
-
+    await actions.downloadImages(imagesToDownload, options);
     setDownloadIsInProgress(false);
   }
-
-  const currentImageNumberRef = useRef(1);
-  const suggestNewFilename = useCallback(
-    (item, suggest) => {
-      let newFilename = '';
-      if (options.folder_name) {
-        newFilename += `${options.folder_name}/`;
-      }
-      if (options.new_file_name) {
-        const regex = /(?:\.([^.]+))?$/;
-        const extension = regex.exec(item.filename)[1];
-        if (imagesToDownload.length === 1) {
-          newFilename += `${options.new_file_name}.${extension}`;
-        } else {
-          const numberOfDigits = imagesToDownload.length.toString().length;
-          const formattedImageNumber = `${currentImageNumberRef.current}`.padStart(
-            numberOfDigits,
-            '0'
-          );
-          newFilename += `${options.new_file_name}${formattedImageNumber}.${extension}`;
-          currentImageNumberRef.current += 1;
-        }
-      } else {
-        newFilename += item.filename;
-      }
-      suggest({ filename: newFilename });
-    },
-    [imagesToDownload, options.folder_name, options.new_file_name]
-  );
-
-  useEffect(() => {
-    chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
-    return () => {
-      chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
-    };
-  }, [suggestNewFilename]);
 
   const runAfterUpdate = useRunAfterUpdate();
 
@@ -316,11 +279,10 @@ const Popup = () => {
         />
       `}
 
-      <!-- TODO: Implement loading animation -->
       <${DownloadButton}
         disabled=${imagesToDownload.length === 0}
         loading=${downloadIsInProgress}
-        onClick=${downloadImages}
+        onClick=${maybeDownloadImages}
       />
 
       ${downloadConfirmationIsShown &&
@@ -333,29 +295,10 @@ const Popup = () => {
             }));
           }}
           onClose=${() => setDownloadConfirmationIsShown(false)}
-          onConfirm=${startDownload}
+          onConfirm=${downloadImages}
         />
       `}
     </div>
-  `;
-};
-
-const DownloadButton = ({ disabled, loading, ...props }) => {
-  const tooltipText = disabled
-    ? 'Select some images to download first'
-    : loading
-    ? 'Remember to keep the extension popup open\nwhile the images are downloading'
-    : '';
-
-  return html`
-    <input
-      type="button"
-      class="accent ${loading ? 'loading' : ''}"
-      value=${loading ? '•••' : 'Download'}
-      disabled=${disabled || loading}
-      title=${tooltipText}
-      ...${props}
-    />
   `;
 };
 
