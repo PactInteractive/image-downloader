@@ -1,37 +1,13 @@
-## Welcome to GitHub Pages
+## Privacy Policy
+### What information does Image Downloader access?
+In order to extract images from a web page, the extension needs to read all the content on that web page when you click the extension icon. You can see the code responsible for that here: https://github.com/PactInteractive/image-downloader/blob/master/src/Popup/sendImages.js
 
-You can use the [editor on GitHub](https://github.com/PactInteractive/image-downloader/edit/gh-pages/index.md) to maintain and preview the content for your website in Markdown files.
+In addition, some websites like Instagram try to prevent access to their content from the outside, so upon opening the popup Image Downloader will request the images as if they're coming from the website itself. You can see the relevant code here: https://github.com/PactInteractive/image-downloader/blob/master/src/Popup/setReferrer.js
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+### How does Image Downloader use that information?
+Image Downloader only uses the extracted information to display the images in a popup, then download them. The downloads run in the background so you don't need to keep the extension open. You can see the code here: https://github.com/PactInteractive/image-downloader/blob/master/src/background/downloadImages.js
 
-### Markdown
+Also, Image Downloader stores some settings locally in your browser. The stored data is automatically removed if you uninstall the extension.
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
-
-```markdown
-Syntax highlighted code block
-
-# Header 1
-## Header 2
-### Header 3
-
-- Bulleted
-- List
-
-1. Numbered
-2. List
-
-**Bold** and _Italic_ and `Code` text
-
-[Link](url) and ![Image](src)
-```
-
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
-
-### Jekyll Themes
-
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/PactInteractive/image-downloader/settings/pages). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://docs.github.com/categories/github-pages-basics/) or [contact support](https://support.github.com/contact) and we’ll help you sort it out.
+### Does Image Downloader share any information?
+The extension does not modify, store, send, or sell your data in any way! No data leaves your computer!
