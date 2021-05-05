@@ -24,6 +24,13 @@ async function downloadImages(task) {
     await new Promise((resolve) => {
       chrome.downloads.download({ url: image }, resolve);
     });
+    if (chrome.runtime.lastError) {
+      console.error(`${chrome.runtime.lastError.message}: ${image}`);
+      task.currentImageNumber += 1;
+      if (task.currentImageNumber === task.imagesToDownload.length) {
+        tasks.delete(task); // The last download item had an error, remove the task
+      }
+    }
   }
 }
 

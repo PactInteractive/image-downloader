@@ -26,7 +26,7 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 
 📝 Change Log
 ━━━━━━━
-3.2.0:
+3.2.1:
 - Download in the background - you can now close the popup and the images will keep downloading!
 - Download single images into subfolder - previously they were saved into the browser's default directory
 
