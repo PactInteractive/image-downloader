@@ -10,7 +10,7 @@ jest.mock('../../lib/react-dom-17.0.2.min.js', () => require('react-dom'));
 
 const { default: html, render } = require('../html.js');
 
-const expectExtractedImages = (elements?: React.ReactNode) => {
+const expectExtractedImages = (elements?: any) => {
   render(elements, document.querySelector('main'));
   require('./sendImages');
   return expect(asMockedFunction(chrome.runtime.sendMessage).mock.calls[0][0]);
@@ -25,22 +25,16 @@ describe(`'img' elements`, () => {
   it(`extracts image URLs from the 'src' property`, () => {
     expectExtractedImages(html`
       <img src="http://example.com/image-src.png" />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/image-src.png'],
-      linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 
   it(`removes the hash from the 'src' property`, () => {
     expectExtractedImages(html`
       <img src="http://example.com/image-with-hash.png#irrelevant-hash" />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/image-with-hash.png'],
-      linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 });
@@ -60,11 +54,8 @@ describe(`'image' elements`, () => {
   it(`extracts image URLs from the 'xlink:href' attribute`, () => {
     expectExtractedImages(html`
       <image xlinkHref="http://example.com/image-src.png" />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/image-src.png'],
-      linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 
@@ -73,11 +64,8 @@ describe(`'image' elements`, () => {
       <image
         xlinkHref="http://example.com/image-with-hash.png#irrelevant-hash"
       />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/image-with-hash.png'],
-      linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 });
@@ -86,22 +74,18 @@ describe(`'a' elements`, () => {
   it(`extracts the 'href' property if it links to an image`, () => {
     expectExtractedImages(html`
       <a href="http://example.com/image-link.png" />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/image-link.png'],
       linkedImages: ['http://example.com/image-link.png'],
-      origin: 'http://localhost',
     });
   });
 
   it(`doesn't extract the 'href' property if it doesn't link to an image`, () => {
     expectExtractedImages(html`
       <a href="http://example.com/not-an-image.html" />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: [],
       linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 });
@@ -114,11 +98,8 @@ describe(`background images`, () => {
           backgroundImage: `url("http://example.com/background-image-double-quotes.png")`,
         }}
       />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/background-image-double-quotes.png'],
-      linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 
@@ -129,11 +110,8 @@ describe(`background images`, () => {
           backgroundImage: `url('http://example.com/background-image-single-quotes.png')`,
         }}
       />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/background-image-single-quotes.png'],
-      linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 
@@ -144,11 +122,8 @@ describe(`background images`, () => {
           backgroundImage: `url(http://example.com/background-image-no-quotes.png)`,
         }}
       />
-    `).toEqual({
-      type: 'sendImages',
+    `).toMatchObject({
       allImages: ['http://example.com/background-image-no-quotes.png'],
-      linkedImages: [],
-      origin: 'http://localhost',
     });
   });
 });
@@ -162,11 +137,8 @@ it.skip(`extracts images from CSS rules`, () => {
       background-image: url('http://example.com/background-image-from-css-rules.png');
     }
   `);
-  expectExtractedImages().toEqual({
-    type: 'sendImages',
+  expectExtractedImages().toMatchObject({
     allImages: ['http://example.com/background-image-from-css-rules.png'],
-    linkedImages: [],
-    origin: 'http://localhost',
   });
 });
 
@@ -177,28 +149,29 @@ it(`removes duplicates`, () => {
       key="div"
       style=${{ backgroundImage: 'url("http://example.com/image-src.png")' }}
     />
-  `).toEqual({
-    type: 'sendImages',
+  `).toMatchObject({
     allImages: ['http://example.com/image-src.png'],
-    linkedImages: [],
-    origin: 'http://localhost',
   });
 });
 
 it(`removes empty images`, () => {
-  expectExtractedImages(html`<img key="img1" /><img key="img2" />`).toEqual({
-    type: 'sendImages',
+  expectExtractedImages(
+    html`<img key="img1" /><img key="img2" />`
+  ).toMatchObject({
     allImages: [],
-    linkedImages: [],
-    origin: 'http://localhost',
   });
 });
 
 it(`maps relative URLs to absolute`, () => {
-  expectExtractedImages(html`<img src="/image-relative.png" />`).toEqual({
-    type: 'sendImages',
+  expectExtractedImages(html`<img src="/image-relative.png" />`).toMatchObject({
     allImages: ['http://localhost/image-relative.png'],
-    linkedImages: [],
+  });
+});
+
+it(`returns origin`, () => {
+  expectExtractedImages(html`
+    <img src="http://example.com/image-src.png" />
+  `).toMatchObject({
     origin: 'http://localhost',
   });
 });
