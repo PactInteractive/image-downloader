@@ -5,6 +5,7 @@ const tasks = require('./tasks');
 const build = async () => {
   await tasks.clean();
   await tasks.updateManifestVersion();
+  await tasks.updatePackageLockVersion();
   await Promise.all(
     filesToCopy
       .map((filePattern) => glob.sync(filePattern))

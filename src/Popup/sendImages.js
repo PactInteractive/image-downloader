@@ -44,8 +44,8 @@
     return url.indexOf('data:image') === 0 || imageUrlRegex.test(url);
   }
 
-  function extractURLFromStyle(url) {
-    return url.replace(/^url\(["']?/, '').replace(/["']?\)$/, '');
+  function extractURLFromStyle(style) {
+    return style.replace(/^.*url\(["']?/, '').replace(/["']?\).*$/, '');
   }
 
   function relativeUrlToAbsolute(url) {
@@ -53,7 +53,7 @@
   }
 
   function unique(values) {
-    return [...new Set(values)];
+    return toArray(new Set(values));
   }
 
   function toArray(values) {
