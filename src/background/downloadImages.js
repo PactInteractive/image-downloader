@@ -1,4 +1,4 @@
-/** @type {Set<{ currentImageNumber: number, imagesToDownload: string[], options: any }>} */
+/** @type {Set<{ numberOfProcessedImages: number, imagesToDownload: string[], options: any, next: () => void }>} */
 const tasks = new Set();
 
 // NOTE: Don't directly use an `async` function as a listener:
@@ -10,9 +10,15 @@ function startDownload(message, sender, resolve) {
   if (message?.type !== 'downloadImages') return;
 
   downloadImages({
-    currentImageNumber: 1,
+    numberOfProcessedImages: 0,
     imagesToDownload: message.imagesToDownload,
     options: message.options,
+    next() {
+      this.numberOfProcessedImages += 1;
+      if (this.numberOfProcessedImages === this.imagesToDownload.length) {
+        tasks.delete(this);
+      }
+    },
   }).then(resolve);
 
   return true;
@@ -26,20 +32,16 @@ async function downloadImages(task) {
     });
     if (chrome.runtime.lastError) {
       console.error(`${chrome.runtime.lastError.message}: ${image}`);
-      task.currentImageNumber += 1;
-      if (task.currentImageNumber === task.imagesToDownload.length) {
-        tasks.delete(task); // The last download item had an error, remove the task
-      }
+      task.next();
     }
   }
 }
 
 function suggestNewFilename(item, suggest) {
   const task = [...tasks][0];
-  if (!task) return;
-
-  if (task.currentImageNumber === task.imagesToDownload.length) {
-    tasks.delete(task); // Task will be done after this run, remove from queue
+  if (!task) {
+    suggest();
+    return;
   }
 
   let newFilename = '';
@@ -49,22 +51,18 @@ function suggestNewFilename(item, suggest) {
   if (task.options.new_file_name) {
     const regex = /(?:\.([^.]+))?$/;
     const extension = regex.exec(item.filename)[1];
-    if (task.imagesToDownload.length === 1) {
-      newFilename += `${task.options.new_file_name}.${extension}`;
-    } else {
-      const numberOfDigits = task.imagesToDownload.length.toString().length;
-      const formattedImageNumber = `${task.currentImageNumber}`.padStart(
-        numberOfDigits,
-        '0'
-      );
-      newFilename += `${task.options.new_file_name}${formattedImageNumber}.${extension}`;
-      task.currentImageNumber += 1;
-    }
+    const numberOfDigits = task.imagesToDownload.length.toString().length;
+    const formattedImageNumber = `${task.numberOfProcessedImages + 1}`.padStart(
+      numberOfDigits,
+      '0'
+    );
+    newFilename += `${task.options.new_file_name}${formattedImageNumber}.${extension}`;
   } else {
     newFilename += item.filename;
   }
 
   suggest({ filename: normalizeSlashes(newFilename) });
+  task.next();
 }
 
 function normalizeSlashes(filename) {
