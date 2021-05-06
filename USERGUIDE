@@ -26,7 +26,7 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 - Disable slider handles when the checkbox is unchecked
 - Add tooltips to slider handles, slider checkboxes, and the Download button
 
-3.2.2:
+3.2.3:
 - Download in the background - you can now close the popup and the images will keep downloading!
 - Download single images into subfolder - previously they were saved into the browser's default directory
 - Improve background image detection
