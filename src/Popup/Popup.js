@@ -14,6 +14,7 @@ import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
 
 import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
+import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { Images } from './Images.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
@@ -278,12 +279,9 @@ const Popup = () => {
         />
       `}
 
-      <!-- TODO: Implement loading animation -->
-      <input
-        type="button"
-        class="accent ${downloadIsInProgress ? 'loading' : ''}"
-        value=${downloadIsInProgress ? '•••' : 'Download'}
-        disabled=${imagesToDownload.length === 0 || downloadIsInProgress}
+      <${DownloadButton}
+        disabled=${imagesToDownload.length === 0}
+        loading=${downloadIsInProgress}
         onClick=${maybeDownloadImages}
       />
 

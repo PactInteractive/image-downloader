@@ -13,11 +13,7 @@ Note: if you haven't set a default download directory you will have to choose th
 ❓ FAQs
 ━━━━
 💭 Why does this extension need access to all my site data?
-In order to extract images from a web page, Image Downloader needs to be able to read all the content on that web page. In addition, some websites like Instagram try to prevent access to their content from the outside, so this extension requests the images as if they're coming from the website itself.
-
-We do not modify, store, send, or sell your data in any way!
-The source code is available for everyone to see here:
-https://github.com/PactInteractive/image-downloader
+In order to extract images from a web page, Image Downloader needs to be able to read all the content on that web page when you open the popup. No data leaves your computer. For more details check out our Privacy Policy: https://pactinteractive.github.io/image-downloader
 
 💭 Why did this extension download smaller images than I expected? Why did it miss some images?
 Image Downloader can only extract the images currently visible on the page. Those may sometimes be smaller thumbnails of the full-resolution images you'd expect to see when you click on a photo (e.g. in Facebook albums). In addition, some websites like Instagram have carousels with multiple images, but only load a few at a time to save bandwidth.
@@ -26,6 +22,10 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 
 📝 Change Log
 ━━━━━━━
+3.3.0:
+- Disable slider handles when the checkbox is unchecked
+- Add tooltips to slider handles, slider checkboxes, and the Download button
+
 3.2.3:
 - Download in the background - you can now close the popup and the images will keep downloading!
 - Download single images into subfolder - previously they were saved into the browser's default directory

@@ -31,7 +31,7 @@
 
   /* Foreground */
   --foreground: hsl(0, 0%, 20%);
-  --foreground-light: hsl(0, 0%, 60%);
+  --foreground-light: hsl(0, 0%, 70%);
   --foreground-inverse: hsl(0, 0%, 100%);
 
   /* Border radii */
@@ -59,9 +59,9 @@
   /* Misc */
   --border-color: var(--neutral-transparent-5);
   --image-background: var(--neutral-light);
-  --input-background: var(--neutral-transparent-5);
   --images-container-gap: 8px;
   --images-container-padding: 12px;
+  --input-background: var(--neutral-transparent-5);
   --tab-background: var(--neutral-lightest);
   --tab-border: var(--neutral-lighter);
   --tab-header-background: var(--neutral-lighter);
@@ -212,6 +212,7 @@ input[type='number'] {
 }
 
 select {
+  cursor: pointer;
   padding: 7px 12px;
 }
 
@@ -228,7 +229,7 @@ input[type='button'] {
   transition: var(--transition-background);
 }
 input[type='button']:disabled {
-  cursor: not-allowed;
+  cursor: help;
   opacity: 0.6;
 }
 input[type='button'].loading:disabled {
