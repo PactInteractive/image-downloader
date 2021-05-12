@@ -22,9 +22,10 @@ We're looking into adding such capabilities to Image Downloader in the future. I
 
 📝 Change Log
 ━━━━━━━
-3.3.0:
+3.3.1:
 - Disable slider handles when the checkbox is unchecked
 - Add tooltips to slider handles, slider checkboxes, and the Download button
+- Fix some issues with downloads not being cleaned up
 
 3.2.3:
 - Download in the background - you can now close the popup and the images will keep downloading!

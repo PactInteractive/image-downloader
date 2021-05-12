@@ -191,7 +191,11 @@ const useSlider = (dimension, options, setOptions) => {
       }));
     });
 
-    return () => slider.noUiSlider?.destroy();
+    return () => {
+      if (slider.noUiSlider) {
+        slider.noUiSlider.destroy();
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -212,12 +216,18 @@ const useSlider = (dimension, options, setOptions) => {
   ]);
 
   useDisableSliderHandle(
-    () => sliderRef.current?.querySelectorAll('.noUi-origin')[0],
+    () =>
+      sliderRef.current
+        ? sliderRef.current.querySelectorAll('.noUi-origin')[0]
+        : undefined,
     options[`filter_min_${dimension}_enabled`]
   );
 
   useDisableSliderHandle(
-    () => sliderRef.current?.querySelectorAll('.noUi-origin')[1],
+    () =>
+      sliderRef.current
+        ? sliderRef.current.querySelectorAll('.noUi-origin')[1]
+        : undefined,
     options[`filter_max_${dimension}_enabled`]
   );
 

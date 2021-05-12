@@ -1,3 +1,4 @@
+// @ts-check
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
     // Open the options page after install

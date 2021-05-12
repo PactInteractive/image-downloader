@@ -1,13 +1,21 @@
-/** @type {Set<{ numberOfProcessedImages: number, imagesToDownload: string[], options: any, next: () => void }>} */
+// @ts-check
+/** @typedef {{ numberOfProcessedImages: number, imagesToDownload: string[], options: any, next: () => void }} Task */
+
+/** @type {Set<Task>} */
 const tasks = new Set();
 
-// NOTE: Don't directly use an `async` function as a listener:
-// https://stackoverflow.com/a/56483156
 chrome.runtime.onMessage.addListener(startDownload);
 chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 
-function startDownload(message, sender, resolve) {
-  if (message?.type !== 'downloadImages') return;
+// NOTE: Don't directly use an `async` function as a listener for `onMessage`:
+// https://stackoverflow.com/a/56483156
+// https://developer.chrome.com/docs/extensions/reference/runtime/#event-onMessage
+function startDownload(
+  /** @type {any} */ message,
+  /** @type {chrome.runtime.MessageSender} */ sender,
+  /** @type {(response?: any) => void} */ resolve
+) {
+  if (!(message && message.type === 'downloadImages')) return;
 
   downloadImages({
     numberOfProcessedImages: 0,
@@ -21,10 +29,10 @@ function startDownload(message, sender, resolve) {
     },
   }).then(resolve);
 
-  return true;
+  return true; // Keeps the message channel open until `resolve` is called
 }
 
-async function downloadImages(task) {
+async function downloadImages(/** @type {Task} */ task) {
   tasks.add(task);
   for (const image of task.imagesToDownload) {
     await new Promise((resolve) => {
@@ -32,11 +40,13 @@ async function downloadImages(task) {
     });
     if (chrome.runtime.lastError) {
       console.error(`${chrome.runtime.lastError.message}: ${image}`);
-      task.next();
     }
+    task.next();
   }
 }
 
+// https://developer.chrome.com/docs/extensions/reference/downloads/#event-onDeterminingFilename
+/** @type {Parameters<chrome.downloads.DownloadDeterminingFilenameEvent['addListener']>[0]} */
 function suggestNewFilename(item, suggest) {
   const task = [...tasks][0];
   if (!task) {
@@ -62,7 +72,6 @@ function suggestNewFilename(item, suggest) {
   }
 
   suggest({ filename: normalizeSlashes(newFilename) });
-  task.next();
 }
 
 function normalizeSlashes(filename) {
