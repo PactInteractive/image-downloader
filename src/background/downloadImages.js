@@ -36,12 +36,16 @@ async function downloadImages(/** @type {Task} */ task) {
   tasks.add(task);
   for (const image of task.imagesToDownload) {
     await new Promise((resolve) => {
-      chrome.downloads.download({ url: image }, resolve);
+      chrome.downloads.download({ url: image }, (downloadId) => {
+        if (downloadId == null) {
+          if (chrome.runtime.lastError) {
+            console.error(`${image}:`, chrome.runtime.lastError.message);
+          }
+          task.next();
+        }
+        resolve();
+      });
     });
-    if (chrome.runtime.lastError) {
-      console.error(`${chrome.runtime.lastError.message}: ${image}`);
-    }
-    task.next();
   }
 }
 
@@ -72,6 +76,7 @@ function suggestNewFilename(item, suggest) {
   }
 
   suggest({ filename: normalizeSlashes(newFilename) });
+  task.next();
 }
 
 function normalizeSlashes(filename) {
