@@ -62,9 +62,6 @@
   --images-container-gap: 8px;
   --images-container-padding: 12px;
   --input-background: var(--neutral-transparent-5);
-  --tab-background: var(--neutral-lightest);
-  --tab-border: var(--neutral-lighter);
-  --tab-header-background: var(--neutral-lighter);
 }
 
 html {

@@ -39,66 +39,6 @@
         margin: 6px 2px 0 2px;
       }
 
-      .tab-list {
-        --number-of-tabs: 5; /* TODO: Set from component */
-
-        display: grid;
-        gap: 0 2px;
-        grid-template-columns: repeat(var(--number-of-tabs), 1fr);
-      }
-
-      .tab-item {
-        display: contents;
-      }
-
-      .tab-header {
-        display: flex;
-        gap: 8px;
-        align-items: center;
-
-        border-radius: var(--border-radius-md) var(--border-radius-md) 0 0;
-        border: 2px solid var(--tab-border);
-        border-bottom: 0;
-        padding: 4px 8px;
-        background: var(--tab-header-background);
-
-        font-size: 16px;
-        font-weight: bold;
-
-        transition: var(--transition-background);
-      }
-
-      .tab-list input[type='radio']:checked ~ .tab-header {
-        background: var(--tab-background);
-      }
-
-      .tab-header img {
-        height: 24px;
-      }
-
-      .tab-content {
-        grid-row: 2;
-        grid-column: 1 / -1;
-
-        display: block;
-        border-radius: 0 0 var(--border-radius-md) var(--border-radius-md);
-        border: 2px solid var(--tab-border);
-        border-top: 0;
-        background: var(--tab-background);
-        padding: 16px;
-      }
-
-      .tab-content.centered {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-      }
-
-      .tab-list input[type='radio'],
-      .tab-list input[type='radio']:not(:checked) ~ .tab-content {
-        display: none;
-      }
-
       #notifications {
         position: fixed;
         bottom: 8px;
