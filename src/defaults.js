@@ -4,6 +4,7 @@ const defaults = {
   // Filters
   folder_name: '',
   new_file_name: '',
+  make_uri_folder: false,
   filter_url: '',
   filter_url_mode: 'normal',
   filter_min_width: 0,
