@@ -82,35 +82,32 @@ export const Images = ({
             class="card ${selectedImages.includes(imageUrl) ? 'checked' : ''}"
             style=${{ minHeight: `${options.image_max_width}px` }}
             onClick=${() => {
-          setSelectedImages((selectedImages) =>
-            selectedImages.includes(imageUrl)
-              ? selectedImages.filter(isNotStrictEqual(imageUrl))
-              : [...selectedImages, imageUrl]
-          );
-        }}
+              setSelectedImages((selectedImages) =>
+                selectedImages.includes(imageUrl)
+                  ? selectedImages.filter(isNotStrictEqual(imageUrl))
+                  : [...selectedImages, imageUrl]
+              );
+            }}
           >
             <img
               src=${imageUrl}
               style=${{
-          minWidth: `${options.image_min_width}px`,
-          maxWidth: `${options.image_max_width}px`,
-        }}
+                minWidth: `${options.image_min_width}px`,
+                maxWidth: `${options.image_max_width}px`,
+              }}
             />
 
             <div class="checkbox"></div>
 
-            ${(showOpenImageButton || showDownloadImageButton) &&
-        html`
+            ${(showOpenImageButton || showDownloadImageButton) && html`
               <div class="actions">
-                ${showOpenImageButton &&
-          html`
+                ${showOpenImageButton && html`
                   <${OpenImageButton}
                     imageUrl=${imageUrl}
                     onClick=${stopPropagation}
                   />
                 `}
-                ${showDownloadImageButton &&
-          html`
+                ${showDownloadImageButton && html`
                   <${DownloadImageButton}
                     imageUrl=${imageUrl}
                     options=${options}
@@ -119,8 +116,7 @@ export const Images = ({
                 `}
               </div>
             `}
-            ${showImageUrl &&
-        html`
+            ${showImageUrl && html`
               <div class="image_url_container">
                 <${ImageUrlTextbox}
                   value=${imageUrl}

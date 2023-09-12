@@ -208,8 +208,9 @@ const Popup = () => {
         </button>
       </div>
 
-      ${options.show_advanced_filters === 'true' &&
-      html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}
+      ${options.show_advanced_filters === 'true' && html`
+        <${AdvancedFilters} options=${options} setOptions=${setOptions} />
+      `}
     </div>
 
     <div ref=${imagesCacheRef} class="hidden">
@@ -255,8 +256,7 @@ const Popup = () => {
         }}
       />
 
-      ${options.show_file_renaming === 'true' &&
-      html`
+      ${options.show_file_renaming === 'true' && html`
         <input
           type="text"
           placeholder="Rename files"
@@ -285,8 +285,7 @@ const Popup = () => {
         onClick=${maybeDownloadImages}
       />
 
-      ${downloadConfirmationIsShown &&
-      html`
+      ${downloadConfirmationIsShown && html`
         <${DownloadConfirmation}
           onCheckboxChange=${({ currentTarget: { checked } }) => {
             setOptions((options) => ({
