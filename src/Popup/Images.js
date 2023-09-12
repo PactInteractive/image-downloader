@@ -1,4 +1,4 @@
-import html, { useMemo } from '../html.js';
+import html, { useEffect, useMemo } from '../html.js';
 
 import { Checkbox } from '../components/Checkbox.js';
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
@@ -22,12 +22,17 @@ export const Images = ({
     const columns = parseInt(options.columns, 10);
     return {
       gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
-      width: `calc(2 * var(--images-container-padding) + ${columns} * ${
-        options.image_max_width
-      }px + ${columns - 1} * var(--images-container-gap))`,
+      width: `calc(2 * var(--images-container-padding) + ${columns} * ${options.image_max_width}px + ${columns - 1} * var(--images-container-gap))`,
       ...style,
     };
   }, [options.columns, options.image_max_width, style]);
+
+  // Fix weird flexbox bug where the parent does not respect the child's width
+  // https://github.com/PactInteractive/image-downloader/issues/114#issuecomment-1715716846
+  useEffect(() => {
+    // Set min width instead of width to allow for other content like header or footer to render properly
+    document.querySelector('main').style.minWidth = containerStyle.width;
+  }, [containerStyle]);
 
   const showImageUrl = useMemo(() => options.show_image_url === 'true', [
     options.show_image_url,
@@ -64,48 +69,48 @@ export const Images = ({
         checked=${allImagesAreSelected}
         indeterminate=${someImagesAreSelected && !allImagesAreSelected}
         onChange=${({ currentTarget: { checked } }) => {
-          setSelectedImages(checked ? visibleImages : []);
-        }}
+      setSelectedImages(checked ? visibleImages : []);
+    }}
       >
         Select all (${imagesToDownload.length} / ${visibleImages.length})
       <//>
 
       ${visibleImages.map(
-        (imageUrl, index) => html`
+      (imageUrl, index) => html`
           <div
             id=${`card_${index}`}
             class="card ${selectedImages.includes(imageUrl) ? 'checked' : ''}"
             style=${{ minHeight: `${options.image_max_width}px` }}
             onClick=${() => {
-              setSelectedImages((selectedImages) =>
-                selectedImages.includes(imageUrl)
-                  ? selectedImages.filter(isNotStrictEqual(imageUrl))
-                  : [...selectedImages, imageUrl]
-              );
-            }}
+          setSelectedImages((selectedImages) =>
+            selectedImages.includes(imageUrl)
+              ? selectedImages.filter(isNotStrictEqual(imageUrl))
+              : [...selectedImages, imageUrl]
+          );
+        }}
           >
             <img
               src=${imageUrl}
               style=${{
-                minWidth: `${options.image_min_width}px`,
-                maxWidth: `${options.image_max_width}px`,
-              }}
+          minWidth: `${options.image_min_width}px`,
+          maxWidth: `${options.image_max_width}px`,
+        }}
             />
 
             <div class="checkbox"></div>
 
             ${(showOpenImageButton || showDownloadImageButton) &&
-            html`
+        html`
               <div class="actions">
                 ${showOpenImageButton &&
-                html`
+          html`
                   <${OpenImageButton}
                     imageUrl=${imageUrl}
                     onClick=${stopPropagation}
                   />
                 `}
                 ${showDownloadImageButton &&
-                html`
+          html`
                   <${DownloadImageButton}
                     imageUrl=${imageUrl}
                     options=${options}
@@ -115,7 +120,7 @@ export const Images = ({
               </div>
             `}
             ${showImageUrl &&
-            html`
+        html`
               <div class="image_url_container">
                 <${ImageUrlTextbox}
                   value=${imageUrl}
@@ -125,7 +130,7 @@ export const Images = ({
             `}
           </div>
         `
-      )}
+    )}
     </div>
   `;
 };
