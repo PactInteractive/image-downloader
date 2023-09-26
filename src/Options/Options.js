@@ -3,7 +3,8 @@ import html, { render, useState } from '../html.js';
 import { Checkbox } from '../components/Checkbox.js';
 import { isNotStrictEqual } from '../utils.js';
 
-import { SupportList } from './Support.js';
+import { About } from './About.js';
+import { Support } from './Support.js';
 
 const initialOptions = Object.keys(localStorage)
   .filter((key) => !key.endsWith('_default'))
@@ -83,13 +84,18 @@ const Options = () => {
       <small class="light">v${chrome.runtime.getManifest().version}</small>
     </h1>
 
-    <fieldset>
-      <legend>About</legend>
-      <${SupportList} />
-    </fieldset>
+    <details>
+      <summary>💭 About</summary>
+      <${About} />
+    </details>
+
+    <details>
+      <summary>🪙 Support</summary>
+      <${Support} />
+    </details>
 
     <fieldset>
-      <legend>General options</legend>
+      <legend>⚙️ General options</legend>
 
       <${Checkbox}
         id="show_download_confirmation_checkbox"
@@ -112,7 +118,7 @@ const Options = () => {
     </fieldset>
 
     <fieldset>
-      <legend>Image options</legend>
+      <legend>🖼️ Image options</legend>
 
       <${Checkbox}
         id="show_image_url_checkbox"

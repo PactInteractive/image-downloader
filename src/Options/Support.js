@@ -1,64 +1,70 @@
 import html from '../html.js';
 import { ExternalLink } from '../components/ExternalLink.js';
 
-const numberOfActiveUsers = '1,000,000+';
-const years = new Date().getFullYear() - 2012;
 const addresses = {
   btc: '19UsTZPYtNp1h2y4QT2a7gbNYNZrEdjXvE',
 };
 
-export const SupportList = () => html`
-  <div style=${{ display: 'flex', gap: '24px' }}>
-    <div style=${{ flex: 2 }}>
-      <p>
-        If you're one of the ${numberOfActiveUsers} people using this extension,
-        over the past ${years} years marketing companies have approached me with
-        offers to pay in exchange for <b>your private data</b> like:
-      </p>
+export const Support = () => html`
+  <p style=${{ margin: '1em 0' }}>
+    If you want to, you can try some of our other projects or support Image
+    Downloader by donating Bitcoin.
+  </p>
 
-      <ul>
-        <li>what websites you visit</li>
-        <li>when you visit them</li>
-        <li>where you visit them from</li>
-      </ul>
+  <div style=${{ display: 'flex', flexDirection: 'column', gap: '1em' }}>
+    <a
+      href="https://codebedder.com"
+      target="_blank"
+      style=${{
+        border: '2px dashed var(--border-color)',
+        padding: '0 1em 1em 1em',
+      }}
+    >
+      <h2 style=${{ display: 'inline-flex', gap: '0.5ch' }}>
+        <img src="https://codebedder.com/logo.svg" style=${{ height: '1em' }} />
+        CodeBedder.com <small> - simplest code editor on the web</small>
+      </h2>
 
-      <p>
-        And what do they think your privacy and trust are worth?
-        <br />
-        <b>0.15 to 0.45 cents</b>
-        <br />
-        Less than a penny!
-      </p>
+      <img src="https://codebedder.com/screenshot.png" />
+    </a>
 
-      <p>
-        My response to such offers?
-        <br />
-        Mark as spam and delete!
-      </p>
-
-      <p>
-        If you want to, you may support this project by donating Bitcoin.
-        <br />
-        In any case, the extension will remain <b>free</b>, <b>open-source</b>,
-        and <b> without targeted ads or tracking algorithms</b>.
-      </p>
-
-      <p>
-        The source code can be found on GitHub:${' '}
-        <${ExternalLink}
-          href="https://github.com/PactInteractive/image-downloader"
+    <a
+      href="https://chrome.google.com/webstore/detail/code-blue/mbjgnjfkngoogkgohnmbimnpdacdbghb"
+      target="_blank"
+      style=${{
+        border: '2px dashed var(--border-color)',
+        padding: '0 1em 1em 1em',
+      }}
+    >
+      <h2 style=${{ display: 'inline-flex', gap: '0.5ch' }}>
+        <img
+          src="https://raw.githubusercontent.com/vdsabev/code-blue/master/images/icon_128.png"
+          style=${{ height: '1em' }}
         />
-      </p>
-    </div>
+        Code Blue
+        <small> - extension to render blocks of inline code on X/Twitter</small>
+      </h2>
 
-    <div style=${{ flex: 1, textAlign: 'center' }}>
+      <div style=${{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
+        <img
+          src="https://raw.githubusercontent.com/vdsabev/code-blue/master/images/before.png"
+        />
+        <img
+          src="https://raw.githubusercontent.com/vdsabev/code-blue/master/images/demo.gif"
+        />
+      </div>
+    </a>
+
+    <div
+      style=${{ border: '2px dashed var(--border-color)', padding: '0 1em' }}
+    >
       <h2 style=${{ display: 'inline-flex', gap: '0.5ch' }}>
         <img src="/images/btc.png" style=${{ height: '1em' }} />
-        Bitcoin address
+        Bitcoin <small>donation address</small>
       </h2>
 
       <${ExternalLink} href="bitcoin:${addresses.btc}">
-        <img src="/images/btc-qr.png" style=${{ width: '100%' }} />
+        <img src="/images/btc-qr.png" style=${{ width: '240px' }} />
       <//>
 
       <pre>${addresses.btc}</pre>

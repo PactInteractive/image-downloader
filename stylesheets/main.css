@@ -94,7 +94,8 @@ svg {
   fill: currentColor;
 }
 
-fieldset {
+fieldset,
+details {
   border-color: var(--border-color);
   border-width: 0;
   border-top-width: 2px;
@@ -102,22 +103,51 @@ fieldset {
   padding-left: 0;
 }
 
-fieldset + fieldset {
-  margin-top: 12px;
+fieldset,
+details {
+  margin-top: 2rem;
 }
 
-fieldset > p:first-of-type {
+fieldset > p:first-of-type,
+details > p:first-of-type {
   margin-top: 0;
 }
 
-fieldset > p:last-of-type {
+fieldset > p:last-of-type,
+details > p:last-of-type {
   margin-bottom: 0;
 }
 
-legend {
-  margin-left: -9px;
+legend,
+summary {
+  margin-left: -8px;
   padding: 0 8px;
   font-weight: bold;
+}
+
+summary::before {
+  content: '\2BC8';
+}
+
+details[open] summary::before {
+  content: '\2BC6';
+}
+
+summary {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.25em;
+  margin-left: -22px;
+  margin-right: -6px;
+}
+
+summary::after {
+  content: '';
+  flex: 1;
+  height: 2px;
+  margin-left: 0.33em;
+  background-color: var(--border-color);
 }
 
 .left {
@@ -318,4 +348,8 @@ input[type='button'].neutral.ghost {
 label {
   cursor: pointer;
   display: inline-flex;
+}
+
+label:has(input[type='checkbox']) {
+  margin-left: 3px;
 }
