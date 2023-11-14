@@ -7,11 +7,38 @@ const addresses = {
 
 export const Support = () => html`
   <p style=${{ margin: '1em 0' }}>
-    If you want to, you can try some of our other projects or support Image
-    Downloader by donating Bitcoin.
+    Try some of our other projects or support Image Downloader directly by
+    donating Bitcoin:
   </p>
 
-  <div style=${{ display: 'flex', flexDirection: 'column', gap: '1em' }}>
+  <div
+    style=${{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(2, minmax(0, 1fr)',
+      gap: '1em',
+    }}
+  >
+    <a
+      href="https://slidezones.netlify.app"
+      target="_blank"
+      style=${{
+        border: '2px dashed var(--border-color)',
+        padding: '0 1em 1em 1em',
+      }}
+    >
+      <h2 style=${{ display: 'inline-flex', gap: '0.5ch', marginBottom: '0' }}>
+        <img
+          src="https://slidezones.netlify.app/images/logo.svg"
+          style=${{ height: '1em' }}
+        />
+        SlideZones
+      </h2>
+      <br />
+      <small>Time zone converter for seamless global meetings</small>
+
+      <img src="https://slidezones.netlify.app/images/screenshot.png" />
+    </a>
+
     <a
       href="https://codebedder.com"
       target="_blank"
@@ -20,10 +47,12 @@ export const Support = () => html`
         padding: '0 1em 1em 1em',
       }}
     >
-      <h2 style=${{ display: 'inline-flex', gap: '0.5ch' }}>
+      <h2 style=${{ display: 'inline-flex', gap: '0.5ch', marginBottom: '0' }}>
         <img src="https://codebedder.com/logo.svg" style=${{ height: '1em' }} />
-        CodeBedder.com <small> - simplest code editor on the web</small>
+        CodeBedder.com
       </h2>
+      <br />
+      <small>Simplest code editor on the web</small>
 
       <img src="https://codebedder.com/screenshot.png" />
     </a>
@@ -36,14 +65,15 @@ export const Support = () => html`
         padding: '0 1em 1em 1em',
       }}
     >
-      <h2 style=${{ display: 'inline-flex', gap: '0.5ch' }}>
+      <h2 style=${{ display: 'inline-flex', gap: '0.5ch', marginBottom: '0' }}>
         <img
           src="https://raw.githubusercontent.com/vdsabev/code-blue/master/images/icon_128.png"
           style=${{ height: '1em' }}
         />
         Code Blue
-        <small> - extension to render blocks of inline code on X/Twitter</small>
       </h2>
+      <br />
+      <small>Render blocks of inline code on X/Twitter</small>
 
       <div style=${{ display: 'grid', gridTemplateColumns: '1fr 1fr' }}>
         <img
@@ -58,16 +88,15 @@ export const Support = () => html`
     <div
       style=${{ border: '2px dashed var(--border-color)', padding: '0 1em' }}
     >
-      <h2 style=${{ display: 'inline-flex', gap: '0.5ch' }}>
+      <h2 style=${{ display: 'inline-flex', gap: '0.5ch', marginBottom: '0' }}>
         <img src="/images/btc.png" style=${{ height: '1em' }} />
         Bitcoin <small>donation address</small>
       </h2>
+      <pre style=${{ margin: '0' }}>${addresses.btc}</pre>
 
       <${ExternalLink} href="bitcoin:${addresses.btc}">
-        <img src="/images/btc-qr.png" style=${{ width: '240px' }} />
+        <img src="/images/btc-qr.png" style=${{ marginBottom: '1rem' }} />
       <//>
-
-      <pre>${addresses.btc}</pre>
     </div>
   </div>
 `;

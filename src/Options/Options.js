@@ -89,7 +89,7 @@ const Options = () => {
       <${About} />
     </details>
 
-    <details>
+    <details open>
       <summary>🪙 Support</summary>
       <${Support} />
     </details>
