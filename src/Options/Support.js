@@ -19,7 +19,7 @@ export const Support = () => html`
     }}
   >
     <a
-      href="https://slidezones.netlify.app"
+      href="https://slidezones.com"
       target="_blank"
       style=${{
         border: '2px dashed var(--border-color)',
@@ -28,7 +28,7 @@ export const Support = () => html`
     >
       <h2 style=${{ display: 'inline-flex', gap: '0.5ch', marginBottom: '0' }}>
         <img
-          src="https://slidezones.netlify.app/images/logo.svg"
+          src="https://slidezones.com/images/logo.svg"
           style=${{ height: '1em' }}
         />
         SlideZones
@@ -36,7 +36,7 @@ export const Support = () => html`
       <br />
       <small>Time zone converter for seamless global meetings</small>
 
-      <img src="https://slidezones.netlify.app/images/screenshot.png" />
+      <img src="https://slidezones.com/images/screenshot.png" />
     </a>
 
     <a
