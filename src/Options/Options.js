@@ -115,6 +115,16 @@ const Options = () => {
       >
         <span>Show file renaming textbox</span>
       <//>
+
+      <br />
+      <${Checkbox}
+          id="make_uri_folder_checkbox"
+          title="Make folders by download URI"
+          checked="${options.make_uri_folder === 'true'}"
+          onChange=${setCheckboxOption('make_uri_folder')}
+      >
+        <span>Make folders by download URI</span>
+      <//>
     </fieldset>
 
     <fieldset>

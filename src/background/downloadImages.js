@@ -62,6 +62,10 @@ function suggestNewFilename(item, suggest) {
   if (task.options.folder_name) {
     newFilename += `${task.options.folder_name}/`;
   }
+  if (task.options.make_uri_folder) {
+    const url = new URL(item.url);
+    newFilename += `${url.host}/${url.pathname.slice(0, -(item.filename.length))}/`;
+  }
   if (task.options.new_file_name) {
     const regex = /(?:\.([^.]+))?$/;
     const extension = regex.exec(item.filename)[1];
