@@ -20,21 +20,9 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "images/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
+      "resources": ["images/*"],
+      "matches": ["<all_urls>"]
     }
   ],
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "downloads"
-  ],
-  "host_permissions": [
-    "http://*/*",
-    "https://*/*"
-  ]
+  "permissions": ["activeTab", "scripting", "downloads"]
 }
