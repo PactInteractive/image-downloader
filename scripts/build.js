@@ -1,16 +1,16 @@
-const glob = require('glob');
-const { filesToCopy } = require('./config');
-const tasks = require('./tasks');
+import { sync } from 'glob';
 
-const build = async () => {
-  await tasks.clean();
-  await tasks.updateManifestVersion();
-  await tasks.updatePackageLockVersion();
+import { filesToCopy } from './config';
+import { clean, copyFile, updateManifest } from './tasks';
+
+async function build() {
+  await clean();
+  await updateManifest();
   await Promise.all(
     filesToCopy
-      .map((filePattern) => glob.sync(filePattern))
+      .map((filePattern) => sync(filePattern))
       .reduce((parent, child) => [...parent, ...child], [])
-      .map(tasks.copyFile)
+      .map(copyFile)
       .map((promise) =>
         promise.catch((error) => {
           if (error.code === 'EEXIST') {
@@ -18,9 +18,9 @@ const build = async () => {
           } else {
             throw error;
           }
-        })
-      )
+        }),
+      ),
   );
-};
+}
 
 build();

@@ -5,7 +5,8 @@
  * ```
  */
 
-const tasks = require('./tasks');
+import tasks from './tasks';
+
 const [taskName, ...args] = process.argv.slice(2);
 if (!tasks[taskName]) {
   const taskNameList = Object.keys(tasks)

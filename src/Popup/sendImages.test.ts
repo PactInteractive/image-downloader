@@ -3,10 +3,10 @@ import { asMockedFunction, mockChrome } from '../test';
 declare var global: any;
 
 global.React = require('react');
-jest.mock('../../lib/react-17.0.2.min.js', () => require('react'));
+jest.mock('../../lib/react-18.3.1.min.js', () => require('react'));
 
 global.ReactDOM = require('react-dom');
-jest.mock('../../lib/react-dom-17.0.2.min.js', () => require('react-dom'));
+jest.mock('../../lib/react-dom-18.3.1.min.js', () => require('react-dom'));
 
 const { default: html, render } = require('../html.js');
 

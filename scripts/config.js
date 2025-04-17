@@ -1,8 +1,14 @@
 const packagePath = './package.json';
-const packageLockPath = './package-lock.json';
 const manifestPath = './manifest.json';
 
 module.exports = {
+  outputDirectory: 'build',
+  icons: {
+    inputSvg: './images/logo.svg',
+    outputDirectory: 'images',
+    prefix: 'icon_',
+    sizes: [16, 32, 48, 128],
+  },
   filesToCopy: [
     manifestPath,
     './images/**/*',
@@ -12,8 +18,6 @@ module.exports = {
   ],
   paths: {
     package: packagePath,
-    packageLock: packageLockPath,
     manifest: manifestPath,
   },
-  outputDirectory: 'build',
 };

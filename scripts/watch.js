@@ -1,19 +1,22 @@
-const watch = require('glob-watcher');
-const { filesToCopy, paths } = require('./config');
-const tasks = require('./tasks');
+import watch from 'glob-watcher';
 
-const logAndExecute = (message, fn) => async (path, ...args) => {
-  const result = await fn(path, ...args);
-  console.log(`[${new Date().toLocaleTimeString()}]`, message, result || path);
-};
+import { filesToCopy, paths } from './config';
+import { updateManifest, copyFile, removeFile } from './tasks';
 
-watch(paths.package).on('change', tasks.updateManifestVersion);
-watch(paths.package).on(
-  'change',
-  logAndExecute('Update', tasks.updatePackageLockVersion)
-);
+const logAndExecute =
+  (message, fn) =>
+  async (path, ...args) => {
+    const result = await fn(path, ...args);
+    console.log(
+      `[${new Date().toLocaleTimeString()}]`,
+      message,
+      result || path,
+    );
+  };
+
+watch(paths.package).on('change', updateManifest);
 
 watch(filesToCopy)
-  .on('add', logAndExecute('Add', tasks.copyFile))
-  .on('change', logAndExecute('Update', tasks.copyFile))
-  .on('unlink', logAndExecute('Remove', tasks.removeFile));
+  .on('add', logAndExecute('Add', copyFile))
+  .on('change', logAndExecute('Update', copyFile))
+  .on('unlink', logAndExecute('Remove', removeFile));
