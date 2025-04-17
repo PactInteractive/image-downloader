@@ -1,5 +1,3 @@
-import './setReferrer.js';
-
 import html, {
   render,
   useCallback,
@@ -33,38 +31,36 @@ const Popup = () => {
   const [selectedImages, setSelectedImages] = useState([]);
   const [visibleImages, setVisibleImages] = useState([]);
   useEffect(() => {
-    const updatePopupData = (message) => {
-      if (message.type !== 'sendImages') return;
-
-      setAllImages((allImages) => unique([...allImages, ...message.allImages]));
-
-      setLinkedImages((linkedImages) =>
-        unique([...linkedImages, ...message.linkedImages])
-      );
-
-      localStorage.active_tab_origin = message.origin;
-    };
-
-    // Add images to state and trigger filtration.
-    // `sendImages.js` is injected into all frames of the active tab, so this listener may be called multiple times.
-    chrome.runtime.onMessage.addListener(updatePopupData);
-
     // Get images on the page
     chrome.windows.getCurrent((currentWindow) => {
       chrome.tabs.query(
         { active: true, windowId: currentWindow.id },
         (activeTabs) => {
-          chrome.tabs.executeScript(activeTabs[0].id, {
-            file: '/src/Popup/sendImages.js',
-            allFrames: true,
-          });
-        }
+          chrome.scripting
+            .executeScript({
+              target: { tabId: activeTabs[0].id, allFrames: true },
+              func: findImages,
+            })
+            .then((messages) => {
+              setAllImages((allImages) =>
+                unique([
+                  ...allImages,
+                  ...messages.flatMap((message) => message?.result?.allImages),
+                ]),
+              );
+
+              setLinkedImages((linkedImages) =>
+                unique([
+                  ...linkedImages,
+                  ...messages.flatMap((message) => message?.result?.linkedImages),
+                ]),
+              );
+
+              localStorage.active_tab_origin = messages[0]?.result?.origin;
+            });
+        },
       );
     });
-
-    return () => {
-      chrome.runtime.onMessage.removeListener(updatePopupData);
-    };
   }, []);
 
   const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
@@ -116,7 +112,7 @@ const Popup = () => {
 
     visibleImages = visibleImages.filter((url) => {
       const image = imagesCacheRef.current.querySelector(
-        `img[src="${encodeURI(url)}"]`
+        `img[src="${encodeURI(url)}"]`,
       );
 
       return (
@@ -139,13 +135,11 @@ const Popup = () => {
   const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
   const imagesToDownload = useMemo(
     () => visibleImages.filter(isIncludedIn(selectedImages)),
-    [visibleImages, selectedImages]
+    [visibleImages, selectedImages],
   );
 
-  const [
-    downloadConfirmationIsShown,
-    setDownloadConfirmationIsShown,
-  ] = useState(false);
+  const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] =
+    useState(false);
 
   function maybeDownloadImages() {
     if (options.show_download_confirmation === 'true') {
@@ -208,14 +202,15 @@ const Popup = () => {
         </button>
       </div>
 
-      ${options.show_advanced_filters === 'true' && html`
+      ${options.show_advanced_filters === 'true' &&
+      html`
         <${AdvancedFilters} options=${options} setOptions=${setOptions} />
       `}
     </div>
 
     <div ref=${imagesCacheRef} class="hidden">
       ${allImages.map(
-        (url) => html`<img src=${encodeURI(url)} onLoad=${filterImages} />`
+        (url) => html`<img src=${encodeURI(url)} onLoad=${filterImages} />`,
       )}
     </div>
 
@@ -242,7 +237,7 @@ const Popup = () => {
         value=${options.folder_name}
         onChange=${({ currentTarget: input }) => {
           const savedSelectionStart = removeSpecialCharacters(
-            input.value.slice(0, input.selectionStart)
+            input.value.slice(0, input.selectionStart),
           ).length;
 
           runAfterUpdate(() => {
@@ -256,7 +251,8 @@ const Popup = () => {
         }}
       />
 
-      ${options.show_file_renaming === 'true' && html`
+      ${options.show_file_renaming === 'true' &&
+      html`
         <input
           type="text"
           placeholder="Rename files"
@@ -264,7 +260,7 @@ const Popup = () => {
           value=${options.new_file_name}
           onChange=${({ currentTarget: input }) => {
             const savedSelectionStart = removeSpecialCharacters(
-              input.value.slice(0, input.selectionStart)
+              input.value.slice(0, input.selectionStart),
             ).length;
 
             runAfterUpdate(() => {
@@ -285,7 +281,8 @@ const Popup = () => {
         onClick=${maybeDownloadImages}
       />
 
-      ${downloadConfirmationIsShown && html`
+      ${downloadConfirmationIsShown &&
+      html`
         <${DownloadConfirmation}
           onCheckboxChange=${({ currentTarget: { checked } }) => {
             setOptions((options) => ({
@@ -300,5 +297,79 @@ const Popup = () => {
     </div>
   `;
 };
+
+function findImages() {
+  // Source: https://support.google.com/webmasters/answer/2598805?hl=en
+  const imageUrlRegex =
+    /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|ico|jfif|jpe?g|png|svg|tiff?|webp|avif))(?:\?([^#]*))?(?:#(.*))?/i;
+
+  function extractImagesFromSelector(selector) {
+    return unique(
+      toArray(document.querySelectorAll(selector))
+        .map(extractImageFromElement)
+        .filter(isTruthy)
+        .map(relativeUrlToAbsolute),
+    );
+  }
+
+  function extractImageFromElement(element) {
+    if (element.tagName.toLowerCase() === 'img') {
+      const src = element.src;
+      const hashIndex = src.indexOf('#');
+      return hashIndex >= 0 ? src.substr(0, hashIndex) : src;
+    }
+
+    if (element.tagName.toLowerCase() === 'image') {
+      const src = element.getAttribute('xlink:href');
+      const hashIndex = src.indexOf('#');
+      return hashIndex >= 0 ? src.substr(0, hashIndex) : src;
+    }
+
+    if (element.tagName.toLowerCase() === 'a') {
+      const href = element.href;
+      if (isImageURL(href)) {
+        return href;
+      }
+    }
+
+    const backgroundImage = window.getComputedStyle(element).backgroundImage;
+    if (backgroundImage) {
+      const parsedURL = extractURLFromStyle(backgroundImage);
+      if (isImageURL(parsedURL)) {
+        return parsedURL;
+      }
+    }
+  }
+
+  function isImageURL(url) {
+    return url.indexOf('data:image') === 0 || imageUrlRegex.test(url);
+  }
+
+  function extractURLFromStyle(style) {
+    return style.replace(/^.*url\(["']?/, '').replace(/["']?\).*$/, '');
+  }
+
+  function relativeUrlToAbsolute(url) {
+    return url.indexOf('/') === 0 ? `${window.location.origin}${url}` : url;
+  }
+
+  function unique(values) {
+    return toArray(new Set(values));
+  }
+
+  function toArray(values) {
+    return [...values];
+  }
+
+  function isTruthy(value) {
+    return !!value;
+  }
+
+  return {
+    allImages: extractImagesFromSelector('img, image, a, [class], [style]'),
+    linkedImages: extractImagesFromSelector('a'),
+    origin: window.location.origin,
+  };
+}
 
 render(html`<${Popup} />`, document.querySelector('main'));

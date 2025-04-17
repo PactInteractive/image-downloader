@@ -84,7 +84,7 @@ const Options = () => {
       <small class="light">v${chrome.runtime.getManifest().version}</small>
     </h1>
 
-    <details>
+    <details open>
       <summary>💭 About</summary>
       <${About} />
     </details>
@@ -239,7 +239,6 @@ const Options = () => {
       />
     </div>
 
-    <!-- TODO: Animate -->
     <div id="notifications">
       ${notifications.map(
         (notification) => html`

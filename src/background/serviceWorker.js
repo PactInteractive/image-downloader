@@ -1,4 +1,13 @@
 // @ts-check
+// Handle updates
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === 'install') {
+    // Open the options page after install
+    chrome.tabs.create({ url: 'src/Options/index.html' });
+  }
+});
+
+// Download images
 /** @typedef {{ numberOfProcessedImages: number, imagesToDownload: string[], options: any, next: () => void }} Task */
 
 /** @type {Set<Task>} */
@@ -64,7 +73,7 @@ function suggestNewFilename(item, suggest) {
   }
   if (task.options.new_file_name) {
     const regex = /(?:\.([^.]+))?$/;
-    const extension = regex.exec(item.filename)[1];
+    const extension = regex.exec(item.filename)?.[1];
     const numberOfDigits = task.imagesToDownload.length.toString().length;
     const formattedImageNumber = `${task.numberOfProcessedImages + 1}`.padStart(
       numberOfDigits,

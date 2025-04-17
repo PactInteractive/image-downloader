@@ -3,30 +3,37 @@
   "description": "Browse and download images on the web",
   "version": "4.0.0",
   "minimum_chrome_version": "72",
-  "manifest_version": 2,
+  "manifest_version": 3,
   "icons": {
     "16": "/images/icon_16.png",
     "32": "/images/icon_32.png",
     "48": "/images/icon_48.png",
     "128": "/images/icon_128.png"
   },
-  "browser_action": {
-    "default_icon": "/images/icon_128.png",
-    "default_popup": "/src/Popup/index.html"
+  "action": {
+    "default_icon": "images/icon_128.png",
+    "default_popup": "src/Popup/index.html"
   },
-  "options_page": "/src/Options/index.html",
+  "options_page": "src/Options/index.html",
   "background": {
-    "persistent": true,
-    "scripts": [
-      "/src/background/downloadImages.js",
-      "/src/background/handleUpdates.js"
-    ]
+    "service_worker": "src/background/serviceWorker.js"
   },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "images/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
   "permissions": [
     "activeTab",
-    "downloads",
-    "webRequest",
-    "webRequestBlocking",
+    "scripting",
+    "downloads"
+  ],
+  "host_permissions": [
     "http://*/*",
     "https://*/*"
   ]

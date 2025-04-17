@@ -1,14 +1,10 @@
 import html from '../html.js';
 import { ExternalLink } from '../components/ExternalLink.js';
 
-const addresses = {
-  btc: '19UsTZPYtNp1h2y4QT2a7gbNYNZrEdjXvE',
-};
-
 export const Support = () => html`
   <p style=${{ margin: '1em 0' }}>
     Try some of our other projects or support Image Downloader directly by
-    donating Bitcoin:
+    donating on Gumroad:
   </p>
 
   <div
@@ -18,7 +14,7 @@ export const Support = () => html`
       gap: '1em',
     }}
   >
-    <a
+    <${ExternalLink}
       href="https://slidezones.com"
       target="_blank"
       style=${{
@@ -37,7 +33,7 @@ export const Support = () => html`
       <small>Time zone converter for seamless global meetings</small>
 
       <img src="https://slidezones.com/images/screenshot.png" />
-    </a>
+    <//>
 
     <a
       href="https://codebedder.com"
@@ -85,18 +81,28 @@ export const Support = () => html`
       </div>
     </a>
 
-    <div
-      style=${{ border: '2px dashed var(--border-color)', padding: '0 1em' }}
+    <a
+      href="https://vdsabev.gumroad.com/l/image-downloader"
+      target="_blank"
+      style=${{
+        display: 'flex',
+        flexDirection: 'column',
+        border: '2px dashed var(--border-color)',
+        padding: '0 1em 1em 1em',
+      }}
     >
-      <h2 style=${{ display: 'inline-flex', gap: '0.5ch', marginBottom: '0' }}>
-        <img src="/images/btc.png" style=${{ height: '1em' }} />
-        Bitcoin <small>donation address</small>
-      </h2>
-      <pre style=${{ margin: '0' }}>${addresses.btc}</pre>
+      <div>
+        <h2
+          style=${{ display: 'inline-flex', gap: '0.5ch', marginBottom: '0' }}
+        >
+          <img src="/images/gumroad.png" style=${{ height: '1em' }} />
+          Gumroad page
+        </h2>
+        <br />
+        <small>Support Image Downloader on Gumroad</small>
+      </div>
 
-      <${ExternalLink} href="bitcoin:${addresses.btc}">
-        <img src="/images/btc-qr.png" style=${{ marginBottom: '1rem' }} />
-      <//>
-    </div>
+      <img src="/images/gumroad.svg" style=${{ flex: '1' }} />
+    </a>
   </div>
 `;
