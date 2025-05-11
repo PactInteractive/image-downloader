@@ -1,3 +1,4 @@
+## Image Downloader
 ## Privacy Policy
 ### What information does Image Downloader access?
 In order to extract images from a web page, the extension needs to read all the content on that web page when you click the extension icon. You can see the code responsible for that here: [src/Popup/sendImages.js](https://github.com/PactInteractive/image-downloader/blob/master/src/Popup/sendImages.js)
