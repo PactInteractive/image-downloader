@@ -1,7 +1,7 @@
 {
   "name": "Image Downloader",
   "description": "Browse and download images on the web",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "minimum_chrome_version": "88",
   "manifest_version": 3,
   "icons": {
@@ -20,9 +20,26 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["images/*"],
-      "matches": ["<all_urls>"]
+      "resources": [
+        "images/*"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
     }
   ],
-  "permissions": ["activeTab", "scripting", "downloads"]
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "downloads",
+    "declarativeNetRequest",
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "host_permissions": [
+    "https://www.instagram.com/*",
+    "https://*.cdninstagram.com/*",
+    "https://*.fbcdn.net/*",
+    "https://*.fbsbx.com/*",
+    "https://graph.facebook.com/*"
+  ]
 }
