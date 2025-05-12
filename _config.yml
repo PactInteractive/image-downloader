@@ -1,1 +1,6 @@
 theme: jekyll-theme-minimal
+title: Image Downloader
+description: Download images from the web with ease. A browser extension for Google Chrome, Microsoft Edge, and Brave.
+twitter_username: vdsabev
+github_username: PactInteractive
+logo: ./logo.svg
