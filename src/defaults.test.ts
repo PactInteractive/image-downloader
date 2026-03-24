@@ -1,10 +1,13 @@
-import { asMockedFunction, mockChrome } from './test';
+import { asMockedFunction, mockChrome } from './test-helpers';
+import { beforeEach, it, expect } from 'bun:test';
 
 declare var global: any;
 
 beforeEach(() => {
   global.chrome = mockChrome();
   localStorage.clear();
+  // Clear require cache so defaults.js re-runs for each test (Jest does this automatically, Bun doesn't)
+  delete require.cache[require.resolve('./defaults')];
 });
 
 it(`preserves existing options in 'localStorage'`, () => {
@@ -21,52 +24,60 @@ it(`sets undefined options in 'localStorage' to default`, () => {
 
 it(`matches 'localStorage' snapshot`, () => {
   require('./defaults');
-  expect(global.localStorage).toMatchInlineSnapshot(`
-    Storage {
-      "columns": "2",
-      "columns_default": "2",
-      "filter_max_height": "3000",
-      "filter_max_height_default": "3000",
-      "filter_max_height_enabled": "false",
-      "filter_max_height_enabled_default": "false",
-      "filter_max_width": "3000",
-      "filter_max_width_default": "3000",
-      "filter_max_width_enabled": "false",
-      "filter_max_width_enabled_default": "false",
-      "filter_min_height": "0",
-      "filter_min_height_default": "0",
-      "filter_min_height_enabled": "false",
-      "filter_min_height_enabled_default": "false",
-      "filter_min_width": "0",
-      "filter_min_width_default": "0",
-      "filter_min_width_enabled": "false",
-      "filter_min_width_enabled_default": "false",
-      "filter_url": "",
-      "filter_url_default": "",
-      "filter_url_mode": "normal",
-      "filter_url_mode_default": "normal",
-      "folder_name": "",
-      "folder_name_default": "",
-      "image_max_width": "200",
-      "image_max_width_default": "200",
-      "image_min_width": "50",
-      "image_min_width_default": "50",
-      "new_file_name": "",
-      "new_file_name_default": "",
-      "only_images_from_links": "false",
-      "only_images_from_links_default": "false",
-      "show_advanced_filters": "true",
-      "show_advanced_filters_default": "true",
-      "show_download_confirmation": "true",
-      "show_download_confirmation_default": "true",
-      "show_download_image_button": "true",
-      "show_download_image_button_default": "true",
-      "show_file_renaming": "true",
-      "show_file_renaming_default": "true",
-      "show_image_url": "true",
-      "show_image_url_default": "true",
-      "show_open_image_button": "true",
-      "show_open_image_button_default": "true",
+  // Convert Storage to plain object using Storage API (cross-runtime compatible)
+  const localStorageData: Record<string, string> = {};
+  for (let i = 0; i < global.localStorage.length; i++) {
+    const key = global.localStorage.key(i);
+    if (key) {
+      localStorageData[key] = global.localStorage.getItem(key) ?? '';
     }
-  `);
+  }
+  expect(localStorageData).toMatchInlineSnapshot(`
+      {
+        "columns": "2",
+        "columns_default": "2",
+        "filter_max_height": "3000",
+        "filter_max_height_default": "3000",
+        "filter_max_height_enabled": "false",
+        "filter_max_height_enabled_default": "false",
+        "filter_max_width": "3000",
+        "filter_max_width_default": "3000",
+        "filter_max_width_enabled": "false",
+        "filter_max_width_enabled_default": "false",
+        "filter_min_height": "0",
+        "filter_min_height_default": "0",
+        "filter_min_height_enabled": "false",
+        "filter_min_height_enabled_default": "false",
+        "filter_min_width": "0",
+        "filter_min_width_default": "0",
+        "filter_min_width_enabled": "false",
+        "filter_min_width_enabled_default": "false",
+        "filter_url": "",
+        "filter_url_default": "",
+        "filter_url_mode": "normal",
+        "filter_url_mode_default": "normal",
+        "folder_name": "",
+        "folder_name_default": "",
+        "image_max_width": "200",
+        "image_max_width_default": "200",
+        "image_min_width": "50",
+        "image_min_width_default": "50",
+        "new_file_name": "",
+        "new_file_name_default": "",
+        "only_images_from_links": "false",
+        "only_images_from_links_default": "false",
+        "show_advanced_filters": "true",
+        "show_advanced_filters_default": "true",
+        "show_download_confirmation": "true",
+        "show_download_confirmation_default": "true",
+        "show_download_image_button": "true",
+        "show_download_image_button_default": "true",
+        "show_file_renaming": "true",
+        "show_file_renaming_default": "true",
+        "show_image_url": "true",
+        "show_image_url_default": "true",
+        "show_open_image_button": "true",
+        "show_open_image_button_default": "true",
+      }
+    `);
 });

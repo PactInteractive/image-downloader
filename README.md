@@ -9,7 +9,7 @@
   <br />
 </h2>
 
-Welcome! If you're here to learn more about how to use this extension check out the [User Guide](USERGUIDE)
+Welcome! If you're here to learn more about how to use this extension check out the [User Guide](USERGUIDE.md)
 
 If you're a developer interested in running the extension locally instead of installing it from the Chrome Web Store - keep reading!
 
@@ -34,12 +34,12 @@ If you're a developer interested in running the extension locally instead of ins
 ## Test
 Run and watch tests related to locally changed files - useful during development:
 ```bash
-bun test
+bun test --watch
 ```
 
-Or run all the tests without watching and generate a coverage report:
+Or run all the tests once without watching:
 ```bash
-bun run test.all
+bun test
 ```
 
 ## License

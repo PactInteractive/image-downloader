@@ -1,0 +1,5 @@
+[test]
+preload = ["./test-preload.js"]
+
+[resolve]
+alias = { "react" = "./lib/react-18.3.1.min.js", "react-dom" = "./lib/react-dom-18.3.1.min.js" }

@@ -1,24 +1,26 @@
 import { mockRecursivePartial } from 'sneer';
+import { mock, Mock } from 'bun:test';
 
 export const mockChrome = () =>
-  mockRecursivePartial<typeof chrome>({
+  mockRecursivePartial<any>({
     downloads: {
       onDeterminingFilename: {
-        addListener: jest.fn(),
+        addListener: mock(),
       },
     },
     runtime: {
+      getManifest: () => ({ version: '4.0.2' }),
       onInstalled: {
-        addListener: jest.fn(),
+        addListener: mock(),
       },
       onMessage: {
-        addListener: jest.fn(),
+        addListener: mock(),
       },
-      sendMessage: jest.fn(),
+      sendMessage: mock(),
     },
     tabs: {
-      create: jest.fn(),
-      query: jest.fn(),
+      create: mock(),
+      query: mock(),
     },
     windows: {
       getCurrent: () => ({ id: 'window' }),
@@ -26,4 +28,4 @@ export const mockChrome = () =>
   });
 
 export const asMockedFunction = <T extends (...args: any[]) => any>(fn: T) =>
-  fn as jest.MockedFunction<T>;
+  fn as unknown as Mock<T>;
