@@ -74,6 +74,8 @@ it(`matches 'localStorage' snapshot`, () => {
         "show_download_image_button_default": "true",
         "show_file_renaming": "true",
         "show_file_renaming_default": "true",
+        "show_image_resolution": "true",
+        "show_image_resolution_default": "true",
         "show_image_url": "true",
         "show_image_url_default": "true",
         "show_open_image_button": "true",

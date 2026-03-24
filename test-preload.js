@@ -1,6 +1,7 @@
 require('@happy-dom/global-registrator').GlobalRegistrator.register();
 
 const path = require('path');
+const manifest = require('./manifest.json');
 
 // Pre-populate require.cache so require("react") returns the custom build
 // This is needed because react-dom's UMD wrapper calls require("react"),
@@ -44,6 +45,6 @@ globalThis.ReactDOM = customReactDom;
 // Set up chrome API mock
 globalThis.chrome = {
   runtime: {
-    getManifest: () => ({ version: '4.0.2' }),
+    getManifest: () => manifest,
   },
 };

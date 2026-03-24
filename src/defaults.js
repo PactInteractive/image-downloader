@@ -22,6 +22,7 @@ const defaults = {
   show_file_renaming: true,
   // Images
   show_image_url: true,
+  show_image_resolution: true,
   show_open_image_button: true,
   show_download_image_button: true,
   columns: 2,

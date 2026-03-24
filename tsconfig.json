@@ -7,6 +7,7 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
     "noEmit": true,
     "moduleResolution": "node",
     "types": ["chrome", "jquery", "bun"],

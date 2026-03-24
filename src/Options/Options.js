@@ -17,7 +17,7 @@ const defaultOptions = Object.keys(localStorage)
       ...options,
       [key.replace('_default', '')]: localStorage[key],
     }),
-    {}
+    {},
   );
 
 const useNotifications = (initialNotifications = []) => {
@@ -30,7 +30,7 @@ const useNotifications = (initialNotifications = []) => {
 
       setTimeout(() => {
         setNotifications((notifications) =>
-          notifications.filter(isNotStrictEqual(notification))
+          notifications.filter(isNotStrictEqual(notification)),
         );
       }, removeNotificationAfterMs);
 
@@ -44,13 +44,17 @@ const useNotifications = (initialNotifications = []) => {
 const Options = () => {
   const [options, setOptions] = useState(initialOptions);
 
-  const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
-    setOptions((options) => ({ ...options, [key]: checked.toString() }));
-  };
+  const setCheckboxOption =
+    (key) =>
+    ({ currentTarget: { checked } }) => {
+      setOptions((options) => ({ ...options, [key]: checked.toString() }));
+    };
 
-  const setValueOption = (key) => ({ currentTarget: { value } }) => {
-    setOptions((state) => ({ ...state, [key]: value }));
-  };
+  const setValueOption =
+    (key) =>
+    ({ currentTarget: { value } }) => {
+      setOptions((state) => ({ ...state, [key]: value }));
+    };
 
   function saveOptions() {
     Object.assign(localStorage, options);
@@ -61,13 +65,13 @@ const Options = () => {
     setOptions(defaultOptions);
     addNotification(
       'accent',
-      'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.'
+      'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.',
     );
   }
 
   function clearData() {
     const userHasConfirmed = window.confirm(
-      'This will delete all extension data related to filters, options, and the name of the default folder where files are saved. Continue?'
+      'This will delete all extension data related to filters, options, and the name of the default folder where files are saved. Continue?',
     );
     if (userHasConfirmed) {
       localStorage.clear();
@@ -127,6 +131,16 @@ const Options = () => {
         onChange=${setCheckboxOption('show_image_url')}
       >
         <span>Show the <b>URL</b> on hover</span>
+      <//>
+
+      <br />
+      <${Checkbox}
+        id="show_image_resolution_checkbox"
+        title="Displays the natural resolution (e.g., 1920×1080) of each image"
+        checked="${options.show_image_resolution === 'true'}"
+        onChange=${setCheckboxOption('show_image_resolution')}
+      >
+        <span>Show the <b>resolution</b></span>
       <//>
 
       <br />
@@ -245,7 +259,7 @@ const Options = () => {
           <div class="notification ${`bg-${notification.type}`} inverse">
             ${notification.message}
           </div>
-        `
+        `,
       )}
     </div>
   `;

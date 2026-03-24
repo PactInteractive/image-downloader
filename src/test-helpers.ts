@@ -1,5 +1,6 @@
 import { mockRecursivePartial } from 'sneer';
 import { mock, Mock } from 'bun:test';
+import manifest from '../manifest.json';
 
 export const mockChrome = () =>
   mockRecursivePartial<any>({
@@ -9,7 +10,7 @@ export const mockChrome = () =>
       },
     },
     runtime: {
-      getManifest: () => ({ version: '4.0.2' }),
+      getManifest: () => manifest,
       onInstalled: {
         addListener: mock(),
       },

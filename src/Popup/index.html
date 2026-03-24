@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
   <head>
     <title>Image Downloader</title>
@@ -181,7 +181,8 @@
         border: 2px solid transparent;
         background: var(--neutral-lightest);
 
-        transition: var(--transition-border-color), var(--transition-box-shadow);
+        transition:
+          var(--transition-border-color), var(--transition-box-shadow);
       }
 
       #images_container .card:hover {
@@ -197,27 +198,27 @@
       }
 
       #images_container .checkbox,
-      #images_container .image_url_container,
-      #images_container .actions {
-        position: absolute;
-
+      #images_container .actions,
+      #images_container .image_url_container {
         transition: var(--transition-opacity);
         opacity: 0;
       }
 
       #images_container .card.checked .checkbox,
       #images_container .card:hover .checkbox,
-      #images_container .card:hover .image_url_container,
-      #images_container .card:hover .actions {
+      #images_container .card:hover .actions,
+      #images_container .card:hover .image_url_container {
         opacity: 1;
       }
 
       #images_container .checkbox {
+        position: absolute;
         top: 4px;
         left: 4px;
       }
 
       #images_container .actions {
+        position: absolute;
         top: 4px;
         right: 4px;
       }
@@ -239,12 +240,6 @@
         background-color: var(--neutral-lighter);
       }
 
-      #images_container .image_url_container {
-        right: 4px;
-        bottom: 4px;
-        left: 4px;
-      }
-
       /* checkbox */
       #images_container .checkbox {
         width: 34px;
@@ -254,7 +249,8 @@
         border: 2px solid var(--neutral);
         background: var(--neutral-lightest);
 
-        transition: var(--transition-background), var(--transition-border-color),
+        transition:
+          var(--transition-background), var(--transition-border-color),
           var(--transition-opacity);
       }
 
@@ -287,6 +283,32 @@
       }
       /* checkbox */
 
+      /* bottom overlay */
+      #images_container .bottom_overlay {
+        position: absolute;
+        right: 4px;
+        bottom: 4px;
+        left: 4px;
+
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+      /* bottom overlay */
+
+      /* resolution */
+      #images_container .resolution {
+        flex-shrink: 0;
+
+        border-radius: var(--border-radius-md);
+        background: hsla(0, 0%, 0%, 66%);
+        padding: 4px;
+        color: var(--neutral-lightest);
+        font-size: 11px;
+        line-height: 2;
+      }
+      /* resolution */
+
       /* actions */
       #images_container .actions {
         display: flex;
@@ -296,11 +318,14 @@
 
       /* image_url_container */
       #images_container .image_url_container {
+        flex: 1;
+        min-width: 0;
         background: var(--neutral-lighter);
       }
 
       #images_container .image_url_container input[type='text'] {
         width: 100%;
+        border-radius: var(--border-radius-md);
         margin-bottom: 0;
       }
       /* image_url_container */
