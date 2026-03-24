@@ -1,16 +1,28 @@
-import html from '../html.js';
+import html, { useLayoutEffect, useRef } from '../html.js';
 import * as actions from './actions.js';
 
-export const ImageUrlTextbox = (props) => html`
-  <input
-    type="text"
-    readonly
-    onClick=${(e) => {
-      e.currentTarget.select();
-    }}
-    ...${props}
-  />
-`;
+export const ImageUrlTextbox = (props) => {
+  const inputRef = useRef(null);
+
+  useLayoutEffect(() => {
+    const input = inputRef.current;
+    if (input) {
+      input.scrollLeft = input.scrollWidth;
+    }
+  }, []);
+
+  return html`
+    <input
+      ref=${inputRef}
+      type="text"
+      readonly
+      onClick=${(e) => {
+        e.currentTarget.select();
+      }}
+      ...${props}
+    />
+  `;
+};
 
 export const OpenImageButton = ({ imageUrl, onClick, ...props }) => {
   return html`

@@ -968,37 +968,4 @@ describe('findImages', () => {
     expect(result.allImages).toHaveLength(0);
     expect(result.linkedImages).toHaveLength(0);
   });
-
-  test('should NOT return non-image data URIs', () => {
-    // HTML: <img src="data:text/plain;base64,SGVsbG8gV29ybGQ=" /><a href="data:application/json;base64,eyJrZXkiOiJ2YWx1ZSJ9">JSON link</a>
-    // Expected: [] - no non-image data URIs
-    const img: MockElement = {
-      tagName: 'IMG',
-      src: 'data:text/plain;base64,SGVsbG8gV29ybGQ=',
-    };
-    const link: MockElement = {
-      tagName: 'A',
-      href: 'data:application/json;base64,eyJrZXkiOiJ2YWx1ZSJ9',
-    };
-    const mockDocument: MockDocument = {
-      querySelectorAll: (selector: string) => {
-        if (selector.includes('img')) return [img];
-        if (selector === 'a' || selector.includes('a')) return [link];
-        return [];
-      },
-    };
-    const mockWindow: MockWindow = {
-      location: { origin: 'http://example.com' },
-      getComputedStyle: () => ({ backgroundImage: '' }),
-    };
-
-    const result = runFindImages(mockDocument, mockWindow);
-
-    expect(result.allImages).not.toContain(
-      'data:text/plain;base64,SGVsbG8gV29ybGQ=',
-    );
-    expect(result.allImages).not.toContain(
-      'data:application/json;base64,eyJrZXkiOiJ2YWx1ZSJ9',
-    );
-  });
 });

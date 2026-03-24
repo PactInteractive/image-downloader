@@ -19,7 +19,7 @@ export function findImages() {
 
       // Extract src
       const src = element.src;
-      if (src && !isNonImageDataURI(src)) {
+      if (src) {
         const hashIndex = src.indexOf('#');
         images.push(hashIndex >= 0 ? src.substr(0, hashIndex) : src);
       }
@@ -96,11 +96,6 @@ export function findImages() {
 
   function isImageURL(url) {
     return url.indexOf('data:image') === 0 || imageUrlRegex.test(url);
-  }
-
-  function isNonImageDataURI(url) {
-    // Check if URL is a data URI but not an image (e.g., data:text/plain, data:application/json)
-    return url.indexOf('data:') === 0 && url.indexOf('data:image') !== 0;
   }
 
   function extractSrcsetURLs(srcset) {

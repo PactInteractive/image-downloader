@@ -73,6 +73,7 @@ const ImageCard = ({
           `}
         </div>
       `}
+
       ${((showImageResolution && resolution.ready) || showImageUrl) &&
       html`
         <div class="bottom_overlay">
@@ -84,6 +85,7 @@ const ImageCard = ({
                 : `${resolution.width}×${resolution.height}`}
             </div>
           `}
+
           ${showImageUrl &&
           html`
             <div class="image_url_container">
