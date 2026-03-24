@@ -1,4 +1,4 @@
-import html, { useCallback, useEffect, useMemo } from '../html.js';
+import html, { useEffect, useMemo } from '../html.js';
 
 import { Checkbox } from '../components/Checkbox.js';
 import { useImageResolution } from '../hooks/useImageResolution.js';

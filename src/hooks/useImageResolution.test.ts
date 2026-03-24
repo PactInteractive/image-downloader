@@ -23,9 +23,16 @@ declare global {
 }
 
 beforeEach(() => {
+  // Set up happy-dom for DOM mocking
+  const { Window } = require('happy-dom');
+  const window = new Window();
+  global.document = window.document;
+  global.window = window;
+
+  document.body.innerHTML = '<div id="root"></div>';
+
   global.React = require('../../lib/react-18.3.1.min');
   global.ReactDOM = require('../../lib/react-dom-18.3.1.min');
-  document.body.innerHTML = '<div id="root"></div>';
 });
 
 // Helper to test hooks by rendering a component that captures the result

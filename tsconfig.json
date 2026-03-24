@@ -11,8 +11,10 @@
     "noEmit": true,
     "moduleResolution": "node",
     "types": ["chrome", "jquery", "bun"],
-    "typeRoots": ["./node_modules/@types"]
+    "typeRoots": ["./node_modules/@types"],
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["src/**/*.ts"],
+  "include": ["src/**/*.ts", "src/**/*.js"],
   "exclude": ["node_modules", "lib"]
 }

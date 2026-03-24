@@ -14,6 +14,7 @@ import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
+import { findImages } from './findImages.js';
 import { Images } from './Images.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
@@ -52,7 +53,9 @@ const Popup = () => {
               setLinkedImages((linkedImages) =>
                 unique([
                   ...linkedImages,
-                  ...messages.flatMap((message) => message?.result?.linkedImages),
+                  ...messages.flatMap(
+                    (message) => message?.result?.linkedImages,
+                  ),
                 ]),
               );
 
@@ -297,79 +300,5 @@ const Popup = () => {
     </div>
   `;
 };
-
-function findImages() {
-  // Source: https://support.google.com/webmasters/answer/2598805?hl=en
-  const imageUrlRegex =
-    /(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|ico|jfif|jpe?g|png|svg|tiff?|webp|avif))(?:\?([^#]*))?(?:#(.*))?/i;
-
-  function extractImagesFromSelector(selector) {
-    return unique(
-      toArray(document.querySelectorAll(selector))
-        .map(extractImageFromElement)
-        .filter(isTruthy)
-        .map(relativeUrlToAbsolute),
-    );
-  }
-
-  function extractImageFromElement(element) {
-    if (element.tagName.toLowerCase() === 'img') {
-      const src = element.src;
-      const hashIndex = src.indexOf('#');
-      return hashIndex >= 0 ? src.substr(0, hashIndex) : src;
-    }
-
-    if (element.tagName.toLowerCase() === 'image') {
-      const src = element.getAttribute('xlink:href');
-      const hashIndex = src.indexOf('#');
-      return hashIndex >= 0 ? src.substr(0, hashIndex) : src;
-    }
-
-    if (element.tagName.toLowerCase() === 'a') {
-      const href = element.href;
-      if (isImageURL(href)) {
-        return href;
-      }
-    }
-
-    const backgroundImage = window.getComputedStyle(element).backgroundImage;
-    if (backgroundImage) {
-      const parsedURL = extractURLFromStyle(backgroundImage);
-      if (isImageURL(parsedURL)) {
-        return parsedURL;
-      }
-    }
-  }
-
-  function isImageURL(url) {
-    return url.indexOf('data:image') === 0 || imageUrlRegex.test(url);
-  }
-
-  function extractURLFromStyle(style) {
-    return style.replace(/^.*url\(["']?/, '').replace(/["']?\).*$/, '');
-  }
-
-  function relativeUrlToAbsolute(url) {
-    return url.indexOf('/') === 0 ? `${window.location.origin}${url}` : url;
-  }
-
-  function unique(values) {
-    return toArray(new Set(values));
-  }
-
-  function toArray(values) {
-    return [...values];
-  }
-
-  function isTruthy(value) {
-    return !!value;
-  }
-
-  return {
-    allImages: extractImagesFromSelector('img, image, a, [class], [style]'),
-    linkedImages: extractImagesFromSelector('a'),
-    origin: window.location.origin,
-  };
-}
 
 render(html`<${Popup} />`, document.querySelector('main'));
