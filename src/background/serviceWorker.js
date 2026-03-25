@@ -8,13 +8,18 @@ chrome.runtime.onInstalled.addListener((details) => {
 });
 
 // Download images
-/** @typedef {{ numberOfProcessedImages: number, imagesToDownload: string[], options: any, next: () => void }} Task */
+/** @typedef {{
+ *   imagesToDownload: string[],
+ *   options: any,
+ *   indices: Map<number, number> // downloadId → original index
+ * }} Task */
 
-/** @type {Set<Task>} */
-const tasks = new Set();
+/** @type {Map<number, Task>} */
+const tasksByDownloadId = new Map();
 
 chrome.runtime.onMessage.addListener(startDownload);
 chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+chrome.downloads.onChanged.addListener(cleanupCompletedDownloadTasks);
 
 // NOTE: Don't directly use an `async` function as a listener for `onMessage`:
 // https://stackoverflow.com/a/56483156
@@ -27,43 +32,47 @@ function startDownload(
   if (!(message && message.type === 'downloadImages')) return;
 
   downloadImages({
-    numberOfProcessedImages: 0,
     imagesToDownload: message.imagesToDownload,
     options: message.options,
-    next() {
-      this.numberOfProcessedImages += 1;
-      if (this.numberOfProcessedImages === this.imagesToDownload.length) {
-        tasks.delete(this);
-      }
-    },
+    indices: new Map()
   }).then(resolve);
 
   return true; // Keeps the message channel open until `resolve` is called
 }
 
 async function downloadImages(/** @type {Task} */ task) {
-  tasks.add(task);
-  for (const image of task.imagesToDownload) {
-    await new Promise((resolve) => {
+  const promises = task.imagesToDownload.map((image, index) => {
+    return new Promise((/** @type {(response?: any) => void} */ resolve) => {
       chrome.downloads.download({ url: image }, (downloadId) => {
-        if (downloadId == null) {
+        if (downloadId != null) {
+          task.indices.set(downloadId, index);
+          tasksByDownloadId.set(downloadId, task);
+        } else {
           if (chrome.runtime.lastError) {
             console.error(`${image}:`, chrome.runtime.lastError.message);
           }
-          task.next();
         }
         resolve();
       });
     });
-  }
+  });
+
+  await Promise.allSettled(promises);
 }
 
 // https://developer.chrome.com/docs/extensions/reference/downloads/#event-onDeterminingFilename
 /** @type {Parameters<chrome.downloads.DownloadDeterminingFilenameEvent['addListener']>[0]} */
 function suggestNewFilename(item, suggest) {
-  const task = [...tasks][0];
+  const task = tasksByDownloadId.get(item.id);
   if (!task) {
     suggest();
+    return;
+  }
+
+  const index = task.indices.get(item.id);
+  if (index === undefined) {
+    suggest();
+    tasksByDownloadId.delete(item.id);
     return;
   }
 
@@ -71,23 +80,36 @@ function suggestNewFilename(item, suggest) {
   if (task.options.folder_name) {
     newFilename += `${task.options.folder_name}/`;
   }
+
   if (task.options.new_file_name) {
     const regex = /(?:\.([^.]+))?$/;
-    const extension = regex.exec(item.filename)?.[1];
+    const extension =
+      regex.exec(item.filename)?.[1] ||
+      item.mime?.split('/')?.[1]?.replace('jpeg', 'jpg');
+
     const numberOfDigits = task.imagesToDownload.length.toString().length;
-    const formattedImageNumber = `${task.numberOfProcessedImages + 1}`.padStart(
-      numberOfDigits,
-      '0'
-    );
-    newFilename += `${task.options.new_file_name}${formattedImageNumber}.${extension}`;
+    const formattedImageNumber = `${index + 1}`.padStart(numberOfDigits, '0');
+
+    newFilename += `${task.options.new_file_name}${formattedImageNumber}${extension ? `.${extension}` : ''}`;
   } else {
     newFilename += item.filename;
   }
 
-  suggest({ filename: normalizeSlashes(newFilename) });
-  task.next();
+  suggest({
+    filename: normalizeSlashes(newFilename),
+    conflictAction: 'uniquify',
+  });
+
+  task.indices.delete(item.id);
+  tasksByDownloadId.delete(item.id);
 }
 
-function normalizeSlashes(filename) {
+function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
+  if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
+    tasksByDownloadId.delete(delta.id);
+  }
+}
+
+function normalizeSlashes(/** @type {string} */ filename) {
   return filename.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
 }
