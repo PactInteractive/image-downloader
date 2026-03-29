@@ -1,38 +1,38 @@
-import { asMockedFunction, mockChrome } from './test-helpers';
-import { beforeEach, it, expect } from 'bun:test';
+import { beforeEach, expect, it } from 'bun:test';
+import { mockChrome } from './test-helpers';
 
 declare var global: any;
 
 beforeEach(() => {
-  global.chrome = mockChrome();
-  localStorage.clear();
-  // Clear require cache so defaults.js re-runs for each test (Jest does this automatically, Bun doesn't)
-  delete require.cache[require.resolve('./defaults')];
+	global.chrome = mockChrome();
+	localStorage.clear();
+	// Clear require cache so defaults.js re-runs for each test (Jest does this automatically, Bun doesn't)
+	delete require.cache[require.resolve('./defaults')];
 });
 
 it(`preserves existing options in 'localStorage'`, () => {
-  localStorage.folder_name = 'test';
-  require('./defaults');
-  expect(localStorage.folder_name).toBe('test');
+	localStorage.folder_name = 'test';
+	require('./defaults');
+	expect(localStorage.folder_name).toBe('test');
 });
 
 it(`sets undefined options in 'localStorage' to default`, () => {
-  localStorage.folder_name = undefined;
-  require('./defaults');
-  expect(localStorage.folder_name).not.toBe(undefined);
+	localStorage.folder_name = undefined;
+	require('./defaults');
+	expect(localStorage.folder_name).not.toBe(undefined);
 });
 
 it(`matches 'localStorage' snapshot`, () => {
-  require('./defaults');
-  // Convert Storage to plain object using Storage API (cross-runtime compatible)
-  const localStorageData: Record<string, string> = {};
-  for (let i = 0; i < global.localStorage.length; i++) {
-    const key = global.localStorage.key(i);
-    if (key) {
-      localStorageData[key] = global.localStorage.getItem(key) ?? '';
-    }
-  }
-  expect(localStorageData).toMatchInlineSnapshot(`
+	require('./defaults');
+	// Convert Storage to plain object using Storage API (cross-runtime compatible)
+	const localStorageData: Record<string, string> = {};
+	for (let i = 0; i < global.localStorage.length; i++) {
+		const key = global.localStorage.key(i);
+		if (key) {
+			localStorageData[key] = global.localStorage.getItem(key) ?? '';
+		}
+	}
+	expect(localStorageData).toMatchInlineSnapshot(`
       {
         "columns": "2",
         "columns_default": "2",
@@ -58,10 +58,6 @@ it(`matches 'localStorage' snapshot`, () => {
         "filter_url_mode_default": "normal",
         "folder_name": "",
         "folder_name_default": "",
-        "image_max_width": "200",
-        "image_max_width_default": "200",
-        "image_min_width": "50",
-        "image_min_width_default": "50",
         "new_file_name": "",
         "new_file_name_default": "",
         "only_images_from_links": "false",

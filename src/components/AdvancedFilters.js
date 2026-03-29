@@ -12,7 +12,7 @@ export const AdvancedFilters = ({ options, setOptions }) => {
   };
 
   return html`
-    <div>
+    <div class="px-3 pb-2">
       <table class="grid">
         <colgroup>
           <col style=${{ width: '45px' }} />
@@ -27,16 +27,16 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           <td>
             <label
               class=${options.filter_min_width_enabled === 'true'
-                ? ''
-                : 'light'}
+      ? ''
+      : 'light'}
               style=${{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+    }}
               title=${getSliderCheckboxTooltip(
-                options.filter_min_width_enabled
-              )}
+      options.filter_min_width_enabled
+    )}
             >
               <small>≥ ${options.filter_min_width}px</small>
               <${SliderCheckbox}
@@ -54,16 +54,16 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           <td>
             <label
               class=${options.filter_max_width_enabled === 'true'
-                ? ''
-                : 'light'}
+      ? ''
+      : 'light'}
               style=${{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    }}
               title=${getSliderCheckboxTooltip(
-                options.filter_max_width_enabled
-              )}
+      options.filter_max_width_enabled
+    )}
             >
               <${SliderCheckbox}
                 options=${options}
@@ -81,16 +81,16 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           <td>
             <label
               class=${options.filter_min_height_enabled === 'true'
-                ? ''
-                : 'light'}
+      ? ''
+      : 'light'}
               style=${{
-                display: 'flex',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-              }}
+      display: 'flex',
+      justifyContent: 'flex-end',
+      alignItems: 'center',
+    }}
               title=${getSliderCheckboxTooltip(
-                options.filter_min_height_enabled
-              )}
+      options.filter_min_height_enabled
+    )}
             >
               <small>≥ ${options.filter_min_height}px</small>
               <${SliderCheckbox}
@@ -108,16 +108,16 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           <td>
             <label
               class=${options.filter_max_height_enabled === 'true'
-                ? ''
-                : 'light'}
+      ? ''
+      : 'light'}
               style=${{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-              }}
+      display: 'flex',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+    }}
               title=${getSliderCheckboxTooltip(
-                options.filter_max_height_enabled
-              )}
+      options.filter_max_height_enabled
+    )}
             >
               <${SliderCheckbox}
                 options=${options}
@@ -254,6 +254,5 @@ const useDisableSliderHandle = (
 };
 
 const getSliderCheckboxTooltip = (option) =>
-  `Click this checkbox to ${
-    option === 'true' ? 'disable' : 'enable'
+  `Click this checkbox to ${option === 'true' ? 'disable' : 'enable'
   } filtering by this value`;

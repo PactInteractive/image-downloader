@@ -8,7 +8,7 @@ export const Checkbox = ({
   title = '',
   ...props
 }) => html`
-  <label ...${{ className, title }}>
+  <label ...${{ class: className, title }}>
     <input
       ref=${setIndeterminate(indeterminate)}
       type="checkbox"

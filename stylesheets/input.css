@@ -1,125 +1,7 @@
 @import 'tailwindcss';
 
-// TODO: Migrate
-@theme {
-	/* Colors */
-	--color-neutral-50: hsl(0, 0%, 100%);
-	--color-neutral-100: hsl(0, 0%, 95%);
-	--color-neutral-200: hsl(300, 11%, 80%);
-	--color-neutral-300: hsl(300, 11%, 60%);
-	--color-neutral-400: hsl(300, 11%, 10%);
-	--color-neutral-500: hsl(300, 11%, 5%);
-	--color-neutral-600: hsl(300, 11%, 0%);
-
-	--color-accent: hsl(213, 80%, 50%);
-	--color-accent-dark: hsl(213, 80%, 40%);
-
-	--color-success-light: hsl(145, 64%, 43%);
-	--color-success: hsl(145, 64%, 40%);
-
-	--color-warning-light: hsl(37, 90%, 51%);
-	--color-warning: hsl(37, 90%, 48%);
-
-	--color-danger-light: hsl(6, 78%, 57%);
-	--color-danger: hsl(6, 78%, 54%);
-
-	--color-foreground: hsl(0, 0%, 20%);
-	--color-foreground-light: hsl(0, 0%, 70%);
-	--color-foreground-inverse: hsl(0, 0%, 100%);
-
-	/* Border radii */
-	--radius-sm: 2px;
-	--radius-md: 4px;
-
-	/* Transitions */
-	--ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
-}
-
-/* Custom utilities for button variants */
-@utility btn-accent {
-	color: var(--color-foreground-inverse);
-	border: 2px solid transparent;
-	background: var(--color-accent);
-	&:hover,
-	&:focus,
-	&:active {
-		background: var(--color-accent-dark);
-	}
-	&.ghost {
-		border: 2px solid var(--color-accent);
-		background: var(--color-neutral-50);
-		color: var(--color-accent);
-	}
-}
-
-@utility btn-success {
-	color: var(--color-foreground-inverse);
-	border: 2px solid var(--color-success-light);
-	background: var(--color-success-light);
-	&:hover,
-	&:focus,
-	&:active {
-		border-color: var(--color-success);
-		background: var(--color-success);
-	}
-	&.ghost {
-		border: 2px solid var(--color-success);
-		background: var(--color-neutral-50);
-		color: var(--color-success);
-	}
-}
-
-@utility btn-warning {
-	color: var(--color-foreground-inverse);
-	border: 2px solid var(--color-warning-light);
-	background: var(--color-warning-light);
-	&:hover,
-	&:focus,
-	&:active {
-		border-color: var(--color-warning);
-		background: var(--color-warning);
-	}
-	&.ghost {
-		border: 2px solid var(--color-warning);
-		background: var(--color-neutral-50);
-		color: var(--color-warning);
-	}
-}
-
-@utility btn-danger {
-	color: var(--color-foreground-inverse);
-	border: 2px solid var(--color-danger-light);
-	background: var(--color-danger-light);
-	&:hover,
-	&:focus,
-	&:active {
-		border-color: var(--color-danger);
-		background: var(--color-danger);
-	}
-	&.ghost {
-		border: 2px solid var(--color-danger);
-		background: var(--color-neutral-50);
-		color: var(--color-danger);
-	}
-}
-
-@utility btn-neutral {
-	color: var(--color-foreground-inverse);
-	border: 2px solid hsla(0, 0%, 0%, 20%);
-	background: hsla(0, 0%, 0%, 20%);
-	&.ghost {
-		border: 2px solid hsla(0, 0%, 0%, 20%);
-		background: var(--color-neutral-50);
-		color: var(--color-foreground);
-	}
-}
-
 @utility corner-* {
 	corner-shape: --value('bevel', 'notch', 'round', 'scoop', 'square', 'squircle');
-}
-
-@utility text-shadow {
-	text-shadow: 0 0 2px var(--color-slate-800);
 }
 
 @layer base {
@@ -141,35 +23,49 @@
 	a:hover {
 		color: var(--color-sky-700);
 	}
+	/* https://stackoverflow.com/questions/11243337/a-taller-than-its-img-child */
+	a > img {
+		display: block;
+	}
 
-	/*
-	summary {
+	img {
+		max-width: 100%;
+	}
+
+	svg {
+		fill: currentColor;
+	}
+
+	input[type='text'],
+	select,
+	button {
+		height: 32px;
+	}
+
+	select,
+	button,
+	label {
 		cursor: pointer;
-		display: flex;
-		padding: 8px 0;
+	}
+
+	input[type='text'],
+	select {
+		background-color: var(--color-slate-100);
+		border-radius: 12px;
+		padding: 8px;
+	}
+
+	button {
+		background-color: var(--color-slate-200);
+		border-radius: 12px;
+		text-align: center;
+	}
+
+	label {
+		display: inline-flex;
 		align-items: center;
-		gap: 0.25em;
-		margin-left: -12px;
-		margin-right: -12px;
-		font-weight: bold;
-
-		&::before {
-			content: '\2BC8';
-		}
-
-		&::after {
-			content: '';
-			flex: 1;
-			height: 2px;
-			margin-left: 0.33em;
-			background-color: var(--color-slate-100);
-		}
+		gap: 4px;
 	}
-
-	details[open] summary::before {
-		content: '\2BC6';
-	}
-	*/
 
 	p:not(:only-child) {
 		margin: 16px 0;
@@ -177,5 +73,72 @@
 
 	small {
 		font-size: 0.9em;
+	}
+
+	hr {
+		border-style: dotted;
+	}
+}
+
+@layer components {
+	.noUi-state-drag {
+		cursor: grabbing;
+	}
+
+	.noUi-horizontal {
+		height: 12px;
+	}
+
+	.noUi-target {
+		border-color: var(--accent);
+		transition: var(--transition-border-color);
+	}
+
+	.noUi-target[disabled] {
+		border-color: var(--border-color);
+	}
+
+	.noUi-connects {
+		cursor: pointer;
+	}
+
+	.noUi-connect {
+		background: var(--accent);
+		transition: var(--transition-background);
+	}
+
+	.noUi-target[disabled] .noUi-connect {
+		background: var(--input-background);
+	}
+
+	.noUi-horizontal .noUi-origin .noUi-handle {
+		cursor: grab;
+		top: -5px;
+		right: -9px;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		border-color: var(--accent);
+
+		transition: var(--transition-border-color);
+	}
+
+	.noUi-horizontal .noUi-origin[disabled] .noUi-handle {
+		cursor: help;
+		border-color: var(--border-color);
+	}
+
+	.noUi-handle::before,
+	.noUi-handle::after {
+		top: 3px;
+		height: 10px;
+	}
+
+	.noUi-handle::before {
+		left: 6px;
+	}
+
+	.noUi-handle::after {
+		left: 9px;
 	}
 }

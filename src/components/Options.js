@@ -1,253 +1,111 @@
 import html, { useState } from '../html.js';
 
 import { Checkbox } from '../components/Checkbox.js';
-import { isNotStrictEqual } from '../utils.js';
 
-import { About } from './About.js';
-import { Support } from './Support.js';
-
-const initialOptions = Object.keys(localStorage)
-  .filter((key) => !key.endsWith('_default'))
-  .reduce((options, key) => ({ ...options, [key]: localStorage[key] }), {});
-
-const defaultOptions = Object.keys(localStorage)
-  .filter((key) => key.endsWith('_default'))
-  .reduce(
-    (options, key) => ({
-      ...options,
-      [key.replace('_default', '')]: localStorage[key],
-    }),
-    {},
+const getInitialOptions = () =>
+  Object.fromEntries(
+    Object.keys(localStorage)
+      .filter((key) => !key.endsWith('_default'))
+      .map((key) => [key, localStorage[key]])
   );
 
-const useNotifications = (initialNotifications = []) => {
-  const [notifications, setNotifications] = useState(initialNotifications);
-
-  function addNotification(type, message) {
-    setNotifications((notifications) => {
-      const notification = { message, type };
-      const removeNotificationAfterMs = 10_000;
-
-      setTimeout(() => {
-        setNotifications((notifications) =>
-          notifications.filter(isNotStrictEqual(notification)),
-        );
-      }, removeNotificationAfterMs);
-
-      return [notification, ...notifications];
-    });
-  }
-
-  return { notifications, addNotification };
-};
-
-const Options = () => {
-  const [options, setOptions] = useState(initialOptions);
+export const Options = () => {
+  const [options, setOptions] = useState(getInitialOptions);
 
   const setCheckboxOption =
     (key) =>
       ({ currentTarget: { checked } }) => {
-        setOptions((options) => ({ ...options, [key]: checked.toString() }));
+        const value = checked.toString();
+        setOptions((options) => ({ ...options, [key]: value }));
+        localStorage.setItem(key, value);
       };
 
   const setValueOption =
     (key) =>
       ({ currentTarget: { value } }) => {
-        setOptions((state) => ({ ...state, [key]: value }));
+        setOptions((options) => ({ ...options, [key]: value }));
+        localStorage.setItem(key, value);
       };
 
-  function saveOptions() {
-    Object.assign(localStorage, options);
-    addNotification('success', 'Options saved');
-  }
-
-  function resetOptions() {
-    setOptions(defaultOptions);
-    addNotification(
-      'accent',
-      'All options have been reset to their default values. You can now save the changes you made or discard them by closing this page.',
-    );
-  }
-
-  function clearData() {
-    const userHasConfirmed = window.confirm(
-      'This will delete all extension data related to filters, options, and the name of the default folder where files are saved. Continue?',
-    );
-    if (userHasConfirmed) {
-      localStorage.clear();
-      window.location.reload();
-    }
-  }
-
-  const { notifications, addNotification } = useNotifications();
-
-  // TODO: Migrate
   return html`
-    <section>
-      <fieldset>
-        <legend>⚙️ General options</legend>
+		<fieldset>
+			<div class="flex flex-col gap-2 px-3 py-2">
+				<${Checkbox}
+					id="show_download_confirmation_checkbox"
+					title="Requires confirmation when you press the Download button"
+					checked="${options.show_download_confirmation === 'true'}"
+					onChange=${setCheckboxOption('show_download_confirmation')}
+				>
+					<span>Show download confirmation</span>
+				<//>
 
-        <${Checkbox}
-          id="show_download_confirmation_checkbox"
-          title="Requires confirmation when you press the Download button"
-          checked="${options.show_download_confirmation === 'true'}"
-          onChange=${setCheckboxOption('show_download_confirmation')}
-        >
-          <span>Show download confirmation</span>
-        <//>
+				<${Checkbox}
+					id="show_file_renaming_checkbox"
+					title="Lets you specify a new file name for downloaded files"
+					checked="${options.show_file_renaming === 'true'}"
+					onChange=${setCheckboxOption('show_file_renaming')}
+				>
+					<span>Show file renaming textbox</span>
+				<//>
+			</div>
 
-        <br />
-        <${Checkbox}
-          id="show_file_renaming_checkbox"
-          title="Lets you specify a new file name for downloaded files"
-          checked="${options.show_file_renaming === 'true'}"
-          onChange=${setCheckboxOption('show_file_renaming')}
-        >
-          <span>Show file renaming textbox</span>
-        <//>
-      </fieldset>
+			<hr class="border-slate-300" />
 
-      <fieldset>
-        <legend>🖼️ Image options</legend>
+			<div class="flex flex-col gap-2 px-3 py-2">
+				<${Checkbox}
+					id="show_image_url_checkbox"
+					title="Displays the URL above each image"
+					checked="${options.show_image_url === 'true'}"
+					onChange=${setCheckboxOption('show_image_url')}
+				>
+					<span>Show the <b>URL</b> on hover</span>
+				<//>
 
-        <${Checkbox}
-          id="show_image_url_checkbox"
-          title="Displays the URL above each image"
-          checked="${options.show_image_url === 'true'}"
-          onChange=${setCheckboxOption('show_image_url')}
-        >
-          <span>Show the <b>URL</b> on hover</span>
-        <//>
+				<${Checkbox}
+					id="show_image_resolution_checkbox"
+					title="Displays the natural resolution (e.g., 1920×1080) of each image"
+					checked="${options.show_image_resolution === 'true'}"
+					onChange=${setCheckboxOption('show_image_resolution')}
+				>
+					<span>Show the <b>resolution</b></span>
+				<//>
 
-        <br />
-        <${Checkbox}
-          id="show_image_resolution_checkbox"
-          title="Displays the natural resolution (e.g., 1920×1080) of each image"
-          checked="${options.show_image_resolution === 'true'}"
-          onChange=${setCheckboxOption('show_image_resolution')}
-        >
-          <span>Show the <b>resolution</b></span>
-        <//>
+				<${Checkbox}
+					id="show_open_image_button_checkbox"
+					title="Displays a button next to each image to open it in a new tab"
+					checked="${options.show_open_image_button === 'true'}"
+					onChange=${setCheckboxOption('show_open_image_button')}
+				>
+					<span>Show the <b>Open</b> button on hover</span>
+				<//>
 
-        <br />
-        <${Checkbox}
-          id="show_open_image_button_checkbox"
-          title="Displays a button next to each image to open it in a new tab"
-          checked="${options.show_open_image_button === 'true'}"
-          onChange=${setCheckboxOption('show_open_image_button')}
-        >
-          <span>Show the <b>Open</b> button on hover</span>
-        <//>
+				<${Checkbox}
+					id="show_download_image_button_checkbox"
+					title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
+					checked="${options.show_download_image_button === 'true'}"
+					onChange=${setCheckboxOption('show_download_image_button')}
+				>
+					<span>Show the <b>Download</b> button on hover</span>
+				<//>
+			</div>
 
-        <br />
-        <${Checkbox}
-          id="show_download_image_button_checkbox"
-          title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
-          checked="${options.show_download_image_button === 'true'}"
-          onChange=${setCheckboxOption('show_download_image_button')}
-        >
-          <span>Show the <b>Download</b> button on hover</span>
-        <//>
+      <hr class="border-slate-300" />
 
-        <table>
-          <tr title="The number of columns">
-            <td><label for="columns_numberbox">Columns:</label></td>
-            <td>
-              <input
-                id="columns_numberbox"
-                type="number"
-                required
-                min="1"
-                max="10"
-                value="${options.columns}"
-                onChange=${setValueOption('columns')}
-              />
-            </td>
-          </tr>
-
-          <tr
-            title="Setting the minimum width can be useful for images that are too small to make out"
-          >
-            <td>
-              <label for="image_min_width_numberbox">
-                Minimum Display Width:
-              </label>
-            </td>
-            <td>
-              <input
-                id="image_min_width_numberbox"
-                type="number"
-                required
-                min="0"
-                max="720"
-                value="${options.image_min_width}"
-                onChange=${setValueOption('image_min_width')}
-              />px
-            </td>
-          </tr>
-
-          <tr
-            title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup"
-          >
-            <td>
-              <label for="image_max_width_numberbox">
-                Maximum Display Width:
-              </label>
-            </td>
-            <td>
-              <input
-                id="image_max_width_numberbox"
-                type="number"
-                required
-                min="30"
-                max="720"
-                value="${options.image_max_width}"
-                onChange=${setValueOption('image_max_width')}
-              />px
-            </td>
-          </tr>
-        </table>
-      </fieldset>
-
-      <div style=${{ display: 'flex', gap: '4px' }}>
-        <input
-          type="button"
-          id="clear_data_button"
-          class="danger ghost"
-          value="Clear Data"
-          title="Clears all data this extension has stored on your machine"
-          onClick=${clearData}
-        />
-
-        <input
-          type="button"
-          id="reset_button"
-          class="neutral ghost"
-          style=${{ marginLeft: 'auto' }}
-          value="Reset"
-          title="Resets all settings to their defaults; save afterwards to preserve the changes"
-          onClick=${resetOptions}
-        />
-
-        <input
-          type="button"
-          id="save_button"
-          class="accent"
-          value="Save"
-          title="Saves the current settings"
-          onClick=${saveOptions}
-        />
+      <div class="flex flex-col gap-2 px-3 py-2">
+        <label>
+          Columns:
+          <input
+            id="columns_numberbox"
+            type="number"
+            required
+            min="1"
+            max="10"
+            class="w-20 rounded border border-slate-300 px-2 py-1"
+            value="${options.columns}"
+            onChange=${setValueOption('columns')}
+          />
+        </label>
       </div>
-
-      <div id="notifications">
-        ${notifications.map(
-    (notification) => html`
-            <div class="notification ${`bg-${notification.type}`} inverse">
-              ${notification.message}
-            </div>
-          `,
-  )}
-      </div>
-    </section>
-  `;
+		</fieldset>
+	`;
 };

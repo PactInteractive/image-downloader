@@ -9,6 +9,7 @@ import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { findImages } from './findImages.js';
 import { Images } from './Images.js';
+import { Options } from './Options.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
 const initialOptions = localStorage;
@@ -135,6 +136,7 @@ export const App = ({ sidebarButton }) => {
 		[visibleImages, selectedImages]
 	);
 
+	const [showOptions, setShowOptions] = useState(false);
 	const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] = useState(false);
 
 	function maybeDownloadImages() {
@@ -153,50 +155,59 @@ export const App = ({ sidebarButton }) => {
 
 	const runAfterUpdate = useRunAfterUpdate();
 
+	// `relative` for new z-index stack to get box shadow
 	return html`
-		<div id="filters_container">
-			<div style=${{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+		<div class="relative shadow-md">
+			<div class="flex items-center gap-1 px-3 py-2">
 				<input
+					id="filter_by_url_input"
 					type="text"
 					placeholder="Filter by URL"
 					title="Filter by parts of the URL or regular expressions."
 					value=${options.filter_url}
-					style=${{ flex: '1' }}
+					class="flex-1"
 					onChange=${({ currentTarget: { value } }) => {
-						setOptions((options) => ({ ...options, filter_url: value.trim() }));
-					}}
+			setOptions((options) => ({ ...options, filter_url: value.trim() }));
+		}}
 				/>
 
 				<${UrlFilterMode}
+					id="url_filter_mode_select"
 					value=${options.filter_url_mode}
 					onChange=${({ currentTarget: { value } }) => {
-						setOptions((options) => ({ ...options, filter_url_mode: value }));
-					}}
+			setOptions((options) => ({ ...options, filter_url_mode: value }));
+		}}
 				/>
 
 				<button
-					id="toggle_advanced_filters_button"
-					class=${options.show_advanced_filters === 'true' ? '' : 'collapsed'}
+					class="w-8"
 					title="Toggle advanced filters"
 					onClick=${() => {
-						setOptions((options) => ({
-							...options,
-							show_advanced_filters: options.show_advanced_filters === 'true' ? 'false' : 'true',
-						}));
-					}}
+			setOptions((options) => ({
+				...options,
+				show_advanced_filters: options.show_advanced_filters === 'true' ? 'false' : 'true',
+			}));
+		}}
 				>
-					<img class="toggle" src="/images/times.svg" />
+					<img
+						class="inline w-4 transition-transform ${options.show_advanced_filters === 'true' ? '' : '-rotate-225'}"
+						src="/images/times.svg"
+					/>
+				</button>
+
+				<button id="open_options_button" class="w-8" title="Options" onClick=${() => setShowOptions((show) => !show)}>
+					<img
+						class="inline transition-transform ${showOptions ? 'w-4 rotate-180' : 'w-5'}"
+						src=${showOptions ? '/images/times.svg' : '/images/cog.svg'}
+					/>
 				</button>
 
 				${sidebarButton}
-
-				<button id="open_options_button" title="Options" onClick=${() => chrome.runtime.openOptionsPage()}>
-					<img src="/images/cog.svg" />
-				</button>
 			</div>
 
-			${options.show_advanced_filters === 'true' &&
-			html` <${AdvancedFilters} options=${options} setOptions=${setOptions} /> `}
+			${options.show_advanced_filters === 'true' && html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}
+		
+			${showOptions && html`<${Options} />`}
 		</div>
 
 		<div ref=${imagesCacheRef} class="hidden">
@@ -214,10 +225,9 @@ export const App = ({ sidebarButton }) => {
 		<div
 			id="downloads_container"
 			style=${{
-				gridTemplateColumns: `${
-					options.show_file_renaming === 'true' ? 'minmax(100px, 1fr)' : ''
+			gridTemplateColumns: `${options.show_file_renaming === 'true' ? 'minmax(100px, 1fr)' : ''
 				} minmax(100px, 1fr) 80px`,
-			}}
+		}}
 		>
 			<input
 				type="text"
@@ -225,38 +235,38 @@ export const App = ({ sidebarButton }) => {
 				title="Set the name of the subfolder you want to download the images to."
 				value=${options.folder_name}
 				onChange=${({ currentTarget: input }) => {
-					const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
+			const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
 
-					runAfterUpdate(() => {
-						input.selectionStart = input.selectionEnd = savedSelectionStart;
-					});
+			runAfterUpdate(() => {
+				input.selectionStart = input.selectionEnd = savedSelectionStart;
+			});
 
-					setOptions((options) => ({
-						...options,
-						folder_name: removeSpecialCharacters(input.value),
-					}));
-				}}
+			setOptions((options) => ({
+				...options,
+				folder_name: removeSpecialCharacters(input.value),
+			}));
+		}}
 			/>
 
 			${options.show_file_renaming === 'true' &&
-			html`
+		html`
 				<input
 					type="text"
 					placeholder="Rename files"
 					title="Set a new file name for the images you want to download."
 					value=${options.new_file_name}
 					onChange=${({ currentTarget: input }) => {
-						const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
+				const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
 
-						runAfterUpdate(() => {
-							input.selectionStart = input.selectionEnd = savedSelectionStart;
-						});
+				runAfterUpdate(() => {
+					input.selectionStart = input.selectionEnd = savedSelectionStart;
+				});
 
-						setOptions((options) => ({
-							...options,
-							new_file_name: removeSpecialCharacters(input.value),
-						}));
-					}}
+				setOptions((options) => ({
+					...options,
+					new_file_name: removeSpecialCharacters(input.value),
+				}));
+			}}
 				/>
 			`}
 
@@ -267,14 +277,14 @@ export const App = ({ sidebarButton }) => {
 			/>
 
 			${downloadConfirmationIsShown &&
-			html`
+		html`
 				<${DownloadConfirmation}
 					onCheckboxChange=${({ currentTarget: { checked } }) => {
-						setOptions((options) => ({
-							...options,
-							show_download_confirmation: (!checked).toString(),
-						}));
-					}}
+				setOptions((options) => ({
+					...options,
+					show_download_confirmation: (!checked).toString(),
+				}));
+			}}
 					onClose=${() => setDownloadConfirmationIsShown(false)}
 					onConfirm=${downloadImages}
 				/>

@@ -1,219 +1,113 @@
 :root {
-  /* Colors */
-  /* Neutral */
-  --neutral-lightest: hsl(0, 0%, 100%);
-  --neutral-lighter: hsl(0, 0%, 95%);
-  --neutral-light: hsl(300, 11%, 80%);
-  --neutral: hsl(300, 11%, 60%);
-  --neutral-dark: hsl(300, 11%, 10%);
-  --neutral-darker: hsl(300, 11%, 5%);
-  --neutral-darkest: hsl(300, 11%, 0%);
+	/* Colors */
+	/* Neutral */
+	--neutral-lightest: hsl(0, 0%, 100%);
+	--neutral-lighter: hsl(0, 0%, 95%);
+	--neutral-light: hsl(300, 11%, 80%);
+	--neutral: hsl(300, 11%, 60%);
+	--neutral-dark: hsl(300, 11%, 10%);
+	--neutral-darker: hsl(300, 11%, 5%);
+	--neutral-darkest: hsl(300, 11%, 0%);
 
-  --neutral-transparent-5: hsla(0, 0%, 0%, 5%);
-  --neutral-transparent-15: hsla(0, 0%, 0%, 15%);
-  --neutral-transparent-20: hsla(0, 0%, 0%, 20%);
+	--neutral-transparent-5: hsla(0, 0%, 0%, 5%);
+	--neutral-transparent-15: hsla(0, 0%, 0%, 15%);
+	--neutral-transparent-20: hsla(0, 0%, 0%, 20%);
 
-  /* Accent */
-  --accent: hsl(213, 80%, 50%);
-  --accent-dark: hsl(213, 80%, 40%);
+	/* Accent */
+	--accent: hsl(213, 80%, 50%);
+	--accent-dark: hsl(213, 80%, 40%);
 
-  /* Success */
-  --success-light: hsl(145, 64%, 43%);
-  --success: hsl(145, 64%, 40%);
+	/* Success */
+	--success-light: hsl(145, 64%, 43%);
+	--success: hsl(145, 64%, 40%);
 
-  /* Warning */
-  --warning-light: hsl(37, 90%, 51%);
-  --warning: hsl(37, 90%, 48%);
+	/* Warning */
+	--warning-light: hsl(37, 90%, 51%);
+	--warning: hsl(37, 90%, 48%);
 
-  /* Danger */
-  --danger-light: hsl(6, 78%, 57%);
-  --danger: hsl(6, 78%, 54%);
+	/* Danger */
+	--danger-light: hsl(6, 78%, 57%);
+	--danger: hsl(6, 78%, 54%);
 
-  /* Foreground */
-  --foreground: hsl(0, 0%, 20%);
-  --foreground-light: hsl(0, 0%, 70%);
-  --foreground-inverse: hsl(0, 0%, 100%);
+	/* Foreground */
+	--foreground: hsl(0, 0%, 20%);
+	--foreground-light: hsl(0, 0%, 70%);
+	--foreground-inverse: hsl(0, 0%, 100%);
 
-  /* Border radii */
-  --border-radius-sm: 2px;
-  --border-radius-md: 4px;
+	/* Border radii */
+	--border-radius-sm: 2px;
+	--border-radius-md: 4px;
 
-  /* Elevations */
-  --elevation-1: 0 2px 4px var(--neutral-transparent-20);
-  --elevation-2: 0 5px 14px var(--neutral-transparent-15),
-    0 3px 5px var(--neutral-transparent-20);
+	/* Elevations */
+	--elevation-1: 0 2px 4px var(--neutral-transparent-20);
+	--elevation-2: 0 5px 14px var(--neutral-transparent-15), 0 3px 5px var(--neutral-transparent-20);
 
-  /* Transitions */
-  --transition-timing-ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
-  --transition-timing-linear: linear;
+	/* Transitions */
+	--transition-timing-ease-out: cubic-bezier(0.25, 0.8, 0.25, 1);
+	--transition-timing-linear: linear;
 
-  --transition-all: all 200ms var(--transition-timing-ease-out);
-  --transition-background: background 200ms var(--transition-timing-ease-out);
-  --transition-border-color: border-color 200ms
-    var(--transition-timing-ease-out);
-  --transition-box-shadow: box-shadow 200ms var(--transition-timing-ease-out);
-  --transition-color: color 200ms var(--transition-timing-ease-out);
-  --transition-opacity: opacity 200ms var(--transition-timing-linear); /* Timing opacity looks weird */
-  --transition-transform: transform 200ms var(--transition-timing-ease-out);
+	--transition-all: all 200ms var(--transition-timing-ease-out);
+	--transition-background: background 200ms var(--transition-timing-ease-out);
+	--transition-border-color: border-color 200ms var(--transition-timing-ease-out);
+	--transition-box-shadow: box-shadow 200ms var(--transition-timing-ease-out);
+	--transition-color: color 200ms var(--transition-timing-ease-out);
+	--transition-opacity: opacity 200ms var(--transition-timing-linear); /* Timing opacity looks weird */
+	--transition-transform: transform 200ms var(--transition-timing-ease-out);
 
-  /* Misc */
-  --border-color: var(--neutral-transparent-5);
-  --image-background: var(--neutral-light);
-  --images-container-gap: 8px;
-  --images-container-padding: 12px;
-  --input-background: var(--neutral-transparent-5);
-}
-
-html {
-  box-sizing: border-box;
-}
-
-*,
-*::before,
-*::after {
-  box-sizing: inherit;
-}
-
-body {
-  min-width: 400px;
-  min-height: 600px;
-  font: 13px/1.5em 'Lucida Grande', Arial, sans-serif;
-  color: var(--foreground);
-}
-
-/* https://stackoverflow.com/questions/11243337/a-taller-than-its-img-child */
-a > img {
-  display: block;
-}
-
-img {
-  max-width: 100%;
-}
-
-svg {
-  fill: currentColor;
-}
-
-fieldset,
-details {
-  border-color: var(--border-color);
-  border-width: 0;
-  border-top-width: 2px;
-  padding-right: 0;
-  padding-left: 0;
-}
-
-fieldset,
-details {
-  margin-top: 2rem;
-}
-
-fieldset > p:first-of-type,
-details > p:first-of-type {
-  margin-top: 0;
-}
-
-fieldset > p:last-of-type,
-details > p:last-of-type {
-  margin-bottom: 0;
-}
-
-legend,
-summary {
-  margin-left: -8px;
-  padding: 0 8px;
-  font-weight: bold;
-}
-
-summary::before {
-  content: '\2BC8';
-}
-
-details[open] summary::before {
-  content: '\2BC6';
-}
-
-summary {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.25em;
-  margin-left: -22px;
-  margin-right: -6px;
-}
-
-summary::after {
-  content: '';
-  flex: 1;
-  height: 2px;
-  margin-left: 0.33em;
-  background-color: var(--border-color);
+	/* Misc */
+	--border-color: var(--neutral-transparent-5);
+	--image-background: var(--neutral-light);
+	--images-container-gap: 8px;
+	--images-container-padding: 12px;
+	--input-background: var(--neutral-transparent-5);
 }
 
 .left {
-  float: left;
+	float: left;
 }
 .right {
-  float: right;
+	float: right;
 }
 .clear {
-  clear: both;
+	clear: both;
 }
 
 .hidden {
-  display: none;
+	display: none;
 }
 
 /* text */
 .accent {
-  color: var(--accent);
+	color: var(--accent);
 }
 .success {
-  color: var(--success);
+	color: var(--success);
 }
 .warning {
-  color: var(--warning);
+	color: var(--warning);
 }
 .danger {
-  color: var(--danger);
+	color: var(--danger);
 }
 .light {
-  color: var(--foreground-light);
+	color: var(--foreground-light);
 }
 .inverse {
-  color: var(--foreground-inverse);
+	color: var(--foreground-inverse);
 }
 
 /* backgrounds */
 .bg-accent {
-  background: var(--accent);
+	background: var(--accent);
 }
 .bg-success {
-  background: var(--success);
+	background: var(--success);
 }
 .bg-warning {
-  background: var(--warning);
+	background: var(--warning);
 }
 .bg-danger {
-  background: var(--danger);
-}
-
-/* links */
-a:link,
-a:visited {
-  color: var(--accent);
-  text-decoration: none;
-}
-
-a:hover,
-a:active {
-  color: var(--accent-dark);
-}
-
-hr {
-  border: 1px dotted var(--neutral);
-  border-bottom: none;
-  margin: 4px 0;
+	background: var(--danger);
 }
 
 /* inputs */
@@ -221,135 +115,126 @@ input[type='text'],
 input[type='button'],
 input[type='number'],
 select {
-  border-radius: var(--border-radius-md);
-  margin-bottom: 4px;
-  font-size: 12px;
+	border-radius: var(--border-radius-md);
+	margin-bottom: 4px;
+	font-size: 12px;
 }
 
 input[type='text'],
 input[type='number'],
 select {
-  border: 0;
-  background: var(--input-background);
-  padding: 8px 12px;
+	border: 0;
+	background: var(--input-background);
+	padding: 8px 12px;
 }
 
 input[type='number'] {
-  padding-right: 4px;
+	padding-right: 4px;
 }
 
 select {
-  cursor: pointer;
-  padding: 7px 12px;
+	cursor: pointer;
+	padding: 7px 12px;
 }
 
 input[type='button'],
 input[type='checkbox'] {
-  cursor: pointer;
+	cursor: pointer;
 }
 
 input[type='button'] {
-  min-width: 50px;
-  color: var(--neutral-lightest);
-  border: 0;
-  padding: 8px 12px;
-  transition: var(--transition-background);
+	min-width: 50px;
+	color: var(--neutral-lightest);
+	border: 0;
+	padding: 8px 12px;
+	transition: var(--transition-background);
 }
 input[type='button']:disabled {
-  cursor: help;
-  opacity: 0.6;
+	cursor: help;
+	opacity: 0.6;
 }
 input[type='button'].loading:disabled {
-  cursor: wait;
+	cursor: wait;
 }
 
 /* accent */
 input[type='button'].accent {
-  background: var(--accent);
+	background: var(--accent);
 }
 input[type='button'].accent:hover,
 input[type='button'].accent:focus,
 input[type='button'].accent:active {
-  background: var(--accent);
+	background: var(--accent);
 }
 
 input[type='button'].accent.ghost {
-  border: 2px solid var(--accent);
-  background: var(--neutral-lightest);
-  color: var(--accent);
+	border: 2px solid var(--accent);
+	background: var(--neutral-lightest);
+	color: var(--accent);
 }
 
 /* success */
 input[type='button'].success {
-  border: 2px solid var(--success-light);
-  background: var(--success-light);
+	border: 2px solid var(--success-light);
+	background: var(--success-light);
 }
 input[type='button'].success:hover,
 input[type='button'].success:focus,
 input[type='button'].success:active {
-  border: 2px solid var(--success);
-  background: var(--success);
+	border: 2px solid var(--success);
+	background: var(--success);
 }
 
 input[type='button'].success.ghost {
-  border: 2px solid var(--success);
-  background: var(--neutral-lightest);
-  color: var(--success);
+	border: 2px solid var(--success);
+	background: var(--neutral-lightest);
+	color: var(--success);
 }
 
 /* warning */
 input[type='button'].warning {
-  border: 2px solid var(--warning-light);
-  background: var(--warning-light);
+	border: 2px solid var(--warning-light);
+	background: var(--warning-light);
 }
 input[type='button'].warning:hover,
 input[type='button'].warning:focus,
 input[type='button'].warning:active {
-  border: 2px solid var(--warning);
-  background: var(--warning);
+	border: 2px solid var(--warning);
+	background: var(--warning);
 }
 
 input[type='button'].warning.ghost {
-  border: 2px solid var(--warning);
-  background: var(--neutral-lightest);
-  color: var(--warning);
+	border: 2px solid var(--warning);
+	background: var(--neutral-lightest);
+	color: var(--warning);
 }
 
 /* danger */
 input[type='button'].danger {
-  border: 2px solid var(--danger-light);
-  background: var(--danger-light);
+	border: 2px solid var(--danger-light);
+	background: var(--danger-light);
 }
 input[type='button'].danger:hover,
 input[type='button'].danger:focus,
 input[type='button'].danger:active {
-  border: 2px solid var(--danger);
-  background: var(--danger);
+	border: 2px solid var(--danger);
+	background: var(--danger);
 }
 
 input[type='button'].danger.ghost {
-  border: 2px solid var(--danger);
-  background: var(--neutral-lightest);
-  color: var(--danger);
+	border: 2px solid var(--danger);
+	background: var(--neutral-lightest);
+	color: var(--danger);
 }
 
 /* neutral */
 input[type='button'].neutral {
-  border: 2px solid var(--neutral-transparent-20);
-  background: var(--neutral-transparent-20);
+	border: 2px solid var(--neutral-transparent-20);
+	background: var(--neutral-transparent-20);
 }
 
 input[type='button'].neutral.ghost {
-  border: 2px solid var(--neutral-transparent-20);
-  background: var(--neutral-lightest);
-  color: var(--foreground);
-}
-
-label {
-  cursor: pointer;
-  display: inline-flex;
-}
-
-label:has(input[type='checkbox']) {
-  margin-left: 3px;
+	border: 2px solid var(--neutral-transparent-20);
+	background: var(--neutral-lightest);
+	color: var(--foreground);
 }
