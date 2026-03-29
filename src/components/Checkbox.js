@@ -4,15 +4,14 @@ export const Checkbox = ({
   children,
   class: className,
   indeterminate,
-  style,
-  title = '',
+  title,
   ...props
 }) => html`
   <label ...${{ class: className, title }}>
     <input
+      class="mb-px"
       ref=${setIndeterminate(indeterminate)}
       type="checkbox"
-      style=${{ marginLeft: 0, ...style }}
       ...${props}
     />
     ${children}

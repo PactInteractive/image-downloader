@@ -1,15 +1,14 @@
 import html from '../html.js';
-import { Checkbox } from '../components/Checkbox.js';
+import { Checkbox } from './Checkbox.js';
 
-export const DownloadConfirmation = ({
+export function DownloadConfirmation({
   onCheckboxChange,
   onClose,
   onConfirm,
-  style,
   ...props
-}) => {
+}) {
   return html`
-    <div style=${{ gridColumn: '1 / -1', ...style }} ...${props}>
+    <div class="col-span-full" ...${props}>
       <div>
         <hr />
         <p>Take a quick look at your browser settings.</p>
@@ -39,11 +38,11 @@ export const DownloadConfirmation = ({
           class="success"
           value="Yes, Download"
           onClick=${() => {
-            onClose();
-            onConfirm();
-          }}
+      onClose();
+      onConfirm();
+    }}
         />
       </div>
     </div>
   `;
-};
+}

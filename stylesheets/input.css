@@ -17,6 +17,10 @@
 			sans-serif;
 	}
 
+	main {
+		min-height: 100vh;
+	}
+
 	a {
 		color: var(--color-sky-600);
 	}
@@ -44,18 +48,21 @@
 
 	select,
 	button,
-	label {
+	label,
+	input[type='checkbox'] {
 		cursor: pointer;
 	}
 
 	input[type='text'],
 	select {
+		border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);
 		background-color: var(--color-slate-100);
 		border-radius: 12px;
-		padding: 8px;
+		padding: 0 8px;
 	}
 
 	button {
+		border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);
 		background-color: var(--color-slate-200);
 		border-radius: 12px;
 		text-align: center;
@@ -80,65 +87,63 @@
 	}
 }
 
-@layer components {
-	.noUi-state-drag {
-		cursor: grabbing;
-	}
+.noUi-state-drag {
+	cursor: grabbing;
+}
 
-	.noUi-horizontal {
-		height: 12px;
-	}
+.noUi-horizontal {
+	height: 12px;
+}
 
-	.noUi-target {
-		border-color: var(--accent);
-		transition: var(--transition-border-color);
-	}
+.noUi-target {
+	border-color: var(--color-sky-600);
+	transition: border-color 200ms;
+}
 
-	.noUi-target[disabled] {
-		border-color: var(--border-color);
-	}
+.noUi-target[disabled] {
+	border-color: var(--color-slate-400);
+}
 
-	.noUi-connects {
-		cursor: pointer;
-	}
+.noUi-connects {
+	cursor: pointer;
+}
 
-	.noUi-connect {
-		background: var(--accent);
-		transition: var(--transition-background);
-	}
+.noUi-connect {
+	background-color: var(--color-sky-600);
+	transition: background-color 200ms;
+}
 
-	.noUi-target[disabled] .noUi-connect {
-		background: var(--input-background);
-	}
+.noUi-target[disabled] .noUi-connect {
+	background-color: var(--color-slate-100);
+}
 
-	.noUi-horizontal .noUi-origin .noUi-handle {
-		cursor: grab;
-		top: -5px;
-		right: -9px;
-		width: 18px;
-		height: 18px;
-		border-radius: 50%;
-		border-color: var(--accent);
+.noUi-horizontal .noUi-origin .noUi-handle {
+	cursor: grab;
+	top: -5px;
+	right: -9px;
+	width: 20px;
+	height: 20px;
+	border-radius: 50%;
+	border-color: var(--color-sky-600);
 
-		transition: var(--transition-border-color);
-	}
+	transition: border-color 200ms;
+}
 
-	.noUi-horizontal .noUi-origin[disabled] .noUi-handle {
-		cursor: help;
-		border-color: var(--border-color);
-	}
+.noUi-horizontal .noUi-origin[disabled] .noUi-handle {
+	cursor: help;
+	border-color: var(--color-slate-400);
+}
 
-	.noUi-handle::before,
-	.noUi-handle::after {
-		top: 3px;
-		height: 10px;
-	}
+.noUi-handle::before,
+.noUi-handle::after {
+	top: 3px;
+	height: 10px;
+}
 
-	.noUi-handle::before {
-		left: 6px;
-	}
+.noUi-handle::before {
+	left: 6px;
+}
 
-	.noUi-handle::after {
-		left: 9px;
-	}
+.noUi-handle::after {
+	left: 9px;
 }

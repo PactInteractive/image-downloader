@@ -5,11 +5,11 @@ import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
 
 import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
+import { Checkbox } from './Checkbox.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { findImages } from './findImages.js';
 import { Images } from './Images.js';
-import { Options } from './Options.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
 const initialOptions = localStorage;
@@ -136,7 +136,6 @@ export const App = ({ openSidebar }) => {
 		[visibleImages, selectedImages]
 	);
 
-	const [showOptions, setShowOptions] = useState(false);
 	const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] = useState(false);
 
 	function maybeDownloadImages() {
@@ -157,8 +156,8 @@ export const App = ({ openSidebar }) => {
 
 	// `relative` for new z-index stack to get box shadow
 	return html`
-		<div class="relative shadow-md">
-			<div class="flex items-center gap-1 px-3 py-2">
+		<header class="z-1 sticky top-0 shadow-md bg-white">
+			<div class="flex items-center gap-1 p-2">
 				<input
 					id="filter_by_url_input"
 					type="text"
@@ -180,7 +179,7 @@ export const App = ({ openSidebar }) => {
 				/>
 
 				<button
-					class="w-8"
+					class="relative w-8"
 					title="Toggle advanced filters"
 					onClick=${() => {
 			setOptions((options) => ({
@@ -190,15 +189,8 @@ export const App = ({ openSidebar }) => {
 		}}
 				>
 					<img
-						class="inline w-4 transition-transform ${options.show_advanced_filters === 'true' ? '' : '-rotate-225'}"
+						class="inline w-3 transition-transform ${options.show_advanced_filters === 'true' ? '' : '-rotate-225'}"
 						src="/images/times.svg"
-					/>
-				</button>
-
-				<button id="open_options_button" class="w-8" title="Options" onClick=${() => setShowOptions((show) => !show)}>
-					<img
-						class="inline transition-transform ${showOptions ? 'w-4 rotate-180' : 'w-5'}"
-						src=${showOptions ? '/images/times.svg' : '/images/cog.svg'}
 					/>
 				</button>
 
@@ -210,15 +202,14 @@ export const App = ({ openSidebar }) => {
 			</div>
 
 			${options.show_advanced_filters === 'true' && html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}
-		
-			${showOptions && html`<${Options} />`}
-		</div>
+		</header>
 
-		<div ref=${imagesCacheRef} class="hidden">
+		<div id="images_cache" ref=${imagesCacheRef} hidden>
 			${allImages.map((url) => html`<img src=${encodeURI(url)} onLoad=${filterImages} />`)}
 		</div>
 
 		<${Images}
+			id="images_container"
 			options=${options}
 			visibleImages=${visibleImages}
 			selectedImages=${selectedImages}
@@ -226,14 +217,10 @@ export const App = ({ openSidebar }) => {
 			setSelectedImages=${setSelectedImages}
 		/>
 
-		<div
-			id="downloads_container"
-			style=${{
-			gridTemplateColumns: `${options.show_file_renaming === 'true' ? 'minmax(100px, 1fr)' : ''
-				} minmax(100px, 1fr) 80px`,
-		}}
-		>
+		<footer class="sticky bottom-0 flex gap-2 mt-auto bg-white p-2" style=${{ boxShadow: '0 -4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1))' }}>
 			<input
+				id="subfolder_name_input"
+				class="flex-1"
 				type="text"
 				placeholder="Save to subfolder"
 				title="Set the name of the subfolder you want to download the images to."
@@ -252,27 +239,26 @@ export const App = ({ openSidebar }) => {
 		}}
 			/>
 
-			${options.show_file_renaming === 'true' &&
-		html`
-				<input
-					type="text"
-					placeholder="Rename files"
-					title="Set a new file name for the images you want to download."
-					value=${options.new_file_name}
-					onChange=${({ currentTarget: input }) => {
-				const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
+			<input
+				id="rename_pattern_input"
+				class="flex-1"
+				type="text"
+				placeholder="Rename files"
+				title="Set a new file name for the images you want to download."
+				value=${options.new_file_name}
+				onChange=${({ currentTarget: input }) => {
+			const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
 
-				runAfterUpdate(() => {
-					input.selectionStart = input.selectionEnd = savedSelectionStart;
-				});
+			runAfterUpdate(() => {
+				input.selectionStart = input.selectionEnd = savedSelectionStart;
+			});
 
-				setOptions((options) => ({
-					...options,
-					new_file_name: removeSpecialCharacters(input.value),
-				}));
-			}}
-				/>
-			`}
+			setOptions((options) => ({
+				...options,
+				new_file_name: removeSpecialCharacters(input.value),
+			}));
+		}}
+			/>
 
 			<${DownloadButton}
 				disabled=${imagesToDownload.length === 0}
@@ -280,8 +266,7 @@ export const App = ({ openSidebar }) => {
 				onClick=${maybeDownloadImages}
 			/>
 
-			${downloadConfirmationIsShown &&
-		html`
+			${downloadConfirmationIsShown && html`
 				<${DownloadConfirmation}
 					onCheckboxChange=${({ currentTarget: { checked } }) => {
 				setOptions((options) => ({
@@ -293,6 +278,6 @@ export const App = ({ openSidebar }) => {
 					onConfirm=${downloadImages}
 				/>
 			`}
-		</div>
+		</footer>
 	`;
 };

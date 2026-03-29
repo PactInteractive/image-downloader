@@ -1,44 +1,33 @@
 import html, { useEffect, useRef } from '../html.js';
-import { Checkbox } from '../components/Checkbox.js';
+import { Checkbox } from './Checkbox.js';
 
-// Currently a singleton. Should rewrite once we switch to a full-fledged rendering library
-export const AdvancedFilters = ({ options, setOptions }) => {
+export function AdvancedFilters({ options, setOptions }) {
   const widthSliderRef = useSlider('width', options, setOptions);
   const heightSliderRef = useSlider('height', options, setOptions);
 
-  // TODO: Extract and reuse in `Options.js` and other components
   const setCheckboxOption = (key) => ({ currentTarget: { checked } }) => {
     setOptions((options) => ({ ...options, [key]: checked.toString() }));
   };
 
   return html`
-    <div class="px-3 pb-2">
-      <table class="grid">
+    <div class="p-2 pt-0">
+      <table class="w-full tabular-nums">
         <colgroup>
-          <col style=${{ width: '45px' }} />
-          <col style=${{ width: '70px' }} />
+          <col class="w-10" />
+          <col class="w-18" />
           <col />
-          <col style=${{ width: '70px' }} />
+          <col class="w-18" />
         </colgroup>
 
-        <tr id="image_width_filter">
-          <td>Width:</td>
+        <tr>
+          <td class="pb-0.5">Width:</td>
 
           <td>
             <label
-              class=${options.filter_min_width_enabled === 'true'
-      ? ''
-      : 'light'}
-              style=${{
-      display: 'flex',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-    }}
-              title=${getSliderCheckboxTooltip(
-      options.filter_min_width_enabled
-    )}
+              class="flex justify-end items-center ${options.filter_min_width_enabled === 'true' ? '' : 'light'}"
+              title=${getSliderCheckboxTooltip(options.filter_min_width_enabled)}
             >
-              <small>≥ ${options.filter_min_width}px</small>
+              <small>${options.filter_min_width}px ≤</small>
               <${SliderCheckbox}
                 options=${options}
                 optionKey="filter_min_width_enabled"
@@ -47,23 +36,14 @@ export const AdvancedFilters = ({ options, setOptions }) => {
             </label>
           </td>
 
-          <td style=${{ padding: '1px 8px 0 8px' }}>
+          <td class="py-1.5 px-4">
             <div ref=${widthSliderRef}></div>
           </td>
 
           <td>
             <label
-              class=${options.filter_max_width_enabled === 'true'
-      ? ''
-      : 'light'}
-              style=${{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    }}
-              title=${getSliderCheckboxTooltip(
-      options.filter_max_width_enabled
-    )}
+              class="flex justify-start items-center ${options.filter_max_width_enabled === 'true' ? '' : 'light'}"
+              title=${getSliderCheckboxTooltip(options.filter_max_width_enabled)}
             >
               <${SliderCheckbox}
                 options=${options}
@@ -75,24 +55,15 @@ export const AdvancedFilters = ({ options, setOptions }) => {
           </td>
         </tr>
 
-        <tr id="image_height_filter">
-          <td>Height:</td>
+        <tr>
+          <td class="pb-0.5">Height:</td>
 
           <td>
             <label
-              class=${options.filter_min_height_enabled === 'true'
-      ? ''
-      : 'light'}
-              style=${{
-      display: 'flex',
-      justifyContent: 'flex-end',
-      alignItems: 'center',
-    }}
-              title=${getSliderCheckboxTooltip(
-      options.filter_min_height_enabled
-    )}
+              class="flex justify-end items-center ${options.filter_min_height_enabled === 'true' ? '' : 'light'}"
+              title=${getSliderCheckboxTooltip(options.filter_min_height_enabled)}
             >
-              <small>≥ ${options.filter_min_height}px</small>
+              <small>${options.filter_min_height}px ≤</small>
               <${SliderCheckbox}
                 options=${options}
                 optionKey="filter_min_height_enabled"
@@ -101,23 +72,14 @@ export const AdvancedFilters = ({ options, setOptions }) => {
             </label>
           </td>
 
-          <td style=${{ padding: '1px 8px 0 8px' }}>
+          <td class="py-1.5 px-4">
             <div ref=${heightSliderRef}></div>
           </td>
 
           <td>
             <label
-              class=${options.filter_max_height_enabled === 'true'
-      ? ''
-      : 'light'}
-              style=${{
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    }}
-              title=${getSliderCheckboxTooltip(
-      options.filter_max_height_enabled
-    )}
+              class="flex justify-start items-center ${options.filter_max_height_enabled === 'true' ? '' : 'light'}"
+              title=${getSliderCheckboxTooltip(options.filter_max_height_enabled)}
             >
               <${SliderCheckbox}
                 options=${options}
@@ -131,6 +93,7 @@ export const AdvancedFilters = ({ options, setOptions }) => {
       </table>
 
       <${Checkbox}
+        class="py-1"
         title="Only show images from direct links on the page; useful on sites like Reddit"
         checked=${options.only_images_from_links === 'true'}
         onChange=${setCheckboxOption('only_images_from_links')}
@@ -139,14 +102,14 @@ export const AdvancedFilters = ({ options, setOptions }) => {
       <//>
     </div>
   `;
-};
+}
 
-const SliderCheckbox = ({
+function SliderCheckbox({
   options,
   optionKey,
   setCheckboxOption,
   ...props
-}) => {
+}) {
   const enabled = options[optionKey] === 'true';
   return html`
     <input
@@ -156,9 +119,9 @@ const SliderCheckbox = ({
       ...${props}
     />
   `;
-};
+}
 
-const useSlider = (dimension, options, setOptions) => {
+function useSlider(dimension, options, setOptions) {
   const sliderRef = useRef(null);
 
   useEffect(() => {
@@ -232,13 +195,13 @@ const useSlider = (dimension, options, setOptions) => {
   );
 
   return sliderRef;
-};
+}
 
-const useDisableSliderHandle = (
+function useDisableSliderHandle(
   getHandle,
   option,
   tooltipText = 'Click the checkbox next to this slider to enable it'
-) => {
+) {
   useEffect(() => {
     const handle = getHandle();
     if (!handle) return;
@@ -251,7 +214,7 @@ const useDisableSliderHandle = (
       handle.setAttribute('title', tooltipText);
     }
   }, [option]);
-};
+}
 
 const getSliderCheckboxTooltip = (option) =>
   `Click this checkbox to ${option === 'true' ? 'disable' : 'enable'
