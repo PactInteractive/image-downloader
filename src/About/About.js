@@ -1,5 +1,5 @@
-import html, { render } from '../html.js';
 import { ExternalLink } from '../components/ExternalLink.js';
+import html, { render } from '../html.js';
 
 const numberOfActiveUsers = '1,900,000+';
 const years = new Date().getFullYear() - 2012;
@@ -7,7 +7,7 @@ const years = new Date().getFullYear() - 2012;
 render(html`<${About} />`, document.querySelector('main'));
 
 function About() {
-  return html`
+	return html`
     <h1 class="flex justify-center items-center gap-2 mb-8 text-2xl font-bold">
       <img class="rounded-xl h-8" src="/images/logo.svg" />
       Image Downloader
@@ -114,17 +114,17 @@ function About() {
 }
 
 function Project({ href, src, title, subtitle, children, ...props }) {
-  return html`
-    <${ExternalLink} href=${href} ...${props}>
-      <div>
-        <h2 class="flex items-center gap-1 font-bold">
-          <img class="h-5" src=${src} />
-          ${title}
-        </h2>
-        <small>${subtitle}</small>
-      </div>
+	return html`
+		<${ExternalLink} href=${href} ...${props}>
+			<div>
+				<h2 class="flex items-center gap-1 font-bold">
+					<img class="h-5" src=${src} />
+					${title}
+				</h2>
+				<small>${subtitle}</small>
+			</div>
 
-      ${children}
-    <//>
-  `;
+			${children}
+		<//>
+	`;
 }

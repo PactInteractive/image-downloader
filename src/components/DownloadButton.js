@@ -1,5 +1,4 @@
 import html from '../html.js';
-import { Checkbox } from './Checkbox.js';
 
 export function DownloadButton({ disabled, loading, ...props }) {
 	const tooltipText = disabled
@@ -9,12 +8,14 @@ export function DownloadButton({ disabled, loading, ...props }) {
 			: '';
 
 	return html`
-    <button
-			class="bg-sky-600 text-white px-2 ${loading ? 'loading' : ''}"
-      type="button"
-      disabled=${disabled || loading}
-      title=${tooltipText}
-      ...${props}
-    >${loading ? '•••' : 'Download'}</button>
-  `;
-};
+		<button
+			class="${loading ? 'animate-pulse' : ''} bg-sky-600 px-2 text-white hover:bg-sky-700"
+			type="button"
+			disabled=${disabled || loading}
+			title=${tooltipText}
+			...${props}
+		>
+			${loading ? '•••' : 'Download'}
+		</button>
+	`;
+}

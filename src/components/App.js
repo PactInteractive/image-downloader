@@ -5,7 +5,6 @@ import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
 
 import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
-import { Checkbox } from './Checkbox.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { findImages } from './findImages.js';
@@ -29,7 +28,7 @@ const saveSelections = (selections) => {
 	localStorage.selectedImages = JSON.stringify(selections);
 };
 
-export const App = ({ openSidebar }) => {
+export function App({ openSidebar }) {
 	const [options, setOptions] = useState(initialOptions);
 
 	useEffect(() => {
@@ -139,7 +138,7 @@ export const App = ({ openSidebar }) => {
 	const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] = useState(false);
 
 	function maybeDownloadImages() {
-		if (options.show_download_confirmation === 'true') {
+		if (options.show_download_confirmation === 'true' && imagesToDownload.length > 1) {
 			setDownloadConfirmationIsShown(true);
 		} else {
 			downloadImages();
@@ -154,9 +153,17 @@ export const App = ({ openSidebar }) => {
 
 	const runAfterUpdate = useRunAfterUpdate();
 
+	const numberOfActiveAdvancedFilters = [
+		'filter_min_width_enabled',
+		'filter_max_width_enabled',
+		'filter_min_height_enabled',
+		'filter_max_height_enabled',
+		'only_images_from_links',
+	].filter((key) => options[key] === 'true').length;
+
 	// `relative` for new z-index stack to get box shadow
 	return html`
-		<header class="z-1 sticky top-0 shadow-md bg-white">
+		<header class="sticky top-0 z-1 bg-white shadow-md">
 			<div class="flex items-center gap-1 p-2">
 				<input
 					id="filter_by_url_input"
@@ -166,42 +173,55 @@ export const App = ({ openSidebar }) => {
 					value=${options.filter_url}
 					class="flex-1"
 					onChange=${({ currentTarget: { value } }) => {
-			setOptions((options) => ({ ...options, filter_url: value.trim() }));
-		}}
+						setOptions((options) => ({ ...options, filter_url: value.trim() }));
+					}}
 				/>
 
 				<${UrlFilterMode}
 					id="url_filter_mode_select"
 					value=${options.filter_url_mode}
 					onChange=${({ currentTarget: { value } }) => {
-			setOptions((options) => ({ ...options, filter_url_mode: value }));
-		}}
+						setOptions((options) => ({ ...options, filter_url_mode: value }));
+					}}
 				/>
 
 				<button
 					class="relative w-8"
 					title="Toggle advanced filters"
 					onClick=${() => {
-			setOptions((options) => ({
-				...options,
-				show_advanced_filters: options.show_advanced_filters === 'true' ? 'false' : 'true',
-			}));
-		}}
+						setOptions((options) => ({
+							...options,
+							show_advanced_filters: options.show_advanced_filters === 'true' ? 'false' : 'true',
+						}));
+					}}
 				>
 					<img
-						class="inline w-3 transition-transform ${options.show_advanced_filters === 'true' ? '' : '-rotate-225'}"
+						class="${options.show_advanced_filters === 'true' ? '' : '-rotate-225'} inline w-3 transition-transform"
 						src="/images/times.svg"
 					/>
+
+					<small
+						class="corner-round ${options.show_advanced_filters !== 'true' && numberOfActiveAdvancedFilters > 0
+							? ''
+							: 'opacity-0'} absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-opacity"
+					>
+						${numberOfActiveAdvancedFilters}
+					</small>
 				</button>
 
-				${openSidebar && html`
+				${openSidebar &&
+				html`
 					<button class="w-8" title="Open in sidebar" onClick=${openSidebar}>
 						<img class="inline w-6" src="/images/sidebar.svg" />
 					</button>
 				`}
+
+				<!-- TODO: Button to switch to popup -->
+				<!-- TODO: Button to the About page -->
 			</div>
 
-			${options.show_advanced_filters === 'true' && html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}
+			${options.show_advanced_filters === 'true' &&
+			html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}
 		</header>
 
 		<div id="images_cache" ref=${imagesCacheRef} hidden>
@@ -217,67 +237,78 @@ export const App = ({ openSidebar }) => {
 			setSelectedImages=${setSelectedImages}
 		/>
 
-		<footer class="sticky bottom-0 flex gap-2 mt-auto bg-white p-2" style=${{ boxShadow: '0 -4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1))' }}>
-			<input
-				id="subfolder_name_input"
-				class="flex-1"
-				type="text"
-				placeholder="Save to subfolder"
-				title="Set the name of the subfolder you want to download the images to."
-				value=${options.folder_name}
-				onChange=${({ currentTarget: input }) => {
-			const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
-
-			runAfterUpdate(() => {
-				input.selectionStart = input.selectionEnd = savedSelectionStart;
-			});
-
-			setOptions((options) => ({
-				...options,
-				folder_name: removeSpecialCharacters(input.value),
-			}));
-		}}
-			/>
-
-			<input
-				id="rename_pattern_input"
-				class="flex-1"
-				type="text"
-				placeholder="Rename files"
-				title="Set a new file name for the images you want to download."
-				value=${options.new_file_name}
-				onChange=${({ currentTarget: input }) => {
-			const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
-
-			runAfterUpdate(() => {
-				input.selectionStart = input.selectionEnd = savedSelectionStart;
-			});
-
-			setOptions((options) => ({
-				...options,
-				new_file_name: removeSpecialCharacters(input.value),
-			}));
-		}}
-			/>
-
-			<${DownloadButton}
-				disabled=${imagesToDownload.length === 0}
-				loading=${downloadIsInProgress}
-				onClick=${maybeDownloadImages}
-			/>
-
-			${downloadConfirmationIsShown && html`
-				<${DownloadConfirmation}
-					onCheckboxChange=${({ currentTarget: { checked } }) => {
-				setOptions((options) => ({
-					...options,
-					show_download_confirmation: (!checked).toString(),
-				}));
+		<footer
+			class="sticky bottom-0 mt-auto bg-white p-2"
+			style=${{
+				boxShadow:
+					'0 -4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1))',
 			}}
+		>
+			${downloadConfirmationIsShown
+			? html`
+				<${DownloadConfirmation}
+					numberOfImages=${imagesToDownload.length}
+					onCheckboxChange=${({ currentTarget: { checked } }) => {
+						setOptions((options) => ({
+							...options,
+							show_download_confirmation: (!checked).toString(),
+						}));
+					}}
 					onClose=${() => setDownloadConfirmationIsShown(false)}
 					onConfirm=${downloadImages}
 				/>
+			`
+			: html`
+				<div class="flex gap-2">
+					<input
+						id="subfolder_name_input"
+						class="flex-1"
+						type="text"
+						placeholder="Save to subfolder"
+						title="Set the name of the subfolder you want to download the images to."
+						value=${options.folder_name}
+						onChange=${({ currentTarget: input }) => {
+							const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
+
+							runAfterUpdate(() => {
+								input.selectionStart = input.selectionEnd = savedSelectionStart;
+							});
+
+							setOptions((options) => ({
+								...options,
+								folder_name: removeSpecialCharacters(input.value),
+							}));
+						}}
+					/>
+
+					<input
+						id="rename_pattern_input"
+						class="flex-1"
+						type="text"
+						placeholder="Rename files"
+						title="Set a new file name for the images you want to download."
+						value=${options.new_file_name}
+						onChange=${({ currentTarget: input }) => {
+							const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
+
+							runAfterUpdate(() => {
+								input.selectionStart = input.selectionEnd = savedSelectionStart;
+							});
+
+							setOptions((options) => ({
+								...options,
+								new_file_name: removeSpecialCharacters(input.value),
+							}));
+						}}
+					/>
+
+					<${DownloadButton}
+						disabled=${imagesToDownload.length === 0}
+						loading=${downloadIsInProgress}
+						onClick=${maybeDownloadImages}
+					/>
+				</div>
 			`}
 		</footer>
 	`;
-};
+}

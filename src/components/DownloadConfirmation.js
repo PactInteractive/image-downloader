@@ -1,48 +1,38 @@
 import html from '../html.js';
 import { Checkbox } from './Checkbox.js';
 
-export function DownloadConfirmation({
-  onCheckboxChange,
-  onClose,
-  onConfirm,
-  ...props
-}) {
-  return html`
-    <div class="col-span-full" ...${props}>
-      <div>
-        <hr />
-        <p>Take a quick look at your browser settings.</p>
-        <p class="danger">
-         If the <b>Ask where to save each file before downloading</b> option is
-          checked, proceeding might open a lot of popup windows. Continue with
-          the download?
-        </p>
-      </div>
+export function DownloadConfirmation({ numberOfImages, onCheckboxChange, onClose, onConfirm, ...props }) {
+	return html`
+		<div ...${props}>
+			<div>
+				<p class="my-0.5">Please take a quick look at your browser settings.</p>
+				<p class="my-0.5 text-red-600">
+					If the <b>Ask where to save each file before downloading</b> option is checked
+					you will get <b>${numberOfImages} popup windows</b>!
+				</p>
+				<p class="my-0.5">For easier downloading we recommend you uncheck that option.</p>
+				<p class="my-0.5">Continue with the download?</p>
+			</div>
 
-      <div style=${{ display: 'flex', gap: '4px', alignItems: 'center' }}>
-        <div style=${{ marginRight: 'auto' }}>
-          <${Checkbox} onChange=${onCheckboxChange}>
-            Got it, don't show again
-          <//>
-        </div>
+			<div class="flex items-center gap-1">
+				<${Checkbox} class="mr-auto" onChange=${onCheckboxChange}> Got it, don't show again <//>
 
-        <input
-          type="button"
-          class="neutral ghost"
-          value="Cancel"
-          onClick=${onClose}
-        />
+				<button
+					type="button"
+					class="bg-white hover:bg-slate-50 px-2"
+					value="Cancel"
+					onClick=${onClose}
+				>Cancel</button>
 
-        <input
-          type="button"
-          class="success"
-          value="Yes, Download"
-          onClick=${() => {
-      onClose();
-      onConfirm();
-    }}
-        />
-      </div>
-    </div>
-  `;
+				<button
+					type="button"
+					class="bg-green-500 hover:bg-green-600 px-2 text-white"
+					onClick=${() => {
+						onClose();
+						onConfirm();
+					}}
+				>Yes, download</button>
+			</div>
+		</div>
+	`;
 }

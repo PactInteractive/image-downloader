@@ -66,6 +66,12 @@
 		background-color: var(--color-slate-200);
 		border-radius: 12px;
 		text-align: center;
+		line-height: 1;
+		transition: background-color 200ms;
+
+		&:hover {
+			background-color: var(--color-slate-300);
+		}
 	}
 
 	label {
@@ -80,10 +86,6 @@
 
 	small {
 		font-size: 0.9em;
-	}
-
-	hr {
-		border-style: dotted;
 	}
 }
 

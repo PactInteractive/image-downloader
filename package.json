@@ -9,7 +9,8 @@
 		"build": "bun scripts/build.js && bun run build:zip",
 		"build:zip": "rm -f ../image-downloader.zip && cd build && zip -r ../../image-downloader.zip .",
 		"task": "bun scripts/task.js",
-		"test": "bun test"
+		"test": "bun test",
+		"lint": "bunx prettier --write ."
 	},
 	"devDependencies": {
 		"@tailwindcss/cli": "4.2.2",

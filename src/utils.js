@@ -6,7 +6,7 @@ export const isIncludedIn = (array) => (item) => array.includes(item);
 export const stopPropagation = (e) => e.stopPropagation();
 
 export const removeSpecialCharacters = (value) => {
-  return value.replace(/[<>:"|?*]/g, '');
+	return value.replace(/[<>:"|?*]/g, '');
 };
 
 export const unique = (values) => [...new Set(values)];

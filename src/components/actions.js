@@ -1,8 +1,4 @@
-export const downloadImages = (imagesToDownload, options) => {
-  return new Promise((resolve) => {
-    chrome.runtime.sendMessage(
-      { type: 'downloadImages', imagesToDownload, options },
-      resolve
-    );
-  });
-};
+export const downloadImages = (imagesToDownload, options) =>
+	new Promise((resolve) => {
+		chrome.runtime.sendMessage({ type: 'downloadImages', imagesToDownload, options }, resolve);
+	});

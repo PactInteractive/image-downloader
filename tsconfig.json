@@ -1,20 +1,20 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2020",
-    "lib": ["ES2020", "DOM"],
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "noEmit": true,
-    "moduleResolution": "node",
-    "types": ["chrome", "jquery", "bun"],
-    "typeRoots": ["./node_modules/@types"],
-    "allowJs": true,
-    "checkJs": false
-  },
-  "include": ["src/**/*.ts", "src/**/*.js"],
-  "exclude": ["node_modules", "lib"]
+	"compilerOptions": {
+		"target": "ES2020",
+		"module": "ES2020",
+		"lib": ["ES2020", "DOM"],
+		"strict": true,
+		"esModuleInterop": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"resolveJsonModule": true,
+		"noEmit": true,
+		"moduleResolution": "node",
+		"types": ["chrome", "jquery", "bun"],
+		"typeRoots": ["./node_modules/@types"],
+		"allowJs": true,
+		"checkJs": false
+	},
+	"include": ["src/**/*.ts", "src/**/*.js"],
+	"exclude": ["node_modules", "lib"]
 }
