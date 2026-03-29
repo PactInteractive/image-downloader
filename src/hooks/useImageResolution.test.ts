@@ -12,15 +12,19 @@ type UseImageResolutionReturn = {
 	resetResolution: () => void;
 };
 
-// Import the hook (JS file without types)
-const { useImageResolution } = require('./useImageResolution.js') as {
-	useImageResolution: () => UseImageResolutionReturn;
-};
-
 declare global {
 	var React: any;
 	var ReactDOM: any;
 }
+
+// Set up React globals before importing the hook (required by html.js at module load time)
+global.React = require('../../lib/react-18.3.1.min');
+global.ReactDOM = require('../../lib/react-dom-18.3.1.min');
+
+// Import the hook after React globals are set
+const { useImageResolution } = require('./useImageResolution.js') as {
+	useImageResolution: () => UseImageResolutionReturn;
+};
 
 beforeEach(() => {
 	// Set up happy-dom for DOM mocking
@@ -30,9 +34,6 @@ beforeEach(() => {
 	global.window = window;
 
 	document.body.innerHTML = '<div id="root"></div>';
-
-	global.React = require('../../lib/react-18.3.1.min');
-	global.ReactDOM = require('../../lib/react-dom-18.3.1.min');
 });
 
 // Helper to test hooks by rendering a component that captures the result

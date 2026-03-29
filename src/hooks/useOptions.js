@@ -29,18 +29,23 @@ const defaults = {
 	columns: 2,
 };
 
-// Clean up obsolete stored data
-Object.keys(localStorage).forEach((key) => {
-	if (defaults[key] === undefined) {
-		localStorage.removeItem(key);
+function cleanupObsoleteStorage() {
+	for (let index = localStorage.length - 1; index >= 0; index--) {
+		const key = localStorage.key(index);
+		if (key && !(key in defaults)) {
+			localStorage.removeItem(key);
+		}
 	}
-});
+}
 
 export function useOptions() {
 	const [options, setOptions] = useState(() => {
+		// Side effect: clean up obsolete stored data on first mount
+		cleanupObsoleteStorage();
+
 		const initial = {};
 		for (const [key, defaultValue] of Object.entries(defaults)) {
-			initial[key] = deserialize(localStorage[key], defaultValue);
+			initial[key] = deserialize(localStorage.getItem(key), defaultValue);
 		}
 		return initial;
 	});
@@ -50,7 +55,7 @@ export function useOptions() {
 			const changes = typeof updater === 'function' ? updater(prev) : updater;
 			const next = { ...prev, ...changes };
 			for (const [key, value] of Object.entries(changes)) {
-				localStorage[key] = serialize(value);
+				localStorage.setItem(key, serialize(value));
 			}
 			return next;
 		});
@@ -60,6 +65,7 @@ export function useOptions() {
 }
 
 function serialize(value) {
+	if (value == null) return '';
 	return typeof value === 'object' ? JSON.stringify(value) : String(value);
 }
 
@@ -68,7 +74,8 @@ function deserialize(value, defaultValue) {
 
 	switch (typeof defaultValue) {
 		case 'number':
-			return parseFloat(value);
+			const number = parseFloat(value);
+			return isNaN(number) ? defaultValue : number;
 		case 'boolean':
 			return value === 'true';
 		case 'object':

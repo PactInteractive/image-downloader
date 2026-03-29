@@ -4,6 +4,15 @@ import { mockChrome } from '../test-helpers';
 declare var global: any;
 
 beforeEach(() => {
+	// Set up happy-dom for DOM mocking
+	const { Window } = require('happy-dom');
+	const window = new Window();
+	global.document = window.document;
+	global.window = window;
+	Object.defineProperty(global, 'localStorage', { value: window.localStorage, writable: true, configurable: true });
+	// Patch missing constructor in happy-dom
+	if (!window.SyntaxError) window.SyntaxError = SyntaxError;
+
 	global.chrome = mockChrome();
 	global.chrome.windows.getCurrent = mock((callback: any) => callback({ id: 'window' }));
 	global.chrome.tabs.query = mock((query: any, callback: any) => callback([{ id: 'tab-1' }]));
@@ -25,18 +34,6 @@ beforeEach(() => {
 	global.chrome.scripting = {
 		executeScript: executeScriptMock,
 	};
-	global.this = global;
-	global.$ = require('../../lib/jquery-3.5.1.min');
-	($.fn as any).fadeIn = function (duration: any, fn: any) {
-		setTimeout(duration, fn);
-		return this;
-	};
-	($.fn as any).fadeOut = function (duration: any, fn: any) {
-		setTimeout(duration, fn);
-		return this;
-	};
-	($ as any).Link = mock();
-	($.fn as any).noUiSlider = mock();
 	global.noUiSlider = {
 		create: mock((element: any, options: any) => {
 			element.noUiSlider = {
