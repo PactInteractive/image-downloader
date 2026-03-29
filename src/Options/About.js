@@ -1,12 +1,10 @@
 import { ExternalLink } from '../components/ExternalLink.js';
-import html, { render } from '../html.js';
+import html from '../html.js';
 
 const numberOfActiveUsers = '1,900,000+';
 const years = new Date().getFullYear() - 2012;
 
-render(html`<${About} />`, document.querySelector('main'));
-
-function About() {
+export function About() {
 	return html`
     <h1 class="flex justify-center items-center gap-2 mb-8 text-2xl font-bold">
       <img class="rounded-xl h-8" src="/images/logo.svg" />
@@ -26,8 +24,8 @@ function About() {
 
     <p>
       If you're one of the ${numberOfActiveUsers} people using this extension,
-      over the past <b class="text-nowrap">${years} years</b> marketing companies have approached me with
-      offers to pay in exchange for <b>your private data</b> like:
+      over the past <b class="text-nowrap">${years} years</b> marketing companies
+      have approached us with offers to pay in exchange for <b>your private data</b> like:
     </p>
 
     <ul class="list-disc ml-8">

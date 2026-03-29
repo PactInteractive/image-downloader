@@ -12,7 +12,7 @@
 	:root,
 	body {
 		font:
-			16px/1.5 'Lucida Grande',
+			18px/1.5 'Lucida Grande',
 			Arial,
 			sans-serif;
 	}
@@ -61,7 +61,8 @@
 		padding: 0 8px;
 	}
 
-	button {
+	button,
+	.btn {
 		border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);
 		background-color: var(--color-slate-200);
 		border-radius: 12px;

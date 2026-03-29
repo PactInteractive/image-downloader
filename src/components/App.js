@@ -189,7 +189,6 @@ export function App({ openSidebar }) {
 				`}
 
 				<!-- TODO: Button to switch to popup -->
-				<!-- TODO: Button to the About page -->
 			</div>
 
 			${options.show_advanced_filters && html`<${AdvancedFilters} options=${options} setOptions=${updateOptions} />`}

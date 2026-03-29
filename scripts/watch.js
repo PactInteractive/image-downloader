@@ -12,7 +12,7 @@ const logAndExecute =
 
 watch(paths.package).on('change', updateManifest);
 
-watch('./stylesheets/input.css').on('change', logAndExecute('CSS', buildCss));
+watch('./style.css').on('change', logAndExecute('CSS', buildCss));
 
 watch(['./src/**/*.js', './src/**/*.html']).on('change', logAndExecute('CSS', buildCss));
 

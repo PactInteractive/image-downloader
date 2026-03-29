@@ -135,7 +135,7 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 						${resolution.error ? 'Error loading image' : `${resolution.width}×${resolution.height}`}
 					</div>
 				`}
-				
+
 				<div class="rounded bg-slate-950/80 px-1 text-white empty:hidden">${getImageExtension(imageUrl)}</div>
 			</div>
 		</div>

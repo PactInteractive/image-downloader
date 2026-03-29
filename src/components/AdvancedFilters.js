@@ -94,14 +94,16 @@ export function AdvancedFilters({ options, setOptions }) {
 				</tr>
 			</table>
 
-			<${Checkbox}
-				class="py-1"
-				title="Only show images from direct links on the page; useful on sites like Reddit"
-				checked=${options.only_images_from_links}
-				onChange=${setCheckboxOption('only_images_from_links')}
-			>
-				Only images from links
-			<//>
+			<div class="flex justify-between gap-2">
+				<${Checkbox}
+					class="py-1"
+					title="Only show images from direct links on the page; useful on sites like Reddit"
+					checked=${options.only_images_from_links}
+					onChange=${setCheckboxOption('only_images_from_links')}
+				>
+					Only images from links
+				<//>
+			</div>
 		</div>
 	`;
 }

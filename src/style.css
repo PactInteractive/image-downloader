@@ -398,6 +398,9 @@
   .items-center {
     align-items: center;
   }
+  .justify-between {
+    justify-content: space-between;
+  }
   .justify-center {
     justify-content: center;
   }
@@ -741,7 +744,7 @@
     corner-shape: squircle;
   }
   :root,	body {
-    font: 16px/1.5 'Lucida Grande',	Arial,	sans-serif;
+    font: 18px/1.5 'Lucida Grande',	Arial,	sans-serif;
   }
   main {
     min-height: 100vh;
@@ -776,7 +779,7 @@
     border-radius: 12px;
     padding: 0 8px;
   }
-  button {
+  button,	.btn {
     border: 1px solid color-mix(in srgb, oklch(70.4% 0.04 256.788) 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);
