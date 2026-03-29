@@ -8,8 +8,8 @@ import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
-import { findImages } from './findImages.js';
 import { Images } from './Images.js';
+import { findImages } from './imageUtils.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
 export function App({ openSidebar }) {

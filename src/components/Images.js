@@ -4,6 +4,7 @@ import { Checkbox } from '../components/Checkbox.js';
 import { useImageResolution } from '../hooks/useImageResolution.js';
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
+import { getImageExtension } from './imageUtils.js';
 
 export function Images({ options, updateOptions, visibleImages, imagesToDownload, style, ...props }) {
 	const selectedImages = options.selected_images;
@@ -134,8 +135,8 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 						${resolution.error ? 'Error loading image' : `${resolution.width}×${resolution.height}`}
 					</div>
 				`}
-
-				<!-- TODO: Show image type/extension -->
+				
+				<div class="rounded bg-slate-950/80 px-1 text-white empty:hidden">${getImageExtension(imageUrl)}</div>
 			</div>
 		</div>
 	`;

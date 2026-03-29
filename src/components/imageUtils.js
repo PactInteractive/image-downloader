@@ -1,3 +1,23 @@
+export function getImageExtension(url) {
+	if (!url) return '';
+
+	// Handle data URIs: data:image/png;base64,... or data:image/svg+xml,...
+	if (url.startsWith('data:image/')) {
+		const match = url.match(/^data:image\/([a-zA-Z0-9+]+)[;,]/);
+		if (!match) return '';
+		const mimeType = match[1].toLowerCase();
+		// Extract base type from compound types like 'svg+xml'
+		return mimeType.split('+')[0];
+	}
+
+	// Remove query string and hash
+	const cleanUrl = url.split('?')[0].split('#')[0];
+
+	// Extract extension from filename
+	const match = cleanUrl.match(/\.([a-zA-Z0-9]+)$/);
+	return match ? match[1].toLowerCase() : '';
+}
+
 export function findImages() {
 	// Source: https://support.google.com/webmasters/answer/2598805?hl=en
 	const imageUrlRegex =

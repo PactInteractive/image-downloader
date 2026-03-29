@@ -548,6 +548,9 @@
   .text-white {
     color: var(--color-white);
   }
+  .lowercase {
+    text-transform: lowercase;
+  }
   .tabular-nums {
     --tw-numeric-spacing: tabular-nums;
     font-variant-numeric: var(--tw-ordinal,) var(--tw-slashed-zero,) var(--tw-numeric-figure,) var(--tw-numeric-spacing,) var(--tw-numeric-fraction,);
@@ -704,6 +707,11 @@
     &::after {
       --tw-content: '';
       content: var(--tw-content);
+    }
+  }
+  .empty\:hidden {
+    &:empty {
+      display: none;
     }
   }
   .hover\:bg-green-600 {
