@@ -1,7 +1,7 @@
 import watch from 'glob-watcher';
 
 import { filesToCopy, paths } from './config';
-import { updateManifest, copyFile, removeFile } from './tasks';
+import { buildCss, updateManifest, copyFile, removeFile } from './tasks';
 
 const logAndExecute =
   (message, fn) =>
@@ -15,6 +15,13 @@ const logAndExecute =
   };
 
 watch(paths.package).on('change', updateManifest);
+
+watch('./stylesheets/input.css').on('change', logAndExecute('CSS', buildCss));
+
+watch(['./src/**/*.js', './src/**/*.html']).on(
+  'change',
+  logAndExecute('CSS', buildCss),
+);
 
 watch(filesToCopy)
   .on('add', logAndExecute('Add', copyFile))

@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
   <head>
-    <title>Image Downloader</title>
+    <title>Image Downloader - Side Panel</title>
 
     <!-- TODO: Remove main.css -->
     <link rel="stylesheet" href="/stylesheets/main.css" type="text/css" />
@@ -60,7 +60,7 @@
 
       #toggle_advanced_filters_button,
       #open_options_button,
-      #open_sidebar_button {
+      #toggle_popup_button {
         cursor: pointer;
         display: flex;
         justify-content: center;
@@ -85,18 +85,8 @@
       }
 
       #open_options_button img,
-      #open_sidebar_button img {
+      #toggle_popup_button img {
         height: 18px;
-      }
-
-      #permission_error {
-        color: var(--danger);
-        font-size: 11px;
-        padding: 8px;
-        background: hsla(6, 78%, 54%, 10%);
-        border-radius: var(--border-radius-md);
-        margin-top: 8px;
-        text-align: center;
       }
 
       .noUi-state-drag {
@@ -350,6 +340,17 @@
         gap: 4px;
         border-top: 1px solid var(--border-color);
       }
+
+      /* Side panel mode indicator */
+      #mode_indicator {
+        font-size: 11px;
+        color: var(--neutral);
+        padding: 4px 8px;
+        background: var(--neutral-lighter);
+        border-radius: var(--border-radius-md);
+        margin-top: 8px;
+        text-align: center;
+      }
     </style>
   </head>
 
@@ -360,6 +361,6 @@
     <script src="/lib/nouislider.min.js"></script>
 
     <script src="/src/defaults.js"></script>
-    <script type="module" src="/src/Popup/Popup.js"></script>
+    <script type="module" src="/src/SidePanel/SidePanel.js"></script>
   </body>
 </html>

@@ -1,76 +1,16 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-  <head>
-    <title>Image Downloader | Options</title>
+	<head>
+		<title>Image Downloader | Options</title>
+		<link rel="stylesheet" href="/stylesheets/style.css" type="text/css" />
+	</head>
 
-    <link rel="stylesheet" href="/stylesheets/main.css" type="text/css" />
-    <style>
-      body {
-        margin: 0;
-        background-color: var(--neutral-lighter);
-      }
+	<body class="bg-slate-100">
+		<main class="mx-auto mb-32 w-full max-w-160 rounded-b-[3rem] bg-white p-8 text-sm shadow-lg"></main>
 
-      main {
-        box-shadow: var(--elevation-1);
-        min-width: 400px;
-        max-width: 640px;
-        width: 100%;
-        margin: 0 auto 12rem auto;
-        padding: 1.5rem;
-        background-color: var(--neutral-lightest);
-      }
+		<script src="/lib/jquery-3.5.1.min.js"></script>
 
-      h1 {
-        display: flex;
-        gap: 12px;
-        justify-content: center;
-        align-items: center;
-      }
-
-      h1 img {
-        height: 32px;
-      }
-
-      select,
-      input[type='color'],
-      input[type='number'] {
-        width: 80px;
-      }
-
-      input[type='number'] {
-        margin-right: 2px;
-        text-align: right;
-      }
-
-      input[type='button'] {
-        min-width: 80px;
-        margin: 6px 2px 0 2px;
-      }
-
-      #notifications {
-        position: fixed;
-        bottom: 8px;
-        left: 8px;
-        display: flex;
-        gap: 8px;
-        flex-direction: column-reverse;
-        max-width: 100%;
-        width: 320px;
-      }
-
-      #notifications > .notification {
-        border-radius: var(--border-radius-md);
-        padding: 8px 12px;
-      }
-    </style>
-  </head>
-
-  <body>
-    <main></main>
-
-    <script src="/lib/jquery-3.5.1.min.js"></script>
-
-    <script src="/src/defaults.js"></script>
-    <script type="module" src="/src/Options/Options.js"></script>
-  </body>
+		<script src="/src/defaults.js"></script>
+		<script type="module" src="/src/Options/Options.js"></script>
+	</body>
 </html>

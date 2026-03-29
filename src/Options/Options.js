@@ -46,15 +46,15 @@ const Options = () => {
 
   const setCheckboxOption =
     (key) =>
-    ({ currentTarget: { checked } }) => {
-      setOptions((options) => ({ ...options, [key]: checked.toString() }));
-    };
+      ({ currentTarget: { checked } }) => {
+        setOptions((options) => ({ ...options, [key]: checked.toString() }));
+      };
 
   const setValueOption =
     (key) =>
-    ({ currentTarget: { value } }) => {
-      setOptions((state) => ({ ...state, [key]: value }));
-    };
+      ({ currentTarget: { value } }) => {
+        setOptions((state) => ({ ...state, [key]: value }));
+      };
 
   function saveOptions() {
     Object.assign(localStorage, options);
@@ -81,188 +81,188 @@ const Options = () => {
 
   const { notifications, addNotification } = useNotifications();
 
+  // TODO: Migrate
   return html`
-    <h1>
-      <img src="/images/logo.svg" />
+    <h1 class="flex justify-center items-center gap-2 mb-8 text-2xl font-bold">
+      <img class="rounded-xl h-8" src="/images/logo.svg" />
       Image Downloader
-      <small class="light">v${chrome.runtime.getManifest().version}</small>
+      <small class="text-slate-400">v${chrome.runtime.getManifest().version}</small>
     </h1>
 
-    <details open>
-      <summary>💭 About</summary>
-      <${About} />
-    </details>
+    <section hidden>
+      <fieldset>
+        <legend>⚙️ General options</legend>
 
-    <details open>
-      <summary>🪙 Support</summary>
-      <${Support} />
-    </details>
-
-    <fieldset>
-      <legend>⚙️ General options</legend>
-
-      <${Checkbox}
-        id="show_download_confirmation_checkbox"
-        title="Requires confirmation when you press the Download button"
-        checked="${options.show_download_confirmation === 'true'}"
-        onChange=${setCheckboxOption('show_download_confirmation')}
-      >
-        <span>Show download confirmation</span>
-      <//>
-
-      <br />
-      <${Checkbox}
-        id="show_file_renaming_checkbox"
-        title="Lets you specify a new file name for downloaded files"
-        checked="${options.show_file_renaming === 'true'}"
-        onChange=${setCheckboxOption('show_file_renaming')}
-      >
-        <span>Show file renaming textbox</span>
-      <//>
-    </fieldset>
-
-    <fieldset>
-      <legend>🖼️ Image options</legend>
-
-      <${Checkbox}
-        id="show_image_url_checkbox"
-        title="Displays the URL above each image"
-        checked="${options.show_image_url === 'true'}"
-        onChange=${setCheckboxOption('show_image_url')}
-      >
-        <span>Show the <b>URL</b> on hover</span>
-      <//>
-
-      <br />
-      <${Checkbox}
-        id="show_image_resolution_checkbox"
-        title="Displays the natural resolution (e.g., 1920×1080) of each image"
-        checked="${options.show_image_resolution === 'true'}"
-        onChange=${setCheckboxOption('show_image_resolution')}
-      >
-        <span>Show the <b>resolution</b></span>
-      <//>
-
-      <br />
-      <${Checkbox}
-        id="show_open_image_button_checkbox"
-        title="Displays a button next to each image to open it in a new tab"
-        checked="${options.show_open_image_button === 'true'}"
-        onChange=${setCheckboxOption('show_open_image_button')}
-      >
-        <span>Show the <b>Open</b> button on hover</span>
-      <//>
-
-      <br />
-      <${Checkbox}
-        id="show_download_image_button_checkbox"
-        title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
-        checked="${options.show_download_image_button === 'true'}"
-        onChange=${setCheckboxOption('show_download_image_button')}
-      >
-        <span>Show the <b>Download</b> button on hover</span>
-      <//>
-
-      <table>
-        <tr title="The number of columns">
-          <td><label for="columns_numberbox">Columns:</label></td>
-          <td>
-            <input
-              id="columns_numberbox"
-              type="number"
-              required
-              min="1"
-              max="10"
-              value="${options.columns}"
-              onChange=${setValueOption('columns')}
-            />
-          </td>
-        </tr>
-
-        <tr
-          title="Setting the minimum width can be useful for images that are too small to make out"
+        <${Checkbox}
+          id="show_download_confirmation_checkbox"
+          title="Requires confirmation when you press the Download button"
+          checked="${options.show_download_confirmation === 'true'}"
+          onChange=${setCheckboxOption('show_download_confirmation')}
         >
-          <td>
-            <label for="image_min_width_numberbox">
-              Minimum Display Width:
-            </label>
-          </td>
-          <td>
-            <input
-              id="image_min_width_numberbox"
-              type="number"
-              required
-              min="0"
-              max="720"
-              value="${options.image_min_width}"
-              onChange=${setValueOption('image_min_width')}
-            />px
-          </td>
-        </tr>
+          <span>Show download confirmation</span>
+        <//>
 
-        <tr
-          title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup"
+        <br />
+        <${Checkbox}
+          id="show_file_renaming_checkbox"
+          title="Lets you specify a new file name for downloaded files"
+          checked="${options.show_file_renaming === 'true'}"
+          onChange=${setCheckboxOption('show_file_renaming')}
         >
-          <td>
-            <label for="image_max_width_numberbox">
-              Maximum Display Width:
-            </label>
-          </td>
-          <td>
-            <input
-              id="image_max_width_numberbox"
-              type="number"
-              required
-              min="30"
-              max="720"
-              value="${options.image_max_width}"
-              onChange=${setValueOption('image_max_width')}
-            />px
-          </td>
-        </tr>
-      </table>
-    </fieldset>
+          <span>Show file renaming textbox</span>
+        <//>
+      </fieldset>
 
-    <div style=${{ display: 'flex', gap: '4px' }}>
-      <input
-        type="button"
-        id="clear_data_button"
-        class="danger ghost"
-        value="Clear Data"
-        title="Clears all data this extension has stored on your machine"
-        onClick=${clearData}
-      />
+      <fieldset>
+        <legend>🖼️ Image options</legend>
 
-      <input
-        type="button"
-        id="reset_button"
-        class="neutral ghost"
-        style=${{ marginLeft: 'auto' }}
-        value="Reset"
-        title="Resets all settings to their defaults; save afterwards to preserve the changes"
-        onClick=${resetOptions}
-      />
+        <${Checkbox}
+          id="show_image_url_checkbox"
+          title="Displays the URL above each image"
+          checked="${options.show_image_url === 'true'}"
+          onChange=${setCheckboxOption('show_image_url')}
+        >
+          <span>Show the <b>URL</b> on hover</span>
+        <//>
 
-      <input
-        type="button"
-        id="save_button"
-        class="accent"
-        value="Save"
-        title="Saves the current settings"
-        onClick=${saveOptions}
-      />
-    </div>
+        <br />
+        <${Checkbox}
+          id="show_image_resolution_checkbox"
+          title="Displays the natural resolution (e.g., 1920×1080) of each image"
+          checked="${options.show_image_resolution === 'true'}"
+          onChange=${setCheckboxOption('show_image_resolution')}
+        >
+          <span>Show the <b>resolution</b></span>
+        <//>
 
-    <div id="notifications">
-      ${notifications.map(
-        (notification) => html`
-          <div class="notification ${`bg-${notification.type}`} inverse">
-            ${notification.message}
-          </div>
-        `,
-      )}
-    </div>
+        <br />
+        <${Checkbox}
+          id="show_open_image_button_checkbox"
+          title="Displays a button next to each image to open it in a new tab"
+          checked="${options.show_open_image_button === 'true'}"
+          onChange=${setCheckboxOption('show_open_image_button')}
+        >
+          <span>Show the <b>Open</b> button on hover</span>
+        <//>
+
+        <br />
+        <${Checkbox}
+          id="show_download_image_button_checkbox"
+          title="Displays a button next to each image to individually download it. This download does not require confirmation, even if you've enabled the confirmation option."
+          checked="${options.show_download_image_button === 'true'}"
+          onChange=${setCheckboxOption('show_download_image_button')}
+        >
+          <span>Show the <b>Download</b> button on hover</span>
+        <//>
+
+        <table>
+          <tr title="The number of columns">
+            <td><label for="columns_numberbox">Columns:</label></td>
+            <td>
+              <input
+                id="columns_numberbox"
+                type="number"
+                required
+                min="1"
+                max="10"
+                value="${options.columns}"
+                onChange=${setValueOption('columns')}
+              />
+            </td>
+          </tr>
+
+          <tr
+            title="Setting the minimum width can be useful for images that are too small to make out"
+          >
+            <td>
+              <label for="image_min_width_numberbox">
+                Minimum Display Width:
+              </label>
+            </td>
+            <td>
+              <input
+                id="image_min_width_numberbox"
+                type="number"
+                required
+                min="0"
+                max="720"
+                value="${options.image_min_width}"
+                onChange=${setValueOption('image_min_width')}
+              />px
+            </td>
+          </tr>
+
+          <tr
+            title="Setting the maximum width prevents bigger images from taking too much space, and also changes the size of the popup"
+          >
+            <td>
+              <label for="image_max_width_numberbox">
+                Maximum Display Width:
+              </label>
+            </td>
+            <td>
+              <input
+                id="image_max_width_numberbox"
+                type="number"
+                required
+                min="30"
+                max="720"
+                value="${options.image_max_width}"
+                onChange=${setValueOption('image_max_width')}
+              />px
+            </td>
+          </tr>
+        </table>
+      </fieldset>
+
+      <div style=${{ display: 'flex', gap: '4px' }}>
+        <input
+          type="button"
+          id="clear_data_button"
+          class="danger ghost"
+          value="Clear Data"
+          title="Clears all data this extension has stored on your machine"
+          onClick=${clearData}
+        />
+
+        <input
+          type="button"
+          id="reset_button"
+          class="neutral ghost"
+          style=${{ marginLeft: 'auto' }}
+          value="Reset"
+          title="Resets all settings to their defaults; save afterwards to preserve the changes"
+          onClick=${resetOptions}
+        />
+
+        <input
+          type="button"
+          id="save_button"
+          class="accent"
+          value="Save"
+          title="Saves the current settings"
+          onClick=${saveOptions}
+        />
+      </div>
+
+      <div id="notifications">
+        ${notifications.map(
+    (notification) => html`
+            <div class="notification ${`bg-${notification.type}`} inverse">
+              ${notification.message}
+            </div>
+          `,
+  )}
+      </div>
+    </section>
+
+    <h2 class="flex items-center gap-2 font-bold text-xl content-[''] after:flex-1 after:h-0.5 after:bg-slate-200">💭 About</h2>
+    <${About} />
+
+    <h2 class="flex items-center gap-2 font-bold text-xl content-[''] after:flex-1 after:h-0.5 after:bg-slate-200">🪙 Support</h2>
+    <${Support} />
   `;
 };
+
 
 render(html`<${Options} />`, document.querySelector('main'));

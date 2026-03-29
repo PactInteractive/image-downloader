@@ -1,3 +1,4 @@
+import { $ } from 'bun';
 import fs from 'fs-extra';
 import { join, normalize } from 'path';
 import sharp from 'sharp';
@@ -23,6 +24,11 @@ export async function updateManifest() {
   );
 
   return normalize(config.paths.manifest);
+}
+
+export async function buildCss() {
+  await $`bunx @tailwindcss/cli -i ./stylesheets/input.css -o ./stylesheets/style.css`;
+  console.log('Built stylesheets/style.css');
 }
 
 export async function copyFile(path) {

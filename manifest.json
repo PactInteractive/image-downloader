@@ -1,8 +1,8 @@
 {
   "name": "Image Downloader",
   "description": "Browse and download images on the web",
-  "version": "4.1.2",
-  "minimum_chrome_version": "88",
+  "version": "4.2.0",
+  "minimum_chrome_version": "114",
   "manifest_version": 3,
   "icons": {
     "16": "/images/icon_16.png",
@@ -31,6 +31,10 @@
   "permissions": [
     "activeTab",
     "scripting",
-    "downloads"
-  ]
+    "downloads",
+    "sidePanel"
+  ],
+  "side_panel": {
+    "default_path": "src/SidePanel/index.html"
+  }
 }
