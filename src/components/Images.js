@@ -5,16 +5,15 @@ import { useImageResolution } from '../hooks/useImageResolution.js';
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
 
-export function Images({
-	options,
-	updateOptions,
-	visibleImages,
-	selectedImages,
-	imagesToDownload,
-	setSelectedImages,
-	style,
-	...props
-}) {
+export function Images({ options, updateOptions, visibleImages, imagesToDownload, style, ...props }) {
+	const selectedImages = options.selected_images;
+
+	const setSelectedImages = (updater) => {
+		updateOptions((prev) => ({
+			selected_images: typeof updater === 'function' ? updater(prev.selected_images) : updater,
+		}));
+	};
+
 	const someImagesAreSelected = visibleImages.length > 0 && visibleImages.some(isIncludedIn(selectedImages));
 	const allImagesAreSelected = visibleImages.length > 0 && visibleImages.every(isIncludedIn(selectedImages));
 

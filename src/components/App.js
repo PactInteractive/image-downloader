@@ -12,33 +12,12 @@ import { findImages } from './findImages.js';
 import { Images } from './Images.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
-// Load saved selections from localStorage
-const loadSavedSelections = () => {
-	try {
-		const saved = localStorage.selectedImages;
-		return saved ? JSON.parse(saved) : [];
-	} catch {
-		return [];
-	}
-};
-
-// Save selections to localStorage
-const saveSelections = (selections) => {
-	localStorage.selectedImages = JSON.stringify(selections);
-};
-
 export function App({ openSidebar }) {
 	const [options, updateOptions] = useOptions();
 
 	const [allImages, setAllImages] = useState([]);
 	const [linkedImages, setLinkedImages] = useState([]);
-	const [selectedImages, setSelectedImages] = useState(loadSavedSelections);
 	const [visibleImages, setVisibleImages] = useState([]);
-
-	// Persist selections to localStorage whenever they change
-	useEffect(() => {
-		saveSelections(selectedImages);
-	}, [selectedImages]);
 
 	useEffect(() => {
 		// Get images on the page
@@ -58,7 +37,8 @@ export function App({ openSidebar }) {
 							unique([...linkedImages, ...messages.flatMap((message) => message?.result?.linkedImages)])
 						);
 
-						localStorage.active_tab_origin = messages[0]?.result?.origin;
+						// TODO: Do we need this for anything?
+						// localStorage.active_tab_origin = messages[0]?.result?.origin;
 					});
 			});
 		});
@@ -126,8 +106,8 @@ export function App({ openSidebar }) {
 
 	const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
 	const imagesToDownload = useMemo(
-		() => visibleImages.filter(isIncludedIn(selectedImages)),
-		[visibleImages, selectedImages]
+		() => visibleImages.filter(isIncludedIn(options.selected_images)),
+		[visibleImages, options.selected_images]
 	);
 
 	const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] = useState(false);
@@ -224,9 +204,7 @@ export function App({ openSidebar }) {
 			options=${options}
 			updateOptions=${updateOptions}
 			visibleImages=${visibleImages}
-			selectedImages=${selectedImages}
 			imagesToDownload=${imagesToDownload}
-			setSelectedImages=${setSelectedImages}
 		/>
 
 		<footer
