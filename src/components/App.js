@@ -29,7 +29,7 @@ const saveSelections = (selections) => {
 	localStorage.selectedImages = JSON.stringify(selections);
 };
 
-export const App = ({ sidebarButton }) => {
+export const App = ({ openSidebar }) => {
 	const [options, setOptions] = useState(initialOptions);
 
 	useEffect(() => {
@@ -202,7 +202,11 @@ export const App = ({ sidebarButton }) => {
 					/>
 				</button>
 
-				${sidebarButton}
+				${openSidebar && html`
+					<button class="w-8" title="Open in sidebar" onClick=${openSidebar}>
+						<img class="inline w-6" src="/images/sidebar.svg" />
+					</button>
+				`}
 			</div>
 
 			${options.show_advanced_filters === 'true' && html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}

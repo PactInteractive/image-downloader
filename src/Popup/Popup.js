@@ -1,4 +1,4 @@
-import html, { render, useCallback } from '../html.js';
+import html, { render } from '../html.js';
 import { App } from '../components/App.js';
 
 async function openSidebar() {
@@ -14,14 +14,4 @@ async function openSidebar() {
   }
 }
 
-const openSidebarButton = html`
-  <button
-    id="open_sidebar_button"
-    title="Open in Sidebar"
-    onClick=${openSidebar}
-  >
-    <img src="/images/sidebar.svg" />
-  </button>
-`;
-
-render(html`<${App} sidebarButton=${openSidebarButton} />`, document.querySelector('main'));
+render(html`<${App} openSidebar=${openSidebar} />`, document.querySelector('main'));

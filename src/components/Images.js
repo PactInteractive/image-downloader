@@ -18,6 +18,8 @@ const ImageCard = ({
 	showImageResolution,
 }) => {
 	const { resolution, onLoad, onError, resetResolution } = useImageResolution();
+	const showImageType = true; // TODO: Add option & implement badge next to the resolution
+	// TODO: Remove `showImageUrl` option, extension is enough
 
 	// Reset resolution when imageUrl changes to avoid showing stale data
 	useEffect(resetResolution, [imageUrl, resetResolution]);
@@ -26,9 +28,13 @@ const ImageCard = ({
 
 	return html`
 		<div
-			id=${`card_${index}`}
-			class="shadow-md card ${isSelected ? 'checked' : ''}"
-			style=${{ minHeight: `200px` }}
+			class="relative flex items-center shadow-md ${isSelected ? 'checked' : ''}"
+			style=${{
+			minHeight: `200px`,
+			backgroundImage: 'conic-gradient(var(--color-slate-100) 90deg, var(--color-slate-300) 90deg 180deg, var(--color-slate-100) 180deg 270deg, var(--color-slate-300) 270deg)',
+			backgroundRepeat: 'repeat',
+			backgroundSize: '12px 12px',
+		}}
 			onClick=${() => {
 			setSelectedImages((selectedImages) =>
 				selectedImages.includes(imageUrl)
@@ -38,36 +44,30 @@ const ImageCard = ({
 		}}
 		>
 			<img
+				class="w-full"
 				src=${imageUrl}
-				style=${{
-			width: `100%`,
-		}}
 				onLoad=${onLoad}
 				onError=${onError}
 			/>
 
 			<div class="checkbox"></div>
 
-			${(showOpenImageButton || showDownloadImageButton) &&
-		html`
+			${(showOpenImageButton || showDownloadImageButton) && html`
 				<div class="actions">
-					${showOpenImageButton && html` <${OpenImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} /> `}
-					${showDownloadImageButton &&
-			html` <${DownloadImageButton} imageUrl=${imageUrl} options=${options} onClick=${stopPropagation} /> `}
+					${showOpenImageButton && html`<${OpenImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />`}
+					${showDownloadImageButton && html`<${DownloadImageButton} imageUrl=${imageUrl} options=${options} onClick=${stopPropagation} />`}
 				</div>
 			`}
-			${((showImageResolution && resolution.ready) || showImageUrl) &&
-		html`
-				<div class="bottom_overlay">
-					${showImageResolution &&
-			resolution.ready &&
-			html`
-						<div class="resolution">
+
+			${((showImageResolution && resolution.ready) || showImageType || showImageUrl) && html`
+				<div class="absolute bottom-1 left-1 right-1 flex gap-1">
+					${showImageResolution && resolution.ready && html`
+						<div class="rounded bg-slate-950/80 text-white px-1">
 							${resolution.error ? 'Error loading image' : `${resolution.width}×${resolution.height}`}
 						</div>
 					`}
-					${showImageUrl &&
-			html`
+
+					${showImageUrl && html`
 						<div class="image_url_container">
 							<${ImageUrlTextbox} value=${imageUrl} onClick=${stopPropagation} />
 						</div>
