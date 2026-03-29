@@ -37,7 +37,7 @@ function About() {
     </ul>
 
     <p>
-      My response to such offers will always be a resounding <b>NO</b>!
+      Our response to such offers will always be a resounding <b>NO</b>!
     </p>
 
     <p>
@@ -50,7 +50,7 @@ function About() {
     </p>
 
     <p>
-      <i>This extension is free!</i> We have other paid products you can use - our premium
+      We have other paid products you can use - our premium
       service <${ExternalLink} class="font-bold text-nowrap" href="https://cutoutmagic.com">Cutout Magic</a> can
       identify objects, clear obstructions, or remove background instantly with 1 click!
     </p>

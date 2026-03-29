@@ -249,11 +249,5 @@ const Options = () => {
   )}
       </div>
     </section>
-
-    <h2 class="flex items-center gap-2 font-bold text-xl content-[''] after:flex-1 after:h-0.5 after:bg-slate-200">💭 About</h2>
-    <${About} />
-
-    <h2 class="flex items-center gap-2 font-bold text-xl content-[''] after:flex-1 after:h-0.5 after:bg-slate-200">🪙 Support</h2>
-    <${Support} />
   `;
 };
