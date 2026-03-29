@@ -17,7 +17,7 @@ export async function updateManifest() {
 
 	const icons = await generateIcons(config.icons);
 
-	await fs.writeJson(config.paths.manifest, { ...manifestJson, version: packageJson.version, icons }, { spaces: 2 });
+	await fs.writeJson(config.paths.manifest, { ...manifestJson, version: packageJson.version, icons }, { spaces: '\t' });
 
 	return normalize(config.paths.manifest);
 }

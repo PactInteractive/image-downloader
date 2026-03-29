@@ -1,8 +1,8 @@
 import html, { useCallback, useEffect, useMemo, useRef, useState } from '../html.js';
 
-import { useOptions } from '../hooks/useOptions.js';
 import { useRunAfterUpdate } from '../hooks/useRunAfterUpdate.js';
 import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
+import { useOptions } from './OptionsProvider.js';
 
 import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
@@ -12,7 +12,7 @@ import { Images } from './Images.js';
 import { findImages } from './imageUtils.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
-export function App({ openSidebar }) {
+export function App() {
 	const [options, updateOptions] = useOptions();
 
 	const [allImages, setAllImages] = useState([]);
@@ -168,27 +168,41 @@ export function App({ openSidebar }) {
 					}}
 				>
 					<img
-						class="${options.show_advanced_filters ? '' : '-rotate-225'} inline w-3 transition-transform"
-						src="/images/times.svg"
+						class="${options.show_advanced_filters ? '' : '-rotate-90'} inline w-3 transition-transform"
+						src="/images/chevron.svg"
 					/>
 
 					<small
 						class="corner-round ${!options.show_advanced_filters && numberOfActiveAdvancedFilters > 0
-							? ''
-							: 'opacity-0'} absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-opacity"
+							? 'ease-elastic duration-400'
+							: 'scale-0'} absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-transform"
 					>
 						${numberOfActiveAdvancedFilters}
 					</small>
 				</button>
 
-				${openSidebar &&
-				html`
-					<button class="w-8" title="Open in sidebar" onClick=${openSidebar}>
-						<img class="inline w-6" src="/images/sidebar.svg" />
-					</button>
-				`}
+				<button
+					class="w-8"
+					title=${options.open_mode === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
+					onClick=${async () => {
+						if (options.open_mode === 'sidebar') {
+							await updateOptions({ open_mode: 'popup' });
+							openPopup();
+						} else {
+							await updateOptions({ open_mode: 'sidebar' });
+							openSidebar();
+						}
+					}}
+				>
+					<img
+						class="inline w-5"
+						src=${options.open_mode === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'}
+					/>
+				</button>
 
-				<!-- TODO: Button to switch to popup -->
+				<button class="w-8" title="Close extension" onClick=${() => window.close()}>
+					<img class="inline w-3" src="/images/times.svg" />
+				</button>
 			</div>
 
 			${options.show_advanced_filters && html`<${AdvancedFilters} options=${options} setOptions=${updateOptions} />`}
@@ -275,4 +289,25 @@ export function App({ openSidebar }) {
 					`}
 		</footer>
 	`;
+}
+
+async function openPopup() {
+	try {
+		await chrome.action.setPopup({ popup: 'src/Popup/index.html' });
+		await chrome.action.openPopup();
+		window.close();
+	} catch (error) {
+		console.error('Error opening popup:', error);
+	}
+}
+
+async function openSidebar() {
+	try {
+		await chrome.action.setPopup({ popup: '' });
+		const currentWindow = await new Promise((resolve) => chrome.windows.getCurrent(resolve));
+		await chrome.sidePanel.open({ windowId: currentWindow.id });
+		window.close(); // Closes the popup
+	} catch (error) {
+		console.error('Error opening side panel:', error);
+	}
 }

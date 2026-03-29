@@ -20,7 +20,7 @@ export function Images({ options, updateOptions, visibleImages, imagesToDownload
 
 	return html`
 		<div
-			class="grid grid-cols-(--image-columns) gap-2 bg-slate-50 p-2"
+			class="grid grid-cols-(--image-columns) gap-2 p-2"
 			style=${{ '--image-columns': `repeat(${options.columns}, minmax(0, 1fr))` }}
 			...${props}
 		>

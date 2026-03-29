@@ -1,40 +1,41 @@
 {
-  "name": "Image Downloader",
-  "description": "Browse and download images on the web",
-  "version": "4.2.0",
-  "minimum_chrome_version": "114",
-  "manifest_version": 3,
-  "icons": {
-    "16": "/images/icon_16.png",
-    "32": "/images/icon_32.png",
-    "48": "/images/icon_48.png",
-    "128": "/images/icon_128.png"
-  },
-  "action": {
-    "default_icon": "images/icon_128.png",
-    "default_popup": "src/Popup/index.html"
-  },
-  "side_panel": {
-    "default_path": "src/SidePanel/index.html"
-  },
-  "options_page": "src/Options/index.html",
-  "background": {
-    "service_worker": "src/background/serviceWorker.js"
-  },
-  "web_accessible_resources": [
-    {
-      "resources": [
-        "images/*"
-      ],
-      "matches": [
-        "<all_urls>"
-      ]
-    }
-  ],
-  "permissions": [
-    "activeTab",
-    "scripting",
-    "downloads",
-    "sidePanel"
-  ]
+	"name": "Image Downloader",
+	"description": "Browse and download images on the web",
+	"version": "4.2.0",
+	"minimum_chrome_version": "121",
+	"manifest_version": 3,
+	"icons": {
+		"16": "/images/icon_16.png",
+		"32": "/images/icon_32.png",
+		"48": "/images/icon_48.png",
+		"128": "/images/icon_128.png"
+	},
+	"action": {
+		"default_icon": "images/icon_128.png",
+		"default_popup": "src/Popup/index.html"
+	},
+	"side_panel": {
+		"default_path": "src/SidePanel/index.html"
+	},
+	"options_page": "src/Options/index.html",
+	"background": {
+		"service_worker": "src/background/serviceWorker.js"
+	},
+	"web_accessible_resources": [
+		{
+			"resources": [
+				"images/*"
+			],
+			"matches": [
+				"<all_urls>"
+			]
+		}
+	],
+	"permissions": [
+		"activeTab",
+		"scripting",
+		"downloads",
+		"sidePanel",
+		"storage"
+	]
 }

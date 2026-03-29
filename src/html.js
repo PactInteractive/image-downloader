@@ -7,11 +7,15 @@ export default html;
 
 // React hooks
 export const useCallback = React.useCallback;
+export const useContext = React.useContext;
 export const useEffect = React.useEffect;
 export const useLayoutEffect = React.useLayoutEffect;
 export const useMemo = React.useMemo;
 export const useRef = React.useRef;
 export const useState = React.useState;
+
+// React context
+export const createContext = React.createContext;
 
 // React DOM
 export const render = ReactDOM.render;
