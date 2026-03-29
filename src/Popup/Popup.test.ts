@@ -48,7 +48,6 @@ beforeEach(() => {
 	document.body.innerHTML = '<main></main>';
 	global.React = require('../../lib/react-18.3.1.min');
 	global.ReactDOM = require('../../lib/react-dom-18.3.1.min');
-	require('../defaults');
 	require('./Popup');
 });
 

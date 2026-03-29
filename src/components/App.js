@@ -1,5 +1,6 @@
 import html, { useCallback, useEffect, useMemo, useRef, useState } from '../html.js';
 
+import { useOptions } from '../hooks/useOptions.js';
 import { useRunAfterUpdate } from '../hooks/useRunAfterUpdate.js';
 import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
 
@@ -10,8 +11,6 @@ import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { findImages } from './findImages.js';
 import { Images } from './Images.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
-
-const initialOptions = localStorage;
 
 // Load saved selections from localStorage
 const loadSavedSelections = () => {
@@ -29,11 +28,7 @@ const saveSelections = (selections) => {
 };
 
 export function App({ openSidebar }) {
-	const [options, setOptions] = useState(initialOptions);
-
-	useEffect(() => {
-		Object.assign(localStorage, options);
-	}, [options]);
+	const [options, updateOptions] = useOptions();
 
 	const [allImages, setAllImages] = useState([]);
 	const [linkedImages, setLinkedImages] = useState([]);
@@ -71,7 +66,7 @@ export function App({ openSidebar }) {
 
 	const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
 	const filterImages = useCallback(() => {
-		let visibleImages = options.only_images_from_links === 'true' ? linkedImages : allImages;
+		let visibleImages = options.only_images_from_links ? linkedImages : allImages;
 
 		let filterValue = options.filter_url;
 		if (filterValue) {
@@ -117,10 +112,10 @@ export function App({ openSidebar }) {
 			const image = imagesCacheRef.current.querySelector(`img[src="${encodeURI(url)}"]`);
 
 			return (
-				(options.filter_min_width_enabled !== 'true' || options.filter_min_width <= image.naturalWidth) &&
-				(options.filter_max_width_enabled !== 'true' || image.naturalWidth <= options.filter_max_width) &&
-				(options.filter_min_height_enabled !== 'true' || options.filter_min_height <= image.naturalHeight) &&
-				(options.filter_max_height_enabled !== 'true' || image.naturalHeight <= options.filter_max_height)
+				(!options.filter_min_width_enabled || options.filter_min_width <= image.naturalWidth) &&
+				(!options.filter_max_width_enabled || image.naturalWidth <= options.filter_max_width) &&
+				(!options.filter_min_height_enabled || options.filter_min_height <= image.naturalHeight) &&
+				(!options.filter_max_height_enabled || image.naturalHeight <= options.filter_max_height)
 			);
 		});
 
@@ -138,7 +133,7 @@ export function App({ openSidebar }) {
 	const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] = useState(false);
 
 	function maybeDownloadImages() {
-		if (options.show_download_confirmation === 'true' && imagesToDownload.length > 1) {
+		if (options.show_download_confirmation && imagesToDownload.length > 1) {
 			setDownloadConfirmationIsShown(true);
 		} else {
 			downloadImages();
@@ -159,7 +154,7 @@ export function App({ openSidebar }) {
 		'filter_min_height_enabled',
 		'filter_max_height_enabled',
 		'only_images_from_links',
-	].filter((key) => options[key] === 'true').length;
+	].filter((key) => options[key]).length;
 
 	// `relative` for new z-index stack to get box shadow
 	return html`
@@ -173,7 +168,7 @@ export function App({ openSidebar }) {
 					value=${options.filter_url}
 					class="flex-1"
 					onChange=${({ currentTarget: { value } }) => {
-						setOptions((options) => ({ ...options, filter_url: value.trim() }));
+						updateOptions({ filter_url: value.trim() });
 					}}
 				/>
 
@@ -181,7 +176,7 @@ export function App({ openSidebar }) {
 					id="url_filter_mode_select"
 					value=${options.filter_url_mode}
 					onChange=${({ currentTarget: { value } }) => {
-						setOptions((options) => ({ ...options, filter_url_mode: value }));
+						updateOptions({ filter_url_mode: value });
 					}}
 				/>
 
@@ -189,19 +184,16 @@ export function App({ openSidebar }) {
 					class="relative w-8"
 					title="Toggle advanced filters"
 					onClick=${() => {
-						setOptions((options) => ({
-							...options,
-							show_advanced_filters: options.show_advanced_filters === 'true' ? 'false' : 'true',
-						}));
+						updateOptions({ show_advanced_filters: !options.show_advanced_filters });
 					}}
 				>
 					<img
-						class="${options.show_advanced_filters === 'true' ? '' : '-rotate-225'} inline w-3 transition-transform"
+						class="${options.show_advanced_filters ? '' : '-rotate-225'} inline w-3 transition-transform"
 						src="/images/times.svg"
 					/>
 
 					<small
-						class="corner-round ${options.show_advanced_filters !== 'true' && numberOfActiveAdvancedFilters > 0
+						class="corner-round ${!options.show_advanced_filters && numberOfActiveAdvancedFilters > 0
 							? ''
 							: 'opacity-0'} absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-opacity"
 					>
@@ -220,8 +212,7 @@ export function App({ openSidebar }) {
 				<!-- TODO: Button to the About page -->
 			</div>
 
-			${options.show_advanced_filters === 'true' &&
-			html`<${AdvancedFilters} options=${options} setOptions=${setOptions} />`}
+			${options.show_advanced_filters && html`<${AdvancedFilters} options=${options} setOptions=${updateOptions} />`}
 		</header>
 
 		<div id="images_cache" ref=${imagesCacheRef} hidden>
@@ -231,6 +222,7 @@ export function App({ openSidebar }) {
 		<${Images}
 			id="images_container"
 			options=${options}
+			updateOptions=${updateOptions}
 			visibleImages=${visibleImages}
 			selectedImages=${selectedImages}
 			imagesToDownload=${imagesToDownload}
@@ -245,70 +237,65 @@ export function App({ openSidebar }) {
 			}}
 		>
 			${downloadConfirmationIsShown
-			? html`
-				<${DownloadConfirmation}
-					numberOfImages=${imagesToDownload.length}
-					onCheckboxChange=${({ currentTarget: { checked } }) => {
-						setOptions((options) => ({
-							...options,
-							show_download_confirmation: (!checked).toString(),
-						}));
-					}}
-					onClose=${() => setDownloadConfirmationIsShown(false)}
-					onConfirm=${downloadImages}
-				/>
-			`
-			: html`
-				<div class="flex gap-2">
-					<input
-						id="subfolder_name_input"
-						class="flex-1"
-						type="text"
-						placeholder="Save to subfolder"
-						title="Set the name of the subfolder you want to download the images to."
-						value=${options.folder_name}
-						onChange=${({ currentTarget: input }) => {
-							const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
+				? html`
+						<${DownloadConfirmation}
+							numberOfImages=${imagesToDownload.length}
+							onCheckboxChange=${({ currentTarget: { checked } }) => {
+								updateOptions({ show_download_confirmation: !checked });
+							}}
+							onClose=${() => setDownloadConfirmationIsShown(false)}
+							onConfirm=${downloadImages}
+						/>
+					`
+				: html`
+						<div class="flex gap-2">
+							<input
+								id="subfolder_name_input"
+								class="flex-1"
+								type="text"
+								placeholder="Save to subfolder"
+								title="Set the name of the subfolder you want to download the images to."
+								value=${options.folder_name}
+								onChange=${({ currentTarget: input }) => {
+									const savedSelectionStart = removeSpecialCharacters(
+										input.value.slice(0, input.selectionStart)
+									).length;
 
-							runAfterUpdate(() => {
-								input.selectionStart = input.selectionEnd = savedSelectionStart;
-							});
+									runAfterUpdate(() => {
+										input.selectionStart = input.selectionEnd = savedSelectionStart;
+									});
 
-							setOptions((options) => ({
-								...options,
-								folder_name: removeSpecialCharacters(input.value),
-							}));
-						}}
-					/>
+									updateOptions({ folder_name: removeSpecialCharacters(input.value) });
+								}}
+							/>
 
-					<input
-						id="rename_pattern_input"
-						class="flex-1"
-						type="text"
-						placeholder="Rename files"
-						title="Set a new file name for the images you want to download."
-						value=${options.new_file_name}
-						onChange=${({ currentTarget: input }) => {
-							const savedSelectionStart = removeSpecialCharacters(input.value.slice(0, input.selectionStart)).length;
+							<input
+								id="rename_pattern_input"
+								class="flex-1"
+								type="text"
+								placeholder="Rename files"
+								title="Set a new file name for the images you want to download."
+								value=${options.new_file_name}
+								onChange=${({ currentTarget: input }) => {
+									const savedSelectionStart = removeSpecialCharacters(
+										input.value.slice(0, input.selectionStart)
+									).length;
 
-							runAfterUpdate(() => {
-								input.selectionStart = input.selectionEnd = savedSelectionStart;
-							});
+									runAfterUpdate(() => {
+										input.selectionStart = input.selectionEnd = savedSelectionStart;
+									});
 
-							setOptions((options) => ({
-								...options,
-								new_file_name: removeSpecialCharacters(input.value),
-							}));
-						}}
-					/>
+									updateOptions({ new_file_name: removeSpecialCharacters(input.value) });
+								}}
+							/>
 
-					<${DownloadButton}
-						disabled=${imagesToDownload.length === 0}
-						loading=${downloadIsInProgress}
-						onClick=${maybeDownloadImages}
-					/>
-				</div>
-			`}
+							<${DownloadButton}
+								disabled=${imagesToDownload.length === 0}
+								loading=${downloadIsInProgress}
+								onClick=${maybeDownloadImages}
+							/>
+						</div>
+					`}
 		</footer>
 	`;
 }
