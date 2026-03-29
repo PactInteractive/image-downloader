@@ -2,8 +2,8 @@
 // Handle updates
 chrome.runtime.onInstalled.addListener((details) => {
   if (details.reason === 'install') {
-    // Open the options page after install
-    chrome.tabs.create({ url: 'src/Options/index.html' });
+    // Open the About page after install
+    chrome.tabs.create({ url: 'src/About/index.html' });
   }
 });
 

@@ -1,4 +1,4 @@
-import html, { render, useState } from '../html.js';
+import html, { useState } from '../html.js';
 
 import { Checkbox } from '../components/Checkbox.js';
 import { isNotStrictEqual } from '../utils.js';
@@ -83,13 +83,7 @@ const Options = () => {
 
   // TODO: Migrate
   return html`
-    <h1 class="flex justify-center items-center gap-2 mb-8 text-2xl font-bold">
-      <img class="rounded-xl h-8" src="/images/logo.svg" />
-      Image Downloader
-      <small class="text-slate-400">v${chrome.runtime.getManifest().version}</small>
-    </h1>
-
-    <section hidden>
+    <section>
       <fieldset>
         <legend>⚙️ General options</legend>
 
@@ -263,6 +257,3 @@ const Options = () => {
     <${Support} />
   `;
 };
-
-
-render(html`<${Options} />`, document.querySelector('main'));

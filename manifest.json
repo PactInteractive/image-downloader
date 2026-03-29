@@ -14,7 +14,9 @@
     "default_icon": "images/icon_128.png",
     "default_popup": "src/Popup/index.html"
   },
-  "options_page": "src/Options/index.html",
+  "side_panel": {
+    "default_path": "src/SidePanel/index.html"
+  },
   "background": {
     "service_worker": "src/background/serviceWorker.js"
   },
@@ -33,8 +35,5 @@
     "scripting",
     "downloads",
     "sidePanel"
-  ],
-  "side_panel": {
-    "default_path": "src/SidePanel/index.html"
-  }
+  ]
 }
