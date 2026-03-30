@@ -56,12 +56,13 @@ export function OptionsProvider({ children }) {
 		setIsReady(true);
 	}, []);
 
-	const updateOptions = async (updater) => {
-		const changes = typeof updater === 'function' ? updater(options) : updater;
-		const next = { ...options, ...changes };
-
-		await chrome.storage.local.set(changes);
-		setOptions(next);
+	const updateOptions = async (changesOrUpdater) => {
+		setOptions((options) => {
+			const changes = typeof changesOrUpdater === 'function' ? changesOrUpdater(options) : changesOrUpdater;
+			const next = { ...options, ...changes };
+			chrome.storage.local.set(changes);
+			return next;
+		});
 	};
 
 	if (!isReady) {
