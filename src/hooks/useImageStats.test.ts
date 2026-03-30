@@ -10,7 +10,7 @@ type UseImageStatsReturn = {
 	};
 	onLoad: (event: { currentTarget: HTMLImageElement }) => void;
 	onError: () => void;
-	resetStats: () => void;
+	reset: () => void;
 };
 
 declare global {
@@ -88,9 +88,9 @@ describe('useImageStats', () => {
 		expect(typeof result.onError).toBe('function');
 	});
 
-	it('should have callable resetStats handler', async () => {
+	it('should have callable reset handler', async () => {
 		const result = (await testHook(useImageStats)) as UseImageStatsReturn;
-		expect(typeof result.resetStats).toBe('function');
+		expect(typeof result.reset).toBe('function');
 	});
 });
 
@@ -206,7 +206,7 @@ describe('getImageResourceSize', () => {
 		const result = getImageResourceSize({ src: url });
 		expect(result).toEqual({
 			bytes: 14,
-			formatted: '0.0KB',
+			formatted: '0KB',
 			fromCache: false,
 		});
 	});
@@ -217,7 +217,7 @@ describe('getImageResourceSize', () => {
 		const result = getImageResourceSize({ src: url });
 		expect(result).toEqual({
 			bytes: 11,
-			formatted: '0.0KB',
+			formatted: '0KB',
 			fromCache: false,
 		});
 	});
@@ -227,7 +227,7 @@ describe('getImageResourceSize', () => {
 		const result = getImageResourceSize({ src: url });
 		expect(result).toEqual({
 			bytes: 15,
-			formatted: '0.0KB',
+			formatted: '0KB',
 			fromCache: false,
 		});
 	});
@@ -237,7 +237,7 @@ describe('getImageResourceSize', () => {
 		const result = getImageResourceSize({ src: url });
 		expect(result).toEqual({
 			bytes: 6,
-			formatted: '0.0KB',
+			formatted: '0KB',
 			fromCache: false,
 		});
 	});
@@ -247,7 +247,7 @@ describe('getImageResourceSize', () => {
 		const result = getImageResourceSize({ src: url });
 		expect(result).toEqual({
 			bytes: 14,
-			formatted: '0.0KB',
+			formatted: '0KB',
 			fromCache: false,
 		});
 	});
@@ -258,7 +258,7 @@ describe('getImageResourceSize', () => {
 		const result = getImageResourceSize({ src: url });
 		expect(result).toEqual({
 			bytes: svgContent.length,
-			formatted: '0.0KB',
+			formatted: '0KB',
 			fromCache: false,
 		});
 	});
@@ -269,7 +269,7 @@ describe('getImageResourceSize', () => {
 		const result = getImageResourceSize({ src: url });
 		expect(result).toEqual({
 			bytes: 11, // "hello world" = 11 bytes after decode
-			formatted: '0.0KB',
+			formatted: '0KB',
 			fromCache: false,
 		});
 	});
@@ -286,7 +286,7 @@ describe('getImageResourceSize', () => {
 		const url = `data:image/png;base64,${btoa(largeContent)}`;
 		const result = getImageResourceSize({ src: url });
 		expect(result?.bytes).toBe(2048);
-		expect(result?.formatted).toBe('2.0KB');
+		expect(result?.formatted).toBe('2KB');
 		expect(result?.fromCache).toBe(false);
 	});
 });
@@ -300,23 +300,23 @@ describe('formatFileSize', () => {
 	});
 
 	it('formats bytes under 1024 as fractional KB', () => {
-		expect(formatFileSize(1)).toBe('0.0KB');
+		expect(formatFileSize(1)).toBe('0KB');
 		expect(formatFileSize(512)).toBe('0.5KB');
-		expect(formatFileSize(1023)).toBe('1.0KB');
+		expect(formatFileSize(1023)).toBe('1KB');
 	});
 
 	it('formats kilobytes', () => {
-		expect(formatFileSize(1024)).toBe('1.0KB');
+		expect(formatFileSize(1024)).toBe('1KB');
 		expect(formatFileSize(1536)).toBe('1.5KB');
-		expect(formatFileSize(10240)).toBe('10.0KB');
+		expect(formatFileSize(10240)).toBe('10KB');
 	});
 
 	it('formats megabytes', () => {
-		expect(formatFileSize(1048576)).toBe('1.0MB');
+		expect(formatFileSize(1048576)).toBe('1MB');
 		expect(formatFileSize(1572864)).toBe('1.5MB');
 	});
 
 	it('formats gigabytes', () => {
-		expect(formatFileSize(1073741824)).toBe('1.0GB');
+		expect(formatFileSize(1073741824)).toBe('1GB');
 	});
 });

@@ -82,11 +82,11 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 	const isSelected = selectedImages.includes(imageUrl);
 
 	// Reset stats when imageUrl changes to avoid showing stale data
-	useEffect(stats.resetStats, [imageUrl, stats.resetStats]);
+	useEffect(stats.reset, [imageUrl, stats.reset]);
 
 	return html`
 		<div
-			class="group relative flex cursor-pointer items-center overflow-hidden rounded-xl shadow-md"
+			class="group relative cursor-pointer flex justify-center items-center overflow-hidden rounded-xl shadow-md"
 			style=${{
 				minHeight: `200px`,
 				backgroundImage:
@@ -102,7 +102,7 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 				);
 			}}
 		>
-			<img class="w-full drop-shadow-md" src=${imageUrl} onLoad=${stats.onLoad} onError=${stats.onError} />
+			<img class="drop-shadow-md" src=${imageUrl} onLoad=${stats.onLoad} onError=${stats.onError} />
 
 			<div
 				class=${`

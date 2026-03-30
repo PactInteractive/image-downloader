@@ -25,7 +25,6 @@ export function App() {
 	const [hostname, setHostname] = useState(initialHostname.value);
 
 	const loadImagesFromActiveTab = useCallback(({ waitForIdleDOM }) => {
-		// TODO: Catch error `Uncaught (in promise) Error: Cannot access contents of the page. Extension manifest must request permission to access the respective host.`
 		chrome.windows.getCurrent((currentWindow) => {
 			chrome.tabs.query({ active: true, windowId: currentWindow.id }, (activeTabs) => {
 				if (activeTabs.length === 0) return;
@@ -52,6 +51,11 @@ export function App() {
 						if (!waitForIdleDOM) {
 							loadImagesFromActiveTab({ waitForIdleDOM: 1000 });
 						}
+					})
+					.catch((error) => {
+						// Some errors are expected like `Cannot access contents of the page.
+						// Extension manifest must request permission to access the respective host.`
+						console.error(error);
 					});
 			});
 		});
@@ -183,9 +187,9 @@ export function App() {
 			${hostname !== initialHostname.value &&
 			html`
 				<div class="bg-amber-100 p-2 text-amber-800">
-					<span class="text-shadow">⚠️</span> For privacy and security reasons the extension can only find images on the
-					website where it was initially opened: <b>${initialHostname.value}</b>. To find images on this website close
-					the extension and reopen it.
+					<span class="text-shadow">⚠️</span> For privacy and security reasons the extension can only look for images
+					on${' '}<b>${initialHostname.value}</b> where it was initially opened. To find images on${' '}
+					<b>${hostname}</b> close the extension and reopen it.
 				</div>
 			`}
 

@@ -27,7 +27,7 @@ export function useImageStats() {
 		if (!urlExtension) {
 			fetchImageExtension(url).then((extension) => {
 				if (extension) {
-					setData((prev) => ({ ...prev, extension }));
+					setData((data) => ({ ...data, extension }));
 				}
 			});
 		}
@@ -43,7 +43,7 @@ export function useImageStats() {
 		});
 	}, []);
 
-	const resetStats = useCallback(() => {
+	const reset = useCallback(() => {
 		setData({
 			width: 0,
 			height: 0,
@@ -57,7 +57,7 @@ export function useImageStats() {
 		data,
 		onLoad,
 		onError,
-		resetStats,
+		reset,
 	};
 }
 
@@ -147,15 +147,6 @@ export async function fetchImageExtension(url) {
 	return '';
 }
 
-export function formatFileSize(bytes) {
-	if (bytes === 0 || bytes == null || isNaN(bytes)) return '';
-
-	const units = ['KB', 'MB', 'GB'];
-	const i = Math.max(0, Math.floor(Math.log(bytes) / Math.log(1024)) - 1);
-	const size = (bytes / Math.pow(1024, i + 1)).toFixed(1);
-	return `${size}${units[i]}`;
-}
-
 export function getImageResourceSize(img) {
 	const url = img.src;
 	if (!url) return null;
@@ -208,4 +199,13 @@ export function getImageResourceSize(img) {
 		formatted: formatFileSize(bytes),
 		fromCache,
 	};
+}
+
+export function formatFileSize(bytes) {
+	if (bytes === 0 || bytes == null || isNaN(bytes)) return '';
+
+	const units = ['KB', 'MB', 'GB'];
+	const i = Math.max(0, Math.floor(Math.log(bytes) / Math.log(1024)) - 1);
+	const size = (bytes / Math.pow(1024, i + 1)).toFixed(1);
+	return `${size.endsWith('.0') ? size.slice(0, -2) : size}${units[i]}`;
 }
