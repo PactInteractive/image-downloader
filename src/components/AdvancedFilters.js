@@ -99,7 +99,16 @@ export function AdvancedFilters() {
 				</tr>
 			</table>
 
-			<div class="flex justify-between gap-2">
+			<div class="flex gap-3">
+				<${Checkbox}
+					class="py-1"
+					title="Attempt to deduplicate images by keeping only the highest resolution variant of each"
+					checked=${options.only_unique_images}
+					onChange=${setCheckboxOption('only_unique_images')}
+				>
+					Only unique images
+				<//>
+
 				<${Checkbox}
 					class="py-1"
 					title="Only show images from direct links on the page; useful on some websites"

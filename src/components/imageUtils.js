@@ -186,3 +186,70 @@ export async function findImages({ waitForIdleDOM }) {
 		origin: window.location.origin,
 	};
 }
+
+const extensionPreference = { jpg: 1, jpeg: 1, png: 2, webp: 3, avif: 4, gif: 5, svg: 6, bmp: 7, ico: 8 };
+
+export function deduplicateImages(urls, imagesCache) {
+	const groups = new Map();
+
+	for (const url of urls) {
+		const key = getNormalizedBaseKey(url);
+		if (!groups.has(key)) groups.set(key, []);
+		groups.get(key).push(url);
+	}
+
+	const result = [];
+	for (const groupUrls of groups.values()) {
+		result.push(pickBestImage(groupUrls, imagesCache));
+	}
+	return result;
+}
+
+function getNormalizedBaseKey(url) {
+	try {
+		const parsed = new URL(url);
+		const path = parsed.pathname;
+		const lastSlash = path.lastIndexOf('/');
+		const filename = lastSlash >= 0 ? path.substring(lastSlash + 1) : path;
+
+		const dotIndex = filename.lastIndexOf('.');
+		const baseName = dotIndex >= 0 ? filename.substring(0, dotIndex) : filename;
+		const ext = dotIndex >= 0 ? filename.substring(dotIndex).toLowerCase() : '';
+
+		// Strip resolution indicators: -300x200, _300w, -1x, etc.
+		const stripped = baseName.replace(/[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w|\d+x)$/i, '');
+
+		return parsed.origin + path.substring(0, lastSlash + 1) + stripped + ext;
+	} catch {
+		return url;
+	}
+}
+
+function pickBestImage(urls, imagesCache) {
+	return urls.reduce((best, url) => {
+		if (best === url) return best;
+
+		const bestExt = getExtension(best);
+		const urlExt = getExtension(url);
+		const bestPref = extensionPreference[bestExt] ?? 99;
+		const urlPref = extensionPreference[urlExt] ?? 99;
+
+		// Prefer by extension
+		if (urlPref < bestPref) return url;
+		if (urlPref > bestPref) return best;
+
+		// Same extension - prefer higher resolution
+		const bestImg = imagesCache.querySelector(`img[src="${encodeURI(best)}"]`);
+		const urlImg = imagesCache.querySelector(`img[src="${encodeURI(url)}"]`);
+		const bestPixels = bestImg ? bestImg.naturalWidth * bestImg.naturalHeight : 0;
+		const urlPixels = urlImg ? urlImg.naturalWidth * urlImg.naturalHeight : 0;
+
+		return urlPixels > bestPixels ? url : best;
+	}, urls[0]);
+}
+
+function getExtension(url) {
+	const pathname = url.split('?')[0].split('#')[0];
+	const dotIndex = pathname.lastIndexOf('.');
+	return dotIndex >= 0 ? pathname.substring(dotIndex + 1).toLowerCase() : '';
+}

@@ -9,7 +9,7 @@ import { AdvancedFilters } from './AdvancedFilters.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { Images } from './Images.js';
-import { findImages } from './imageUtils.js';
+import { deduplicateImages, findImages } from './imageUtils.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
 export function App() {
@@ -143,6 +143,10 @@ export function App() {
 			);
 		});
 
+		if (options.only_unique_images) {
+			visibleImages = deduplicateImages(visibleImages, imagesCacheRef.current);
+		}
+
 		setVisibleImages(visibleImages);
 	}, [allImages, linkedImages, options]);
 
@@ -179,6 +183,7 @@ export function App() {
 		'filter_min_height_enabled',
 		'filter_max_height_enabled',
 		'only_images_from_links',
+		'only_unique_images',
 	].filter((key) => options[key]).length;
 
 	// `relative` for new z-index stack to get box shadow
@@ -295,7 +300,7 @@ export function App() {
 						/>
 					`
 				: html`
-						<div class="grid-cols-[1fr_1fr_auto] grid gap-2">
+						<div class="grid grid-cols-[1fr_1fr_auto] gap-2">
 							<input
 								id="subfolder_name_input"
 								class="flex-1"

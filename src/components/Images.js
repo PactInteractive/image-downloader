@@ -89,7 +89,7 @@ function ImageCard({ imageUrl, index, selectedImages, setSelectedImages }) {
 		<div
 			class="group relative cursor-pointer flex justify-center items-center overflow-hidden rounded-xl shadow-md"
 			style=${{
-				minHeight: `200px`,
+				minHeight: `192px`,
 				backgroundImage:
 					'conic-gradient(var(--color-slate-100) 90deg, var(--color-slate-300) 90deg 180deg, var(--color-slate-100) 180deg 270deg, var(--color-slate-300) 270deg)',
 				backgroundRepeat: 'repeat',
