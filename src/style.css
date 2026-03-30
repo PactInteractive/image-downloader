@@ -26,7 +26,6 @@
     --color-black: #000;
     --color-white: #fff;
     --spacing: 0.25rem;
-    --container-2xl: 42rem;
     --text-sm: 0.875rem;
     --text-sm--line-height: calc(1.25 / 0.875);
     --text-2xl: 1.5rem;
@@ -244,6 +243,9 @@
   .z-1 {
     z-index: 1;
   }
+  .col-span-1 {
+    grid-column: span 1 / span 1;
+  }
   .col-span-full {
     grid-column: 1 / -1;
   }
@@ -331,6 +333,9 @@
   .h-32 {
     height: calc(var(--spacing) * 32);
   }
+  .min-h-160 {
+    min-height: calc(var(--spacing) * 160);
+  }
   .w-3 {
     width: calc(var(--spacing) * 3);
   }
@@ -349,9 +354,6 @@
   .w-7 {
     width: calc(var(--spacing) * 7);
   }
-  .w-8 {
-    width: calc(var(--spacing) * 8);
-  }
   .w-10 {
     width: calc(var(--spacing) * 10);
   }
@@ -367,8 +369,11 @@
   .max-w-160 {
     max-width: calc(var(--spacing) * 160);
   }
-  .min-w-2xl {
-    min-width: var(--container-2xl);
+  .min-w-8 {
+    min-width: calc(var(--spacing) * 8);
+  }
+  .min-w-160 {
+    min-width: calc(var(--spacing) * 160);
   }
   .flex-1 {
     flex: 1;
@@ -410,6 +415,9 @@
   }
   .grid-cols-2 {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .grid-cols-\[1fr_1fr_auto\] {
+    grid-template-columns: 1fr 1fr auto;
   }
   .flex-col {
     flex-direction: column;
@@ -639,6 +647,9 @@
   .corner-round {
     corner-shape: round;
   }
+  .small-caps {
+    font-variant: small-caps;
+  }
   .text-shadow {
     text-shadow: 0 0 2px var(--color-slate-800);
   }
@@ -667,16 +678,16 @@
       left: calc(1 / 2 * 100%);
     }
   }
-  .after\:h-3 {
+  .after\:h-2\.5 {
     &::after {
       content: var(--tw-content);
-      height: calc(var(--spacing) * 3);
+      height: calc(var(--spacing) * 2.5);
     }
   }
-  .after\:w-5 {
+  .after\:w-4\.5 {
     &::after {
       content: var(--tw-content);
-      width: calc(var(--spacing) * 5);
+      width: calc(var(--spacing) * 4.5);
     }
   }
   .after\:-translate-x-1\/2 {
@@ -699,11 +710,11 @@
       rotate: calc(45deg * -1);
     }
   }
-  .after\:border-4 {
+  .after\:border-3 {
     &::after {
       content: var(--tw-content);
       border-style: var(--tw-border-style);
-      border-width: 4px;
+      border-width: 3px;
     }
   }
   .after\:border-t-0 {
@@ -805,6 +816,7 @@
     cursor: pointer;
   }
   input[type='text'],	select {
+    min-width: 0;
     border: 1px solid color-mix(in srgb, oklch(70.4% 0.04 256.788) 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);

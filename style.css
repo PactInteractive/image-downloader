@@ -1,11 +1,17 @@
 @import 'tailwindcss';
 
 @theme {
+	--breakpoint-2xs: 24rem;
+	--breakpoint-xs: 30rem;
 	--ease-elastic: cubic-bezier(0.5, 2.5, 0.5, 0.5);
 }
 
 @utility corner-* {
 	corner-shape: --value('bevel', 'notch', 'round', 'scoop', 'square', 'squircle');
+}
+
+@utility small-caps {
+	font-variant: small-caps;
 }
 
 @utility text-shadow {
@@ -63,6 +69,7 @@
 
 	input[type='text'],
 	select {
+		min-width: 0;
 		border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);
 		background-color: var(--color-slate-100);
 		border-radius: 12px;

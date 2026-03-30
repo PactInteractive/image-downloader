@@ -1,15 +1,20 @@
-import html, { useEffect, useRef } from '../html.js';
+import html, { useCallback, useEffect, useRef } from '../html.js';
 import { Checkbox } from './Checkbox.js';
+import { useOptions } from './OptionsProvider.js';
 
-export function AdvancedFilters({ options, setOptions }) {
-	const widthSliderRef = useSlider('width', options, setOptions);
-	const heightSliderRef = useSlider('height', options, setOptions);
+export function AdvancedFilters() {
+	const [options, updateOptions] = useOptions();
+	const widthSliderRef = useSlider('width', options, updateOptions);
+	const heightSliderRef = useSlider('height', options, updateOptions);
 
-	const setCheckboxOption =
-		(key) =>
-		({ currentTarget: { checked } }) => {
-			setOptions((options) => ({ ...options, [key]: checked }));
-		};
+	const setCheckboxOption = useCallback(
+		(key) => {
+			return ({ currentTarget: { checked } }) => {
+				updateOptions({ [key]: checked });
+			};
+		},
+		[updateOptions]
+	);
 
 	return html`
 		<div class="p-2 pt-0">
@@ -115,7 +120,7 @@ function SliderCheckbox({ options, optionKey, setCheckboxOption, ...props }) {
 	`;
 }
 
-function useSlider(dimension, options, setOptions) {
+function useSlider(dimension, options, updateOptions) {
 	const sliderRef = useRef(null);
 
 	useEffect(() => {
@@ -138,11 +143,10 @@ function useSlider(dimension, options, setOptions) {
 		});
 
 		slider.noUiSlider.on('update', ([min, max]) => {
-			setOptions((options) => ({
-				...options,
+			updateOptions({
 				[`filter_min_${dimension}`]: min,
 				[`filter_max_${dimension}`]: max,
-			}));
+			});
 		});
 
 		return () => {
@@ -176,11 +180,7 @@ function useSlider(dimension, options, setOptions) {
 	return sliderRef;
 }
 
-function useDisableSliderHandle(
-	getHandle,
-	option,
-	tooltipText = 'Click the checkbox next to this slider to enable it'
-) {
+function useDisableSliderHandle(getHandle, option, tooltip = 'Click the checkbox next to this slider to enable it') {
 	useEffect(() => {
 		const handle = getHandle();
 		if (!handle) return;
@@ -190,7 +190,7 @@ function useDisableSliderHandle(
 			handle.removeAttribute('title');
 		} else {
 			handle.setAttribute('disabled', true);
-			handle.setAttribute('title', tooltipText);
+			handle.setAttribute('title', tooltip);
 		}
 	}, [option]);
 }

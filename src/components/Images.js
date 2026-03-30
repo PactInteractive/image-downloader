@@ -5,8 +5,10 @@ import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
 import { Badge } from './Badge.js';
 import { Checkbox } from './Checkbox.js';
+import { useOptions } from './OptionsProvider.js';
 
-export function Images({ options, updateOptions, visibleImages, imagesToDownload, style, ...props }) {
+export function Images({ visibleImages, imagesToDownload, style, ...props }) {
+	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
 
 	const setSelectedImages = (updater) => {
@@ -67,7 +69,6 @@ export function Images({ options, updateOptions, visibleImages, imagesToDownload
 						key=${imageUrl}
 						imageUrl=${imageUrl}
 						index=${index}
-						options=${options}
 						selectedImages=${selectedImages}
 						setSelectedImages=${setSelectedImages}
 					/>
@@ -77,7 +78,7 @@ export function Images({ options, updateOptions, visibleImages, imagesToDownload
 	`;
 }
 
-function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages }) {
+function ImageCard({ imageUrl, index, selectedImages, setSelectedImages }) {
 	const stats = useImageStats();
 	const isSelected = selectedImages.includes(imageUrl);
 
@@ -115,8 +116,8 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 					after:content-['']
 					after:absolute after:top-1/2 after:left-1/2
 					after:-translate-x-1/2 after:-translate-y-2/3
-					after:w-5 after:h-3
-					after:border-4 after:border-t-0 after:border-r-0
+					after:w-4.5 after:h-2.5
+					after:border-3 after:border-t-0 after:border-r-0
 					after:-rotate-45
 					after:transition-all
 					${isSelected ? 'after:border-white' : 'after:border-slate-400'}
@@ -125,7 +126,7 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 
 			<div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100">
 				<${OpenImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
-				<${DownloadImageButton} imageUrl=${imageUrl} options=${options} onClick=${stopPropagation} />
+				<${DownloadImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
 			</div>
 
 			<div class="absolute right-1 bottom-1 left-1 flex gap-1">
@@ -135,7 +136,7 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 					stats.data.status === 'loaded' &&
 					html`
 					<${Badge}>${stats.data.width}×${stats.data.height}</${Badge}>
-					<${Badge}>${stats.data.size ? stats.data.size.formatted : ''}</${Badge}>
+					<${Badge} class="small-caps lowercase">${stats.data.size ? stats.data.size.formatted : ''}</${Badge}>
 				`
 				}
 			</div>
@@ -163,7 +164,9 @@ function OpenImageButton({ imageUrl, onClick, ...props }) {
 	`;
 }
 
-function DownloadImageButton({ imageUrl, options, onClick, ...props }) {
+function DownloadImageButton({ imageUrl, onClick, ...props }) {
+	const [options] = useOptions();
+
 	function downloadImages(e) {
 		actions.downloadImages([imageUrl], options);
 		if (onClick) {

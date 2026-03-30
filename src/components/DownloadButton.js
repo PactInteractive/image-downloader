@@ -1,6 +1,6 @@
 import html from '../html.js';
 
-export function DownloadButton({ disabled, loading, ...props }) {
+export function DownloadButton({ class: className = '', disabled, loading, ...props }) {
 	const tooltipText = disabled
 		? 'Select some images to download first'
 		: loading
@@ -9,7 +9,7 @@ export function DownloadButton({ disabled, loading, ...props }) {
 
 	return html`
 		<button
-			class="${loading ? 'animate-pulse' : ''} bg-sky-600 px-2 text-white hover:bg-sky-700"
+			class="${loading ? 'animate-pulse' : ''} ${className} bg-sky-600 px-2 text-white hover:bg-sky-700"
 			type="button"
 			disabled=${disabled || loading}
 			title=${tooltipText}

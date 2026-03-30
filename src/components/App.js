@@ -195,7 +195,7 @@ export function App() {
 
 			<div class="flex items-center gap-1 p-2">
 				<button
-					class="w-8"
+					class="min-w-8"
 					title="Reload images from current tab"
 					onClick=${() => loadImagesFromActiveTab({ waitForIdleDOM: false })}
 				>
@@ -223,7 +223,7 @@ export function App() {
 				/>
 
 				<button
-					class="relative w-8"
+					class="relative min-w-8"
 					title="Toggle advanced filters"
 					onClick=${() => {
 						updateOptions({ show_advanced_filters: !options.show_advanced_filters });
@@ -244,7 +244,7 @@ export function App() {
 				</button>
 
 				<button
-					class="w-8"
+					class="min-w-8"
 					title=${options.open_mode === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
 					onClick=${async () => {
 						if (options.open_mode === 'sidebar') {
@@ -262,25 +262,19 @@ export function App() {
 					/>
 				</button>
 
-				<button class="w-8" title="Close extension" onClick=${() => window.close()}>
+				<button class="min-w-8" title="Close extension" onClick=${() => window.close()}>
 					<img class="inline w-3" src="/images/times.svg" />
 				</button>
 			</div>
 
-			${options.show_advanced_filters && html`<${AdvancedFilters} options=${options} setOptions=${updateOptions} />`}
+			${options.show_advanced_filters && html`<${AdvancedFilters} />`}
 		</header>
 
 		<div id="images_cache" ref=${imagesCacheRef} hidden>
 			${allImages.map((url) => html`<img src=${encodeURI(url)} onLoad=${filterImages} />`)}
 		</div>
 
-		<${Images}
-			id="images_container"
-			options=${options}
-			updateOptions=${updateOptions}
-			visibleImages=${visibleImages}
-			imagesToDownload=${imagesToDownload}
-		/>
+		<${Images} id="images_container" visibleImages=${visibleImages} imagesToDownload=${imagesToDownload} />
 
 		<footer
 			class="sticky bottom-0 mt-auto bg-white p-2"
@@ -301,7 +295,7 @@ export function App() {
 						/>
 					`
 				: html`
-						<div class="flex gap-2">
+						<div class="grid-cols-[1fr_1fr_auto] grid gap-2">
 							<input
 								id="subfolder_name_input"
 								class="flex-1"
@@ -343,6 +337,7 @@ export function App() {
 							/>
 
 							<${DownloadButton}
+								class="col-span-1"
 								disabled=${imagesToDownload.length === 0}
 								loading=${downloadIsInProgress}
 								onClick=${maybeDownloadImages}
