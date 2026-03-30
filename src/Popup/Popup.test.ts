@@ -14,6 +14,21 @@ beforeEach(() => {
 	if (!window.SyntaxError) window.SyntaxError = SyntaxError;
 
 	global.chrome = mockChrome();
+	global.chrome.storage = {
+		local: {
+			get: async () => ({}),
+			set: async () => {},
+		},
+	};
+	global.chrome.tabs.onUpdated = { addListener: mock(), removeListener: mock() };
+	global.chrome.tabs.onActivated = { addListener: mock(), removeListener: mock() };
+	global.chrome.action = {
+		setPopup: mock(),
+		openPopup: mock(),
+	};
+	global.chrome.sidePanel = {
+		open: mock(),
+	};
 	global.chrome.windows.getCurrent = mock((callback: any) => callback({ id: 'window' }));
 	global.chrome.tabs.query = mock((query: any, callback: any) => callback([{ id: 'tab-1' }]));
 	const executeScriptMock = mock(() =>

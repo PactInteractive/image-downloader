@@ -136,7 +136,7 @@ describe('useOptions', () => {
 		});
 
 		it('should load values from chrome.storage', async () => {
-			await chrome.storage.local.set({ folder_name: 'TestFolder', columns: '4' });
+			await chrome.storage.local.set({ folder_name: 'TestFolder', columns: 4 });
 
 			const [options] = await testHook(useOptions);
 
@@ -155,11 +155,26 @@ describe('useOptions', () => {
 			expect(options.columns).toBe(5);
 			expect(global.localStorage.length).toBe(0);
 
-			// Verify the data is now in chrome.storage
+			// Verify the data is now in chrome.storage as native types
 			const stored = await chrome.storage.local.get(null);
 			expect(stored.folder_name).toBe('MigratedFolder');
-			expect(stored.columns).toBe('5');
+			expect(stored.columns).toBe(5);
 			expect(stored.unknown_key).toBeUndefined();
+		});
+
+		it('should not overwrite existing chrome.storage data during migration', async () => {
+			// Simulate chrome.storage already having data (e.g. from another device)
+			await chrome.storage.local.set({ folder_name: 'ExistingFolder', columns: 3 });
+			global.localStorage.setItem('folder_name', 'OldLocalFolder');
+			global.localStorage.setItem('new_file_name', 'MigratedFile');
+
+			const [options] = await testHook(useOptions);
+
+			// chrome.storage value should NOT be overwritten
+			expect(options.folder_name).toBe('ExistingFolder');
+			// But localStorage-only keys should still be migrated
+			expect(options.new_file_name).toBe('MigratedFile');
+			expect(global.localStorage.length).toBe(0);
 		});
 	});
 
@@ -180,88 +195,39 @@ describe('useOptions', () => {
 			await updateOptions((prev: any) => ({ columns: prev.columns + 1 }));
 
 			const stored = await chrome.storage.local.get(['columns']);
-			expect(stored.columns).toBe('3');
+			expect(stored.columns).toBe(3);
 		});
 	});
 
-	describe('serialization', () => {
-		it('should serialize numbers correctly', async () => {
+	describe('native types in storage', () => {
+		it('should store numbers as numbers', async () => {
 			const [, updateOptions] = await testHook(useOptions);
 
 			await updateOptions({ filter_min_width: 100 });
 
 			const stored = await chrome.storage.local.get(['filter_min_width']);
-			expect(stored.filter_min_width).toBe('100');
+			expect(stored.filter_min_width).toBe(100);
+			expect(typeof stored.filter_min_width).toBe('number');
 		});
 
-		it('should serialize booleans correctly', async () => {
+		it('should store booleans as booleans', async () => {
 			const [, updateOptions] = await testHook(useOptions);
 
 			await updateOptions({ show_advanced_filters: false });
 
 			const stored = await chrome.storage.local.get(['show_advanced_filters']);
-			expect(stored.show_advanced_filters).toBe('false');
+			expect(stored.show_advanced_filters).toBe(false);
+			expect(typeof stored.show_advanced_filters).toBe('boolean');
 		});
 
-		it('should serialize objects correctly', async () => {
+		it('should store objects as objects', async () => {
 			const [, updateOptions] = await testHook(useOptions);
 
 			await updateOptions({ selected_images: ['img1.jpg', 'img2.jpg'] });
 
 			const stored = await chrome.storage.local.get(['selected_images']);
-			expect(stored.selected_images).toBe('["img1.jpg","img2.jpg"]');
-		});
-	});
-
-	describe('deserialization', () => {
-		it('should deserialize numbers correctly', async () => {
-			await chrome.storage.local.set({ columns: '3' });
-
-			const [options] = await testHook(useOptions);
-
-			expect(options.columns).toBe(3);
-		});
-
-		it('should deserialize booleans correctly', async () => {
-			await chrome.storage.local.set({ show_file_renaming: 'false' });
-
-			const [options] = await testHook(useOptions);
-
-			expect(options.show_file_renaming).toBe(false);
-		});
-
-		it('should deserialize objects correctly', async () => {
-			await chrome.storage.local.set({ selected_images: '["a.jpg","b.jpg"]' });
-
-			const [options] = await testHook(useOptions);
-
-			expect(options.selected_images).toEqual(['a.jpg', 'b.jpg']);
-		});
-	});
-
-	describe('error handling', () => {
-		it('should return default value for invalid chrome.storage data', async () => {
-			await chrome.storage.local.set({ columns: 'not-a-number' });
-
-			const [options] = await testHook(useOptions);
-
-			expect(options.columns).toBe(2);
-		});
-
-		it('should return default value when number parses to NaN', async () => {
-			await chrome.storage.local.set({ filter_min_width: 'abc' });
-
-			const [options] = await testHook(useOptions);
-
-			expect(options.filter_min_width).toBe(0);
-		});
-
-		it('should return default value for invalid JSON objects', async () => {
-			await chrome.storage.local.set({ selected_images: 'invalid json' });
-
-			const [options] = await testHook(useOptions);
-
-			expect(options.selected_images).toEqual([]);
+			expect(stored.selected_images).toEqual(['img1.jpg', 'img2.jpg']);
+			expect(Array.isArray(stored.selected_images)).toBe(true);
 		});
 	});
 });

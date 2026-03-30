@@ -38,32 +38,32 @@ export function OptionsProvider({ children }) {
 	const [options, setOptions] = useState(null);
 	const [isReady, setIsReady] = useState(false);
 
-	useEffect(async () => {
-		// First, migrate from localStorage if there's data there
-		await migrateFromLocalStorage();
+	useEffect(() => {
+		(async () => {
+			// First, migrate from localStorage if there's data there
+			await migrateFromLocalStorage();
 
-		// Then load from chrome.storage
-		const stored = await chrome.storage.local.get(null);
+			// Then load from chrome.storage (native types, no conversion needed)
+			const stored = await chrome.storage.local.get(null);
 
-		// Deserialize stored values to their proper types
-		const deserialized = {};
-		for (const key of Object.keys(stored)) {
-			if (key in defaults) {
-				deserialized[key] = deserialize(stored[key], defaults[key]);
+			const filtered = {};
+			for (const key of Object.keys(stored)) {
+				if (key in defaults) {
+					filtered[key] = stored[key];
+				}
 			}
-		}
 
-		setOptions({ ...defaults, ...deserialized });
-		setIsReady(true);
+			setOptions({ ...defaults, ...filtered });
+			setIsReady(true);
+		})();
 	}, []);
 
 	const updateOptions = async (changesOrUpdater) => {
-		setOptions((options) => {
-			const changes = typeof changesOrUpdater === 'function' ? changesOrUpdater(options) : changesOrUpdater;
-			const next = { ...options, ...changes };
-			chrome.storage.local.set(changes);
-			return next;
-		});
+		const changes = typeof changesOrUpdater === 'function' ? changesOrUpdater(options) : changesOrUpdater;
+		if (!(changes && Object.keys(changes).length > 0)) return;
+
+		setOptions((options) => ({ ...options, ...changes }));
+		await chrome.storage.local.set(changes);
 	};
 
 	if (!isReady) {
@@ -84,12 +84,15 @@ export function useOptions() {
 async function migrateFromLocalStorage() {
 	if (localStorage.length === 0) return;
 
+	// Only migrate keys that don't already exist in chrome.storage
+	// to avoid overwriting newer data (e.g. from another device)
+	const existing = await chrome.storage.local.get(null);
+
 	const toMigrate = {};
 	for (let index = localStorage.length - 1; index >= 0; index--) {
 		const key = localStorage.key(index);
-		if (key && key in defaults) {
-			const value = localStorage.getItem(key);
-			toMigrate[key] = deserialize(value, defaults[key]);
+		if (key && key in defaults && !(key in existing)) {
+			toMigrate[key] = parseLocalStorageValue(localStorage.getItem(key), defaults[key]);
 		}
 	}
 
@@ -102,15 +105,16 @@ async function migrateFromLocalStorage() {
 	localStorage.clear();
 }
 
-function deserialize(value, defaultValue) {
+function parseLocalStorageValue(value, defaultValue) {
 	if (value == null) return defaultValue;
 
 	switch (typeof defaultValue) {
-		case 'number':
+		case 'number': {
 			const number = parseFloat(value);
 			return isNaN(number) ? defaultValue : number;
+		}
 		case 'boolean':
-			return value === 'true' || value === true;
+			return value === 'true';
 		case 'object':
 			try {
 				return JSON.parse(value);

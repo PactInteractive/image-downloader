@@ -47,6 +47,8 @@ export function About() {
       />
     </p>
 
+    <hr />
+
     <p>
       We have other paid products you can use - our premium
       service <${ExternalLink} class="font-bold text-nowrap" href="https://cutoutmagic.com">Cutout Magic</a> can
@@ -62,7 +64,9 @@ export function About() {
       <img class="shadow rounded-2xl" src="https://cutoutmagic.com/cover-1280x720.jpg" />
     <//>
 
-    <p class="mt-8 mb-4">
+    <hr class="mt-4" />
+
+    <p class="my-4">
       You can also try our other projects or support us directly by donating on Gumroad:
     </p>
 
