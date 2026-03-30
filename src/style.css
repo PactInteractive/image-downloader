@@ -258,8 +258,11 @@
   .my-0\.5 {
     margin-block: calc(var(--spacing) * 0.5);
   }
-  .mt-8 {
-    margin-top: calc(var(--spacing) * 8);
+  .my-4 {
+    margin-block: calc(var(--spacing) * 4);
+  }
+  .mt-4 {
+    margin-top: calc(var(--spacing) * 4);
   }
   .mt-auto {
     margin-top: auto;
@@ -849,6 +852,9 @@
   }
   small {
     font-size: 0.9em;
+  }
+  hr {
+    border-top: 1px dotted var(--color-slate-300);
   }
 }
 .noUi-state-drag {

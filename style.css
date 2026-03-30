@@ -103,6 +103,10 @@
 	small {
 		font-size: 0.9em;
 	}
+
+	hr {
+		border-top: 1px dotted var(--color-slate-300);
+	}
 }
 
 .noUi-state-drag {
