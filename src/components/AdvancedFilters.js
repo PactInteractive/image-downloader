@@ -102,7 +102,7 @@ export function AdvancedFilters() {
 			<div class="flex justify-between gap-2">
 				<${Checkbox}
 					class="py-1"
-					title="Only show images from direct links on the page; useful on sites like Reddit"
+					title="Only show images from direct links on the page; useful on some websites"
 					checked=${options.only_images_from_links}
 					onChange=${setCheckboxOption('only_images_from_links')}
 				>
