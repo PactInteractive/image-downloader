@@ -19,30 +19,64 @@ export function App() {
 	const [linkedImages, setLinkedImages] = useState([]);
 	const [visibleImages, setVisibleImages] = useState([]);
 
-	useEffect(() => {
-		// Get images on the page
+	// Extension can only access the domain it was initially opened on
+	const initialHostname = useRef();
+	const [hostname, setHostname] = useState(initialHostname.value);
+
+	const loadImagesFromActiveTab = useCallback(({ waitForIdleDOM }) => {
 		chrome.windows.getCurrent((currentWindow) => {
 			chrome.tabs.query({ active: true, windowId: currentWindow.id }, (activeTabs) => {
+				if (activeTabs.length === 0) return;
+
+				const activeTab = activeTabs[0];
+				if (activeTab.url) {
+					try {
+						initialHostname.value = new URL(activeTab.url).hostname;
+						setHostname(initialHostname.value);
+					} catch (error) {
+						console.error(error, activeTab.url);
+					}
+				}
+
 				chrome.scripting
 					.executeScript({
-						target: { tabId: activeTabs[0].id, allFrames: true },
+						target: { tabId: activeTab.id, allFrames: true },
 						func: findImages,
+						args: [{ waitForIdleDOM }],
 					})
 					.then((messages) => {
-						setAllImages((allImages) =>
-							unique([...allImages, ...messages.flatMap((message) => message?.result?.allImages)])
-						);
-
-						setLinkedImages((linkedImages) =>
-							unique([...linkedImages, ...messages.flatMap((message) => message?.result?.linkedImages)])
-						);
-
-						// TODO: Do we need this for anything?
-						// localStorage.active_tab_origin = messages[0]?.result?.origin;
+						setAllImages(unique(messages.flatMap((message) => message?.result?.allImages)));
+						setLinkedImages(unique(messages.flatMap((message) => message?.result?.linkedImages)));
+						if (!waitForIdleDOM) {
+							loadImagesFromActiveTab({ waitForIdleDOM: 1000 });
+						}
 					});
 			});
 		});
 	}, []);
+
+	useEffect(() => {
+		loadImagesFromActiveTab({ waitForIdleDOM: false });
+
+		function reloadImagesWhenPageLoads(tabId, changeInfo, tab) {
+			if (changeInfo.url) {
+				try {
+					setHostname(new URL(tab.url).hostname);
+				} catch (error) {
+					console.error(error, tab.url);
+					setHostname('!invalid!');
+				}
+			}
+
+			if (tab.active && changeInfo.status === 'complete') {
+				loadImagesFromActiveTab({ waitForIdleDOM: false });
+			}
+		}
+
+		chrome.tabs.onUpdated.addListener(reloadImagesWhenPageLoads);
+
+		return () => chrome.tabs.onUpdated.removeListener(reloadImagesWhenPageLoads);
+	}, [loadImagesFromActiveTab]);
 
 	const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
 	const filterImages = useCallback(() => {
@@ -139,7 +173,24 @@ export function App() {
 	// `relative` for new z-index stack to get box shadow
 	return html`
 		<header class="sticky top-0 z-1 bg-white shadow-md">
+			${hostname !== initialHostname.value &&
+			html`
+				<div class="bg-amber-100 p-2 text-amber-800">
+					<span class="text-shadow">⚠️</span> For privacy and security reasons the extension can only find images on
+					the website where it was initially opened: <b>${initialHostname.value}</b>.
+					To find images on this website close the extension and reopen it.
+				</div>
+			`}
+
 			<div class="flex items-center gap-1 p-2">
+				<button
+					class="w-8"
+					title="Reload images from current tab"
+					onClick=${() => loadImagesFromActiveTab({ waitForIdleDOM: false })}
+				>
+					<img class="inline w-3.5" src="/images/reload.svg" />
+				</button>
+
 				<input
 					id="filter_by_url_input"
 					type="text"

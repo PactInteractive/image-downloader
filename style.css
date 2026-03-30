@@ -8,6 +8,10 @@
 	corner-shape: --value('bevel', 'notch', 'round', 'scoop', 'square', 'squircle');
 }
 
+@utility text-shadow {
+	text-shadow: 0 0 2px var(--color-slate-800);
+}
+
 @layer base {
 	* {
 		corner-shape: squircle;
