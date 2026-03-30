@@ -1,24 +1,41 @@
-export function getImageExtension(url) {
-	if (!url) return '';
-
-	// Handle data URIs: data:image/png;base64,... or data:image/svg+xml,...
-	if (url.startsWith('data:image/')) {
-		const match = url.match(/^data:image\/([a-zA-Z0-9+]+)[;,]/);
-		if (!match) return '';
-		const mimeType = match[1].toLowerCase();
-		// Extract base type from compound types like 'svg+xml'
-		return mimeType.split('+')[0];
+export async function findImages({ waitForIdleDOM }) {
+	// Wait until the page is fully loaded
+	if (document.readyState !== 'complete') {
+		await new Promise((resolve) => {
+			window.addEventListener('load', resolve, { once: true });
+			// Fallback in case 'load' already fired or for SPAs
+			if (document.readyState === 'complete') resolve();
+		});
 	}
 
-	// Remove query string and hash
-	const cleanUrl = url.split('?')[0].split('#')[0];
+	if (waitForIdleDOM) {
+		await new Promise((resolve) => {
+			let debounceTimer;
 
-	// Extract extension from filename
-	const match = cleanUrl.match(/\.([a-zA-Z0-9]+)$/);
-	return match ? match[1].toLowerCase() : '';
-}
+			const observer = new MutationObserver(() => {
+				// Something changed → reset the debounce timer
+				clearTimeout(debounceTimer);
+				debounceTimer = setTimeout(() => {
+					observer.disconnect();
+					resolve();
+				}, waitForIdleDOM);
+			});
 
-export function findImages() {
+			// Observe the whole document
+			observer.observe(document.documentElement, {
+				childList: true,
+				subtree: true,
+				attributes: false, // set true if you care about src changes etc.
+			});
+
+			// Initial timer in case the page is already quiet
+			debounceTimer = setTimeout(() => {
+				observer.disconnect();
+				resolve();
+			}, waitForIdleDOM);
+		});
+	}
+
 	// Source: https://support.google.com/webmasters/answer/2598805?hl=en
 	const imageUrlRegex =
 		/(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|ico|jfif|jpe?g|png|svg|tiff?|webp|avif))(?:\?([^#]*))?(?:#(.*))?/i;

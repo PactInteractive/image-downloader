@@ -15,6 +15,7 @@ import { UrlFilterMode } from './UrlFilterMode.js';
 export function App() {
 	const [options, updateOptions] = useOptions();
 
+	// Images
 	const [allImages, setAllImages] = useState([]);
 	const [linkedImages, setLinkedImages] = useState([]);
 	const [visibleImages, setVisibleImages] = useState([]);
@@ -24,6 +25,7 @@ export function App() {
 	const [hostname, setHostname] = useState(initialHostname.value);
 
 	const loadImagesFromActiveTab = useCallback(({ waitForIdleDOM }) => {
+		// TODO: Catch error `Uncaught (in promise) Error: Cannot access contents of the page. Extension manifest must request permission to access the respective host.`
 		chrome.windows.getCurrent((currentWindow) => {
 			chrome.tabs.query({ active: true, windowId: currentWindow.id }, (activeTabs) => {
 				if (activeTabs.length === 0) return;
@@ -59,7 +61,7 @@ export function App() {
 		loadImagesFromActiveTab({ waitForIdleDOM: false });
 
 		function reloadImagesWhenPageLoads(tabId, changeInfo, tab) {
-			if (changeInfo.url) {
+			if (tab?.active && changeInfo?.url) {
 				try {
 					setHostname(new URL(tab.url).hostname);
 				} catch (error) {
@@ -68,14 +70,18 @@ export function App() {
 				}
 			}
 
-			if (tab.active && changeInfo.status === 'complete') {
+			if (tab?.active && changeInfo?.status === 'complete') {
 				loadImagesFromActiveTab({ waitForIdleDOM: false });
 			}
 		}
 
 		chrome.tabs.onUpdated.addListener(reloadImagesWhenPageLoads);
+		chrome.tabs.onActivated.addListener(reloadImagesWhenPageLoads);
 
-		return () => chrome.tabs.onUpdated.removeListener(reloadImagesWhenPageLoads);
+		return () => {
+			chrome.tabs.onUpdated.removeListener(reloadImagesWhenPageLoads);
+			chrome.tabs.onActivated.removeListener(reloadImagesWhenPageLoads);
+		};
 	}, [loadImagesFromActiveTab]);
 
 	const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
@@ -138,6 +144,7 @@ export function App() {
 
 	useEffect(filterImages, [allImages, linkedImages, options]);
 
+	// Download
 	const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
 	const imagesToDownload = useMemo(
 		() => visibleImages.filter(isIncludedIn(options.selected_images)),
@@ -176,9 +183,9 @@ export function App() {
 			${hostname !== initialHostname.value &&
 			html`
 				<div class="bg-amber-100 p-2 text-amber-800">
-					<span class="text-shadow">⚠️</span> For privacy and security reasons the extension can only find images on
-					the website where it was initially opened: <b>${initialHostname.value}</b>.
-					To find images on this website close the extension and reopen it.
+					<span class="text-shadow">⚠️</span> For privacy and security reasons the extension can only find images on the
+					website where it was initially opened: <b>${initialHostname.value}</b>. To find images on this website close
+					the extension and reopen it.
 				</div>
 			`}
 

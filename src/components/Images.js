@@ -1,10 +1,10 @@
 import html, { useEffect } from '../html.js';
 
-import { Checkbox } from '../components/Checkbox.js';
-import { useImageResolution } from '../hooks/useImageResolution.js';
+import { useImageStats } from '../hooks/useImageStats.js';
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
-import { getImageExtension } from './imageUtils.js';
+import { Badge } from './Badge.js';
+import { Checkbox } from './Checkbox.js';
 
 export function Images({ options, updateOptions, visibleImages, imagesToDownload, style, ...props }) {
 	const selectedImages = options.selected_images;
@@ -78,11 +78,11 @@ export function Images({ options, updateOptions, visibleImages, imagesToDownload
 }
 
 function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages }) {
-	const { resolution, onLoad, onError, resetResolution } = useImageResolution();
+	const stats = useImageStats();
 	const isSelected = selectedImages.includes(imageUrl);
 
-	// Reset resolution when imageUrl changes to avoid showing stale data
-	useEffect(resetResolution, [imageUrl, resetResolution]);
+	// Reset stats when imageUrl changes to avoid showing stale data
+	useEffect(stats.resetStats, [imageUrl, stats.resetStats]);
 
 	return html`
 		<div
@@ -102,7 +102,7 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 				);
 			}}
 		>
-			<img class="w-full drop-shadow-md" src=${imageUrl} onLoad=${onLoad} onError=${onError} />
+			<img class="w-full drop-shadow-md" src=${imageUrl} onLoad=${stats.onLoad} onError=${stats.onError} />
 
 			<div
 				class=${`
@@ -129,14 +129,15 @@ function ImageCard({ imageUrl, index, options, selectedImages, setSelectedImages
 			</div>
 
 			<div class="absolute right-1 bottom-1 left-1 flex gap-1">
-				${resolution.ready &&
-				html`
-					<div class="rounded bg-slate-950/80 px-1 text-white">
-						${resolution.error ? 'Error loading image' : `${resolution.width}×${resolution.height}`}
-					</div>
-				`}
+				<${Badge} class="uppercase">${stats.data.extension}</${Badge}>
 
-				<div class="rounded bg-slate-950/80 px-1 text-white empty:hidden">${getImageExtension(imageUrl)}</div>
+				${
+					stats.data.status === 'loaded' &&
+					html`
+					<${Badge}>${stats.data.width}×${stats.data.height}</${Badge}>
+					<${Badge}>${stats.data.size ? stats.data.size.formatted : ''}</${Badge}>
+				`
+				}
 			</div>
 		</div>
 	`;
