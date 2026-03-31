@@ -22,11 +22,10 @@ const defaults = {
 	filter_max_height: 3000,
 	filter_max_height_default: 3000,
 	filter_max_height_enabled: false,
+	only_unique_images: true,
 	only_images_from_links: false,
-	only_unique_images: false,
 	// Download
 	show_download_confirmation: true,
-	show_file_renaming: true,
 	// Images
 	selected_images: [],
 	columns: 2,
