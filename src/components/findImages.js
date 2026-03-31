@@ -1,4 +1,5 @@
 // Executed via `chrome.scripting.executeScript` - cannot have imports!
+
 export async function findImages({ waitForIdleDOM }) {
 	// Wait until the page is fully loaded
 	if (document.readyState !== 'complete') {
@@ -9,7 +10,7 @@ export async function findImages({ waitForIdleDOM }) {
 		});
 	}
 
-	if (waitForIdleDOM) {
+	if (waitForIdleDOM !== false && waitForIdleDOM >= 0 && Number.isFinite(waitForIdleDOM)) {
 		await new Promise((resolve) => {
 			let debounceTimer;
 
@@ -30,6 +31,7 @@ export async function findImages({ waitForIdleDOM }) {
 			});
 
 			// Initial timer in case the page is already quiet
+			clearTimeout(debounceTimer);
 			debounceTimer = setTimeout(() => {
 				observer.disconnect();
 				resolve();

@@ -21,9 +21,9 @@ export function App() {
 	const [linkedImages, setLinkedImages] = useState([]);
 	const [visibleImages, setVisibleImages] = useState([]);
 
-	// Extension can only access the domain it was initially opened on
-	const initialHostname = useRef();
-	const [hostname, setHostname] = useState(initialHostname.value);
+	const [scriptError, setScriptError] = useState();
+	const [hostname, setHostname] = useState();
+	const limitedAccessHostnames = /\.google\.com/;
 
 	const loadImagesFromActiveTab = useCallback(({ waitForIdleDOM }) => {
 		chrome.windows.getCurrent((currentWindow) => {
@@ -33,13 +33,13 @@ export function App() {
 				const activeTab = activeTabs[0];
 				if (activeTab.url) {
 					try {
-						initialHostname.value = new URL(activeTab.url).hostname;
-						setHostname(initialHostname.value);
+						setHostname(new URL(activeTab.url).hostname);
 					} catch (error) {
-						console.error(error, activeTab.url);
+						setHostname(activeTab.url);
 					}
 				}
 
+				setScriptError(null);
 				chrome.scripting
 					.executeScript({
 						target: { tabId: activeTab.id, allFrames: true },
@@ -54,9 +54,10 @@ export function App() {
 						}
 					})
 					.catch((error) => {
-						// Some errors are expected like `Cannot access contents of the page.
-						// Extension manifest must request permission to access the respective host.`
-						console.error(error);
+						// Ignore some errors that happen regularly when navigating around
+						if (error.message === 'Cannot access a chrome:// URL') return;
+
+						setScriptError(error.message);
 					});
 			});
 		});
@@ -66,17 +67,24 @@ export function App() {
 		loadImagesFromActiveTab({ waitForIdleDOM: false });
 
 		function reloadImagesWhenPageLoads(tabId, changeInfo, tab) {
-			if (tab?.active && changeInfo?.url) {
-				try {
-					setHostname(new URL(tab.url).hostname);
-				} catch (error) {
-					console.error(error, tab.url);
-					setHostname('!invalid!');
-				}
+			if (!tab) {
+				setHostname(undefined);
+				loadImagesFromActiveTab({ waitForIdleDOM: 1 });
+				return;
 			}
 
-			if (tab?.active && changeInfo?.status === 'complete') {
-				loadImagesFromActiveTab({ waitForIdleDOM: false });
+			if (tab?.active) {
+				if (changeInfo?.url) {
+					try {
+						setHostname(new URL(tab.url).hostname);
+					} catch (error) {
+						setHostname(tab.url);
+					}
+				}
+
+				if (changeInfo?.status === 'complete') {
+					loadImagesFromActiveTab({ waitForIdleDOM: false });
+				}
 			}
 		}
 
@@ -190,12 +198,20 @@ export function App() {
 	// `relative` for new z-index stack to get box shadow
 	return html`
 		<header class="sticky top-0 z-1 bg-white shadow-md">
-			${hostname !== initialHostname.value &&
+			${hostname &&
+			limitedAccessHostnames.test(hostname) &&
+			html`
+				<div class="bg-sky-100 p-2 text-sky-800">
+					<span class="text-shadow">🛡️</span> Image Downloader has limited access to sensitive domains like ${' '}<b
+						>${hostname}</b
+					>
+				</div>
+			`}
+			${scriptError &&
 			html`
 				<div class="bg-amber-100 p-2 text-amber-800">
-					<span class="text-shadow">⚠️</span> For privacy and security reasons the extension can only look for images
-					on${' '}<b>${initialHostname.value}</b> where it was initially opened. To find images on${' '}
-					<b>${hostname}</b> close the extension and reopen it.
+					<span class="text-shadow">⚠️</span> Image Downloader cannot access the contents of this page - please close
+					the extension and open it again
 				</div>
 			`}
 

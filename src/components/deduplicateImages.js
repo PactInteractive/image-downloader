@@ -28,7 +28,9 @@ function getNormalizedBaseKey(url) {
 
 		const basepath = path
 			// Remove extension
-			.split('.').slice(0, -1).join('.')
+			.split('.')
+			.slice(0, -1)
+			.join('.')
 			// Remove common resolution suffixes: -300x200, _300w, -1x, etc.
 			.replace(/[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w|\d+x)$/i, '');
 
