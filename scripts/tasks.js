@@ -23,8 +23,7 @@ export async function updateManifest() {
 }
 
 export async function buildCss() {
-	await $`bunx @tailwindcss/cli -i ./style.css -o ./src/style.css`;
-	console.log('Built src/style.css');
+	await $`bunx @tailwindcss/cli -i ./src/style.css -o ./${config.outputDirectory}/src/style.css`;
 }
 
 export async function copyFile(path) {

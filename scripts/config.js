@@ -9,7 +9,7 @@ module.exports = {
 		prefix: 'icon_',
 		sizes: [16, 32, 48, 128],
 	},
-	filesToCopy: [manifestPath, './images/**/*', './lib/**/*', './src/**/!(test.ts|*.test.ts)'],
+	filesToCopy: [manifestPath, './images/**/*', './lib/**/*', './src/**/!(style.css|test.ts|*.test.ts)'],
 	paths: {
 		package: packagePath,
 		manifest: manifestPath,
