@@ -128,9 +128,11 @@ function ImageCard({ imageUrl, index, selectedImages, setSelectedImages }) {
 				<${DownloadImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
 			</div>
 
-			<!-- Toggle opacity - they take up the same space so it can't be visibility, and toggling display messes with the input content scrolling -->
 			<div class="absolute right-1 bottom-1 left-1">
-				<div class="group-hover:opacity-0 flex gap-1">
+				<!-- Toggle opacity - toggling display messes with the input content scrolling -->
+				<${ImageUrlTextbox} class="opacity-0 group-hover:opacity-100 w-full" value=${imageUrl} />
+
+				<div class="group-hover:hidden flex gap-1">
 					<${ImageStat} class="uppercase">${stats.data.extension}</${ImageStat}>
 
 					${
@@ -141,8 +143,6 @@ function ImageCard({ imageUrl, index, selectedImages, setSelectedImages }) {
 					`
 					}
 				</div>
-
-				<${ImageUrlTextbox} class="opacity-0 group-hover:opacity-100 w-full" value=${imageUrl} />
 			</div>
 		</div>
 	`;
