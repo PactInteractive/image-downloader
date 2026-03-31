@@ -1,9 +1,8 @@
-import html, { useEffect } from '../html.js';
+import html, { useEffect, useLayoutEffect, useRef } from '../html.js';
 
 import { useImageStats } from '../hooks/useImageStats.js';
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
-import { Badge } from './Badge.js';
 import { Checkbox } from './Checkbox.js';
 import { useOptions } from './OptionsProvider.js';
 
@@ -109,10 +108,10 @@ function ImageCard({ imageUrl, index, selectedImages, setSelectedImages }) {
 				class=${`
 					absolute top-1 left-1
 					w-7 h-7
-					rounded-md border-2 shadow-md
+					rounded-md border shadow-md
 					transition-all
-					${isSelected ? 'border-sky-600 bg-sky-600' : 'opacity-0 border-slate-400 bg-white'}
-					group-hover:opacity-100
+					${isSelected ? 'border-sky-600 bg-sky-600' : 'hidden border-slate-400 bg-white'}
+					group-hover:block
 					after:content-['']
 					after:absolute after:top-1/2 after:left-1/2
 					after:-translate-x-1/2 after:-translate-y-2/3
@@ -124,21 +123,26 @@ function ImageCard({ imageUrl, index, selectedImages, setSelectedImages }) {
 				`}
 			></div>
 
-			<div class="absolute top-1 right-1 flex gap-1 opacity-0 group-hover:opacity-100">
+			<div class="absolute top-1 right-1 hidden group-hover:flex gap-1">
 				<${OpenImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
 				<${DownloadImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
 			</div>
 
-			<div class="absolute right-1 bottom-1 left-1 flex gap-1">
-				<${Badge} class="uppercase">${stats.data.extension}</${Badge}>
+			<!-- Toggle opacity - they take up the same space so it can't be visibility, and toggling display messes with the input content scrolling -->
+			<div class="absolute right-1 bottom-1 left-1">
+				<div class="group-hover:opacity-0 flex gap-1">
+					<${ImageStat} class="uppercase">${stats.data.extension}</${ImageStat}>
 
-				${
-					stats.data.status === 'loaded' &&
-					html`
-					<${Badge}>${stats.data.width}×${stats.data.height}</${Badge}>
-					<${Badge} class="small-caps lowercase">${stats.data.size ? stats.data.size.formatted : ''}</${Badge}>
-				`
-				}
+					${
+						stats.data.status === 'loaded' &&
+						html`
+						<${ImageStat}>${stats.data.width}×${stats.data.height}</${ImageStat}>
+						<${ImageStat} class="small-caps lowercase">${stats.data.size ? stats.data.size.formatted : ''}</${ImageStat}>
+					`
+					}
+				</div>
+
+				<${ImageUrlTextbox} class="opacity-0 group-hover:opacity-100 w-full" value=${imageUrl} />
 			</div>
 		</div>
 	`;
@@ -181,6 +185,38 @@ function DownloadImageButton({ imageUrl, onClick, ...props }) {
 			type="button"
 			title="Download"
 			onClick=${downloadImages}
+			...${props}
+		/>
+	`;
+}
+
+function ImageStat({ class: className = '', children, ...props }) {
+	return html`
+		<small class="${className} rounded bg-slate-950/80 px-1 text-white empty:hidden" ...${props}>${children}</small>
+	`;
+}
+
+function ImageUrlTextbox(props) {
+	const inputRef = useRef(null);
+
+	function scrollToEnd() {
+		const input = inputRef.current;
+		if (input) {
+			input.scrollLeft = input.scrollWidth;
+		}
+	}
+
+	useLayoutEffect(scrollToEnd, []);
+
+	return html`
+		<input
+			ref=${inputRef}
+			type="text"
+			readonly
+			onClick=${(e) => {
+				stopPropagation(e);
+				e.currentTarget.select();
+			}}
 			...${props}
 		/>
 	`;
