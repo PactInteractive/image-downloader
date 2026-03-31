@@ -145,27 +145,37 @@
 	right: -9px;
 	width: 20px;
 	height: 20px;
+	box-shadow: none;
+	outline: 1px solid white;
 	border-radius: 50%;
 	border-color: var(--color-sky-600);
-
-	transition: border-color 200ms;
+	background-color: var(--color-sky-600);
+	transition: all 200ms;
 }
 
 .noUi-horizontal .noUi-origin[disabled] .noUi-handle {
 	cursor: help;
 	border-color: var(--color-slate-400);
+	background-color: var(--color-slate-100);
 }
 
 .noUi-handle::before,
 .noUi-handle::after {
-	top: 3px;
+	top: 4px;
 	height: 10px;
+	background-color: white;
+	transition: all 200ms;
+}
+
+.noUi-origin[disabled] .noUi-handle::before,
+.noUi-origin[disabled] .noUi-handle::after {
+	background-color: var(--color-slate-400);
 }
 
 .noUi-handle::before {
-	left: 6px;
+	left: 6.5px;
 }
 
 .noUi-handle::after {
-	left: 9px;
+	left: 9.5px;
 }

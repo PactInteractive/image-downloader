@@ -1,5 +1,5 @@
-import { describe, expect, test } from 'bun:test';
-import { findImages } from './imageUtils.js';
+import { describe, expect, it } from 'bun:test';
+import { findImages } from './findImages.js';
 
 // Type definitions for mock objects
 interface MockElement {
@@ -40,7 +40,7 @@ describe('findImages', () => {
 			addEventListener: () => {},
 		};
 
-		const result = await findImages({});
+		const result = await findImages({ waitForIdleDOM: false });
 
 		// Clean up
 		delete (global as unknown as { document?: MockDocument }).document;
@@ -49,7 +49,7 @@ describe('findImages', () => {
 		return result;
 	}
 
-	test('returns empty arrays when no images found', async () => {
+	it('returns empty arrays when no images found', async () => {
 		const mockDocument: MockDocument = {
 			querySelectorAll: () => [],
 		};
@@ -65,7 +65,7 @@ describe('findImages', () => {
 		expect(result.origin).toBe('http://example.com');
 	});
 
-	test('extracts src from img elements', async () => {
+	it('extracts src from img elements', async () => {
 		const img: MockElement = {
 			tagName: 'IMG',
 			src: 'http://site.com/photo.jpg',
@@ -86,7 +86,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://site.com/photo.jpg');
 	});
 
-	test('strips hash from img src', async () => {
+	it('strips hash from img src', async () => {
 		const img: MockElement = {
 			tagName: 'IMG',
 			src: 'http://site.com/photo.jpg#thumb',
@@ -108,7 +108,7 @@ describe('findImages', () => {
 		expect(result.allImages).not.toContain('http://site.com/photo.jpg#thumb');
 	});
 
-	test('extracts xlink:href from SVG image elements', async () => {
+	it('extracts xlink:href from SVG image elements', async () => {
 		const svgImage: MockElement = {
 			tagName: 'image',
 			getAttribute: (attr: string) => (attr === 'xlink:href' ? 'http://site.com/svg.png' : null),
@@ -129,7 +129,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://site.com/svg.png');
 	});
 
-	test('extracts image URLs from anchor elements', async () => {
+	it('extracts image URLs from anchor elements', async () => {
 		const link: MockElement = {
 			tagName: 'A',
 			href: 'http://site.com/link.jpg',
@@ -151,7 +151,7 @@ describe('findImages', () => {
 		expect(result.linkedImages).toContain('http://site.com/link.jpg');
 	});
 
-	test('ignores non-image URLs in anchor elements', async () => {
+	it('ignores non-image URLs in anchor elements', async () => {
 		const link: MockElement = {
 			tagName: 'A',
 			href: 'http://site.com/page.html',
@@ -173,7 +173,7 @@ describe('findImages', () => {
 		expect(result.linkedImages).not.toContain('http://site.com/page.html');
 	});
 
-	test('extracts URLs from background-image styles', async () => {
+	it('extracts URLs from background-image styles', async () => {
 		const div: MockElement = { tagName: 'DIV' };
 		const mockDocument: MockDocument = {
 			querySelectorAll: (selector: string) => {
@@ -194,7 +194,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://site.com/bg.png');
 	});
 
-	test('extracts data URIs', async () => {
+	it('extracts data URIs', async () => {
 		const img: MockElement = {
 			tagName: 'IMG',
 			src: 'data:image/png;base64,iVBORw0KGgo=',
@@ -215,7 +215,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('data:image/png;base64,iVBORw0KGgo=');
 	});
 
-	test('converts relative URLs to absolute', async () => {
+	it('converts relative URLs to absolute', async () => {
 		const img: MockElement = {
 			tagName: 'IMG',
 			src: '/images/photo.jpg',
@@ -236,7 +236,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://example.com/images/photo.jpg');
 	});
 
-	test('removes duplicate URLs', async () => {
+	it('removes duplicate URLs', async () => {
 		const img1: MockElement = {
 			tagName: 'IMG',
 			src: 'http://site.com/same.jpg',
@@ -261,7 +261,7 @@ describe('findImages', () => {
 		expect(result.allImages.filter((url: string) => url === 'http://site.com/same.jpg').length).toBe(1);
 	});
 
-	test('handles various image formats', async () => {
+	it('handles various image formats', async () => {
 		const formats = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg', 'bmp', 'ico', 'avif'];
 		const images: MockElement[] = formats.map((ext) => ({
 			tagName: 'IMG',
@@ -286,7 +286,7 @@ describe('findImages', () => {
 		});
 	});
 
-	test('handles URLs with query parameters', async () => {
+	it('handles URLs with query parameters', async () => {
 		const img: MockElement = {
 			tagName: 'IMG',
 			src: 'http://site.com/photo.jpg?size=large&w=800',
@@ -307,7 +307,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://site.com/photo.jpg?size=large&w=800');
 	});
 
-	test('filters out falsy values', async () => {
+	it('filters out falsy values', async () => {
 		const img1: MockElement = {
 			tagName: 'IMG',
 			src: 'http://site.com/valid.jpg',
@@ -333,7 +333,7 @@ describe('findImages', () => {
 		expect(result.allImages).not.toContain('');
 	});
 
-	test('extracts URL with different quote styles in CSS', async () => {
+	it('extracts URL with different quote styles in CSS', async () => {
 		// Note: The original extractURLFromStyle has a regex issue
 		// This test documents actual behavior
 		const div1: MockElement = { tagName: 'DIV', id: 1 };
@@ -362,7 +362,7 @@ describe('findImages', () => {
 		expect(result.allImages.length).toBe(3);
 	});
 
-	test('extracts URL from background-image with linear-gradient overlay', async () => {
+	it('extracts URL from background-image with linear-gradient overlay', async () => {
 		const div: MockElement = { tagName: 'DIV' };
 		const mockDocument: MockDocument = {
 			querySelectorAll: (selector: string) => {
@@ -392,7 +392,7 @@ describe('findImages', () => {
 	// Additional use cases (marked as .skip until implemented)
 	// ============================================
 
-	test('extracts Cloudflare Images URLs from imagedelivery.net without extensions', async () => {
+	it('extracts Cloudflare Images URLs from imagedelivery.net without extensions', async () => {
 		// HTML: <img src="https://imagedelivery.net/abc123/photo/public" />
 		// Expected: ['https://imagedelivery.net/abc123/photo/public']
 		const img: MockElement = {
@@ -415,7 +415,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('https://imagedelivery.net/abc123/photo/public');
 	});
 
-	test('extracts images from img srcset attribute with multiple candidates', async () => {
+	it('extracts images from img srcset attribute with multiple candidates', async () => {
 		// HTML: <img src="http://example.com/fallback.jpg" srcset="http://example.com/small.jpg 480w, http://example.com/medium.jpg 800w, http://example.com/large.jpg 1200w" />
 		// Expected: ['http://example.com/fallback.jpg', 'http://example.com/small.jpg', 'http://example.com/medium.jpg', 'http://example.com/large.jpg']
 		const img: MockElement = {
@@ -449,7 +449,7 @@ describe('findImages', () => {
 		);
 	});
 
-	test('extracts images from picture and source elements with srcset', async () => {
+	it('extracts images from picture and source elements with srcset', async () => {
 		// HTML: <picture><source srcset="http://example.com/desktop.webp 1200w, http://example.com/mobile.webp 600w" type="image/webp" /><source srcset="http://example.com/desktop.jpg 1200w, http://example.com/mobile.jpg 600w" type="image/jpeg" /><img src="http://example.com/fallback.jpg" /></picture>
 		// Expected: ['http://example.com/desktop.webp', 'http://example.com/mobile.webp', 'http://example.com/desktop.jpg', 'http://example.com/mobile.jpg', 'http://example.com/fallback.jpg']
 		const img: MockElement = {
@@ -492,7 +492,7 @@ describe('findImages', () => {
 		);
 	});
 
-	test('extracts images from data-src attribute for lazy loading', async () => {
+	it('extracts images from data-src attribute for lazy loading', async () => {
 		// HTML: <img class="lazy" data-src="http://example.com/lazy-image.jpg" />
 		// Expected: ['http://example.com/lazy-image.jpg']
 		const img: MockElement = {
@@ -516,7 +516,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://example.com/lazy-image.jpg');
 	});
 
-	test('extracts images from data-srcset attribute for lazy loading', async () => {
+	it('extracts images from data-srcset attribute for lazy loading', async () => {
 		// HTML: <img class="lazy" data-src="http://example.com/fallback.jpg" data-srcset="http://example.com/small.jpg 480w, http://example.com/large.jpg 800w" />
 		// Expected: ['http://example.com/fallback.jpg', 'http://example.com/small.jpg', 'http://example.com/large.jpg']
 		const img: MockElement = {
@@ -550,7 +550,7 @@ describe('findImages', () => {
 		);
 	});
 
-	test('extracts all images from multiple url() values in background-image', async () => {
+	it('extracts all images from multiple url() values in background-image', async () => {
 		// HTML: <div style="background-image: url(http://example.com/layer1.png), url(http://example.com/layer2.png), url(http://example.com/layer3.png);"></div>
 		// Expected: ['http://example.com/layer1.png', 'http://example.com/layer2.png', 'http://example.com/layer3.png']
 		const div: MockElement = { tagName: 'DIV' };
@@ -581,7 +581,7 @@ describe('findImages', () => {
 		);
 	});
 
-	test('extracts images from mask-image CSS property', async () => {
+	it('extracts images from mask-image CSS property', async () => {
 		// HTML: <div class="masked" style="mask-image: url(http://example.com/mask.svg);"></div>
 		// Expected: ['http://example.com/mask.svg']
 		const div: MockElement = { tagName: 'DIV' };
@@ -611,7 +611,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://example.com/mask.svg');
 	});
 
-	test('extracts images from border-image-source CSS property', async () => {
+	it('extracts images from border-image-source CSS property', async () => {
 		// HTML: <div style="border-image-source: url(http://example.com/border.png);"></div>
 		// Expected: ['http://example.com/border.png']
 		const div: MockElement = { tagName: 'DIV' };
@@ -639,7 +639,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://example.com/border.png');
 	});
 
-	test('extracts images from list-style-image CSS property', async () => {
+	it('extracts images from list-style-image CSS property', async () => {
 		// HTML: <ul style="list-style-image: url(http://example.com/bullet.gif);"><li>Item 1</li></ul>
 		// Expected: ['http://example.com/bullet.gif']
 		const ul: MockElement = { tagName: 'UL' };
@@ -667,7 +667,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('http://example.com/bullet.gif');
 	});
 
-	test('extracts protocol-relative URLs from img src', async () => {
+	it('extracts protocol-relative URLs from img src', async () => {
 		// HTML: <img src="//cdn.example.com/image.jpg" />
 		// Expected: ['//cdn.example.com/image.jpg']
 		const img: MockElement = {
@@ -690,7 +690,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('//cdn.example.com/image.jpg');
 	});
 
-	test('extracts protocol-relative URLs from background-image', async () => {
+	it('extracts protocol-relative URLs from background-image', async () => {
 		// HTML: <div style="background-image: url(//cdn.example.com/background.png);"></div>
 		// Expected: ['//cdn.example.com/background.png']
 		const div: MockElement = { tagName: 'DIV' };
@@ -718,7 +718,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('//cdn.example.com/background.png');
 	});
 
-	test('extracts blob URLs from img src', async () => {
+	it('extracts blob URLs from img src', async () => {
 		// HTML: <img src="blob:https://example.com/abc123-def456-789" />
 		// Expected: ['blob:https://example.com/abc123-def456-789']
 		const img: MockElement = {
@@ -741,7 +741,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('blob:https://example.com/abc123-def456-789');
 	});
 
-	test('extracts blob URLs from CSS background-image', async () => {
+	it('extracts blob URLs from CSS background-image', async () => {
 		// HTML: <div style="background-image: url(blob:http://localhost:3000/image-blob-id);"></div>
 		// Expected: ['blob:http://localhost:3000/image-blob-id']
 		const div: MockElement = { tagName: 'DIV' };
@@ -769,7 +769,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('blob:http://localhost:3000/image-blob-id');
 	});
 
-	test('extracts various data:image URL formats', async () => {
+	it('extracts various data:image URL formats', async () => {
 		// HTML: <img src="data:image/jpeg;base64,/9j/4AAQ..." /><img src="data:image/svg+xml;utf8,<svg>...</svg>" /><img src="data:image/webp;base64,UklGR..." />
 		// Expected: ['data:image/jpeg;base64,/9j/4AAQ...', 'data:image/svg+xml;utf8,<svg>...</svg>', 'data:image/webp;base64,UklGR...']
 		const img1: MockElement = {
@@ -806,7 +806,7 @@ describe('findImages', () => {
 		);
 	});
 
-	test('extracts data:image URLs from CSS background-image', async () => {
+	it('extracts data:image URLs from CSS background-image', async () => {
 		// HTML: <div style="background-image: url(data:image/png;base64,iVBORw0KGgo=);"></div>
 		// Expected: ['data:image/png;base64,iVBORw0KGgo=']
 		const div: MockElement = { tagName: 'DIV' };
@@ -834,7 +834,7 @@ describe('findImages', () => {
 		expect(result.allImages).toContain('data:image/png;base64,iVBORw0KGgo=');
 	});
 
-	test('extracts SVG use elements referencing external images', async () => {
+	it('extracts SVG use elements referencing external images', async () => {
 		// HTML: <svg><use xlink:href="http://example.com/sprite.svg#icon-1" /></svg>
 		// Expected: ['http://example.com/sprite.svg']
 		const use: MockElement = {
@@ -861,7 +861,7 @@ describe('findImages', () => {
 	// Negative test cases (should NOT be returned)
 	// ============================================
 
-	test('should NOT return CSS gradients as images', async () => {
+	it('should NOT return CSS gradients as images', async () => {
 		// HTML: <div style="background-image: linear-gradient(to right, red, blue);"></div><div style="background-image: radial-gradient(circle, yellow, green);"></div>
 		// Expected: []
 		const div1: MockElement = { tagName: 'DIV' };
@@ -886,7 +886,7 @@ describe('findImages', () => {
 		expect(result.allImages).toHaveLength(0);
 	});
 
-	test('should NOT return non-image links (HTML, JS, CSS files)', async () => {
+	it('should NOT return non-image links (HTML, JS, CSS files)', async () => {
 		// HTML: <a href="http://example.com/page.html">HTML page</a><a href="http://example.com/script.js">Script</a><a href="http://example.com/styles.css">Stylesheet</a>
 		// Expected: [] for linkedImages
 		const link1: MockElement = {

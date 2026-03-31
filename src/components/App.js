@@ -6,10 +6,11 @@ import { useOptions } from './OptionsProvider.js';
 
 import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
+import { deduplicateImages } from './deduplicateImages.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
+import { findImages } from './findImages.js';
 import { Images } from './Images.js';
-import { deduplicateImages, findImages } from './imageUtils.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
 export function App() {
