@@ -25,17 +25,22 @@ function getNormalizedBaseKey(url) {
 	try {
 		const parsed = new URL(url);
 		const path = parsed.pathname;
-		const lastSlash = path.lastIndexOf('/');
-		const filename = lastSlash >= 0 ? path.substring(lastSlash + 1) : path;
 
-		const dotIndex = filename.lastIndexOf('.');
-		const baseName = dotIndex >= 0 ? filename.substring(0, dotIndex) : filename;
-		const ext = dotIndex >= 0 ? filename.substring(dotIndex).toLowerCase() : '';
+		const basepath = path
+			// Remove extension
+			.split('.').slice(0, -1).join('.')
+			// Remove common resolution suffixes: -300x200, _300w, -1x, etc.
+			.replace(/[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w|\d+x)$/i, '');
 
-		// Strip resolution indicators: -300x200, _300w, -1x, etc.
-		const stripped = baseName.replace(/[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w|\d+x)$/i, '');
+		// Whitelist params
+		const params = new URLSearchParams();
+		for (const [name, value] of parsed.searchParams) {
+			if (['id', 'url', 'href'].includes(name)) {
+				params.append(name, value);
+			}
+		}
 
-		return parsed.origin + path.substring(0, lastSlash + 1) + stripped;
+		return `${parsed.origin}${basepath}?${params.toString()}`;
 	} catch {
 		return url;
 	}

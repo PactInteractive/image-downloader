@@ -124,4 +124,12 @@ describe('deduplicateImages', () => {
 		const urls = Object.keys(images);
 		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo-1024w.png']);
 	});
+
+	it('should not group images with path & different url query params', () => {
+		const urls = [
+			`https://www.reddit.com/media?url=${encodeURIComponent('https://i.redd.it/abc123.jpeg')}`,
+			`https://www.reddit.com/media?url=${encodeURIComponent('https://i.redd.it/def456.jpeg')}`,
+		];
+		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+	});
 });
