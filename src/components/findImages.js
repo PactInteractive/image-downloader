@@ -1,6 +1,10 @@
 // Executed via `chrome.scripting.executeScript` - cannot have imports!
 
 export async function findImages({ waitForIdleDOM }) {
+	// Clean up any previously created observer and timeout from prior executions
+	window.__observer?.disconnect();
+	clearTimeout(window.__idleDomTimer);
+
 	// Wait until the page is fully loaded
 	if (document.readyState !== 'complete') {
 		await new Promise((resolve) => {
@@ -12,27 +16,24 @@ export async function findImages({ waitForIdleDOM }) {
 
 	if (waitForIdleDOM !== false && waitForIdleDOM >= 0 && Number.isFinite(waitForIdleDOM)) {
 		await new Promise((resolve) => {
-			let debounceTimer;
-
 			const observer = new MutationObserver(() => {
-				// Something changed → reset the debounce timer
-				clearTimeout(debounceTimer);
-				debounceTimer = setTimeout(() => {
+				clearTimeout(window.__idleDomTimer);
+				window.__idleDomTimer = setTimeout(() => {
 					observer.disconnect();
 					resolve();
 				}, waitForIdleDOM);
 			});
 
-			// Observe the whole document
 			observer.observe(document.documentElement, {
 				childList: true,
 				subtree: true,
-				attributes: false, // set true if you care about src changes etc.
+				attributes: false,
 			});
 
-			// Initial timer in case the page is already quiet
-			clearTimeout(debounceTimer);
-			debounceTimer = setTimeout(() => {
+			window.__observer = observer;
+
+			clearTimeout(window.__idleDomTimer);
+			window.__idleDomTimer = setTimeout(() => {
 				observer.disconnect();
 				resolve();
 			}, waitForIdleDOM);
