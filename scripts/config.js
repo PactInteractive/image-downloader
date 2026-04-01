@@ -14,6 +14,7 @@ export const filesToCopy = [
 	manifestPath,
 	'./images/**/*',
 	'./lib/**/*',
+	'!./lib/eruda.min.js',
 	'./src/**',
 	'!./src/Web/**',
 	'!./src/style.css',

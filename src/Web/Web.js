@@ -4,7 +4,7 @@ import html, { render, useCallback, useEffect, useRef, useState } from '../html.
 
 function Wrapper() {
 	const iframeRef = useRef(null);
-	const [iframeUrl, setIframeUrl] = useState(`${window.location.origin}/src/Options/index.html`);
+	const [iframeUrl, setIframeUrl] = useState('/src/Options/index.html');
 	const [inputUrl, setInputUrl] = useState(iframeUrl);
 
 	useEffect(() => {
@@ -18,7 +18,7 @@ function Wrapper() {
 		(e) => {
 			e.preventDefault();
 			const url = inputUrl.trim();
-			setIframeUrl(url && !/^https?:\/\//i.test(url) ? `https://${url}` : url);
+			setIframeUrl(url ? url.startsWith('/') ? window.location.origin + url : `https://${url}` : url)
 		},
 		[inputUrl]
 	);
