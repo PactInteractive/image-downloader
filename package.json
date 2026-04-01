@@ -29,7 +29,7 @@
 		"fs-extra": "9.0.1",
 		"glob": "7.1.6",
 		"glob-watcher": "5.0.5",
-		"happy-dom": "20.8.7",
+		"happy-dom": "20.8.9",
 		"prettier": "3.5.3",
 		"prettier-plugin-organize-imports": "4.3.0",
 		"prettier-plugin-tailwindcss": "0.7.2",
