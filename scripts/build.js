@@ -1,3 +1,4 @@
+import fs from 'fs-extra';
 import { sync } from 'glob';
 
 import { filesToCopy } from './config';
@@ -7,20 +8,25 @@ async function build() {
 	await clean();
 	await updateManifest();
 	await buildCss();
+
+	const patterns = filesToCopy.filter((pattern) => !pattern.startsWith('!'));
+	const ignore = filesToCopy.filter((pattern) => pattern.startsWith('!')).map((pattern) => pattern.slice(1));
+
+	const allFiles = patterns
+		.map((filePattern) => sync(filePattern, { ignore }))
+		.reduce((parent, child) => [...parent, ...child], [])
+		.filter((file) => !fs.statSync(file).isDirectory());
+
 	await Promise.all(
-		filesToCopy
-			.map((filePattern) => sync(filePattern))
-			.reduce((parent, child) => [...parent, ...child], [])
-			.map(copyFile)
-			.map((promise) =>
-				promise.catch((error) => {
-					if (error.code === 'EEXIST') {
-						// Ignore already existing file error
-					} else {
-						throw error;
-					}
-				})
-			)
+		allFiles.map(copyFile).map((promise) =>
+			promise.catch((error) => {
+				if (error.code === 'EEXIST') {
+					// Ignore already existing file error
+				} else {
+					throw error;
+				}
+			})
+		)
 	);
 }
 

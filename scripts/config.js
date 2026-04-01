@@ -1,17 +1,28 @@
 const packagePath = './package.json';
 const manifestPath = './manifest.json';
 
-module.exports = {
-	outputDirectory: 'build',
-	icons: {
-		inputSvg: './images/logo.svg',
-		outputDirectory: 'images',
-		prefix: 'icon_',
-		sizes: [16, 32, 48, 128],
-	},
-	filesToCopy: [manifestPath, './images/**/*', './lib/**/*', './src/**/!(style.css|test.ts|*.test.ts)'],
-	paths: {
-		package: packagePath,
-		manifest: manifestPath,
-	},
+export const outputDirectory = 'build';
+
+export const icons = {
+	inputSvg: './images/logo.svg',
+	outputDirectory: 'images',
+	prefix: 'icon_',
+	sizes: [16, 32, 48, 128],
+};
+
+export const filesToCopy = [
+	manifestPath,
+	'./images/**/*',
+	'./lib/**/*',
+	'./src/**',
+	'!./src/Web/**',
+	'!./src/style.css',
+	'!./src/test.ts',
+	'!./src/test-helpers.ts',
+	'!./src/**/*.test.ts',
+];
+
+export const paths = {
+	package: packagePath,
+	manifest: manifestPath,
 };

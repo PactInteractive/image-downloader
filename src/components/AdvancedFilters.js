@@ -31,7 +31,7 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.filter_min_width_enabled ? '' : 'light'} flex items-center justify-end"
+							class="${options.filter_min_width_enabled ? '' : 'text-slate-500'} flex items-center justify-end"
 							title=${getSliderCheckboxTooltip(options.filter_min_width_enabled)}
 						>
 							<small>${options.filter_min_width}px ≤</small>
@@ -49,7 +49,7 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.filter_max_width_enabled ? '' : 'light'} flex items-center justify-start"
+							class="${options.filter_max_width_enabled ? '' : 'text-slate-500'} flex items-center justify-start text-nowrap"
 							title=${getSliderCheckboxTooltip(options.filter_max_width_enabled)}
 						>
 							<${SliderCheckbox}
@@ -67,7 +67,7 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.filter_min_height_enabled ? '' : 'light'} flex items-center justify-end"
+							class="${options.filter_min_height_enabled ? '' : 'text-slate-500'} flex items-center justify-end text-nowrap"
 							title=${getSliderCheckboxTooltip(options.filter_min_height_enabled)}
 						>
 							<small>${options.filter_min_height}px ≤</small>
@@ -85,7 +85,7 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.filter_max_height_enabled ? '' : 'light'} flex items-center justify-start"
+							class="${options.filter_max_height_enabled ? '' : 'text-slate-500'} flex items-center justify-start text-nowrap"
 							title=${getSliderCheckboxTooltip(options.filter_max_height_enabled)}
 						>
 							<${SliderCheckbox}
@@ -106,7 +106,7 @@ export function AdvancedFilters() {
 					checked=${options.only_unique_images}
 					onChange=${setCheckboxOption('only_unique_images')}
 				>
-					Only unique images
+					Unique images
 				<//>
 
 				<${Checkbox}
@@ -115,7 +115,7 @@ export function AdvancedFilters() {
 					checked=${options.only_images_from_links}
 					onChange=${setCheckboxOption('only_images_from_links')}
 				>
-					Only images from links
+					Images from links
 				<//>
 
 				<${Checkbox}
@@ -124,7 +124,7 @@ export function AdvancedFilters() {
 					checked=${options.hide_images_with_errors}
 					onChange=${setCheckboxOption('hide_images_with_errors')}
 				>
-					Hide images with errors
+					Hide errors
 				<//>
 			</div>
 		</div>

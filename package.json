@@ -5,6 +5,9 @@
 	"license": "GPLv3",
 	"scripts": {
 		"dev": "bun start",
+		"web": "bun --watch scripts/serve.js",
+		"code": "code-server --port=4095",
+    "tailscale": "tailscale serve reset && tailscale serve --bg --http=3001 3000 && tailscale serve --bg --http=4096 4095",
 		"start": "bun run build && bun scripts/watch.js",
 		"build": "bun scripts/build.js && bun run build:zip",
 		"build:zip": "rm -f ../image-downloader.zip && cd build && zip -r ../../image-downloader.zip .",

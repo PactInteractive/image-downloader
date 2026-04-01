@@ -1,6 +1,6 @@
 // Executed via `chrome.scripting.executeScript` - cannot have imports!
 
-export async function findImages({ waitForIdleDOM }) {
+export async function findImages({ waitForIdleDOM, document = global.document, window = global.window }) {
 	// Clean up any previously created observer and timeout from prior executions
 	window.__observer?.disconnect();
 	clearTimeout(window.__idleDomTimer);
@@ -16,7 +16,7 @@ export async function findImages({ waitForIdleDOM }) {
 
 	if (waitForIdleDOM !== false && waitForIdleDOM >= 0 && Number.isFinite(waitForIdleDOM)) {
 		await new Promise((resolve) => {
-			const observer = new MutationObserver(() => {
+			const observer = new window.MutationObserver(() => {
 				clearTimeout(window.__idleDomTimer);
 				window.__idleDomTimer = setTimeout(() => {
 					observer.disconnect();
