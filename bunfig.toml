@@ -1,5 +1,5 @@
 [test]
-preload = ["./test-preload.js"]
+preload = ["./test-preload.ts"]
 
 [resolve]
 alias = { "react" = "./lib/react-18.3.1.min.js", "react-dom" = "./lib/react-dom-18.3.1.min.js" }

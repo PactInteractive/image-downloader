@@ -1,13 +1,15 @@
+import { sync } from 'glob';
 import { join } from 'node:path';
-import { outputDirectory } from './config.js';
+
+import * as config from './config';
 
 const injectScripts = `
-	<script src="/lib/eruda.min.js"></script>
+	<script src="/src/Web/lib/eruda.min.js"></script>
 	<script>eruda.init()</script>
 	<script src="/src/Web/chrome.shim.js"></script>
 `;
 
-const mimeTypes = {
+const mimeTypes: Record<string, string> = {
 	'.html': 'text/html',
 	'.js': 'application/javascript',
 	'.mjs': 'application/javascript',
@@ -24,22 +26,27 @@ const mimeTypes = {
 	'.woff2': 'font/woff2',
 };
 
-const port = parseInt(process.env.PORT) || 3000;
+const port = parseInt(process.env.PORT || '') || 3000;
 Bun.serve({
 	port,
 	async fetch(request) {
 		const url = new URL(request.url);
-		const filePath = url.pathname === '/' ? '/src/Web/index.html' : url.pathname;
+		const filepath = url.pathname === '/' ? '/src/Web/index.html' : url.pathname;
+		const shouldServeFromBuild = config.copy.include.some((pattern) =>
+			sync(pattern, {
+				ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
+			}).includes(`.${filepath}`)
+		);
 
-		const file = Bun.file(join(__dirname, '..', (filePath.startsWith('/src/Web') ? '' : outputDirectory) + filePath));
+		const file = Bun.file(join(__dirname, '..', (shouldServeFromBuild ? config.build : '') + filepath));
 
 		if (await file.exists()) {
 			console.log(`${request.method} ${url.href} 200`);
-			const extension = filePath.slice(filePath.lastIndexOf('.'));
+			const extension = filepath.slice(filepath.lastIndexOf('.'));
 			const contentType = mimeTypes[extension] || 'application/octet-stream';
 
 			if (extension === '.html') {
-				const html = (await file.text()).replace('<head>', `<head>${injectScripts}`);
+				const html = (await file.text()).replace('<script', `${injectScripts}<script`);
 				return new Response(html, {
 					headers: {
 						'Content-Type': contentType,

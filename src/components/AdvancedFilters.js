@@ -49,7 +49,9 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.filter_max_width_enabled ? '' : 'text-slate-500'} flex items-center justify-start text-nowrap"
+							class="${options.filter_max_width_enabled
+								? ''
+								: 'text-slate-500'} flex items-center justify-start text-nowrap"
 							title=${getSliderCheckboxTooltip(options.filter_max_width_enabled)}
 						>
 							<${SliderCheckbox}
@@ -67,7 +69,9 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.filter_min_height_enabled ? '' : 'text-slate-500'} flex items-center justify-end text-nowrap"
+							class="${options.filter_min_height_enabled
+								? ''
+								: 'text-slate-500'} flex items-center justify-end text-nowrap"
 							title=${getSliderCheckboxTooltip(options.filter_min_height_enabled)}
 						>
 							<small>${options.filter_min_height}px ≤</small>
@@ -85,7 +89,9 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.filter_max_height_enabled ? '' : 'text-slate-500'} flex items-center justify-start text-nowrap"
+							class="${options.filter_max_height_enabled
+								? ''
+								: 'text-slate-500'} flex items-center justify-start text-nowrap"
 							title=${getSliderCheckboxTooltip(options.filter_max_height_enabled)}
 						>
 							<${SliderCheckbox}

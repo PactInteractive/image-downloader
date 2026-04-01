@@ -9,7 +9,9 @@ import { useImageStats } from './useImageStats.js';
 export function Images({ visibleImages, imagesToDownload, totalImages, style, ...props }) {
 	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
-	const [errorCount, setErrorCount] = useState(0);
+	// const [errorCount, setErrorCount] = useState(0);
+	let [errorCount, setErrorCount] = useState(0);
+	errorCount = 3; // TODO: Remove
 
 	const setSelectedImages = (updater) => {
 		updateOptions((prev) => ({
@@ -27,25 +29,21 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 			...${props}
 		>
 			<div class="col-span-full flex items-center gap-2 tabular-nums">
+				${errorCount > 0 &&
+				html`
+					<div class="rounded-md border border-red-200 bg-red-50 px-1.5 py-0.5 text-xs text-red-600">
+						<span class="rounded-full border">✕</span> ${errorCount}
+					</div>
+				`}
+
 				<${Checkbox}
-					class="py-1"
+					class="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs"
 					checked=${allImagesAreSelected}
 					indeterminate=${someImagesAreSelected && !allImagesAreSelected}
 					onChange=${({ currentTarget: { checked } }) => setSelectedImages(checked ? visibleImages : [])}
 				>
-					Select all
+					${imagesToDownload.length}/${visibleImages.length}
 				<//>
-
-				${errorCount > 0 &&
-				html`
-					<small class="rounded-md border border-red-200 bg-red-50 px-1.5 py-0.5 text-xs text-red-600">
-						✕ ${errorCount}
-					</small>
-				`}
-
-				<small class="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs">
-					${imagesToDownload.length}/${visibleImages.length} selected
-				</small>
 
 				<small class="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs">
 					${totalImages} total

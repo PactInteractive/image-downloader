@@ -10,11 +10,11 @@
 		"resolveJsonModule": true,
 		"noEmit": true,
 		"moduleResolution": "node",
-		"types": ["chrome", "jquery", "bun"],
+		"types": ["chrome", "jquery", "bun", "node"],
 		"typeRoots": ["./node_modules/@types"],
 		"allowJs": true,
 		"checkJs": false
 	},
-	"include": ["src/**/*.ts", "src/**/*.js"],
+	"include": ["src/**/*.ts", "src/**/*.js", "scripts/**/*.ts", "test-preload.ts"],
 	"exclude": ["node_modules", "lib"]
 }

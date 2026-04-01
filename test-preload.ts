@@ -1,6 +1,8 @@
-require('@happy-dom/global-registrator').GlobalRegistrator.register();
+import { GlobalRegistrator } from '@happy-dom/global-registrator';
+import path from 'path';
 
-const path = require('path');
+GlobalRegistrator.register();
+
 const manifest = require('./manifest.json');
 
 // Pre-populate require.cache so require("react") returns the custom build
@@ -17,7 +19,8 @@ require.cache[reactResolved] = {
 	path: path.dirname(reactResolved),
 	children: [],
 	parent: null,
-	isPreloaded: false,
+	isPreloading: false,
+	paths: [],
 	require: require,
 };
 globalThis.React = customReact;
@@ -34,7 +37,8 @@ require.cache[reactDomResolved] = {
 	path: path.dirname(reactDomResolved),
 	children: [],
 	parent: null,
-	isPreloaded: false,
+	isPreloading: false,
+	paths: [],
 	require: require,
 };
 globalThis.ReactDOM = customReactDom;
@@ -44,4 +48,4 @@ globalThis.chrome = {
 	runtime: {
 		getManifest: () => manifest,
 	},
-};
+} as typeof chrome;

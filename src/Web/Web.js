@@ -18,7 +18,7 @@ function Wrapper() {
 		(e) => {
 			e.preventDefault();
 			const url = inputUrl.trim();
-			setIframeUrl(url ? url.startsWith('/') ? window.location.origin + url : `https://${url}` : url)
+			setIframeUrl(url ? (url.startsWith('/') ? window.location.origin + url : `https://${url}`) : url);
 		},
 		[inputUrl]
 	);
