@@ -200,8 +200,8 @@ export function App() {
 		'filter_min_height_enabled',
 		'filter_max_height_enabled',
 		'only_unique_images',
-		'only_images_from_links',
 		'hide_images_with_errors',
+		'only_images_from_links',
 	].filter((key) => options[key]).length;
 
 	// `relative` for new z-index stack to get box shadow

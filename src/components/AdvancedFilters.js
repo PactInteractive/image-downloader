@@ -102,20 +102,11 @@ export function AdvancedFilters() {
 			<div class="flex gap-3">
 				<${Checkbox}
 					class="py-1"
-					title="Attempt to deduplicate images by keeping only the highest resolution variant of each"
+					title="Attempt to deduplicate images by keeping only the highest resolution and best format"
 					checked=${options.only_unique_images}
 					onChange=${setCheckboxOption('only_unique_images')}
 				>
-					Unique images
-				<//>
-
-				<${Checkbox}
-					class="py-1"
-					title="Only show images from direct links on the page; useful on some websites"
-					checked=${options.only_images_from_links}
-					onChange=${setCheckboxOption('only_images_from_links')}
-				>
-					Images from links
+					Unique
 				<//>
 
 				<${Checkbox}
@@ -125,6 +116,15 @@ export function AdvancedFilters() {
 					onChange=${setCheckboxOption('hide_images_with_errors')}
 				>
 					Hide errors
+				<//>
+
+				<${Checkbox}
+					class="py-1"
+					title="Only show images from direct links on the page; useful on some websites"
+					checked=${options.only_images_from_links}
+					onChange=${setCheckboxOption('only_images_from_links')}
+				>
+					Only links
 				<//>
 			</div>
 		</div>
