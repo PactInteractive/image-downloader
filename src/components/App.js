@@ -98,6 +98,13 @@ export function App() {
 	}, [loadImagesFromActiveTab]);
 
 	const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
+	const erroredUrlsRef = useRef(new Set());
+
+	// Clear errored URLs when the image list changes so they get a fresh chance to load
+	useEffect(() => {
+		erroredUrlsRef.current.clear();
+	}, [allImages]);
+
 	const filterImages = useCallback(() => {
 		let visibleImages = options.only_images_from_links ? linkedImages : allImages;
 
@@ -148,7 +155,8 @@ export function App() {
 				(!options.filter_min_width_enabled || options.filter_min_width <= image.naturalWidth) &&
 				(!options.filter_max_width_enabled || image.naturalWidth <= options.filter_max_width) &&
 				(!options.filter_min_height_enabled || options.filter_min_height <= image.naturalHeight) &&
-				(!options.filter_max_height_enabled || image.naturalHeight <= options.filter_max_height)
+				(!options.filter_max_height_enabled || image.naturalHeight <= options.filter_max_height) &&
+				(!options.hide_images_with_errors || !erroredUrlsRef.current.has(url))
 			);
 		});
 
@@ -193,6 +201,7 @@ export function App() {
 		'filter_max_height_enabled',
 		'only_unique_images',
 		'only_images_from_links',
+		'hide_images_with_errors',
 	].filter((key) => options[key]).length;
 
 	// `relative` for new z-index stack to get box shadow
@@ -246,7 +255,9 @@ export function App() {
 
 				<button
 					class="relative min-w-8"
-					title="Toggle advanced filters"
+					title=${!options.show_advanced_filters && numberOfActiveAdvancedFilters > 0
+						? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
+						: 'Toggle advanced filters'}
 					onClick=${() => {
 						updateOptions({ show_advanced_filters: !options.show_advanced_filters });
 					}}
@@ -293,7 +304,17 @@ export function App() {
 		</header>
 
 		<div id="images_cache" ref=${imagesCacheRef} hidden>
-			${allImages.map((url) => html`<img src=${encodeURI(url)} onLoad=${filterImages} />`)}
+			${allImages.map(
+				(url) =>
+					html`<img
+						src=${encodeURI(url)}
+						onLoad=${filterImages}
+						onError=${() => {
+							erroredUrlsRef.current.add(url);
+							filterImages();
+						}}
+					/>`
+			)}
 		</div>
 
 		<${Images}

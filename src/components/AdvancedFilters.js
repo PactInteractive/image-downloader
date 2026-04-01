@@ -117,6 +117,15 @@ export function AdvancedFilters() {
 				>
 					Only images from links
 				<//>
+
+				<${Checkbox}
+					class="py-1"
+					title="Hide images that failed to load or have errors"
+					checked=${options.hide_images_with_errors}
+					onChange=${setCheckboxOption('hide_images_with_errors')}
+				>
+					Hide images with errors
+				<//>
 			</div>
 		</div>
 	`;
