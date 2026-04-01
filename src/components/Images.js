@@ -9,7 +9,6 @@ import { useOptions } from './OptionsProvider.js';
 export function Images({ visibleImages, imagesToDownload, totalImages, style, ...props }) {
 	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
-	const allImageStatsRef = useRef([]);
 	const [errorCount, setErrorCount] = useState(0);
 
 	const setSelectedImages = (updater) => {
@@ -80,14 +79,12 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 			</div>
 
 			${visibleImages.map(
-				(imageUrl, index) => html`
+				(imageUrl) => html`
 					<${ImageCard}
 						key=${imageUrl}
 						imageUrl=${imageUrl}
-						index=${index}
 						selectedImages=${selectedImages}
 						setSelectedImages=${setSelectedImages}
-						allImageStatsRef=${allImageStatsRef}
 						setImageErrorCount=${setErrorCount}
 					/>
 				`
@@ -96,7 +93,7 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 	`;
 }
 
-function ImageCard({ imageUrl, index, selectedImages, setSelectedImages, allImageStatsRef, setImageErrorCount }) {
+function ImageCard({ imageUrl, selectedImages, setSelectedImages, setImageErrorCount }) {
 	const stats = useImageStats();
 	const [retryCount, setRetryCount] = useState(0);
 	const isSelected = selectedImages.includes(imageUrl);
@@ -104,19 +101,14 @@ function ImageCard({ imageUrl, index, selectedImages, setSelectedImages, allImag
 	// Reset stats when imageUrl changes to avoid showing stale data
 	useEffect(stats.reset, [imageUrl, stats.reset]);
 
-	// Track error status for status bar
+	// Track error count for status bar
+	const isErrored = stats.data.status === 'error';
 	useEffect(() => {
-		const current = allImageStatsRef.current;
-		const prevStatus = current[index];
-
-		if (stats.data.status === 'error' && prevStatus !== 'error') {
-			setImageErrorCount((c) => c + 1);
-		} else if (stats.data.status !== 'error' && prevStatus === 'error') {
-			setImageErrorCount((c) => c - 1);
-		}
-
-		current[index] = stats.data.status;
-	});
+		if (isErrored) setImageErrorCount((c) => c + 1);
+		return () => {
+			if (isErrored) setImageErrorCount((c) => c - 1);
+		};
+	}, [isErrored]);
 
 	return html`
 		<div
