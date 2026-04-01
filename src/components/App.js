@@ -268,9 +268,9 @@ export function App() {
 					/>
 
 					<small
-						class="corner-round ${!options.show_advanced_filters && numberOfActiveAdvancedFilters > 0
+						class="${!options.show_advanced_filters && numberOfActiveAdvancedFilters > 0
 							? 'ease-elastic duration-400'
-							: 'scale-0'} absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-transform"
+							: 'scale-0'} corner-round absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-transform"
 					>
 						${numberOfActiveAdvancedFilters}
 					</small>

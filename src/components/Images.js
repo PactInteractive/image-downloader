@@ -9,9 +9,7 @@ import { useImageStats } from './useImageStats.js';
 export function Images({ visibleImages, imagesToDownload, totalImages, style, ...props }) {
 	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
-	// const [errorCount, setErrorCount] = useState(0);
-	let [errorCount, setErrorCount] = useState(0);
-	errorCount = 3; // TODO: Remove
+	const [errorCount, setErrorCount] = useState(0);
 
 	const setSelectedImages = (updater) => {
 		updateOptions((prev) => ({
@@ -29,25 +27,37 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 			...${props}
 		>
 			<div class="col-span-full flex items-center gap-2 tabular-nums">
+				${totalImages > 0 &&
+				html`
+					<${Badge}
+						as=${Checkbox}
+						class="border-slate-300 bg-slate-50 text-slate-600"
+						checked=${allImagesAreSelected}
+						indeterminate=${someImagesAreSelected && !allImagesAreSelected}
+						disabled=${visibleImages.length === 0}
+						title="Click to select or unselect all visible images"
+						onChange=${({ currentTarget: { checked } }) => setSelectedImages(checked ? visibleImages : [])}
+					>
+						${imagesToDownload.length}/${visibleImages.length} selected
+					<//>
+				`}
+				${totalImages - visibleImages.length > 0 &&
+				html`
+					<${Badge} class="border-slate-300 bg-slate-50 text-slate-600" title="Images removed by your filters">
+						<${Circle} class="border border-dashed border-slate-600" />
+						${totalImages - visibleImages.length} filtered out
+					<//>
+				`}
 				${errorCount > 0 &&
 				html`
-					<div class="rounded-md border border-red-200 bg-red-50 px-1.5 py-0.5 text-xs text-red-600">
-						<span class="rounded-full border">✕</span> ${errorCount}
-					</div>
+					<${Badge}
+						class="border-red-300 bg-red-50 text-red-600"
+						title="Images that failed to load"
+					>
+						<${Circle} class="bg-red-600 text-center font-bold text-white">✕<//>
+						${errorCount} ${errorCount === 1 ? 'error' : 'errors'}
+					<//>
 				`}
-
-				<${Checkbox}
-					class="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs"
-					checked=${allImagesAreSelected}
-					indeterminate=${someImagesAreSelected && !allImagesAreSelected}
-					onChange=${({ currentTarget: { checked } }) => setSelectedImages(checked ? visibleImages : [])}
-				>
-					${imagesToDownload.length}/${visibleImages.length}
-				<//>
-
-				<small class="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs">
-					${totalImages} total
-				</small>
 
 				<div class="ml-auto">Columns:</div>
 
@@ -88,6 +98,22 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 				`
 			)}
 		</div>
+	`;
+}
+
+function Badge({ as: Component = 'div', class: className = '', children, ...props }) {
+	return html`
+		<${Component} class="${className} flex h-8 items-center gap-1 rounded-full border p-1 text-xs" ...${props}>
+			${children}
+		<//>
+	`;
+}
+
+function Circle({ class: className = '', children, ...props }) {
+	return html`
+		<span class="inline-block h-4 w-4 corner-round rounded-full ${className}" ...${props}>
+			${children}
+		</span>
 	`;
 }
 
