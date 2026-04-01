@@ -98,7 +98,6 @@ export function App() {
 	}, [loadImagesFromActiveTab]);
 
 	const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
-	const failedImagesRef = useRef(new Set());
 	const filterImages = useCallback(() => {
 		let visibleImages = options.only_images_from_links ? linkedImages : allImages;
 
@@ -143,8 +142,6 @@ export function App() {
 		}
 
 		visibleImages = visibleImages.filter((url) => {
-			if (failedImagesRef.current.has(url)) return true;
-
 			const image = imagesCacheRef.current.querySelector(`img[src="${encodeURI(url)}"]`);
 
 			return (
@@ -296,20 +293,15 @@ export function App() {
 		</header>
 
 		<div id="images_cache" ref=${imagesCacheRef} hidden>
-			${allImages.map(
-				(url) =>
-					html`<img
-						src=${encodeURI(url)}
-						onLoad=${filterImages}
-						onError=${() => {
-							failedImagesRef.current.add(url);
-							filterImages();
-						}}
-					/>`
-			)}
+			${allImages.map((url) => html`<img src=${encodeURI(url)} onLoad=${filterImages} />`)}
 		</div>
 
-		<${Images} id="images_container" visibleImages=${visibleImages} imagesToDownload=${imagesToDownload} />
+		<${Images}
+			id="images_container"
+			visibleImages=${visibleImages}
+			imagesToDownload=${imagesToDownload}
+			totalImages=${allImages.length}
+		/>
 
 		<footer
 			class="sticky bottom-0 mt-auto bg-white p-2"

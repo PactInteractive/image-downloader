@@ -1,4 +1,4 @@
-import html, { useEffect, useLayoutEffect, useRef } from '../html.js';
+import html, { useEffect, useLayoutEffect, useRef, useState } from '../html.js';
 
 import { useImageStats } from '../hooks/useImageStats.js';
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
@@ -6,9 +6,11 @@ import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
 import { useOptions } from './OptionsProvider.js';
 
-export function Images({ visibleImages, imagesToDownload, style, ...props }) {
+export function Images({ visibleImages, imagesToDownload, totalImages, style, ...props }) {
 	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
+	const allImageStatsRef = useRef([]);
+	const [errorCount, setErrorCount] = useState(0);
 
 	const setSelectedImages = (updater) => {
 		updateOptions((prev) => ({
@@ -32,8 +34,23 @@ export function Images({ visibleImages, imagesToDownload, style, ...props }) {
 					indeterminate=${someImagesAreSelected && !allImagesAreSelected}
 					onChange=${({ currentTarget: { checked } }) => setSelectedImages(checked ? visibleImages : [])}
 				>
-					Select all (${imagesToDownload.length} / ${visibleImages.length})
+					Select all
 				<//>
+
+				${errorCount > 0 &&
+				html`
+					<small class="rounded-md border border-red-200 bg-red-50 px-1.5 py-0.5 text-xs text-red-600">
+						✕ ${errorCount}
+					</small>
+				`}
+
+				<small class="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs">
+					${imagesToDownload.length}/${visibleImages.length} selected
+				</small>
+
+				<small class="rounded-md border border-slate-200 bg-slate-100 px-1.5 py-0.5 text-xs">
+					${totalImages} total
+				</small>
 
 				<div class="ml-auto">Columns:</div>
 
@@ -70,6 +87,8 @@ export function Images({ visibleImages, imagesToDownload, style, ...props }) {
 						index=${index}
 						selectedImages=${selectedImages}
 						setSelectedImages=${setSelectedImages}
+						allImageStatsRef=${allImageStatsRef}
+						setImageErrorCount=${setErrorCount}
 					/>
 				`
 			)}
@@ -77,13 +96,27 @@ export function Images({ visibleImages, imagesToDownload, style, ...props }) {
 	`;
 }
 
-function ImageCard({ imageUrl, index, selectedImages, setSelectedImages }) {
+function ImageCard({ imageUrl, index, selectedImages, setSelectedImages, allImageStatsRef, setImageErrorCount }) {
 	const stats = useImageStats();
 	const [retryCount, setRetryCount] = useState(0);
 	const isSelected = selectedImages.includes(imageUrl);
 
 	// Reset stats when imageUrl changes to avoid showing stale data
 	useEffect(stats.reset, [imageUrl, stats.reset]);
+
+	// Track error status for status bar
+	useEffect(() => {
+		const current = allImageStatsRef.current;
+		const prevStatus = current[index];
+
+		if (stats.data.status === 'error' && prevStatus !== 'error') {
+			setImageErrorCount((c) => c + 1);
+		} else if (stats.data.status !== 'error' && prevStatus === 'error') {
+			setImageErrorCount((c) => c - 1);
+		}
+
+		current[index] = stats.data.status;
+	});
 
 	return html`
 		<div
