@@ -21,7 +21,7 @@ export function AdvancedFilters() {
 			<table class="w-full tabular-nums">
 				<colgroup>
 					<col class="w-10" />
-					<col class="w-18" />
+					<col class="w-22" />
 					<col />
 					<col class="w-18" />
 				</colgroup>

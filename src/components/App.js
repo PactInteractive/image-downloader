@@ -320,8 +320,8 @@ export function App() {
 		<${Images}
 			id="images_container"
 			visibleImages=${visibleImages}
+			allImages=${allImages}
 			imagesToDownload=${imagesToDownload}
-			totalImages=${allImages.length}
 		/>
 
 		<footer

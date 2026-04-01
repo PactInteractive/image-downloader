@@ -1,4 +1,4 @@
-import html, { useEffect, useLayoutEffect, useRef, useState } from '../html.js';
+import html, { useEffect, useLayoutEffect, useMemo, useRef, useState } from '../html.js';
 
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
@@ -6,10 +6,16 @@ import { Checkbox } from './Checkbox.js';
 import { useOptions } from './OptionsProvider.js';
 import { useImageStats } from './useImageStats.js';
 
-export function Images({ visibleImages, imagesToDownload, totalImages, style, ...props }) {
+export function Images({ visibleImages, allImages, imagesToDownload, style, ...props }) {
 	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
 	const [errorCount, setErrorCount] = useState(0);
+	const [showFiltered, setShowFiltered] = useState(false);
+
+	const displayedImages = useMemo(
+		() => (showFiltered && allImages ? allImages.filter((url) => !visibleImages.includes(url)) : visibleImages),
+		[showFiltered, allImages, visibleImages]
+	);
 
 	const setSelectedImages = (updater) => {
 		updateOptions((prev) => ({
@@ -17,8 +23,8 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 		}));
 	};
 
-	const someImagesAreSelected = visibleImages.length > 0 && visibleImages.some(isIncludedIn(selectedImages));
-	const allImagesAreSelected = visibleImages.length > 0 && visibleImages.every(isIncludedIn(selectedImages));
+	const someImagesAreSelected = displayedImages.length > 0 && displayedImages.some(isIncludedIn(selectedImages));
+	const allImagesAreSelected = displayedImages.length > 0 && displayedImages.every(isIncludedIn(selectedImages));
 
 	return html`
 		<div
@@ -27,31 +33,39 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 			...${props}
 		>
 			<div class="col-span-full flex items-center gap-2 tabular-nums">
-				${totalImages > 0 &&
+				${allImages?.length > 0 &&
 				html`
 					<${Badge}
 						as=${Checkbox}
-						class="border-slate-300 bg-slate-50 text-slate-600"
+						class="border-slate-300 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100"
 						checked=${allImagesAreSelected}
 						indeterminate=${someImagesAreSelected && !allImagesAreSelected}
-						disabled=${visibleImages.length === 0}
+						disabled=${displayedImages.length === 0}
 						title="Click to select or unselect all visible images"
-						onChange=${({ currentTarget: { checked } }) => setSelectedImages(checked ? visibleImages : [])}
+						onChange=${({ currentTarget: { checked } }) => setSelectedImages(checked ? displayedImages : [])}
 					>
-						${imagesToDownload.length}/${visibleImages.length} selected
+						${imagesToDownload.length}/${displayedImages.length} selected
 					<//>
 				`}
-				${totalImages - visibleImages.length > 0 &&
+				${allImages?.length - visibleImages.length > 0 &&
 				html`
-					<${Badge} class="border-slate-300 bg-slate-50 text-slate-600" title="Images removed by your filters">
-						<${Circle} class="border border-dashed border-slate-600" />
-						${totalImages - visibleImages.length} filtered out
+					<${Badge}
+						as="button"
+						type="button"
+						class="border-slate-300 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100"
+						title="Images removed by your filters"
+						onClick=${() => setShowFiltered((v) => !v)}
+					>
+						<${Circle} class="${showFiltered ? 'border-solid' : 'border-dashed'} border border-slate-600" />
+						${allImages?.length - visibleImages.length} filtered out
 					<//>
 				`}
 				${errorCount > 0 &&
 				html`
 					<${Badge}
-						class="border-red-300 bg-red-50 text-red-600"
+						as="button"
+						type="button"
+						class="border-red-300 bg-red-50 text-red-600 transition-colors hover:bg-red-100"
 						title="Images that failed to load"
 					>
 						<${Circle} class="bg-red-600 text-center font-bold text-white">✕<//>
@@ -86,7 +100,7 @@ export function Images({ visibleImages, imagesToDownload, totalImages, style, ..
 				</button>
 			</div>
 
-			${visibleImages.map(
+			${displayedImages.map(
 				(imageUrl) => html`
 					<${ImageCard}
 						key=${imageUrl}
@@ -111,9 +125,7 @@ function Badge({ as: Component = 'div', class: className = '', children, ...prop
 
 function Circle({ class: className = '', children, ...props }) {
 	return html`
-		<span class="inline-block h-4 w-4 corner-round rounded-full ${className}" ...${props}>
-			${children}
-		</span>
+		<span class="corner-round ${className} inline-block h-4 w-4 rounded-full" ...${props}> ${children} </span>
 	`;
 }
 
