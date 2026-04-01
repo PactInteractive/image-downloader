@@ -1,10 +1,10 @@
 import html, { useEffect, useLayoutEffect, useRef, useState } from '../html.js';
 
-import { useImageStats } from '../hooks/useImageStats.js';
 import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
 import { useOptions } from './OptionsProvider.js';
+import { useImageStats } from './useImageStats.js';
 
 export function Images({ visibleImages, imagesToDownload, totalImages, style, ...props }) {
 	const [options, updateOptions] = useOptions();

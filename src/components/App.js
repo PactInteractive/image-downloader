@@ -1,8 +1,8 @@
 import html, { useCallback, useEffect, useMemo, useRef, useState } from '../html.js';
 
-import { useRunAfterUpdate } from '../hooks/useRunAfterUpdate.js';
 import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
 import { useOptions } from './OptionsProvider.js';
+import { useRunAfterUpdate } from './useRunAfterUpdate.js';
 
 import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
