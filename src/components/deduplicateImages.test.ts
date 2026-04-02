@@ -59,6 +59,11 @@ describe('deduplicateImages', () => {
 		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
 	});
 
+	it('should keep image extensions not in the priority list', () => {
+		const urls = ['https://example.com/photo.png', 'https://example.com/photo.svg'];
+		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+	});
+
 	it('should prefer png over all other formats', () => {
 		const urls = [
 			'https://example.com/photo.avif',

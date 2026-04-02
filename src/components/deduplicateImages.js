@@ -1,6 +1,6 @@
 import { isTruthy, unique } from '../utils.js';
 
-const extensionPriorities = ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'avif'];
+const priorities = ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'avif'];
 
 export function deduplicateImages(urls, imagesCache) {
 	const groups = new Map();
@@ -28,7 +28,9 @@ function getNormalizedBaseKey(url) {
 		// Extract actual filename (last path segment) for cross-subdomain deduplication
 		const filename = parsed.pathname.split('/').filter(isTruthy).at(-1) || '';
 		const hasExtension = filename.includes('.');
-		const nameWithoutExtension = hasExtension ? filename.split('.').slice(0, -1).join('.') : filename;
+		const parts = filename.split('.');
+		const nameWithoutExtension =
+			parts.length > 1 && priorities.includes(parts.at(-1)) ? parts.slice(0, -1).join('.') : filename;
 
 		// Get base name without resolution suffix
 		const basename = nameWithoutExtension.replace(/[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w|\d+x)$/i, '');
@@ -112,8 +114,8 @@ function pickBestImageUrl(urlStrings, imagesCache) {
 	);
 
 	const bestResolutionUrl = bestResolutionUrls.reduce((bestUrl, currentUrl) => {
-		const bestPriority = extensionPriorities.indexOf(getExtension(bestUrl));
-		const currentPriority = extensionPriorities.indexOf(getExtension(currentUrl));
+		const bestPriority = priorities.indexOf(getExtension(bestUrl));
+		const currentPriority = priorities.indexOf(getExtension(currentUrl));
 
 		if (currentPriority < 0) return bestUrl;
 		if (bestPriority < 0) return currentUrl;
