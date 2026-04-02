@@ -26,7 +26,7 @@ function Wrapper() {
 	return html`
 		<div class="flex" style=${{ width: '100dvw', height: '100dvh' }}>
 			<div class="flex-1 overflow-hidden">
-				<form class="flex items-center gap-2 border-b border-slate-700 bg-slate-800 px-3 py-2" onSubmit=${navigate}>
+				<form class="flex items-center gap-2 bg-slate-800 px-3 py-2" onSubmit=${navigate}>
 					<span class="shrink-0 text-xs font-medium tracking-wider text-slate-400 uppercase">URL</span>
 					<input
 						class="flex-1 rounded bg-slate-700 px-3 py-1.5 text-sm text-slate-100 placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-500"
@@ -52,7 +52,10 @@ function Wrapper() {
 				/>
 			</div>
 
-			<div class="flex flex-1 flex-col overflow-auto bg-slate-50">
+			<div
+				class="flex flex-1 flex-col overflow-auto bg-slate-50"
+				style=${{ borderLeft: '1px', borderStyle: 'solid', borderColor: 'lightgrey' }}
+			>
 				<${App} />
 			</div>
 		</div>
