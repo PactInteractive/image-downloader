@@ -65,7 +65,7 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 					<${Badge}
 						as="button"
 						type="button"
-						class="border-red-300 bg-red-50 text-red-600 transition-colors hover:bg-red-100"
+						class="border-red-300 bg-red-50 hover:bg-red-100 text-red-600"
 						title="Images that failed to load"
 					>
 						<${Circle} class="bg-red-600 text-center font-bold text-white">✕<//>
@@ -228,7 +228,7 @@ function ImageCard({ imageUrl, selectedImages, setSelectedImages, setImageErrorC
 function ImageError({ onClick, ...props }) {
 	return html`
 		<button
-			class="flex flex-col items-center justify-center gap-1 p-4 text-slate-400"
+			class="flex flex-col items-center justify-center gap-1 p-4 h-auto border-red-300 bg-red-50 hover:bg-red-100 text-red-600 text-xs"
 			type="button"
 			title="Retry loading image"
 			onClick=${(e) => {
@@ -237,22 +237,11 @@ function ImageError({ onClick, ...props }) {
 			}}
 			...${props}
 		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				class="h-8 w-8"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="1.5"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
-				<circle cx="8.5" cy="8.5" r="1.5" />
-				<line x1="21" y1="15" x2="14" y2="8" />
-				<line x1="14" y1="15" x2="21" y2="8" />
-			</svg>
-			<span class="text-xs">Failed to load</span>
+			<div>
+				<${Circle} class="bg-red-600 text-center font-bold text-white">✕<//>
+				${' '}Error loading image
+			</div>
+			Click to retry
 		</button>
 	`;
 }
