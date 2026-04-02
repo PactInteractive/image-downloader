@@ -19,7 +19,7 @@ export function App() {
 	// Images
 	const [allImages, setAllImages] = useState([]);
 	const [linkedImages, setLinkedImages] = useState([]);
-	const [visibleImages, setVisibleImages] = useState([]);
+	const [matchingImages, setMatchingImages] = useState([]);
 
 	const [scriptError, setScriptError] = useState();
 	const [hostname, setHostname] = useState();
@@ -101,14 +101,14 @@ export function App() {
 	const erroredUrlsRef = useRef(new Set());
 
 	const filterImages = useCallback(() => {
-		let visibleImages = options.only_images_from_links ? linkedImages : allImages;
+		let matchingImages = options.only_images_from_links ? linkedImages : allImages;
 
 		let filterValue = options.filter_url;
 		if (filterValue) {
 			switch (options.filter_url_mode) {
 				case 'normal':
 					const terms = filterValue.split(/\s+/);
-					visibleImages = visibleImages.filter((url) => {
+					matchingImages = matchingImages.filter((url) => {
 						for (let index = 0; index < terms.length; index++) {
 							let term = terms[index];
 							if (term.length !== 0) {
@@ -132,7 +132,7 @@ export function App() {
 					filterValue = filterValue.replace(/([.^$[\]\\(){}|-])/g, '\\$1').replace(/([?*+])/, '.$1');
 				/* fall through */
 				case 'regex':
-					visibleImages = visibleImages.filter((url) => {
+					matchingImages = matchingImages.filter((url) => {
 						try {
 							return url.match(filterValue);
 						} catch (error) {
@@ -143,7 +143,7 @@ export function App() {
 			}
 		}
 
-		visibleImages = visibleImages.filter((url) => {
+		matchingImages = matchingImages.filter((url) => {
 			const image = imagesCacheRef.current.querySelector(`img[src="${encodeURI(url)}"]`);
 
 			return (
@@ -156,10 +156,10 @@ export function App() {
 		});
 
 		if (options.only_unique_images) {
-			visibleImages = deduplicateImages(visibleImages, imagesCacheRef.current);
+			matchingImages = deduplicateImages(matchingImages, imagesCacheRef.current);
 		}
 
-		setVisibleImages(visibleImages);
+		setMatchingImages(matchingImages);
 	}, [allImages, linkedImages, options]);
 
 	useEffect(filterImages, [allImages, linkedImages, options]);
@@ -167,8 +167,8 @@ export function App() {
 	// Download
 	const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
 	const imagesToDownload = useMemo(
-		() => visibleImages.filter(isIncludedIn(options.selected_images)),
-		[visibleImages, options.selected_images]
+		() => allImages.filter(isIncludedIn(options.selected_images)),
+		[allImages, options.selected_images]
 	);
 
 	const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] = useState(false);
@@ -313,10 +313,9 @@ export function App() {
 
 		<${Images}
 			id="images_container"
-			visibleImages=${visibleImages}
 			allImages=${allImages}
+			matchingImages=${matchingImages}
 			imagesToDownload=${imagesToDownload}
-			errorCount=${erroredUrlsRef.current.size}
 			erroredUrlsRef=${erroredUrlsRef}
 		/>
 

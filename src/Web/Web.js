@@ -1,11 +1,13 @@
 import { App } from '../components/App.js';
 import { OptionsProvider } from '../components/OptionsProvider.js';
 import html, { render, useCallback, useEffect, useRef, useState } from '../html.js';
+import { add } from '../utils.js';
 
 function Wrapper() {
 	const iframeRef = useRef(null);
 	const [iframeUrl, setIframeUrl] = useState('/src/Options/index.html');
 	const [inputUrl, setInputUrl] = useState(iframeUrl);
+	const [iframeLoaded, setIframeLoaded] = useState(0);
 
 	useEffect(() => {
 		window.__devIframe = iframeRef.current;
@@ -49,6 +51,7 @@ function Wrapper() {
 					ref=${iframeRef}
 					src=${iframeUrl}
 					same-origin-referrerpolicy="no-referrer"
+					onLoad=${() => setIframeLoaded(add(1))}
 				/>
 			</div>
 
@@ -56,7 +59,7 @@ function Wrapper() {
 				class="flex flex-1 flex-col overflow-auto bg-slate-50"
 				style=${{ borderLeft: '1px', borderStyle: 'solid', borderColor: 'lightgrey' }}
 			>
-				<${App} />
+				<${App} key=${iframeLoaded} />
 			</div>
 		</div>
 	`;

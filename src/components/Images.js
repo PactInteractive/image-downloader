@@ -1,26 +1,34 @@
 import html, { useEffect, useLayoutEffect, useMemo, useRef, useState } from '../html.js';
 
-import { isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
+import { add, isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
 import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
 import { useOptions } from './OptionsProvider.js';
 import { useImageStats } from './useImageStats.js';
 
-export function Images({ visibleImages, allImages, imagesToDownload, errorCount, erroredUrlsRef, style, ...props }) {
+export function Images({ allImages, matchingImages, imagesToDownload, erroredUrlsRef, style, ...props }) {
 	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
-	const [visibilityFilter, setVisibilityFilter] = useState('matching');
+	const [tab, setTab] = useState('matching');
 
-	const filteredOutCount = allImages?.length - visibleImages.length - errorCount;
+	const errorCount = erroredUrlsRef.current.size;
+	const filteredOutCount = allImages.length - matchingImages.length - errorCount;
 
 	const displayedImages = useMemo(() => {
-		if (!allImages) return visibleImages;
-		if (visibilityFilter === 'matching') return visibleImages;
-		if (visibilityFilter === 'filtered_out')
-			return allImages.filter((url) => !visibleImages.includes(url) && !erroredUrlsRef?.current?.has(url));
-		if (visibilityFilter === 'errors') return allImages.filter((url) => erroredUrlsRef?.current?.has(url));
-		return visibleImages;
-	}, [visibilityFilter, allImages, visibleImages, errorCount]);
+		if (!allImages) {
+			return matchingImages;
+		}
+		if (tab === 'matching') {
+			return matchingImages;
+		}
+		if (tab === 'filtered_out') {
+			return allImages.filter((url) => !matchingImages.includes(url) && !erroredUrlsRef?.current?.has(url));
+		}
+		if (tab === 'errors') {
+			return allImages.filter((url) => erroredUrlsRef?.current?.has(url));
+		}
+		return matchingImages;
+	}, [tab, allImages, matchingImages, errorCount]);
 
 	const setSelectedImages = (updater) => {
 		updateOptions((prev) => ({
@@ -38,13 +46,13 @@ export function Images({ visibleImages, allImages, imagesToDownload, errorCount,
 				<${Badge}
 					as="ul"
 					class="overflow-hidden border-slate-300"
-					onChange=${(e) => setVisibilityFilter(e.target.value)}
+					onChange=${(e) => setTab(e.target.value)}
 				>
 					<li>
 						<${Tab}
 							class="text-slate-600 has-checked:text-slate-700"
 							title="Images matching your filters"
-							input=${{ name: 'visibility', value: 'matching', checked: visibilityFilter === 'matching' }}
+							input=${{ name: 'visibility', value: 'matching', checked: tab === 'matching' }}
 						>
 							<${Circle} class="bg-green-600 text-white">+<//>
 							${allImages.length - filteredOutCount - errorCount} matching
@@ -57,7 +65,7 @@ export function Images({ visibleImages, allImages, imagesToDownload, errorCount,
 							<${Tab}
 								class="border-l border-slate-300 text-slate-600 has-checked:text-slate-700"
 								title="Images removed by your filters"
-								input=${{ name: 'visibility', value: 'filtered_out', checked: visibilityFilter === 'filtered_out' }}
+								input=${{ name: 'visibility', value: 'filtered_out', checked: tab === 'filtered_out' }}
 							>
 								<${Circle} class="bg-slate-600 text-white">-<//>
 								${filteredOutCount} filtered out
@@ -70,7 +78,7 @@ export function Images({ visibleImages, allImages, imagesToDownload, errorCount,
 							<${Tab}
 								class="border-l border-slate-300 text-red-600 has-checked:text-red-700"
 								title="Images that failed to load"
-								input=${{ name: 'visibility', value: 'errors', checked: visibilityFilter === 'errors' }}
+								input=${{ name: 'visibility', value: 'errors', checked: tab === 'errors' }}
 							>
 								<${Circle} class="bg-red-600 text-white">×<//>
 								${errorCount} ${errorCount === 1 ? 'error' : 'errors'}
@@ -78,19 +86,19 @@ export function Images({ visibleImages, allImages, imagesToDownload, errorCount,
 						</li>
 					`}
 				<//>
-			`}
 
-			<${Badge}
-				as=${Checkbox}
-				class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
-				checked=${allImagesAreSelected}
-				indeterminate=${someImagesAreSelected && !allImagesAreSelected}
-				disabled=${displayedImages.length === 0}
-				title="Click to select or unselect all visible images"
-				onChange=${(e) => setSelectedImages(e.currentTarget.checked ? displayedImages : [])}
-			>
-				${imagesToDownload.length} selected
-			<//>
+				<${Badge}
+					as=${Checkbox}
+					class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
+					checked=${allImagesAreSelected}
+					indeterminate=${someImagesAreSelected && !allImagesAreSelected}
+					disabled=${displayedImages.length === 0}
+					title="Click to select or unselect all visible images"
+					onChange=${(e) => setSelectedImages(e.currentTarget.checked ? displayedImages : [])}
+				>
+					${imagesToDownload.length} selected
+				<//>
+			`}
 
 			<div class="mt-px ml-auto flex items-center gap-1.5">
 				Columns:
@@ -204,7 +212,7 @@ function ImageCard({ imageUrl, selectedImages, setSelectedImages, erroredUrlsRef
 							onClick=${() => {
 								erroredUrlsRef?.current?.delete(imageUrl);
 								stats.reset();
-								setRetryCount((c) => c + 1);
+								setRetryCount(add(1));
 							}}
 						/>`
 					: html`<img
