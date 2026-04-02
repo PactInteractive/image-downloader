@@ -3,12 +3,6 @@ import { join } from 'node:path';
 
 import * as config from './config';
 
-const injectScripts = `
-	<script src="/src/Web/lib/eruda.min.js"></script>
-	<script>eruda.init()</script>
-	<script src="/src/Web/chrome.shim.js"></script>
-`;
-
 const mimeTypes: Record<string, string> = {
 	'.html': 'text/html',
 	'.js': 'application/javascript',
@@ -46,7 +40,13 @@ Bun.serve({
 			const contentType = mimeTypes[extension] || 'application/octet-stream';
 
 			if (extension === '.html') {
+				const injectScripts = `${
+					filepath === '/src/Web/index.html'
+						? `<script src="/src/Web/lib/eruda.min.js"></script><script>eruda.init()</script>`
+						: ''
+				}<script src="/src/Web/chrome.shim.js"></script>`;
 				const html = (await file.text()).replace('<script', `${injectScripts}<script`);
+
 				return new Response(html, {
 					headers: {
 						'Content-Type': contentType,
