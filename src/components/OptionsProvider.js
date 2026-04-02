@@ -23,7 +23,6 @@ const defaults = {
 	filter_max_height_default: 3000,
 	filter_max_height_enabled: false,
 	only_unique_images: true,
-	hide_images_with_errors: true,
 	only_images_from_links: false,
 	// Download
 	show_download_confirmation: true,

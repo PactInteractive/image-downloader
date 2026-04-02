@@ -14,7 +14,7 @@ export function About() {
 
     <a class="float-right mb-4 ml-4 text-center" href="https://x.com/vdsabev" target="_blank" rel="noopener noreferrer">
       <img
-        class="w-32 h-32 shadow rounded-[3rem] mb-1"
+        class="w-32 h-32 shadow rounded-[3rem] mx-auto mb-1"
         src="/images/me.jpg"
       />
       <span class="text-slate-700">Made by</span> @vdsabev

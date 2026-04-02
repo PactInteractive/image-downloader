@@ -100,11 +100,6 @@ export function App() {
 	const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
 	const erroredUrlsRef = useRef(new Set());
 
-	// Clear errored URLs when the image list changes so they get a fresh chance to load
-	useEffect(() => {
-		erroredUrlsRef.current.clear();
-	}, [allImages]);
-
 	const filterImages = useCallback(() => {
 		let visibleImages = options.only_images_from_links ? linkedImages : allImages;
 
@@ -156,7 +151,7 @@ export function App() {
 				(!options.filter_max_width_enabled || image.naturalWidth <= options.filter_max_width) &&
 				(!options.filter_min_height_enabled || options.filter_min_height <= image.naturalHeight) &&
 				(!options.filter_max_height_enabled || image.naturalHeight <= options.filter_max_height) &&
-				(!options.hide_images_with_errors || !erroredUrlsRef.current.has(url))
+				!erroredUrlsRef.current.has(url)
 			);
 		});
 
@@ -200,7 +195,6 @@ export function App() {
 		'filter_min_height_enabled',
 		'filter_max_height_enabled',
 		'only_unique_images',
-		'hide_images_with_errors',
 		'only_images_from_links',
 	].filter((key) => options[key]).length;
 
@@ -322,6 +316,8 @@ export function App() {
 			visibleImages=${visibleImages}
 			allImages=${allImages}
 			imagesToDownload=${imagesToDownload}
+			errorCount=${erroredUrlsRef.current.size}
+			erroredUrlsRef=${erroredUrlsRef}
 		/>
 
 		<footer

@@ -112,16 +112,7 @@ export function AdvancedFilters() {
 					checked=${options.only_unique_images}
 					onChange=${setCheckboxOption('only_unique_images')}
 				>
-					Unique
-				<//>
-
-				<${Checkbox}
-					class="py-1"
-					title="Hide images that failed to load or have errors"
-					checked=${options.hide_images_with_errors}
-					onChange=${setCheckboxOption('hide_images_with_errors')}
-				>
-					Hide errors
+					Only unique
 				<//>
 
 				<${Checkbox}

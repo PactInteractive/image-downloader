@@ -6,16 +6,21 @@ import { Checkbox } from './Checkbox.js';
 import { useOptions } from './OptionsProvider.js';
 import { useImageStats } from './useImageStats.js';
 
-export function Images({ visibleImages, allImages, imagesToDownload, style, ...props }) {
+export function Images({ visibleImages, allImages, imagesToDownload, errorCount, erroredUrlsRef, style, ...props }) {
 	const [options, updateOptions] = useOptions();
 	const selectedImages = options.selected_images;
-	const [errorCount, setErrorCount] = useState(0);
-	const [showFiltered, setShowFiltered] = useState(false);
+	const [visibilityFilter, setVisibilityFilter] = useState('matching');
 
-	const displayedImages = useMemo(
-		() => (showFiltered && allImages ? allImages.filter((url) => !visibleImages.includes(url)) : visibleImages),
-		[showFiltered, allImages, visibleImages]
-	);
+	const filteredOutCount = allImages?.length - visibleImages.length - errorCount;
+
+	const displayedImages = useMemo(() => {
+		if (!allImages) return visibleImages;
+		if (visibilityFilter === 'matching') return visibleImages;
+		if (visibilityFilter === 'filtered_out')
+			return allImages.filter((url) => !visibleImages.includes(url) && !erroredUrlsRef?.current?.has(url));
+		if (visibilityFilter === 'errors') return allImages.filter((url) => erroredUrlsRef?.current?.has(url));
+		return visibleImages;
+	}, [visibilityFilter, allImages, visibleImages, errorCount]);
 
 	const setSelectedImages = (updater) => {
 		updateOptions((prev) => ({
@@ -27,49 +32,68 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 	const allImagesAreSelected = displayedImages.length > 0 && displayedImages.every(isIncludedIn(selectedImages));
 
 	return html`
-		<div
-			class="grid grid-cols-(--image-columns) gap-2 p-2"
-			style=${{ '--image-columns': `repeat(${options.columns}, minmax(0, 1fr))` }}
-			...${props}
-		>
-			<div class="col-span-full flex items-center gap-2 tabular-nums">
-				${allImages?.length > 0 &&
-				html`
-					<${Badge}
-						as=${Checkbox}
-						class="border-slate-300 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100"
-						checked=${allImagesAreSelected}
-						indeterminate=${someImagesAreSelected && !allImagesAreSelected}
-						disabled=${displayedImages.length === 0}
-						title="Click to select or unselect all visible images"
-						onChange=${({ currentTarget: { checked } }) => setSelectedImages(checked ? displayedImages : [])}
-					>
-						${imagesToDownload.length}/${displayedImages.length} selected
-					<//>
-				`}
-				${allImages?.length - visibleImages.length > 0 &&
-				html`
-					<${Badge}
-						class="border-slate-300 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100"
-						title="Images removed by your filters"
-						onClick=${() => setShowFiltered((v) => !v)}
-					>
-						<${Circle} class="${showFiltered ? 'border-solid' : 'border-dashed'} border border-slate-600" />
-						${allImages?.length - visibleImages.length} filtered out
-					<//>
-				`}
-				${errorCount > 0 &&
-				html`
-					<${Badge}
-						class="border-red-300 bg-red-50 hover:bg-red-100 text-red-600"
-						title="Images that failed to load"
-					>
-						<${Circle} class="bg-red-600 text-center font-bold text-white">✕<//>
-						${errorCount} ${errorCount === 1 ? 'error' : 'errors'}
-					<//>
-				`}
+		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
+			${displayedImages.length > 0 &&
+			html`
+				<${Badge}
+					as="ul"
+					class="overflow-hidden border-slate-300"
+					onChange=${(e) => setVisibilityFilter(e.target.value)}
+				>
+					<li>
+						<${Tab}
+							class="text-slate-600 has-checked:text-slate-700"
+							title="Images matching your filters"
+							input=${{ name: 'visibility', value: 'matching', checked: visibilityFilter === 'matching' }}
+						>
+							<${Circle} class="bg-green-600 text-white">+<//>
+							${allImages.length - filteredOutCount - errorCount} matching
+						<//>
+					</li>
 
-				<div class="ml-auto">Columns:</div>
+					${filteredOutCount > 0 &&
+					html`
+						<li>
+							<${Tab}
+								class="border-l border-slate-300 text-slate-600 has-checked:text-slate-700"
+								title="Images removed by your filters"
+								input=${{ name: 'visibility', value: 'filtered_out', checked: visibilityFilter === 'filtered_out' }}
+							>
+								<${Circle} class="bg-slate-600 text-white">-<//>
+								${filteredOutCount} filtered out
+							<//>
+						</li>
+					`}
+					${errorCount > 0 &&
+					html`
+						<li>
+							<${Tab}
+								class="border-l border-slate-300 text-red-600 has-checked:text-red-700"
+								title="Images that failed to load"
+								input=${{ name: 'visibility', value: 'errors', checked: visibilityFilter === 'errors' }}
+							>
+								<${Circle} class="bg-red-600 text-white">×<//>
+								${errorCount} ${errorCount === 1 ? 'error' : 'errors'}
+							<//>
+						</li>
+					`}
+				<//>
+			`}
+
+			<${Badge}
+				as=${Checkbox}
+				class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
+				checked=${allImagesAreSelected}
+				indeterminate=${someImagesAreSelected && !allImagesAreSelected}
+				disabled=${displayedImages.length === 0}
+				title="Click to select or unselect all visible images"
+				onChange=${(e) => setSelectedImages(e.currentTarget.checked ? displayedImages : [])}
+			>
+				${imagesToDownload.length} selected
+			<//>
+
+			<div class="mt-px ml-auto flex items-center gap-1.5">
+				Columns:
 
 				<button
 					type="button"
@@ -95,7 +119,13 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 					+
 				</button>
 			</div>
+		</div>
 
+		<div
+			class="grid grid-cols-(--image-columns) gap-2 p-2"
+			style=${{ '--image-columns': `repeat(${options.columns}, minmax(0, 1fr))` }}
+			...${props}
+		>
 			${displayedImages.map(
 				(imageUrl) => html`
 					<${ImageCard}
@@ -103,7 +133,7 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 						imageUrl=${imageUrl}
 						selectedImages=${selectedImages}
 						setSelectedImages=${setSelectedImages}
-						setImageErrorCount=${setErrorCount}
+						erroredUrlsRef=${erroredUrlsRef}
 					/>
 				`
 			)}
@@ -114,7 +144,7 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 function Badge({ as: Component = 'button', class: className = '', children, ...props }) {
 	return html`
 		<${Component}
-			class="${className} flex h-8 items-center gap-1 rounded-full border p-1 text-xs"
+			class="${className} flex items-center rounded-full border text-xs text-nowrap"
 			...${Component === 'button' ? { type: 'button', ...props } : props}
 		>
 			${children}
@@ -122,28 +152,33 @@ function Badge({ as: Component = 'button', class: className = '', children, ...p
 	`;
 }
 
-function Circle({ class: className = '', children, ...props }) {
+function Tab({ class: className = '', children, input, ...props }) {
 	return html`
-		<span class="corner-round ${className} inline-block h-4 w-4 rounded-full" ...${props}> ${children} </span>
+		<label
+			class="${className} bg-slate-50 p-1 transition-colors hover:bg-slate-100 has-checked:bg-slate-200"
+			...${props}
+		>
+			<input class="sr-only" type="radio" ...${input} />
+			${children}
+		</label>
 	`;
 }
 
-function ImageCard({ imageUrl, selectedImages, setSelectedImages, setImageErrorCount }) {
+function Circle({ class: className = '', children, ...props }) {
+	return html`
+		<span class="corner-round ${className} inline-block h-4 w-4 rounded-full text-center font-bold" ...${props}>
+			${children}
+		</span>
+	`;
+}
+
+function ImageCard({ imageUrl, selectedImages, setSelectedImages, erroredUrlsRef }) {
 	const stats = useImageStats();
 	const [retryCount, setRetryCount] = useState(0);
 	const isSelected = selectedImages.includes(imageUrl);
 
 	// Reset stats when imageUrl changes to avoid showing stale data
 	useEffect(stats.reset, [imageUrl, stats.reset]);
-
-	// Track error count for status bar
-	const isErrored = stats.data.status === 'error';
-	useEffect(() => {
-		if (isErrored) setImageErrorCount((c) => c + 1);
-		return () => {
-			if (isErrored) setImageErrorCount((c) => c - 1);
-		};
-	}, [isErrored]);
 
 	return html`
 		<div
@@ -167,6 +202,7 @@ function ImageCard({ imageUrl, selectedImages, setSelectedImages, setImageErrorC
 				stats.data.status === 'error'
 					? html`<${ImageError}
 							onClick=${() => {
+								erroredUrlsRef?.current?.delete(imageUrl);
 								stats.reset();
 								setRetryCount((c) => c + 1);
 							}}
@@ -227,7 +263,7 @@ function ImageCard({ imageUrl, selectedImages, setSelectedImages, setImageErrorC
 function ImageError({ onClick, ...props }) {
 	return html`
 		<button
-			class="flex flex-col items-center justify-center gap-1 p-4 h-auto border-red-300 bg-red-50 hover:bg-red-100 text-red-600 text-xs"
+			class="flex h-auto flex-col items-center justify-center gap-1 border-red-300 bg-red-50 p-4 text-xs text-red-600 hover:bg-red-100"
 			type="button"
 			title="Retry loading image"
 			onClick=${(e) => {
@@ -237,7 +273,7 @@ function ImageError({ onClick, ...props }) {
 			...${props}
 		>
 			<div>
-				<${Circle} class="bg-red-600 text-center font-bold text-white">✕<//>
+				<${Circle} class="bg-red-600 text-white">×<//>
 				${' '}Error loading image
 			</div>
 			Click to retry
