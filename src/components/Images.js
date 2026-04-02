@@ -50,8 +50,6 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 				${allImages?.length - visibleImages.length > 0 &&
 				html`
 					<${Badge}
-						as="button"
-						type="button"
 						class="border-slate-300 bg-slate-50 text-slate-600 transition-colors hover:bg-slate-100"
 						title="Images removed by your filters"
 						onClick=${() => setShowFiltered((v) => !v)}
@@ -63,8 +61,6 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 				${errorCount > 0 &&
 				html`
 					<${Badge}
-						as="button"
-						type="button"
 						class="border-red-300 bg-red-50 hover:bg-red-100 text-red-600"
 						title="Images that failed to load"
 					>
@@ -115,9 +111,12 @@ export function Images({ visibleImages, allImages, imagesToDownload, style, ...p
 	`;
 }
 
-function Badge({ as: Component = 'div', class: className = '', children, ...props }) {
+function Badge({ as: Component = 'button', class: className = '', children, ...props }) {
 	return html`
-		<${Component} class="${className} flex h-8 items-center gap-1 rounded-full border p-1 text-xs" ...${props}>
+		<${Component}
+			class="${className} flex h-8 items-center gap-1 rounded-full border p-1 text-xs"
+			...${Component === 'button' ? { type: 'button', ...props } : props}
+		>
 			${children}
 		<//>
 	`;
