@@ -1,39 +1,42 @@
 // Executed via `chrome.scripting.executeScript` - cannot have imports!
 
-export async function findImages({ waitForIdleDOM, document = global.document, window = global.window }) {
+export async function findImages({ waitForIdleDOM, ...context } = {}) {
+	context.document ||= document;
+	context.window ||= window;
+
 	// Clean up any previously created observer and timeout from prior executions
-	window.__observer?.disconnect();
-	clearTimeout(window.__idleDomTimer);
+	context.window.__observer?.disconnect();
+	clearTimeout(context.window.__idleDomTimer);
 
 	// Wait until the page is fully loaded
-	if (document.readyState !== 'complete') {
+	if (context.document.readyState !== 'complete') {
 		await new Promise((resolve) => {
-			window.addEventListener('load', resolve, { once: true });
+			context.window.addEventListener('load', resolve, { once: true });
 			// Fallback in case 'load' already fired or for SPAs
-			if (document.readyState === 'complete') resolve();
+			if (context.document.readyState === 'complete') resolve();
 		});
 	}
 
 	if (waitForIdleDOM !== false && waitForIdleDOM >= 0 && Number.isFinite(waitForIdleDOM)) {
 		await new Promise((resolve) => {
-			const observer = new window.MutationObserver(() => {
-				clearTimeout(window.__idleDomTimer);
-				window.__idleDomTimer = setTimeout(() => {
+			const observer = new context.window.MutationObserver(() => {
+				clearTimeout(context.window.__idleDomTimer);
+				context.window.__idleDomTimer = setTimeout(() => {
 					observer.disconnect();
 					resolve();
 				}, waitForIdleDOM);
 			});
 
-			observer.observe(document.documentElement, {
+			observer.observe(context.document.documentElement, {
 				childList: true,
 				subtree: true,
 				attributes: false,
 			});
 
-			window.__observer = observer;
+			context.window.__observer = observer;
 
-			clearTimeout(window.__idleDomTimer);
-			window.__idleDomTimer = setTimeout(() => {
+			clearTimeout(context.window.__idleDomTimer);
+			context.window.__idleDomTimer = setTimeout(() => {
 				observer.disconnect();
 				resolve();
 			}, waitForIdleDOM);
@@ -47,7 +50,7 @@ export async function findImages({ waitForIdleDOM, document = global.document, w
 	/** @returns {string[]} */
 	function extractImagesFromSelector(selector) {
 		return unique(
-			toArray(document.querySelectorAll(selector))
+			toArray(context.document.querySelectorAll(selector))
 				.flatMap(extractImageFromElement)
 				.filter(isTruthy)
 				.map(relativeUrlToAbsolute)
@@ -121,7 +124,7 @@ export async function findImages({ waitForIdleDOM, document = global.document, w
 			}
 		}
 
-		const backgroundImage = window.getComputedStyle(element).backgroundImage;
+		const backgroundImage = context.window.getComputedStyle(element).backgroundImage;
 		if (backgroundImage) {
 			const parsedURLs = extractURLsFromStyle(backgroundImage);
 			// For background images, accept any valid URL (not just ones with image extensions)
@@ -169,7 +172,7 @@ export async function findImages({ waitForIdleDOM, document = global.document, w
 
 	function relativeUrlToAbsolute(url) {
 		// Only convert root-relative URLs (single /), not protocol-relative URLs (//)
-		return url.indexOf('/') === 0 && url.indexOf('//') !== 0 ? `${window.location.origin}${url}` : url;
+		return url.indexOf('/') === 0 && url.indexOf('//') !== 0 ? `${context.window.location.origin}${url}` : url;
 	}
 
 	function unique(values) {
@@ -187,6 +190,6 @@ export async function findImages({ waitForIdleDOM, document = global.document, w
 	return {
 		allImages: extractImagesFromSelector('img, image, source, use, a, [class], [style]'),
 		linkedImages: extractImagesFromSelector('a'),
-		origin: window.location.origin,
+		origin: context.window.location.origin,
 	};
 }
