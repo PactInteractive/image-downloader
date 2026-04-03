@@ -315,7 +315,6 @@ export function App() {
 			id="images_container"
 			allImages=${allImages}
 			matchingImages=${matchingImages}
-			imagesToDownload=${imagesToDownload}
 			erroredUrlsRef=${erroredUrlsRef}
 		/>
 

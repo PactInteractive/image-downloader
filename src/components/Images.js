@@ -1,19 +1,15 @@
 import html, { useEffect, useLayoutEffect, useMemo, useRef, useState } from '../html.js';
 
-import { add, isIncludedIn, isNotStrictEqual, stopPropagation } from '../utils.js';
+import { add, isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
 import { useOptions } from './OptionsProvider.js';
 import { useImageStats } from './useImageStats.js';
 
-export function Images({ allImages, matchingImages, imagesToDownload, erroredUrlsRef, style, ...props }) {
+export function Images({ allImages, matchingImages, erroredUrlsRef, style, ...props }) {
 	const [options, updateOptions] = useOptions();
-	const selectedImages = options.selected_images;
+
 	const [tab, setTab] = useState('matching');
-
-	const errorCount = erroredUrlsRef.current.size;
-	const filteredOutCount = allImages.length - matchingImages.length - errorCount;
-
 	const displayedImages = useMemo(() => {
 		if (!allImages) {
 			return matchingImages;
@@ -30,24 +26,20 @@ export function Images({ allImages, matchingImages, imagesToDownload, erroredUrl
 		return matchingImages;
 	}, [tab, allImages, matchingImages, errorCount]);
 
-	const setSelectedImages = (updater) => {
-		updateOptions((prev) => ({
-			selected_images: typeof updater === 'function' ? updater(prev.selected_images) : updater,
-		}));
-	};
+	const selectedImages = useMemo(
+		() => options.selected_images.filter(isIncludedIn(allImages)),
+		[options.selected_images, allImages]
+	);
+	const errorCount = erroredUrlsRef.current.size;
+	const filteredOutCount = allImages.length - matchingImages.length - errorCount;
 
-	const someImagesAreSelected = displayedImages.length > 0 && displayedImages.some(isIncludedIn(selectedImages));
-	const allImagesAreSelected = displayedImages.length > 0 && displayedImages.every(isIncludedIn(selectedImages));
+	const allImagesFromCurrentTabAreSelected = displayedImages.every(isIncludedIn(selectedImages));
 
 	return html`
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
 			${displayedImages.length > 0 &&
 			html`
-				<${Badge}
-					as="ul"
-					class="overflow-hidden border-slate-300"
-					onChange=${(e) => setTab(e.target.value)}
-				>
+				<${Badge} as="ul" class="overflow-hidden border-slate-300" onChange=${(e) => setTab(e.target.value)}>
 					<li>
 						<${Tab}
 							class="text-slate-600 has-checked:text-slate-700"
@@ -90,13 +82,18 @@ export function Images({ allImages, matchingImages, imagesToDownload, erroredUrl
 				<${Badge}
 					as=${Checkbox}
 					class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
-					checked=${allImagesAreSelected}
-					indeterminate=${someImagesAreSelected && !allImagesAreSelected}
-					disabled=${displayedImages.length === 0}
+					checked=${selectedImages.length > 0 && allImagesFromCurrentTabAreSelected}
+					indeterminate=${selectedImages.length > 0 && !allImagesFromCurrentTabAreSelected}
+					disabled=${allImages.length === 0}
 					title="Click to select or unselect all visible images"
-					onChange=${(e) => setSelectedImages(e.currentTarget.checked ? displayedImages : [])}
+					onChange=${({ currentTarget: { checked } }) =>
+						updateOptions((options) => ({
+							selected_images: checked
+								? unique([...options.selected_images, ...displayedImages])
+								: options.selected_images.filter(isNotIncludedIn(displayedImages)),
+						}))}
 				>
-					${imagesToDownload.length} selected
+					${selectedImages.length} selected
 				<//>
 			`}
 
@@ -140,8 +137,14 @@ export function Images({ allImages, matchingImages, imagesToDownload, erroredUrl
 						key=${imageUrl}
 						imageUrl=${imageUrl}
 						selectedImages=${selectedImages}
-						setSelectedImages=${setSelectedImages}
 						erroredUrlsRef=${erroredUrlsRef}
+						onClick=${() => {
+							updateOptions((options) =>
+								options.selected_images.includes(imageUrl)
+									? options.selected_images.filter(isNotStrictEqual(imageUrl))
+									: [...options.selected_images, imageUrl]
+							);
+						}}
 					/>
 				`
 			)}
@@ -180,7 +183,7 @@ function Circle({ class: className = '', children, ...props }) {
 	`;
 }
 
-function ImageCard({ imageUrl, selectedImages, setSelectedImages, erroredUrlsRef }) {
+function ImageCard({ imageUrl, selectedImages, erroredUrlsRef, ...props }) {
 	const stats = useImageStats();
 	const [retryCount, setRetryCount] = useState(0);
 	const isSelected = selectedImages.includes(imageUrl);
@@ -197,13 +200,6 @@ function ImageCard({ imageUrl, selectedImages, setSelectedImages, erroredUrlsRef
 					'conic-gradient(var(--color-slate-100) 90deg, var(--color-slate-300) 90deg 180deg, var(--color-slate-100) 180deg 270deg, var(--color-slate-300) 270deg)',
 				backgroundRepeat: 'repeat',
 				backgroundSize: '12px 12px',
-			}}
-			onClick=${() => {
-				setSelectedImages((selectedImages) =>
-					selectedImages.includes(imageUrl)
-						? selectedImages.filter(isNotStrictEqual(imageUrl))
-						: [...selectedImages, imageUrl]
-				);
 			}}
 		>
 			${

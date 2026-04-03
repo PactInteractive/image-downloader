@@ -1,7 +1,7 @@
-
 export const add = (a) => (b) => a + b;
 
 export const isIncludedIn = (array) => (item) => array.includes(item);
+export const isNotIncludedIn = (array) => (item) => !array.includes(item);
 
 export const isStrictEqual = (value1) => (value2) => value1 === value2;
 export const isNotStrictEqual = (value1) => (value2) => value1 !== value2;
