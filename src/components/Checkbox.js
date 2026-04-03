@@ -1,6 +1,14 @@
+// @ts-check
 import html from '../html.js';
 
-export function Checkbox({ children, class: className, indeterminate, title, ...props }) {
+export function Checkbox(
+	/** @type {{
+		children: any;
+		class: string;
+		indeterminate: boolean;
+		title: string;
+	}} */ { children, class: className, indeterminate, title, ...props }
+) {
 	return html`
 		<label ...${{ class: className, title }}>
 			<input class="mb-px" ref=${setIndeterminate(indeterminate)} type="checkbox" ...${props} />
@@ -10,8 +18,9 @@ export function Checkbox({ children, class: className, indeterminate, title, ...
 }
 
 // Source: https://davidwalsh.name/react-indeterminate
-const setIndeterminate = (indeterminate) => (element) => {
-	if (element) {
-		element.indeterminate = indeterminate;
-	}
-};
+const setIndeterminate =
+	(/** @type {boolean?} */ indeterminate) => (/** @type {HTMLInputElement | null} */ element) => {
+		if (element) {
+			element.indeterminate = !!indeterminate;
+		}
+	};

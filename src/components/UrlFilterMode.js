@@ -1,6 +1,7 @@
+// @ts-check
 import html from '../html.js';
 
-export function UrlFilterMode(props) {
+export function UrlFilterMode(/** @type {Object} */ props) {
 	return html`
 		<select ...${props}>
 			<option value="normal" title="A plain text search">Text</option>

@@ -1,7 +1,36 @@
-import { useCallback, useState } from '../html.js';
+// @ts-check
+import { useSignal } from '../html.js';
 
+/**
+ * @typedef {Object} ImageSize
+ * @property {number} bytes
+ * @property {string} formatted
+ * @property {boolean} fromCache
+ */
+
+/**
+ * @typedef {Object} ImageStatsData
+ * @property {number} width
+ * @property {number} height
+ * @property {ImageSize | null} size
+ * @property {string} extension
+ * @property {'idle' | 'loaded' | 'error'} status
+ */
+
+/**
+ * @typedef {Object} ImageStats
+ * @property {{ value: ImageStatsData }} data
+ * @property {(event: Event) => void} onLoad
+ * @property {() => void} onError
+ * @property {() => void} reset
+ */
+
+/**
+ * @returns {ImageStats}
+ */
 export function useImageStats() {
-	const [data, setData] = useState({
+	/** @type {{ value: ImageStatsData }} */
+	const data = useSignal({
 		width: 0,
 		height: 0,
 		size: null,
@@ -9,49 +38,50 @@ export function useImageStats() {
 		status: 'idle',
 	});
 
-	const onLoad = useCallback((event) => {
-		const img = event.currentTarget;
+	// TODO: Maybe convert all of these to actions
+	function onLoad(/** @type {Event} */ e) {
+		const img = /** @type {HTMLImageElement} */ (e.currentTarget);
 		const url = img.currentSrc || img.src;
 		const size = getImageResourceSize(img);
 		const urlExtension = getImageExtension(url);
 
-		setData({
+		data.value = {
 			width: img.naturalWidth,
 			height: img.naturalHeight,
 			size,
 			extension: urlExtension,
 			status: 'loaded',
-		});
+		};
 
 		// Refine extension via fetch if URL parsing was inconclusive
 		if (!urlExtension) {
 			fetchImageExtension(url).then((extension) => {
 				if (extension) {
-					setData((data) => ({ ...data, extension }));
+					data.value = { ...data.value, extension };
 				}
 			});
 		}
-	}, []);
+	}
 
-	const onError = useCallback(() => {
-		setData({
+	function onError() {
+		data.value = {
 			width: 0,
 			height: 0,
 			size: null,
 			extension: '',
 			status: 'error',
-		});
-	}, []);
+		};
+	}
 
-	const reset = useCallback(() => {
-		setData({
+	function reset() {
+		data.value = {
 			width: 0,
 			height: 0,
 			size: null,
 			extension: '',
 			status: 'idle',
-		});
-	}, []);
+		};
+	}
 
 	return {
 		data,
@@ -61,6 +91,10 @@ export function useImageStats() {
 	};
 }
 
+/**
+ * @param {string} url
+ * @returns {string}
+ */
 export function getImageExtension(url) {
 	if (!url) return '';
 
@@ -103,6 +137,7 @@ export function getImageExtension(url) {
 	return '';
 }
 
+/** @type {Record<string, string>} */
 const mimeExtensions = {
 	'image/jpeg': 'jpg',
 	'image/png': 'png',
@@ -116,6 +151,10 @@ const mimeExtensions = {
 	'image/vnd.microsoft.icon': 'ico',
 };
 
+/**
+ * @param {string} url
+ * @returns {Promise<string>}
+ */
 export async function fetchImageExtension(url) {
 	if (!url) return '';
 
@@ -147,6 +186,10 @@ export async function fetchImageExtension(url) {
 	return '';
 }
 
+/**
+ * @param {HTMLImageElement} img
+ * @returns {ImageSize | null}
+ */
 export function getImageResourceSize(img) {
 	const url = img.src;
 	if (!url) return null;
@@ -181,16 +224,17 @@ export function getImageResourceSize(img) {
 	}
 
 	const entries = performance.getEntriesByName(url);
-	const entry = entries.find((e) => e.initiatorType === 'img');
+	const entry = entries.find((entry) => /** @type {PerformanceResourceTiming} */ (entry).initiatorType === 'img');
 
 	if (!entry) return null;
 
-	const encodedSize = entry.encodedBodySize || entry.transferSize;
-	const decodedSize = entry.decodedBodySize;
+	const resourceEntry = /** @type {PerformanceResourceTiming} */ (entry);
+	const encodedSize = resourceEntry.encodedBodySize || resourceEntry.transferSize;
+	const decodedSize = resourceEntry.decodedBodySize;
 
 	if (!encodedSize && !decodedSize) return null;
 
-	const fromCache = entry.transferSize === 0 || (entry.transferSize === undefined && encodedSize > 0);
+	const fromCache = resourceEntry.transferSize === 0 || (resourceEntry.transferSize === undefined && encodedSize > 0);
 
 	const bytes = encodedSize || decodedSize;
 
@@ -201,6 +245,10 @@ export function getImageResourceSize(img) {
 	};
 }
 
+/**
+ * @param {number} bytes
+ * @returns {string}
+ */
 export function formatFileSize(bytes) {
 	if (bytes === 0 || bytes == null || isNaN(bytes)) return '';
 

@@ -1,5 +1,4 @@
 import { App } from '../components/App.js';
-import { OptionsProvider } from '../components/OptionsProvider.js';
 import html, { render, useCallback, useEffect, useRef, useState } from '../html.js';
 import { add } from '../utils.js';
 
@@ -28,7 +27,7 @@ function Wrapper() {
 	return html`
 		<div class="flex" style=${{ width: '100dvw', height: '100dvh' }}>
 			<div class="flex-1 overflow-hidden">
-				<form class="flex items-center gap-2 bg-slate-800 px-3 py-2" onSubmit=${navigate}>
+				<form id="url_form" class="flex items-center gap-2 bg-slate-800 px-3 py-2" onSubmit=${navigate}>
 					<span class="shrink-0 text-xs font-medium tracking-wider text-slate-400 uppercase">URL</span>
 					<input
 						class="flex-1 rounded bg-slate-700 px-3 py-1.5 text-sm text-slate-100 placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-500"
@@ -65,4 +64,4 @@ function Wrapper() {
 	`;
 }
 
-render(html`<${OptionsProvider}><${Wrapper} /><//>`, document.querySelector('main'));
+render(html`<${Wrapper} />`, document.querySelector('main'));

@@ -8,7 +8,7 @@ export const build = 'build';
 
 export const copy = {
 	include: [manifestJson, './images/**/*', './lib/**/*', './src/**'],
-	exclude: [style, './src/Web/**', './src/test.ts', './src/test-helpers.ts', './src/**/*.test.ts'],
+	exclude: [style, './src/Web/**', './src/**/*.ts'],
 };
 
 export const icons = {

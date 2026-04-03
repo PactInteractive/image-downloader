@@ -1,53 +1,71 @@
-import html, { useEffect, useLayoutEffect, useMemo, useRef, useState } from '../html.js';
+// @ts-check
+import html, { useSignal } from '../html.js';
 
-import { add, isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
+import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
-import { useOptions } from './OptionsProvider.js';
+import {
+	allImages,
+	displayedImages,
+	erroredUrls,
+	matchingImages,
+	options,
+	selectedImages,
+	tab,
+	updateOption,
+} from './data.js';
 import { useImageStats } from './useImageStats.js';
 
-export function Images({ allImages, matchingImages, erroredUrlsRef, style, ...props }) {
-	const [options, updateOptions] = useOptions();
+/**
+ * @typedef {import('./useImageStats.js').ImageStatsData} ImageStatsData
+ * @typedef {import('./useImageStats.js').ImageStats} ImageStats
+ */
 
-	const [tab, setTab] = useState('matching');
-	const displayedImages = useMemo(() => {
-		if (!allImages) {
-			return matchingImages;
-		}
-		if (tab === 'matching') {
-			return matchingImages;
-		}
-		if (tab === 'filtered_out') {
-			return allImages.filter((url) => !matchingImages.includes(url) && !erroredUrlsRef?.current?.has(url));
-		}
-		if (tab === 'errors') {
-			return allImages.filter((url) => erroredUrlsRef?.current?.has(url));
-		}
-		return matchingImages;
-	}, [tab, allImages, matchingImages, errorCount]);
+/**
+ * @typedef {import('./data.js').Options} Options
+ */
 
-	const selectedImages = useMemo(
-		() => options.selected_images.filter(isIncludedIn(allImages)),
-		[options.selected_images, allImages]
-	);
-	const errorCount = erroredUrlsRef.current.size;
-	const filteredOutCount = allImages.length - matchingImages.length - errorCount;
+/**
+ * @typedef {Object} CSSProperties
+ * @property {string} [minHeight]
+ * @property {string} [backgroundImage]
+ * @property {string} [backgroundRepeat]
+ * @property {string} [backgroundSize]
+ */
 
-	const allImagesFromCurrentTabAreSelected = displayedImages.every(isIncludedIn(selectedImages));
+/**
+ * @typedef {Object} ImagesProps
+ * @property {string} [class]
+ * @property {CSSProperties} [style]
+ */
+
+export function Images(/** @type {ImagesProps} */ { class: className, style, ...props }) {
+	if (!options.value) return null;
+
+	const filteredOutCount = allImages.value.length - matchingImages.value.length - erroredUrls.value.length;
+	const allImagesFromCurrentTabAreSelected = displayedImages.value.every(isIncludedIn(selectedImages.value));
 
 	return html`
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
-			${displayedImages.length > 0 &&
+			${displayedImages.value.length > 0 &&
 			html`
-				<${Badge} as="ul" class="overflow-hidden border-slate-300" onChange=${(e) => setTab(e.target.value)}>
+				<${Badge}
+					as="ul"
+					class="overflow-hidden border-slate-300"
+					onChange=${
+						/** @param {Event} e */ (e) => {
+							tab.value = /** @type {HTMLInputElement} */ (e.target).value;
+						}
+					}
+				>
 					<li>
 						<${Tab}
 							class="text-slate-600 has-checked:text-slate-700"
 							title="Images matching your filters"
-							input=${{ name: 'visibility', value: 'matching', checked: tab === 'matching' }}
+							input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
 						>
 							<${Circle} class="bg-green-600 text-white">+<//>
-							${allImages.length - filteredOutCount - errorCount} matching
+							${matchingImages.value.length} matching
 						<//>
 					</li>
 
@@ -57,23 +75,23 @@ export function Images({ allImages, matchingImages, erroredUrlsRef, style, ...pr
 							<${Tab}
 								class="border-l border-slate-300 text-slate-600 has-checked:text-slate-700"
 								title="Images removed by your filters"
-								input=${{ name: 'visibility', value: 'filtered_out', checked: tab === 'filtered_out' }}
+								input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 							>
 								<${Circle} class="bg-slate-600 text-white">-<//>
 								${filteredOutCount} filtered out
 							<//>
 						</li>
 					`}
-					${errorCount > 0 &&
+					${erroredUrls.value.length > 0 &&
 					html`
 						<li>
 							<${Tab}
 								class="border-l border-slate-300 text-red-600 has-checked:text-red-700"
 								title="Images that failed to load"
-								input=${{ name: 'visibility', value: 'errors', checked: tab === 'errors' }}
+								input=${{ name: 'visibility', value: 'errors', checked: tab.value === 'errors' }}
 							>
 								<${Circle} class="bg-red-600 text-white">×<//>
-								${errorCount} ${errorCount === 1 ? 'error' : 'errors'}
+								${erroredUrls.value.length} ${erroredUrls.value.length === 1 ? 'error' : 'errors'}
 							<//>
 						</li>
 					`}
@@ -82,18 +100,18 @@ export function Images({ allImages, matchingImages, erroredUrlsRef, style, ...pr
 				<${Badge}
 					as=${Checkbox}
 					class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
-					checked=${selectedImages.length > 0 && allImagesFromCurrentTabAreSelected}
-					indeterminate=${selectedImages.length > 0 && !allImagesFromCurrentTabAreSelected}
-					disabled=${allImages.length === 0}
+					checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
+					indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
+					disabled=${allImages.value.length === 0}
 					title="Click to select or unselect all visible images"
-					onChange=${({ currentTarget: { checked } }) =>
-						updateOptions((options) => ({
-							selected_images: checked
-								? unique([...options.selected_images, ...displayedImages])
-								: options.selected_images.filter(isNotIncludedIn(displayedImages)),
-						}))}
+					onChange=${(/** @type {Event} */ e) => {
+						const { checked } = /** @type {HTMLInputElement} */ (e.currentTarget);
+						selectedImages.value = checked
+							? unique([...selectedImages.value, ...displayedImages.value])
+							: selectedImages.value.filter(isNotIncludedIn(displayedImages.value));
+					}}
 				>
-					${selectedImages.length} selected
+					${selectedImages.value.length} selected
 				<//>
 			`}
 
@@ -104,22 +122,18 @@ export function Images({ allImages, matchingImages, erroredUrlsRef, style, ...pr
 					type="button"
 					class="h-6 w-6 font-bold"
 					aria-label="Fewer columns"
-					onClick=${() => {
-						updateOptions({ columns: Math.max(1, options.columns - 1) });
-					}}
+					onClick=${() => updateOption('columns', Math.max(1, (options.value?.columns || 0) - 1))}
 				>
 					-
 				</button>
 
-				${options.columns}
+				${options.value.columns}
 
 				<button
 					type="button"
 					class="h-6 w-6 font-bold"
 					aria-label="More columns"
-					onClick=${() => {
-						updateOptions({ columns: Math.min(options.columns + 1, 6) });
-					}}
+					onClick=${() => updateOption('columns', Math.min((options.value?.columns || 0) + 1, 6))}
 				>
 					+
 				</button>
@@ -128,22 +142,18 @@ export function Images({ allImages, matchingImages, erroredUrlsRef, style, ...pr
 
 		<div
 			class="grid grid-cols-(--image-columns) gap-2 p-2"
-			style=${{ '--image-columns': `repeat(${options.columns}, minmax(0, 1fr))` }}
+			style=${{ '--image-columns': `repeat(${options.value.columns}, minmax(0, 1fr))`, ...style }}
 			...${props}
 		>
-			${displayedImages.map(
-				(imageUrl) => html`
+			${displayedImages.value.map(
+				/** @param {string} imageUrl */ (imageUrl) => html`
 					<${ImageCard}
 						key=${imageUrl}
 						imageUrl=${imageUrl}
-						selectedImages=${selectedImages}
-						erroredUrlsRef=${erroredUrlsRef}
 						onClick=${() => {
-							updateOptions((options) =>
-								options.selected_images.includes(imageUrl)
-									? options.selected_images.filter(isNotStrictEqual(imageUrl))
-									: [...options.selected_images, imageUrl]
-							);
+							selectedImages.value = selectedImages.value.includes(imageUrl)
+								? selectedImages.value.filter(isNotStrictEqual(imageUrl))
+								: [...selectedImages.value, imageUrl];
 						}}
 					/>
 				`
@@ -152,6 +162,13 @@ export function Images({ allImages, matchingImages, erroredUrlsRef, style, ...pr
 	`;
 }
 
+/**
+ * @param {Object} props
+ * @param {string | Function} [props.as]
+ * @param {string} [props.class]
+ * @param {any} [props.children]
+ * @param {Object} [props.onChange]
+ */
 function Badge({ as: Component = 'button', class: className = '', children, ...props }) {
 	return html`
 		<${Component}
@@ -163,6 +180,12 @@ function Badge({ as: Component = 'button', class: className = '', children, ...p
 	`;
 }
 
+/**
+ * @param {Object} props
+ * @param {string} [props.class]
+ * @param {any} [props.children]
+ * @param {{ name: string, value: string, checked: boolean }} [props.input]
+ */
 function Tab({ class: className = '', children, input, ...props }) {
 	return html`
 		<label
@@ -175,6 +198,11 @@ function Tab({ class: className = '', children, input, ...props }) {
 	`;
 }
 
+/**
+ * @param {Object} props
+ * @param {string} [props.class]
+ * @param {any} [props.children]
+ */
 function Circle({ class: className = '', children, ...props }) {
 	return html`
 		<span class="corner-round ${className} inline-block h-4 w-4 rounded-full text-center font-bold" ...${props}>
@@ -183,13 +211,17 @@ function Circle({ class: className = '', children, ...props }) {
 	`;
 }
 
-function ImageCard({ imageUrl, selectedImages, erroredUrlsRef, ...props }) {
+/**
+ * @param {Object} props
+ * @param {string} props.imageUrl
+ */
+function ImageCard({ imageUrl, ...props }) {
 	const stats = useImageStats();
-	const [retryCount, setRetryCount] = useState(0);
-	const isSelected = selectedImages.includes(imageUrl);
+	const retryCount = useSignal(0);
+	const isSelected = selectedImages.value.includes(imageUrl);
 
-	// Reset stats when imageUrl changes to avoid showing stale data
-	useEffect(stats.reset, [imageUrl, stats.reset]);
+	// TODO: Reset stats when imageUrl changes to avoid showing stale data
+	// useEffect(stats.reset, [imageUrl, stats.reset]);
 
 	return html`
 		<div
@@ -201,18 +233,19 @@ function ImageCard({ imageUrl, selectedImages, erroredUrlsRef, ...props }) {
 				backgroundRepeat: 'repeat',
 				backgroundSize: '12px 12px',
 			}}
+			...${props}
 		>
 			${
-				stats.data.status === 'error'
+				stats.data.value.status === 'error'
 					? html`<${ImageError}
 							onClick=${() => {
-								erroredUrlsRef?.current?.delete(imageUrl);
+								erroredUrls.value = erroredUrls.value.filter(isNotStrictEqual(imageUrl));
 								stats.reset();
-								setRetryCount(add(1));
+								retryCount.value++;
 							}}
 						/>`
 					: html`<img
-							key=${retryCount}
+							key=${retryCount.value}
 							class="drop-shadow-md"
 							src=${imageUrl}
 							onLoad=${stats.onLoad}
@@ -249,13 +282,13 @@ function ImageCard({ imageUrl, selectedImages, erroredUrlsRef, ...props }) {
 				<${ImageUrlTextbox} class="opacity-0 group-hover:opacity-100 w-full" value=${imageUrl} />
 
 				<div class="group-hover:hidden flex gap-1">
-					<${ImageStat} class="uppercase">${stats.data.extension}</${ImageStat}>
+					<${ImageStat} class="uppercase">${stats.data.value.extension}</${ImageStat}>
 
 					${
-						stats.data.status === 'loaded' &&
+						stats.data.value.status === 'loaded' &&
 						html`
-						<${ImageStat}>${stats.data.width}×${stats.data.height}</${ImageStat}>
-						<${ImageStat} class="small-caps lowercase">${stats.data.size ? stats.data.size.formatted : ''}</${ImageStat}>
+						<${ImageStat}>${stats.data.value.width}×${stats.data.value.height}</${ImageStat}>
+						<${ImageStat} class="small-caps lowercase">${stats.data.value.size ? stats.data.value.size.formatted : ''}</${ImageStat}>
 					`
 					}
 				</div>
@@ -264,16 +297,22 @@ function ImageCard({ imageUrl, selectedImages, erroredUrlsRef, ...props }) {
 	`;
 }
 
+/**
+ * @param {Object} props
+ * @param {(e: MouseEvent) => void} [props.onClick]
+ */
 function ImageError({ onClick, ...props }) {
 	return html`
 		<button
 			class="flex h-auto flex-col items-center justify-center gap-1 border-red-300 bg-red-50 p-4 text-xs text-red-600 hover:bg-red-100"
 			type="button"
 			title="Retry loading image"
-			onClick=${(e) => {
-				e.stopPropagation();
-				onClick?.(e);
-			}}
+			onClick=${
+				/** @param {MouseEvent} e */ (e) => {
+					e.stopPropagation();
+					onClick?.(e);
+				}
+			}
 			...${props}
 		>
 			<div>
@@ -285,7 +324,15 @@ function ImageError({ onClick, ...props }) {
 	`;
 }
 
+/**
+ * @param {Object} props
+ * @param {string} props.imageUrl
+ * @param {(e: MouseEvent) => void} [props.onClick]
+ */
 function OpenImageButton({ imageUrl, onClick, ...props }) {
+	/**
+	 * @param {MouseEvent} e
+	 */
 	function openNewTab(e) {
 		chrome.tabs.create({ url: imageUrl, active: false });
 		if (onClick) {
@@ -305,11 +352,17 @@ function OpenImageButton({ imageUrl, onClick, ...props }) {
 	`;
 }
 
+/**
+ * @param {Object} props
+ * @param {string} props.imageUrl
+ * @param {(e: MouseEvent) => void} [props.onClick]
+ */
 function DownloadImageButton({ imageUrl, onClick, ...props }) {
-	const [options] = useOptions();
-
+	/**
+	 * @param {MouseEvent} e
+	 */
 	function downloadImages(e) {
-		actions.downloadImages([imageUrl], options);
+		actions.downloadImages([imageUrl]);
 		if (onClick) {
 			onClick(e);
 		}
@@ -327,33 +380,43 @@ function DownloadImageButton({ imageUrl, onClick, ...props }) {
 	`;
 }
 
+/**
+ * @param {Object} props
+ * @param {string} [props.class]
+ * @param {any} [props.children]
+ */
 function ImageStat({ class: className = '', children, ...props }) {
 	return html`
 		<small class="${className} rounded bg-slate-950/80 px-1 text-white empty:hidden" ...${props}>${children}</small>
 	`;
 }
 
+/**
+ * @param {Object} props
+ */
 function ImageUrlTextbox(props) {
-	const inputRef = useRef(null);
+	// TODO: Implement
+	// const inputRef = useRef(null);
 
-	function scrollToEnd() {
-		const input = inputRef.current;
-		if (input) {
-			input.scrollLeft = input.scrollWidth;
-		}
-	}
+	// function scrollToEnd() {
+	// 	const input = inputRef.current;
+	// 	if (input) {
+	// 		input.scrollLeft = input.scrollWidth;
+	// 	}
+	// }
 
-	useLayoutEffect(scrollToEnd, []);
+	// useLayoutEffect(scrollToEnd, []);
 
 	return html`
 		<input
-			ref=${inputRef}
 			type="text"
 			readonly
-			onClick=${(e) => {
-				e.stopPropagation();
-				e.currentTarget.select();
-			}}
+			onClick=${
+				/** @param {MouseEvent} e */ (e) => {
+					e.stopPropagation();
+					/** @type {HTMLInputElement} */ (e.currentTarget).select();
+				}
+			}
 			...${props}
 		/>
 	`;

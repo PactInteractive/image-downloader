@@ -1,3 +1,4 @@
+// @ts-check
 // Executed via `chrome.scripting.executeScript` - cannot have imports!
 
 export async function findImages({ waitForIdleDOM, ...context } = {}) {

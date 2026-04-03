@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "bun start",
 		"web": "bun --watch scripts/web.ts",
+		"bun remote": "bun code & bun tailscale",
 		"code": "code-server --port=4095",
 		"tailscale": "tailscale serve reset && tailscale serve --bg --http=3001 3000 && tailscale serve --bg --http=4096 4095",
 		"start": "bun run build && bun scripts/watch.ts",
@@ -33,8 +34,6 @@
 		"prettier": "3.5.3",
 		"prettier-plugin-organize-imports": "4.3.0",
 		"prettier-plugin-tailwindcss": "0.7.2",
-		"react": "18.3.1",
-		"react-dom": "18.3.1",
 		"sharp": "0.34.1",
 		"sneer": "1.0.1",
 		"tailwindcss": "4.2.2",

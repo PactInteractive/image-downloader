@@ -1,8 +1,9 @@
+// @ts-check
 import { isTruthy, unique } from '../utils.js';
 
 const priorities = ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'avif'];
 
-export function deduplicateImages(urls, imagesCache) {
+export function deduplicateImages(/** @type {string[]} */ urls, /** @type {HTMLDivElement} */ imagesCache) {
 	const groups = new Map();
 
 	for (const url of urls) {
@@ -21,16 +22,18 @@ export function deduplicateImages(urls, imagesCache) {
 	return result;
 }
 
-function getNormalizedBaseKey(url) {
+/** @returns {string} */
+function getNormalizedBaseKey(/** @type {string} */ url) {
 	try {
 		const parsed = new URL(url);
 
 		// Extract actual filename (last path segment) for cross-subdomain deduplication
 		const filename = parsed.pathname.split('/').filter(isTruthy).at(-1) || '';
-		const hasExtension = filename.includes('.');
 		const parts = filename.split('.');
 		const nameWithoutExtension =
-			parts.length > 1 && priorities.includes(parts.at(-1)) ? parts.slice(0, -1).join('.') : filename;
+			parts.length > 1 && priorities.includes(/** @type {string} */ (parts.at(-1)))
+				? parts.slice(0, -1).join('.')
+				: filename;
 
 		// Get base name without resolution suffix
 		const basename = nameWithoutExtension.replace(/[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w|\d+x)$/i, '');
@@ -75,30 +78,30 @@ function getNormalizedBaseKey(url) {
 	}
 }
 
-function pickBestImageUrl(urlStrings, imagesCache) {
+function pickBestImageUrl(/** @type {string[]} */ urlStrings, /** @type {HTMLDivElement} */ imagesCache) {
 	const uniqueUrlStrings = unique(urlStrings);
 
-	const realUrls = uniqueUrlStrings
-		.map((urlString) => {
-			try {
-				return new URL(urlString);
-			} catch (error) {
-				return false;
-			}
-		})
-		.filter(isTruthy);
+	const realUrls = /** @type {URL[]} */ ([]);
+	for (const urlString of uniqueUrlStrings) {
+		try {
+			realUrls.push(new URL(urlString));
+		} catch {
+			// skip invalid URLs
+		}
+	}
 
 	if (realUrls.length === 0) return undefined;
 
+	/** @param {URL} url */
 	const getResolution = (url) => {
-		const img = imagesCache.querySelector(`img[src="${url}"]`);
+		const img = /** @type {HTMLImageElement | null} */ (imagesCache.querySelector(`img[src="${url.href}"]`));
 		return img ? { width: img.naturalWidth, height: img.naturalHeight } : { width: 0, height: 0 };
 	};
 
 	const bestResolutionUrls = realUrls.slice(1).reduce(
-		(bestUrls, currentUrl) => {
-			const bestResolution = getResolution(bestUrls[0].href);
-			const currentResolution = getResolution(currentUrl.href);
+		(/** @type {URL[]} */ bestUrls, /** @type {URL} */ currentUrl) => {
+			const bestResolution = getResolution(bestUrls[0]);
+			const currentResolution = getResolution(currentUrl);
 
 			if (currentResolution.width > bestResolution.width && currentResolution.height > bestResolution.height) {
 				return [currentUrl];
@@ -113,7 +116,7 @@ function pickBestImageUrl(urlStrings, imagesCache) {
 		[realUrls[0]]
 	);
 
-	const bestResolutionUrl = bestResolutionUrls.reduce((bestUrl, currentUrl) => {
+	const bestResolutionUrl = bestResolutionUrls.reduce((/** @type {URL} */ bestUrl, /** @type {URL} */ currentUrl) => {
 		const bestPriority = priorities.indexOf(getExtension(bestUrl));
 		const currentPriority = priorities.indexOf(getExtension(currentUrl));
 
@@ -125,6 +128,6 @@ function pickBestImageUrl(urlStrings, imagesCache) {
 	return bestResolutionUrl.href;
 }
 
-function getExtension(url) {
-	return url.pathname.split('.').at(-1).toLowerCase();
+function getExtension(/** @type {URL} */ url) {
+	return /** @type {string} */ (url.pathname.split('.').at(-1)).toLowerCase();
 }

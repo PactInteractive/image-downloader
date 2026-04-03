@@ -1,7 +1,16 @@
+// @ts-check
 import html from '../html.js';
 import { Checkbox } from './Checkbox.js';
 
-export function DownloadConfirmation({ numberOfImages, onCheckboxChange, onClose, onConfirm, ...props }) {
+export function DownloadConfirmation(
+	/** @type {{ numberOfImages: number; onCheckboxChange: (e: Event) => void; onClose: () => void; onConfirm: () => void; }} */ {
+		numberOfImages,
+		onCheckboxChange,
+		onClose,
+		onConfirm,
+		...props
+	}
+) {
 	return html`
 		<div ...${props}>
 			<div>

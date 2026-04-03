@@ -1,216 +1,83 @@
-import html, { useCallback, useEffect, useMemo, useRef, useState } from '../html.js';
+// @ts-check
+import html, { useEffect, useSignal } from '../html.js';
 
-import { isIncludedIn, removeSpecialCharacters, unique } from '../utils.js';
-import { useOptions } from './OptionsProvider.js';
-import { useRunAfterUpdate } from './useRunAfterUpdate.js';
-
+import { removeSpecialCharacters } from '../utils.js';
 import * as actions from './actions.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
-import { deduplicateImages } from './deduplicateImages.js';
+import {
+	allImages,
+	erroredUrls,
+	hostname,
+	imagesCache,
+	limitedAccessHostnames,
+	loadedImages,
+	loadImagesFromActiveTab,
+	options,
+	scriptError,
+	selectedImages,
+	updateOption,
+} from './data.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
-import { findImages } from './findImages.js';
 import { Images } from './Images.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
+import { useRunAfterUpdate } from './useRunAfterUpdate.js';
 
 export function App() {
-	const [options, updateOptions] = useOptions();
+	useEffect(() => {
+		if (!options.value) return;
+
+		loadImagesFromActiveTab({ waitForIdleDOM: false });
+	}, [options.value]);
 
 	// Images
-	const [allImages, setAllImages] = useState([]);
-	const [linkedImages, setLinkedImages] = useState([]);
-	const [matchingImages, setMatchingImages] = useState([]);
-
-	const [scriptError, setScriptError] = useState();
-	const [hostname, setHostname] = useState();
-	const limitedAccessHostnames = /\.google\.com/;
-
-	const loadImagesFromActiveTab = useCallback(({ waitForIdleDOM }) => {
-		chrome.windows.getCurrent((currentWindow) => {
-			chrome.tabs.query({ active: true, windowId: currentWindow.id }, (activeTabs) => {
-				if (activeTabs.length === 0) return;
-
-				const activeTab = activeTabs[0];
-				if (activeTab.url) {
-					try {
-						setHostname(new URL(activeTab.url).hostname);
-					} catch (error) {
-						setHostname(activeTab.url);
-					}
-				}
-
-				setScriptError(null);
-				chrome.scripting
-					.executeScript({
-						target: { tabId: activeTab.id, allFrames: true },
-						func: findImages,
-						args: [{ waitForIdleDOM }],
-					})
-					.then((messages) => {
-						setAllImages(unique(messages.flatMap((message) => message?.result?.allImages)));
-						setLinkedImages(unique(messages.flatMap((message) => message?.result?.linkedImages)));
-						if (!waitForIdleDOM) {
-							loadImagesFromActiveTab({ waitForIdleDOM: 1000 });
-						}
-					})
-					.catch((error) => {
-						// Ignore some errors that happen regularly when navigating around
-						if (error.message === 'Cannot access a chrome:// URL') return;
-
-						setScriptError(error.message);
-					});
-			});
-		});
-	}, []);
-
-	useEffect(() => {
-		loadImagesFromActiveTab({ waitForIdleDOM: false });
-
-		function reloadImagesWhenPageLoads(tabId, changeInfo, tab) {
-			if (!tab) {
-				setHostname(undefined);
-				loadImagesFromActiveTab({ waitForIdleDOM: 1 });
-				return;
-			}
-
-			if (tab?.active) {
-				if (changeInfo?.url) {
-					try {
-						setHostname(new URL(tab.url).hostname);
-					} catch (error) {
-						setHostname(tab.url);
-					}
-				}
-
-				if (changeInfo?.status === 'complete') {
-					loadImagesFromActiveTab({ waitForIdleDOM: false });
-				}
-			}
-		}
-
-		chrome.tabs.onUpdated.addListener(reloadImagesWhenPageLoads);
-		chrome.tabs.onActivated.addListener(reloadImagesWhenPageLoads);
-
-		return () => {
-			chrome.tabs.onUpdated.removeListener(reloadImagesWhenPageLoads);
-			chrome.tabs.onActivated.removeListener(reloadImagesWhenPageLoads);
-		};
-	}, [loadImagesFromActiveTab]);
-
-	const imagesCacheRef = useRef(null); // Not displayed; only used for filtering by natural width / height
-	const erroredUrlsRef = useRef(new Set());
-
-	const filterImages = useCallback(() => {
-		let matchingImages = options.only_images_from_links ? linkedImages : allImages;
-
-		let filterValue = options.filter_url;
-		if (filterValue) {
-			switch (options.filter_url_mode) {
-				case 'normal':
-					const terms = filterValue.split(/\s+/);
-					matchingImages = matchingImages.filter((url) => {
-						for (let index = 0; index < terms.length; index++) {
-							let term = terms[index];
-							if (term.length !== 0) {
-								const expected = term[0] !== '-';
-								if (!expected) {
-									term = term.substr(1);
-									if (term.length === 0) {
-										continue;
-									}
-								}
-								const found = url.indexOf(term) !== -1;
-								if (found !== expected) {
-									return false;
-								}
-							}
-						}
-						return true;
-					});
-					break;
-				case 'wildcard':
-					filterValue = filterValue.replace(/([.^$[\]\\(){}|-])/g, '\\$1').replace(/([?*+])/, '.$1');
-				/* fall through */
-				case 'regex':
-					matchingImages = matchingImages.filter((url) => {
-						try {
-							return url.match(filterValue);
-						} catch (error) {
-							return false;
-						}
-					});
-					break;
-			}
-		}
-
-		matchingImages = matchingImages.filter((url) => {
-			const image = imagesCacheRef.current.querySelector(`img[src="${encodeURI(url)}"]`);
-
-			return (
-				(!options.filter_min_width_enabled || options.filter_min_width <= image.naturalWidth) &&
-				(!options.filter_max_width_enabled || image.naturalWidth <= options.filter_max_width) &&
-				(!options.filter_min_height_enabled || options.filter_min_height <= image.naturalHeight) &&
-				(!options.filter_max_height_enabled || image.naturalHeight <= options.filter_max_height) &&
-				!erroredUrlsRef.current.has(url)
-			);
-		});
-
-		if (options.only_unique_images) {
-			matchingImages = deduplicateImages(matchingImages, imagesCacheRef.current);
-		}
-
-		setMatchingImages(matchingImages);
-	}, [allImages, linkedImages, options]);
-
-	useEffect(filterImages, [allImages, linkedImages, options]);
-
-	// Download
-	const [downloadIsInProgress, setDownloadIsInProgress] = useState(false);
-	const imagesToDownload = useMemo(
-		() => allImages.filter(isIncludedIn(options.selected_images)),
-		[allImages, options.selected_images]
-	);
-
-	const [downloadConfirmationIsShown, setDownloadConfirmationIsShown] = useState(false);
-
-	function maybeDownloadImages() {
-		if (options.show_download_confirmation && imagesToDownload.length > 1) {
-			setDownloadConfirmationIsShown(true);
-		} else {
-			downloadImages();
-		}
-	}
-
-	async function downloadImages() {
-		setDownloadIsInProgress(true);
-		await actions.downloadImages(imagesToDownload, options);
-		setDownloadIsInProgress(false);
-	}
-
-	const runAfterUpdate = useRunAfterUpdate();
-
-	const numberOfActiveAdvancedFilters = [
+	/** @type {(keyof import('./data.js').Options)[]} */
+	const advancedFilterKeys = [
 		'filter_min_width_enabled',
 		'filter_max_width_enabled',
 		'filter_min_height_enabled',
 		'filter_max_height_enabled',
 		'only_unique_images',
 		'only_images_from_links',
-	].filter((key) => options[key]).length;
+	];
+	const numberOfActiveAdvancedFilters = advancedFilterKeys.filter((key) => options.value?.[key]).length;
 
-	// `relative` for new z-index stack to get box shadow
+	// Download
+	const downloadIsInProgress = useSignal(false);
+	const downloadConfirmationIsShown = useSignal(false);
+
+	function maybeDownloadImages() {
+		if (options.value?.show_download_confirmation && selectedImages.value.length > 1) {
+			downloadConfirmationIsShown.value = true;
+		} else {
+			downloadImages();
+		}
+	}
+
+	async function downloadImages() {
+		downloadIsInProgress.value = true;
+		await actions.downloadImages(selectedImages.value);
+		downloadIsInProgress.value = false;
+	}
+
+	const runAfterUpdate = useRunAfterUpdate();
+
+	if (!options.value) {
+		return html`<div class="p-4">Loading...</div>`;
+	}
+
 	return html`
 		<header class="sticky top-0 z-1 bg-white shadow-md">
-			${hostname &&
-			limitedAccessHostnames.test(hostname) &&
+			${hostname.value &&
+			limitedAccessHostnames.test(hostname.value) &&
 			html`
 				<div class="bg-sky-100 p-2 text-sky-800">
 					<span class="text-shadow">🛡️</span> Image Downloader has limited access to sensitive domains like ${' '}<b
-						>${hostname}</b
+						>${hostname.value}</b
 					>
 				</div>
 			`}
-			${scriptError &&
+			${scriptError.value &&
 			html`
 				<div class="bg-amber-100 p-2 text-amber-800">
 					<span class="text-shadow">⚠️</span> Image Downloader cannot access the contents of this page - please close
@@ -232,37 +99,33 @@ export function App() {
 					type="text"
 					placeholder="Filter by URL"
 					title="Filter by parts of the URL or regular expressions."
-					value=${options.filter_url}
+					value=${options.value?.filter_url}
 					class="flex-1"
-					onChange=${({ currentTarget: { value } }) => {
-						updateOptions({ filter_url: value.trim() });
-					}}
+					onChange=${(/** @type {Event} */ e) =>
+						updateOption('filter_url', /** @type {HTMLInputElement} */ (e.currentTarget).value.trim())}
 				/>
 
 				<${UrlFilterMode}
 					id="url_filter_mode_select"
-					value=${options.filter_url_mode}
-					onChange=${({ currentTarget: { value } }) => {
-						updateOptions({ filter_url_mode: value });
-					}}
+					value=${options.value?.filter_url_mode}
+					onChange=${(/** @type {Event} */ e) =>
+						updateOption('filter_url_mode', /** @type {HTMLInputElement} */ (e.currentTarget).value)}
 				/>
 
 				<button
 					class="relative min-w-8"
-					title=${!options.show_advanced_filters && numberOfActiveAdvancedFilters > 0
+					title=${!options.value?.show_advanced_filters && numberOfActiveAdvancedFilters > 0
 						? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
 						: 'Toggle advanced filters'}
-					onClick=${() => {
-						updateOptions({ show_advanced_filters: !options.show_advanced_filters });
-					}}
+					onClick=${() => updateOption('show_advanced_filters', !options.value?.show_advanced_filters)}
 				>
 					<img
-						class="${options.show_advanced_filters ? '' : '-rotate-90'} inline w-3 transition-transform"
+						class="${options.value?.show_advanced_filters ? '' : '-rotate-90'} inline w-3 transition-transform"
 						src="/images/chevron.svg"
 					/>
 
 					<small
-						class="${!options.show_advanced_filters && numberOfActiveAdvancedFilters > 0
+						class="${!options.value?.show_advanced_filters && numberOfActiveAdvancedFilters > 0
 							? 'ease-elastic duration-400'
 							: 'scale-0'} corner-round absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-transform"
 					>
@@ -272,20 +135,20 @@ export function App() {
 
 				<button
 					class="min-w-8"
-					title=${options.open_mode === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
+					title=${options.value?.open_mode === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
 					onClick=${async () => {
-						if (options.open_mode === 'sidebar') {
-							await updateOptions({ open_mode: 'popup' });
+						if (options.value?.open_mode === 'sidebar') {
+							updateOption('open_mode', 'popup');
 							openPopup();
 						} else {
-							await updateOptions({ open_mode: 'sidebar' });
+							updateOption('open_mode', 'sidebar');
 							openSidebar();
 						}
 					}}
 				>
 					<img
 						class="inline w-5"
-						src=${options.open_mode === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'}
+						src=${options.value?.open_mode === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'}
 					/>
 				</button>
 
@@ -294,29 +157,29 @@ export function App() {
 				</button>
 			</div>
 
-			${options.show_advanced_filters && html`<${AdvancedFilters} />`}
+			${options.value?.show_advanced_filters && html`<${AdvancedFilters} />`}
 		</header>
 
-		<div id="images_cache" ref=${imagesCacheRef} hidden>
-			${allImages.map(
-				(url) =>
-					html`<img
+		<div
+			id="images_cache"
+			ref=${(/** @type {HTMLDivElement} */ element) => {
+				imagesCache.value = element;
+			}}
+			hidden
+		>
+			${allImages.value.map(
+				(url) => html`
+					<img
+						key=${url}
 						src=${encodeURI(url)}
-						onLoad=${filterImages}
-						onError=${() => {
-							erroredUrlsRef.current.add(url);
-							filterImages();
-						}}
-					/>`
+						onLoad=${() => (loadedImages.value = [...loadedImages.value, url])}
+						onError=${() => (erroredUrls.value = [...erroredUrls.value, url])}
+					/>
+				`
 			)}
 		</div>
 
-		<${Images}
-			id="images_container"
-			allImages=${allImages}
-			matchingImages=${matchingImages}
-			erroredUrlsRef=${erroredUrlsRef}
-		/>
+		<${Images} id="images_container" />
 
 		<footer
 			class="sticky bottom-0 mt-auto bg-white p-2"
@@ -325,14 +188,17 @@ export function App() {
 					'0 -4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1))',
 			}}
 		>
-			${downloadConfirmationIsShown
+			${downloadConfirmationIsShown.value
 				? html`
 						<${DownloadConfirmation}
-							numberOfImages=${imagesToDownload.length}
-							onCheckboxChange=${({ currentTarget: { checked } }) => {
-								updateOptions({ show_download_confirmation: !checked });
+							numberOfImages=${selectedImages.value.length}
+							onCheckboxChange=${(/** @type {Event} */ e) => {
+								updateOption(
+									'show_download_confirmation',
+									!(/** @type {HTMLInputElement} */ (e.currentTarget).checked)
+								);
 							}}
-							onClose=${() => setDownloadConfirmationIsShown(false)}
+							onClose=${() => (downloadConfirmationIsShown.value = false)}
 							onConfirm=${downloadImages}
 						/>
 					`
@@ -344,17 +210,18 @@ export function App() {
 								type="text"
 								placeholder="Save to subfolder"
 								title="Set the name of the subfolder you want to download the images to."
-								value=${options.folder_name}
-								onChange=${({ currentTarget: input }) => {
+								value=${options.value?.folder_name}
+								onChange=${(/** @type {Event} */ e) => {
+									const input = /** @type HTMLInputElement */ (e.currentTarget);
 									const savedSelectionStart = removeSpecialCharacters(
-										input.value.slice(0, input.selectionStart)
+										input.value.slice(0, input.selectionStart || 0)
 									).length;
 
 									runAfterUpdate(() => {
 										input.selectionStart = input.selectionEnd = savedSelectionStart;
 									});
 
-									updateOptions({ folder_name: removeSpecialCharacters(input.value) });
+									updateOption('folder_name', removeSpecialCharacters(input.value));
 								}}
 							/>
 
@@ -364,24 +231,25 @@ export function App() {
 								type="text"
 								placeholder="Rename files"
 								title="Set a new file name for the images you want to download."
-								value=${options.new_file_name}
-								onChange=${({ currentTarget: input }) => {
+								value=${options.value?.new_file_name}
+								onChange=${(/** @type {Event} */ e) => {
+									const input = /** @type HTMLInputElement */ (e.currentTarget);
 									const savedSelectionStart = removeSpecialCharacters(
-										input.value.slice(0, input.selectionStart)
+										input.value.slice(0, input.selectionStart || 0)
 									).length;
 
 									runAfterUpdate(() => {
 										input.selectionStart = input.selectionEnd = savedSelectionStart;
 									});
 
-									updateOptions({ new_file_name: removeSpecialCharacters(input.value) });
+									updateOption('new_file_name', removeSpecialCharacters(input.value));
 								}}
 							/>
 
 							<${DownloadButton}
 								class="col-span-1"
-								disabled=${imagesToDownload.length === 0}
-								loading=${downloadIsInProgress}
+								disabled=${selectedImages.value.length === 0}
+								loading=${downloadIsInProgress.value}
 								onClick=${maybeDownloadImages}
 							/>
 						</div>
@@ -389,7 +257,6 @@ export function App() {
 		</footer>
 	`;
 }
-
 async function openPopup() {
 	try {
 		await chrome.action.setPopup({ popup: 'src/Popup/index.html' });
