@@ -7,12 +7,13 @@ import { Checkbox } from './Checkbox.js';
 import {
 	allImages,
 	displayedImages,
-	erroredUrls,
+	erroredImages,
+	filteredOuImages,
 	matchingImages,
 	options,
 	selectedImages,
 	tab,
-	updateOption,
+	updateOptions,
 } from './data.js';
 import { useImageStats } from './useImageStats.js';
 
@@ -42,7 +43,6 @@ import { useImageStats } from './useImageStats.js';
 export function Images(/** @type {ImagesProps} */ { class: className, style, ...props }) {
 	if (!options.value) return null;
 
-	const filteredOutCount = allImages.value.length - matchingImages.value.length - erroredUrls.value.length;
 	const allImagesFromCurrentTabAreSelected = displayedImages.value.every(isIncludedIn(selectedImages.value));
 
 	return html`
@@ -69,7 +69,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						<//>
 					</li>
 
-					${filteredOutCount > 0 &&
+					${filteredOuImages.value.length > 0 &&
 					html`
 						<li>
 							<${Tab}
@@ -78,11 +78,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 								input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 							>
 								<${Circle} class="bg-slate-600 text-white">-<//>
-								${filteredOutCount} filtered out
+								${filteredOuImages.value.length} filtered out
 							<//>
 						</li>
 					`}
-					${erroredUrls.value.length > 0 &&
+					${erroredImages.value.length > 0 &&
 					html`
 						<li>
 							<${Tab}
@@ -91,7 +91,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 								input=${{ name: 'visibility', value: 'errors', checked: tab.value === 'errors' }}
 							>
 								<${Circle} class="bg-red-600 text-white">×<//>
-								${erroredUrls.value.length} ${erroredUrls.value.length === 1 ? 'error' : 'errors'}
+								${erroredImages.value.length} ${erroredImages.value.length === 1 ? 'error' : 'errors'}
 							<//>
 						</li>
 					`}
@@ -122,7 +122,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 					type="button"
 					class="h-6 w-6 font-bold"
 					aria-label="Fewer columns"
-					onClick=${() => updateOption('columns', Math.max(1, (options.value?.columns || 0) - 1))}
+					onClick=${() => updateOptions({ columns: Math.max(1, (options.value?.columns || 0) - 1) })}
 				>
 					-
 				</button>
@@ -133,7 +133,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 					type="button"
 					class="h-6 w-6 font-bold"
 					aria-label="More columns"
-					onClick=${() => updateOption('columns', Math.min((options.value?.columns || 0) + 1, 6))}
+					onClick=${() => updateOptions({ columns: Math.min((options.value?.columns || 0) + 1, 6) })}
 				>
 					+
 				</button>
@@ -239,7 +239,7 @@ function ImageCard({ imageUrl, ...props }) {
 				stats.data.value.status === 'error'
 					? html`<${ImageError}
 							onClick=${() => {
-								erroredUrls.value = erroredUrls.value.filter(isNotStrictEqual(imageUrl));
+								erroredImages.value = erroredImages.value.filter(isNotStrictEqual(imageUrl));
 								stats.reset();
 								retryCount.value++;
 							}}

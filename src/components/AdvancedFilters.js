@@ -7,14 +7,14 @@ import html, { useEffect, useRef } from '../html.js';
 const noUiSlider = /** @type {NoUiSlider} */ (/** @type {any} */ (globalThis).noUiSlider);
 
 import { Checkbox } from './Checkbox.js';
-import { defaults, options, updateOption } from './data.js';
+import { defaults, options, updateOptions } from './data.js';
 
 export function AdvancedFilters() {
 	const widthSliderRef = useSlider('width');
 	const heightSliderRef = useSlider('height');
 
 	const setCheckboxOption = (/** @type {keyof import('./data.js').Options} */ key) => (/** @type {Event} */ e) => {
-		updateOption(key, /** @type {HTMLInputElement} */ (e.currentTarget).checked);
+		updateOptions({ [key]: /** @type {HTMLInputElement} */ (e.currentTarget).checked });
 	};
 
 	return html`
@@ -155,9 +155,10 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 		});
 
 		slider.noUiSlider?.on('update', (/** @type [number, number] */ [min, max]) => {
-			// TODO: Batch updates
-			updateOption(`filter_min_${dimension}`, min);
-			updateOption(`filter_max_${dimension}`, max);
+			updateOptions({
+				[`filter_min_${dimension}`]: min,
+				[`filter_max_${dimension}`]: max,
+			});
 		});
 
 		return () => {

@@ -1,5 +1,5 @@
 // @ts-check
-import { options } from './data';
+import { options } from './data.js';
 
 export const downloadImages = (/** @type {string[]} */ imagesToDownload) =>
 	new Promise((resolve) => {

@@ -59,14 +59,14 @@ export async function findImages(
 	function extractImagesFromSelector(/** @type {string} */ selector) {
 		const images = /** @type {Set<string>} */ (new Set());
 		context.document.querySelectorAll(selector).forEach((element) => {
-			const extracted = extractImagesFromElement(element);
-			extracted?.forEach(images.add, images);
+			const urls = extractImageUrlsFromElement(element);
+			urls?.forEach((url) => images.add(relativeUrlToAbsolute(url)));
 		});
 		return [...images];
 	}
 
 	/** @returns {string[] | null | undefined} */
-	function extractImagesFromElement(/** @type {Element} */ element) {
+	function extractImageUrlsFromElement(/** @type {Element} */ element) {
 		if (element.tagName.toLowerCase() === 'img') {
 			const images = [];
 
@@ -186,7 +186,7 @@ export async function findImages(
 
 	return {
 		allImages: extractImagesFromSelector('img, image, source, use, a, [class], [style]'),
-		linkedImages: extractImagesFromSelector('a'), // Do not merge into `allImages` - we want to preserve the original order of images from the DOM
+		linkedImages: extractImagesFromSelector('a'), // Do not merge into `allImages` - we want to preserve the order of images from the DOM
 		origin: context.window.location.origin,
 	};
 }

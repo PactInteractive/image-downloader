@@ -1,6 +1,6 @@
 // @ts-check
 import { computed, effect, signal } from '../html.js';
-import { isNotIncludedIn, unique } from '../utils.js';
+import { unique } from '../utils.js';
 import { deduplicateImages } from './deduplicateImages.js';
 import { findImages } from './findImages.js';
 
@@ -17,7 +17,7 @@ export const imagesCache = signal(null); // Not displayed; only used for filteri
 export const loadedImages = signal([]);
 
 /** @type {import('../html.js').Signal<string[]>} */
-export const erroredUrls = signal([]);
+export const erroredImages = signal([]);
 
 export const matchingImages = computed(() => {
 	if (!options.value) return [];
@@ -77,7 +77,7 @@ export const matchingImages = computed(() => {
 			(!options.value.filter_max_width_enabled || image.naturalWidth <= options.value.filter_max_width) &&
 			(!options.value.filter_min_height_enabled || options.value.filter_min_height <= image.naturalHeight) &&
 			(!options.value.filter_max_height_enabled || image.naturalHeight <= options.value.filter_max_height) &&
-			!erroredUrls.value.includes(url)
+			!erroredImages.value.includes(url)
 		);
 	});
 
@@ -88,7 +88,9 @@ export const matchingImages = computed(() => {
 	return filtered;
 });
 
-export const filteredOuImages = computed(() => allImages.value.filter(isNotIncludedIn(matchingImages.value)));
+export const filteredOuImages = computed(() =>
+	allImages.value.filter((url) => !matchingImages.value.includes(url) && !erroredImages.value.includes(url))
+);
 
 /** @type {import('../html.js').Signal<string[]>} */
 export const selectedImages = signal([]);
@@ -96,13 +98,13 @@ export const selectedImages = signal([]);
 export const tab = signal('matching');
 
 export const displayedImages = computed(() => {
-	if (tab.value === 'filtered_out') {
-		return allImages.value.filter((url) => !matchingImages.value.includes(url) && !erroredUrls.value.includes(url));
-	}
-	if (tab.value === 'errors') {
-		return allImages.value.filter((url) => erroredUrls.value.includes(url));
-	}
-	return matchingImages.value;
+	return (
+		{
+			matching: matchingImages.value,
+			filtered_out: filteredOuImages.value,
+			errors: erroredImages.value,
+		}[tab.value] ?? []
+	);
 });
 
 export const defaults = {
@@ -141,18 +143,18 @@ export const defaults = {
 /** @type {import('../html.js').Signal<Options | null>} */
 export const options = signal(null);
 
-/**
- * @template {keyof Options} K
- * @param {K} key
- * @param {Options[K]} value
- */
-export function updateOption(key, value) {
+/** @template {keyof Options} K */
+export function updateOption(/** @type {K} */ key, /** @type {Options[K]} */ value) {
 	if (!options.value) return;
 
 	options.value = { ...options.value, [key]: value };
 }
 
-initOptions();
+export function updateOptions(/** @type {Partial<Options>} */ newOptions) {
+	if (!options.value) return;
+
+	options.value = { ...options.value, ...newOptions };
+}
 
 // Store options
 effect(() => {
@@ -248,9 +250,18 @@ export function loadImagesFromActiveTab(/** @type {{ waitForIdleDOM: number | fa
 				})
 				.then((messages) => {
 					loadedImages.value = [];
-					erroredUrls.value = [];
-					allImages.value = unique(messages.flatMap((message) => message?.result?.allImages || []));
-					linkedImages.value = unique(messages.flatMap((message) => message?.result?.linkedImages || []));
+					erroredImages.value = [];
+					allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
+					linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));
+					for (const message of messages) {
+						if (message.result?.origin) {
+							try {
+								hostname.value = new URL(message?.result?.origin).hostname;
+							} catch (error) {
+								// ignore
+							}
+						}
+					}
 					if (!waitForIdleDOM) {
 						loadImagesFromActiveTab({ waitForIdleDOM: 1000 });
 					}
@@ -290,16 +301,5 @@ function reloadImagesWhenPageLoads(/** @type {number}*/ tabId, /** @type {any} *
 chrome.tabs.onUpdated.addListener(reloadImagesWhenPageLoads);
 chrome.tabs.onActivated.addListener((activeInfo) => reloadImagesWhenPageLoads(0, activeInfo, null)); // TODO: Verify
 
-// DEPRECATED
-export function updateOptions(/** @type {Partial<Options> | ((opts: Options) => Partial<Options>)} */ changes) {
-	if (!options.value) return;
-
-	const next = typeof changes === 'function' ? changes(options.value) : changes;
-	if (!(next && Object.keys(next).length > 0)) return;
-
-	options.value = { ...options.value, ...next };
-}
-
-export function useOptions() {
-	return [options, updateOptions];
-}
+// Initialize
+initOptions().then(() => loadImagesFromActiveTab({ waitForIdleDOM: false }));
