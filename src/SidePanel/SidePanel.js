@@ -1,3 +1,4 @@
+// @ts-check
 import { App } from '../components/App.js';
 import html, { render } from '../html.js';
 

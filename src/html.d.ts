@@ -30,3 +30,5 @@ export interface ForProps<T> {
 }
 
 export function For<T>(props: ForProps<T>): any;
+
+export function render(vnode: any, parent: HTMLElement, replaceNode?: HTMLElement | HTMLElement[]): void;

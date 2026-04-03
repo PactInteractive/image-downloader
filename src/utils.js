@@ -1,6 +1,3 @@
-/** @type {(a: number) => (b: number) => number} */
-export const add = (a) => (b) => a + b;
-
 /** @type {<T>(array: T[]) => (item: T) => boolean} */
 export const isIncludedIn = (array) => (item) => array.includes(item);
 

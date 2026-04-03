@@ -1,5 +1,5 @@
 // @ts-check
-import html, { useSignal } from '../html.js';
+import html, { useEffect, useSignal } from '../html.js';
 
 import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
@@ -8,7 +8,7 @@ import {
 	allImages,
 	displayedImages,
 	erroredImages,
-	filteredOuImages,
+	filteredOutImages,
 	matchingImages,
 	options,
 	selectedImages,
@@ -69,7 +69,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						<//>
 					</li>
 
-					${filteredOuImages.value.length > 0 &&
+					${filteredOutImages.value.length > 0 &&
 					html`
 						<li>
 							<${Tab}
@@ -78,7 +78,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 								input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 							>
 								<${Circle} class="bg-slate-600 text-white">-<//>
-								${filteredOuImages.value.length} filtered out
+								${filteredOutImages.value.length} filtered out
 							<//>
 						</li>
 					`}
@@ -221,7 +221,7 @@ function ImageCard({ imageUrl, ...props }) {
 	const isSelected = selectedImages.value.includes(imageUrl);
 
 	// TODO: Reset stats when imageUrl changes to avoid showing stale data
-	// useEffect(stats.reset, [imageUrl, stats.reset]);
+	useEffect(stats.reset, [imageUrl, stats.reset]);
 
 	return html`
 		<div
@@ -240,8 +240,8 @@ function ImageCard({ imageUrl, ...props }) {
 					? html`<${ImageError}
 							onClick=${() => {
 								erroredImages.value = erroredImages.value.filter(isNotStrictEqual(imageUrl));
-								stats.reset();
 								retryCount.value++;
+								stats.reset();
 							}}
 						/>`
 					: html`<img

@@ -1,12 +1,19 @@
 // @ts-check
-import html, { For } from '../html.js';
+import html, { For, useEffect } from '../html.js';
 
-import { allImages, erroredImages, imagesCache, loadedImages, options } from './data.js';
+import { allImages, erroredImages, imagesCache, initialize, loadedImages, loadImagesFromActiveTab, options, reloadImagesWhenPageLoads } from './data.js';
 import { Footer } from './Footer.js';
 import { Header } from './Header.js';
 import { Images } from './Images.js';
 
 export function App() {
+	useEffect(() => {
+		chrome.tabs.onUpdated.addListener(reloadImagesWhenPageLoads);
+		chrome.tabs.onActivated.addListener(({ tabId }) => reloadImagesWhenPageLoads(tabId, {}, null));
+
+		initialize().then(() => loadImagesFromActiveTab({ waitForIdleDOM: false }));
+	}, []);
+
 	if (!options.value) {
 		return html`<div class="p-4">Loading...</div>`;
 	}

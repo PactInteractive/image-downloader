@@ -1,36 +1,32 @@
 import { beforeEach, expect, it, mock } from 'bun:test';
+import { Window } from 'happy-dom';
 import { mockChrome } from '../test-helpers';
 
-declare var global: any;
+const window = new Window();
+(globalThis as any).document = window.document;
+(globalThis as any).window = window;
+if (!window.SyntaxError) window.SyntaxError = SyntaxError;
+(globalThis as any).localStorage = window.localStorage;
 
 beforeEach(() => {
-	// Set up happy-dom for DOM mocking
-	const { Window } = require('happy-dom');
-	const window = new Window();
-	global.document = window.document;
-	global.window = window;
-	Object.defineProperty(global, 'localStorage', { value: window.localStorage, writable: true, configurable: true });
-	// Patch missing constructor in happy-dom
-	if (!window.SyntaxError) window.SyntaxError = SyntaxError;
-
-	global.chrome = mockChrome();
-	global.chrome.storage = {
+	(global as any).chrome = mockChrome();
+	(global as any).chrome.storage = {
 		local: {
 			get: async () => ({}),
 			set: async () => {},
 		},
 	};
-	global.chrome.tabs.onUpdated = { addListener: mock(), removeListener: mock() };
-	global.chrome.tabs.onActivated = { addListener: mock(), removeListener: mock() };
-	global.chrome.action = {
+	(global as any).chrome.tabs.onUpdated = { addListener: mock(), removeListener: mock() };
+	(global as any).chrome.tabs.onActivated = { addListener: mock(), removeListener: mock() };
+	(global as any).chrome.action = {
 		setPopup: mock(),
 		openPopup: mock(),
 	};
-	global.chrome.sidePanel = {
+	(global as any).chrome.sidePanel = {
 		open: mock(),
 	};
-	global.chrome.windows.getCurrent = mock((callback: any) => callback({ id: 'window' }));
-	global.chrome.tabs.query = mock((query: any, callback: any) => callback([{ id: 'tab-1' }]));
+	(global as any).chrome.windows.getCurrent = mock((callback: any) => callback({ id: 'window' }));
+	(global as any).chrome.tabs.query = mock((query: any, callback: any) => callback([{ id: 'tab-1' }]));
 	const executeScriptMock = mock(() =>
 		Promise.resolve([
 			{
@@ -46,10 +42,10 @@ beforeEach(() => {
 			},
 		])
 	);
-	global.chrome.scripting = {
+	(global as any).chrome.scripting = {
 		executeScript: executeScriptMock,
 	};
-	global.noUiSlider = {
+	(global as any).noUiSlider = {
 		create: mock((element: any, options: any) => {
 			element.noUiSlider = {
 				on: mock(),
@@ -58,14 +54,11 @@ beforeEach(() => {
 		}),
 	};
 	document.body.innerHTML = '<main></main>';
-	global.React = require('../../lib/react-18.3.1.min');
-	global.ReactDOM = require('../../lib/react-dom-18.3.1.min');
-	require('./Popup');
 });
 
 it(`renders images`, async () => {
-	// React 18's concurrent rendering uses MessageChannel for scheduling
-	// Wait for React to finish rendering and effects to run
+	require('./Popup');
+
 	await new Promise((resolve) => setTimeout(resolve, 50));
 
 	expect(document.querySelectorAll('#images_container img').length).toBe(3);

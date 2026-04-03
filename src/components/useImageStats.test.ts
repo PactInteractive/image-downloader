@@ -1,46 +1,15 @@
-import { beforeEach, describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'bun:test';
+import { Window } from 'happy-dom';
+import { h, render } from '../../lib/preact.module.js';
 
-type UseImageStatsReturn = {
-	data: {
-		width: number;
-		height: number;
-		size: { bytes: number; formatted: string; fromCache: boolean } | null;
-		extension: string;
-		status: 'idle' | 'loaded' | 'error';
-	};
-	onLoad: (event: { currentTarget: HTMLImageElement }) => void;
-	onError: () => void;
-	reset: () => void;
-};
+import { formatFileSize, getImageExtension, getImageResourceSize, useImageStats } from './useImageStats.js';
 
-declare global {
-	var React: any;
-	var ReactDOM: any;
-}
+// Set up DOM globals
+const window = new Window();
+(globalThis as any).document = window.document;
+(globalThis as any).window = window;
+if (!window.SyntaxError) window.SyntaxError = SyntaxError;
 
-// Set up React globals before importing the hook (required by html.js at module load time)
-global.React = require('../../lib/react-18.3.1.min');
-global.ReactDOM = require('../../lib/react-dom-18.3.1.min');
-
-// Import the hook after React globals are set
-const { useImageStats, getImageExtension, getImageResourceSize, formatFileSize } = require('./useImageStats.js') as {
-	useImageStats: () => UseImageStatsReturn;
-	getImageExtension: (url: string) => string;
-	getImageResourceSize: (img: { src: string }) => { bytes: number; formatted: string; fromCache: boolean } | null;
-	formatFileSize: (bytes: number) => string;
-};
-
-beforeEach(() => {
-	// Set up happy-dom for DOM mocking
-	const { Window } = require('happy-dom');
-	const window = new Window();
-	global.document = window.document;
-	global.window = window;
-
-	document.body.innerHTML = '<div id="root"></div>';
-});
-
-// Helper to test hooks by rendering a component that captures the result
 async function testHook<T>(hookFn: () => T): Promise<T> {
 	let result: T | undefined;
 	const TestComponent = () => {
@@ -48,17 +17,11 @@ async function testHook<T>(hookFn: () => T): Promise<T> {
 		return null;
 	};
 
-	const rootElement = document.getElementById('root');
-	const root = global.ReactDOM.createRoot(rootElement);
+	const rootElement = document.createElement('div');
+	document.body.appendChild(rootElement);
+	render(h(TestComponent, null), rootElement);
 
-	// Render the component
-	root.render(global.React.createElement(TestComponent));
-
-	// React 18's concurrent rendering uses MessageChannel for scheduling
-	// Wait for React to finish rendering and effects to run
 	await new Promise((resolve) => setTimeout(resolve, 50));
-
-	root.unmount();
 
 	if (!result) {
 		throw new Error('Hook result was not captured');
@@ -69,27 +32,27 @@ async function testHook<T>(hookFn: () => T): Promise<T> {
 
 describe('useImageStats', () => {
 	it('should initialize with default data state', async () => {
-		const result = (await testHook(useImageStats)) as UseImageStatsReturn;
+		const result = await testHook(useImageStats);
 
-		expect(result.data.width).toBe(0);
-		expect(result.data.height).toBe(0);
-		expect(result.data.size).toBe(null);
-		expect(result.data.extension).toBe('');
-		expect(result.data.status).toBe('idle');
+		expect(result.data.value.width).toBe(0);
+		expect(result.data.value.height).toBe(0);
+		expect(result.data.value.size).toBe(null);
+		expect(result.data.value.extension).toBe('');
+		expect(result.data.value.status).toBe('idle');
 	});
 
 	it('should have callable onLoad handler', async () => {
-		const result = (await testHook(useImageStats)) as UseImageStatsReturn;
+		const result = await testHook(useImageStats);
 		expect(typeof result.onLoad).toBe('function');
 	});
 
 	it('should have callable onError handler', async () => {
-		const result = (await testHook(useImageStats)) as UseImageStatsReturn;
+		const result = await testHook(useImageStats);
 		expect(typeof result.onError).toBe('function');
 	});
 
 	it('should have callable reset handler', async () => {
-		const result = (await testHook(useImageStats)) as UseImageStatsReturn;
+		const result = await testHook(useImageStats);
 		expect(typeof result.reset).toBe('function');
 	});
 });
@@ -197,13 +160,12 @@ describe('getImageExtension', () => {
 
 describe('getImageResourceSize', () => {
 	it('returns null for empty src', () => {
-		expect(getImageResourceSize({ src: '' })).toBe(null);
+		expect(getImageResourceSize({ src: '' } as HTMLImageElement)).toBe(null);
 	});
 
 	it('estimates size from base64 data URI (PNG)', () => {
-		// 'PNG image data' = 14 bytes
 		const url = `data:image/png;base64,${btoa('PNG image data')}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toEqual({
 			bytes: 14,
 			formatted: '0KB',
@@ -212,9 +174,9 @@ describe('getImageResourceSize', () => {
 	});
 
 	it('estimates size from base64 data URI (SVG)', () => {
-		const svgContent = '<svg></svg>'; // 11 bytes
+		const svgContent = '<svg></svg>';
 		const url = `data:image/svg+xml;base64,${btoa(svgContent)}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toEqual({
 			bytes: 11,
 			formatted: '0KB',
@@ -224,7 +186,7 @@ describe('getImageResourceSize', () => {
 
 	it('estimates size from base64 data URI (JPEG)', () => {
 		const url = `data:image/jpeg;base64,${btoa('fake jpeg bytes')}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toEqual({
 			bytes: 15,
 			formatted: '0KB',
@@ -234,7 +196,7 @@ describe('getImageResourceSize', () => {
 
 	it('estimates size from base64 data URI (GIF)', () => {
 		const url = `data:image/gif;base64,${btoa('GIF89a')}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toEqual({
 			bytes: 6,
 			formatted: '0KB',
@@ -244,7 +206,7 @@ describe('getImageResourceSize', () => {
 
 	it('estimates size from base64 data URI (WebP)', () => {
 		const url = `data:image/webp;base64,${btoa('webp data here')}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toEqual({
 			bytes: 14,
 			formatted: '0KB',
@@ -255,7 +217,7 @@ describe('getImageResourceSize', () => {
 	it('estimates size from text-encoded data URI (SVG)', () => {
 		const svgContent = '<svg xmlns="http://www.w3.org/2000/svg"></svg>';
 		const url = `data:image/svg+xml;utf8,${svgContent}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toEqual({
 			bytes: svgContent.length,
 			formatted: '0KB',
@@ -266,9 +228,9 @@ describe('getImageResourceSize', () => {
 	it('estimates size from URL-encoded data URI', () => {
 		const content = 'hello%20world';
 		const url = `data:image/svg+xml,${content}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toEqual({
-			bytes: 11, // "hello world" = 11 bytes after decode
+			bytes: 11,
 			formatted: '0KB',
 			fromCache: false,
 		});
@@ -276,15 +238,14 @@ describe('getImageResourceSize', () => {
 
 	it('returns null for invalid base64 data URI', () => {
 		const url = 'data:image/png;base64,!!!invalid!!!';
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result).toBe(null);
 	});
 
 	it('formats larger base64 data URIs correctly', () => {
-		// Create a string > 1024 bytes
 		const largeContent = 'x'.repeat(2048);
 		const url = `data:image/png;base64,${btoa(largeContent)}`;
-		const result = getImageResourceSize({ src: url });
+		const result = getImageResourceSize({ src: url } as HTMLImageElement);
 		expect(result?.bytes).toBe(2048);
 		expect(result?.formatted).toBe('2KB');
 		expect(result?.fromCache).toBe(false);

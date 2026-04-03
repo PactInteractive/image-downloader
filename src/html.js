@@ -1,14 +1,15 @@
+// @ts-check
 import htm from '../lib/htm.js';
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from '../lib/preact-hooks.module.js';
 import { Fragment, h, render } from '../lib/preact.module.js';
 import { useComputed, useSignal, useSignalEffect } from '../lib/signals.module.js';
-export { computed, effect, signal } from '../../lib/signals-core.module.js';
+export { computed, effect, signal } from '../lib/signals-core.module.js';
 
 const html = htm.bind(h);
 export default html;
 
 // React-compatible hooks (from preact/hooks — drop-in replacement)
-export { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState };
+export { useEffect, useLayoutEffect, useMemo, useRef, useState };
 
 // Signals
 export { useComputed, useSignal, useSignalEffect };
@@ -25,8 +26,8 @@ export { For };
  */
 function For({ each, fallback, getKey, children }) {
 	const cache = useMemo(() => new Map(), []);
-	const list = typeof each === 'function' ? each() : each;
-	const listValue = list && typeof list.value !== 'undefined' ? list.value : list;
+	const list = /** @type {import('./html.js').Signal<any[]>} */ (typeof each === 'function' ? each() : each);
+	const listValue = /** @type {any[]} */ (list && typeof list.value !== 'undefined' ? list.value : list);
 
 	if (!listValue || !listValue.length) return fallback || null;
 

@@ -88,7 +88,7 @@ export const matchingImages = computed(() => {
 	return filtered;
 });
 
-export const filteredOuImages = computed(() =>
+export const filteredOutImages = computed(() =>
 	allImages.value.filter((url) => !matchingImages.value.includes(url) && !erroredImages.value.includes(url))
 );
 
@@ -101,7 +101,7 @@ export const displayedImages = computed(() => {
 	return (
 		{
 			matching: matchingImages.value,
-			filtered_out: filteredOuImages.value,
+			filtered_out: filteredOutImages.value,
 			errors: erroredImages.value,
 		}[tab.value] ?? []
 	);
@@ -163,7 +163,7 @@ effect(() => {
 	}
 });
 
-async function initOptions() {
+export async function initialize() {
 	await migrateFromLocalStorage();
 	const stored = await chrome.storage.local.get(null);
 	/** @type {Partial<Options>} */
@@ -276,7 +276,11 @@ export function loadImagesFromActiveTab(/** @type {{ waitForIdleDOM: number | fa
 	});
 }
 
-function reloadImagesWhenPageLoads(/** @type {number}*/ tabId, /** @type {any} */ changeInfo, /** @type {any} */ tab) {
+export function reloadImagesWhenPageLoads(
+	/** @type {number}*/ tabId,
+	/** @type {any} */ changeInfo,
+	/** @type {any} */ tab
+) {
 	if (!tab) {
 		hostname.value = '';
 		loadImagesFromActiveTab({ waitForIdleDOM: 1 });
@@ -297,9 +301,3 @@ function reloadImagesWhenPageLoads(/** @type {number}*/ tabId, /** @type {any} *
 		}
 	}
 }
-
-chrome.tabs.onUpdated.addListener(reloadImagesWhenPageLoads);
-chrome.tabs.onActivated.addListener((activeInfo) => reloadImagesWhenPageLoads(0, activeInfo, null)); // TODO: Verify
-
-// Initialize
-initOptions().then(() => loadImagesFromActiveTab({ waitForIdleDOM: false }));

@@ -155,12 +155,21 @@ describe('deduplicateImages', () => {
 		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[1]]);
 	});
 
-	it('should deduplicate based on special query params', () => {
+	it('should deduplicate based on the "url" query params', () => {
 		const urls = [
 			'https://example.com/photo.jpg',
 			`https://example.com/image?url=${encodeURIComponent('https://example.com/photo.jpg')}`,
 		];
 		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[0]]);
+	});
+
+	it('should deduplicate based on the "domain" query params', () => {
+		const urls = [
+			'https://www.google.com/s2/favicons?domain=css-tricks.com&sz=256',
+			'https://www.google.com/s2/favicons?domain=stackoverflow.com&sz=256',
+			'https://www.google.com/s2/favicons?domain=reddit.com&sz=256',
+		];
+		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
 	});
 
 	it('should deduplicate based on same filename across subdomains', () => {

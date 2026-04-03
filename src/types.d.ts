@@ -1,4 +1,5 @@
 interface Window {
+	__devIframe?: { current?: HTMLIframeElement };
 	__observer?: MutationObserver;
 	__idleDomTimer?: ReturnType<typeof setTimeout>;
 }

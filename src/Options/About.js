@@ -1,3 +1,4 @@
+// @ts-check
 import { ExternalLink } from '../components/ExternalLink.js';
 import html from '../html.js';
 

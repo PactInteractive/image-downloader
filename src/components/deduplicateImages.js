@@ -42,26 +42,36 @@ function getNormalizedBaseKey(/** @type {string} */ url) {
 		const identifierMatch = nameWithoutExtension.match(/([a-zA-Z0-9]{6,})$/);
 		let identifier = identifierMatch ? identifierMatch[1] : basename;
 
-		// Extract `?url=`
-		const urlParam = parsed.searchParams.get('url');
-		if (urlParam) {
-			const decodedUrl = decodeURIComponent(urlParam);
+		// Extract special query params
+		const urlParamKeys = ['url', 'domain'];
+		for (const key of urlParamKeys) {
+			const value = parsed.searchParams.get(key);
+			if (value) {
+				const decodedUrl = decodeURIComponent(value);
 
-			if (decodedUrl.startsWith('http:') || decodedUrl.startsWith('https:')) {
-				const ampIndex = decodedUrl.indexOf('&');
-				return ampIndex !== -1
-					? getNormalizedBaseKey(decodedUrl.slice(0, ampIndex) + '?' + decodedUrl.slice(ampIndex + 1))
-					: getNormalizedBaseKey(decodedUrl);
-			}
-
-			if (decodedUrl.startsWith('/')) {
-				const ampIndex = decodedUrl.indexOf('&');
-				if (ampIndex !== -1) {
-					return getNormalizedBaseKey(
-						parsed.origin + decodedUrl.slice(0, ampIndex) + '?' + decodedUrl.slice(ampIndex + 1)
-					);
+				if (decodedUrl.startsWith('http:') || decodedUrl.startsWith('https:')) {
+					const ampIndex = decodedUrl.indexOf('&');
+					return ampIndex !== -1
+						? getNormalizedBaseKey(decodedUrl.slice(0, ampIndex) + '?' + decodedUrl.slice(ampIndex + 1))
+						: getNormalizedBaseKey(decodedUrl);
 				}
-				return getNormalizedBaseKey(parsed.origin + decodedUrl);
+
+				if (decodedUrl.startsWith('/')) {
+					const ampIndex = decodedUrl.indexOf('&');
+					if (ampIndex !== -1) {
+						return getNormalizedBaseKey(
+							parsed.origin + decodedUrl.slice(0, ampIndex) + '?' + decodedUrl.slice(ampIndex + 1)
+						);
+					}
+					return getNormalizedBaseKey(parsed.origin + decodedUrl);
+				}
+
+				// Attempt to add a protocol and parse the value
+				try {
+					return new URL(`https://${value}`).href;
+				} catch (error) {
+					// ignore
+				}
 			}
 		}
 
