@@ -1,6 +1,11 @@
 // @ts-check
 import html, { useEffect, useRef } from '../html.js';
 
+/** @typedef {{ create(el: Element, opts: Record<string, any>): void }} NoUiSlider */
+/** @typedef {HTMLDivElement & { noUiSlider?: { on(event: string, callback: Function): void; destroy(): void } }} SliderElement */
+
+const noUiSlider = /** @type {NoUiSlider} */ (/** @type {any} */ (globalThis).noUiSlider);
+
 import { Checkbox } from './Checkbox.js';
 import { defaults, options, updateOption } from './data.js';
 
@@ -125,7 +130,7 @@ export function AdvancedFilters() {
 }
 
 function useSlider(/** @type {'width' | 'height'} */ dimension) {
-	const sliderRef = useRef(/** @type {HTMLDivElement | null} */ (null));
+	const sliderRef = useRef(/** @type {SliderElement | null} */ (null));
 
 	useEffect(() => {
 		const slider = sliderRef.current;
@@ -150,7 +155,7 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 		});
 
 		slider.noUiSlider?.on('update', (/** @type [number, number] */ [min, max]) => {
-			// TODO: Batch
+			// TODO: Batch updates
 			updateOption(`filter_min_${dimension}`, min);
 			updateOption(`filter_max_${dimension}`, max);
 		});

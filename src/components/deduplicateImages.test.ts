@@ -33,7 +33,7 @@ describe('deduplicateImages', () => {
 			const url = match?.[1] ?? selector;
 			return images[url] ?? null;
 		},
-	};
+	} as unknown as HTMLDivElement;
 
 	it('should handle empty array', () => {
 		expect(deduplicateImages([], imagesCache)).toEqual([]);
