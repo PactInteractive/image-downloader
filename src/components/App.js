@@ -7,7 +7,6 @@ import {
 	imagesCache,
 	initialize,
 	initialized,
-	loadedImages,
 	loadImagesFromActiveTab,
 	reloadImagesWhenPageLoads,
 } from './data.js';
@@ -33,12 +32,7 @@ export function App() {
 		<div id="images_cache" ref=${(/** @type {HTMLDivElement} */ element) => (imagesCache.value = element)} hidden>
 			<${For} each=${allImages.value}>
 				${(/** @type {string} */ url) => html`
-					<img
-						key=${url}
-						src=${url}
-						onLoad=${() => (loadedImages.value = [...loadedImages.value, url])}
-						onError=${() => (erroredImages.value = [...erroredImages.value, url])}
-					/>
+					<img key=${url} src=${url} onError=${() => (erroredImages.value = [...erroredImages.value, url])} />
 				`}
 			<//>
 		</div>

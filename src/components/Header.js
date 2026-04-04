@@ -3,6 +3,7 @@ import html from '../html.js';
 
 import { toggle } from '../utils.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
+import { Bubble } from './Bubble.js';
 import {
 	filterMaxHeightEnabled,
 	filterMaxWidthEnabled,
@@ -89,13 +90,9 @@ export function Header(/** @type {Object} */ props) {
 						src="/images/chevron.svg"
 					/>
 
-					<small
-						class="${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
-							? 'ease-elastic duration-400'
-							: 'scale-0'} corner-round absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-transform"
-					>
+					<${Bubble} show=${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0}>
 						${numberOfActiveAdvancedFilters}
-					</small>
+					<//>
 				</button>
 
 				<button

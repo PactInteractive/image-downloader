@@ -1,6 +1,6 @@
 // @ts-check
 import { action, computed, effect, signal } from '../html.js';
-import { unique } from '../utils.js';
+import { isIncludedIn, unique } from '../utils.js';
 import { deduplicateImages } from './deduplicateImages.js';
 import { findImages } from './findImages.js';
 
@@ -179,11 +179,7 @@ export const linkedImages = signal([]);
 /** @type {import('../html.js').Signal<HTMLDivElement | null>} */
 export const imagesCache = signal(null); // Not displayed; only used for filtering by natural width / height
 
-/** @type {import('../html.js').Signal<string[]>} */
-export const loadedImages = signal([]);
-
-/** @type {import('../html.js').Signal<string[]>} */
-export const erroredImages = signal([]);
+export const tab = signal('matching');
 
 export const matchingImages = computed(() => {
 	let filtered = onlyImagesFromLinks.value ? linkedImages.value : allImages.value;
@@ -249,12 +245,18 @@ export const matchingImages = computed(() => {
 
 	return filtered;
 });
+export const selectedMatchingImages = computed(() => selectedImages.value.filter(isIncludedIn(matchingImages.value)));
 
 export const filteredOutImages = computed(() =>
 	allImages.value.filter((url) => !matchingImages.value.includes(url) && !erroredImages.value.includes(url))
 );
+export const selectedFilteredOutImages = computed(() =>
+	selectedImages.value.filter(isIncludedIn(filteredOutImages.value))
+);
 
-export const tab = signal('matching');
+/** @type {import('../html.js').Signal<string[]>} */
+export const erroredImages = signal([]);
+export const selectedErroredImages = computed(() => selectedImages.value.filter(isIncludedIn(erroredImages.value)));
 
 export const displayedImages = computed(() => {
 	return (
@@ -296,7 +298,6 @@ export const loadImagesFromActiveTab = action(
 						args: [{ waitForIdleDOM }],
 					})
 					.then((messages) => {
-						loadedImages.value = [];
 						erroredImages.value = [];
 						allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
 						linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));

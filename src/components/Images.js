@@ -11,7 +11,10 @@ import {
 	erroredImages,
 	filteredOutImages,
 	matchingImages,
+	selectedErroredImages,
+	selectedFilteredOutImages,
 	selectedImages,
+	selectedMatchingImages,
 	tab,
 } from './data.js';
 import { useImageStats } from './useImageStats.js';
@@ -44,9 +47,8 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 
 	return html`
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
-			<${Badge}
-				as="ul"
-				class="overflow-hidden border-slate-300"
+			<ul
+				class="flex items-center overflow-hidden rounded-full border border-slate-300 text-xs text-nowrap"
 				onChange=${
 					/** @param {Event} e */ (e) => {
 						tab.value = /** @type {HTMLInputElement} */ (e.target).value;
@@ -59,7 +61,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						title="Images matching your filters"
 						input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
 					>
-						<${Circle} class="bg-green-600 text-white">+<//>
+						<${Circle} class="bg-green-600 text-white">
+							${selectedMatchingImages.value.length > 0
+								? html`<span class="text-2xs">${selectedMatchingImages.value.length}</span>`
+								: '+'}
+						<//>
 						${matchingImages.value.length} matching
 					<//>
 				</li>
@@ -72,7 +78,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 							title="Images removed by your filters"
 							input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 						>
-							<${Circle} class="bg-slate-600 text-white">-<//>
+							<${Circle} class="bg-slate-600 text-white">
+								${selectedFilteredOutImages.value.length > 0
+									? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
+									: '-'}
+							<//>
 							${filteredOutImages.value.length} filtered out
 						<//>
 					</li>
@@ -85,16 +95,19 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 							title="Images that failed to load"
 							input=${{ name: 'visibility', value: 'errors', checked: tab.value === 'errors' }}
 						>
-							<${Circle} class="bg-red-600 text-white">×<//>
+							<${Circle} class="bg-red-600 text-white">
+								${selectedErroredImages.value.length > 0
+									? html`<span class="text-2xs">${selectedErroredImages.value.length}</span>`
+									: '×'}
+							<//>
 							${erroredImages.value.length} ${erroredImages.value.length === 1 ? 'error' : 'errors'}
 						<//>
 					</li>
 				`}
-			<//>
+			</ul>
 
-			<${Badge}
-				as=${Checkbox}
-				class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
+			<${Checkbox}
+				class="flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 p-1 text-xs text-nowrap text-slate-600 transition-colors hover:bg-slate-100"
 				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
 				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
 				disabled=${allImages.value.length === 0}
@@ -158,24 +171,6 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 
 /**
  * @param {Object} props
- * @param {string | Function} [props.as]
- * @param {string} [props.class]
- * @param {any} [props.children]
- * @param {Object} [props.onChange]
- */
-function Badge({ as: Component = 'button', class: className = '', children, ...props }) {
-	return html`
-		<${Component}
-			class="${className} flex items-center rounded-full border text-xs text-nowrap"
-			...${Component === 'button' ? { type: 'button', ...props } : props}
-		>
-			${children}
-		<//>
-	`;
-}
-
-/**
- * @param {Object} props
  * @param {string} [props.class]
  * @param {any} [props.children]
  * @param {{ name: string, value: string, checked: boolean }} [props.input]
@@ -199,7 +194,10 @@ function Tab({ class: className = '', children, input, ...props }) {
  */
 function Circle({ class: className = '', children, ...props }) {
 	return html`
-		<span class="corner-round ${className} inline-block h-4 w-4 rounded-full text-center font-bold" ...${props}>
+		<span
+			class="corner-round ${className} inline-block h-4 min-w-4 rounded-full px-1 text-center font-bold"
+			...${props}
+		>
 			${children}
 		</span>
 	`;

@@ -18,6 +18,10 @@
 	text-shadow: 0 0 2px var(--color-slate-800);
 }
 
+@utility text-2xs {
+	font-size: 0.625rem;
+}
+
 @layer base {
 	* {
 		corner-shape: squircle;
