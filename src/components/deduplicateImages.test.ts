@@ -172,6 +172,17 @@ describe('deduplicateImages', () => {
 		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
 	});
 
+	it('should not deduplicate based on the first part of the path only', () => {
+		const urls = [
+			'https://images.cutoutmagic.com/6lkr4uWYb0JTl96g3yXwQunP6ETAEXNt/f21a849329d1/image.c212e62a427d-nobg-cutout.png',
+			'https://images.cutoutmagic.com/6lkr4uWYb0JTl96g3yXwQunP6ETAEXNt/9c1ecbba2c0a/7023E-startpage-wk8-16x9.lighting.nobg.jpg-2a2c40cfe1bd-cutout.png',
+			'https://images.cutoutmagic.com/6lkr4uWYb0JTl96g3yXwQunP6ETAEXNt/c8fc7a4c2e68/HBOl0yhaIAAe4Wg.chair.nobg.jpg-a96912f85dc3-cutout.png',
+			'https://images.cutoutmagic.com/6lkr4uWYb0JTl96g3yXwQunP6ETAEXNt/7b4f49831ed9/PH203361_rs.crop.chair.nobg.jpg-6c7d295a213b-cutout.png',
+			'https://images.cutoutmagic.com/6lkr4uWYb0JTl96g3yXwQunP6ETAEXNt/2d62773d552f/before.couch.nobg.jpg-7ad7bba4c6c1-cutout.png',
+		];
+		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+	});
+
 	it('should deduplicate based on same filename across subdomains', () => {
 		const urls = [
 			'https://preview.redd.it/abc123.jpeg?width=1080&crop=smart&auto=webp&s=7cf1d33c34ab20623b04dfc4f05b9a2320c44cad',

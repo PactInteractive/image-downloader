@@ -24,7 +24,7 @@ function Wrapper() {
 						class="flex-1 rounded bg-slate-700 px-3 py-1.5 text-sm text-slate-100 placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-500"
 						type="text"
 						value=${inputUrl.value}
-						onInput=${(/** @type {Event} */ e) => inputUrl.value = (/** @type {HTMLInputElement} */ (e.target)).value}
+						onInput=${(/** @type {Event} */ e) => (inputUrl.value = /** @type {HTMLInputElement} */ (e.target).value)}
 						placeholder="Enter URL..."
 					/>
 
@@ -41,7 +41,7 @@ function Wrapper() {
 					ref=${(/** @type {HTMLIFrameElement} */ iframe) => (window.__devIframe = iframe)}
 					src=${iframeUrl}
 					same-origin-referrerpolicy="no-referrer"
-					onLoad=${() => iframeLoaded.value += 1}
+					onLoad=${() => (iframeLoaded.value += 1)}
 				/>
 			</div>
 

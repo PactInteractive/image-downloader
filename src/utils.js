@@ -21,3 +21,18 @@ export const stopPropagation = (e) => e.stopPropagation();
 
 /** @type {<T>(values: T[]) => T[]} */
 export const unique = (values) => [...new Set(values)];
+
+// Signals
+export const increment = (/** @type {{ value: number }} */ signal) => () => signal.value++;
+
+export const decrement = (/** @type {{ value: number }} */ signal) => () => signal.value--;
+
+export const toggle = (/** @type {{ value: boolean }} */ signal) => () => (signal.value = !signal.value);
+
+export const setToCheckboxValue = (/** @type {{ value: boolean }} */ signal) => (/** @type {Event} */ e) => {
+	signal.value = /** @type {HTMLInputElement} */ (e.currentTarget).checked;
+};
+
+export const setToInvertedCheckboxValue = (/** @type {{ value: boolean }} */ signal) => (/** @type {Event} */ e) => {
+	signal.value = !(/** @type {HTMLInputElement} */ (e.currentTarget).checked);
+};

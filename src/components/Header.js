@@ -1,28 +1,35 @@
 // @ts-check
 import html from '../html.js';
 
+import { toggle } from '../utils.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
 import {
+	filterMaxHeightEnabled,
+	filterMaxWidthEnabled,
+	filterMinHeightEnabled,
+	filterMinWidthEnabled,
+	filterUrl,
+	filterUrlMode,
 	hostname,
 	limitedAccessHostnames,
 	loadImagesFromActiveTab,
-	options,
+	onlyImagesFromLinks,
+	onlyUniqueImages,
+	openMode,
 	scriptError,
-	updateOptions,
+	showAdvancedFilters,
 } from './data.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
 export function Header(/** @type {Object} */ props) {
-	/** @type {(keyof import('./data.js').Options)[]} */
-	const advancedFilterKeys = [
-		'filter_min_width_enabled',
-		'filter_max_width_enabled',
-		'filter_min_height_enabled',
-		'filter_max_height_enabled',
-		'only_unique_images',
-		'only_images_from_links',
-	];
-	const numberOfActiveAdvancedFilters = advancedFilterKeys.filter((key) => options.value?.[key]).length;
+	const numberOfActiveAdvancedFilters = [
+		filterMinWidthEnabled,
+		filterMaxWidthEnabled,
+		filterMinHeightEnabled,
+		filterMaxHeightEnabled,
+		onlyUniqueImages,
+		onlyImagesFromLinks,
+	].filter((s) => s.value).length;
 
 	return html`
 		<header ...${props}>
@@ -57,33 +64,33 @@ export function Header(/** @type {Object} */ props) {
 					type="text"
 					placeholder="Filter by URL"
 					title="Filter by parts of the URL or regular expressions."
-					value=${options.value?.filter_url}
+					value=${filterUrl.value}
 					class="flex-1"
 					onChange=${(/** @type {Event} */ e) =>
-						updateOptions({ filter_url: /** @type {HTMLInputElement} */ (e.currentTarget).value.trim() })}
+						(filterUrl.value = /** @type {HTMLInputElement} */ (e.currentTarget).value.trim())}
 				/>
 
 				<${UrlFilterMode}
 					id="url_filter_mode_select"
-					value=${options.value?.filter_url_mode}
+					value=${filterUrlMode.value}
 					onChange=${(/** @type {Event} */ e) =>
-						updateOptions({ filter_url_mode: /** @type {HTMLInputElement} */ (e.currentTarget).value })}
+						(filterUrlMode.value = /** @type {HTMLInputElement} */ (e.currentTarget).value)}
 				/>
 
 				<button
 					class="relative min-w-8"
-					title=${!options.value?.show_advanced_filters && numberOfActiveAdvancedFilters > 0
+					title=${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
 						? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
 						: 'Toggle advanced filters'}
-					onClick=${() => updateOptions({ show_advanced_filters: !options.value?.show_advanced_filters })}
+					onClick=${toggle(showAdvancedFilters)}
 				>
 					<img
-						class="${options.value?.show_advanced_filters ? '' : '-rotate-90'} inline w-3 transition-transform"
+						class="${showAdvancedFilters.value ? '' : '-rotate-90'} inline w-3 transition-transform"
 						src="/images/chevron.svg"
 					/>
 
 					<small
-						class="${!options.value?.show_advanced_filters && numberOfActiveAdvancedFilters > 0
+						class="${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
 							? 'ease-elastic duration-400'
 							: 'scale-0'} corner-round absolute top-0.5 right-0.5 flex h-4 w-4 translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-sky-600 font-bold text-white tabular-nums transition-transform"
 					>
@@ -93,21 +100,18 @@ export function Header(/** @type {Object} */ props) {
 
 				<button
 					class="min-w-8"
-					title=${options.value?.open_mode === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
+					title=${openMode.value === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
 					onClick=${async () => {
-						if (options.value?.open_mode === 'sidebar') {
-							updateOptions({ open_mode: 'popup' });
+						if (openMode.value === 'sidebar') {
+							openMode.value = 'popup';
 							openPopup();
 						} else {
-							updateOptions({ open_mode: 'sidebar' });
+							openMode.value = 'sidebar';
 							openSidebar();
 						}
 					}}
 				>
-					<img
-						class="inline w-5"
-						src=${options.value?.open_mode === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'}
-					/>
+					<img class="inline w-5" src=${openMode.value === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'} />
 				</button>
 
 				<button class="min-w-8" title="Close extension" onClick=${() => window.close()}>
@@ -115,7 +119,7 @@ export function Header(/** @type {Object} */ props) {
 				</button>
 			</div>
 
-			${options.value?.show_advanced_filters && html`<${AdvancedFilters} />`}
+			${showAdvancedFilters.value && html`<${AdvancedFilters} />`}
 		</header>
 	`;
 }

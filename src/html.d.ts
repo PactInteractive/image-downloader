@@ -10,6 +10,7 @@ export interface ReadonlySignal<T> {
 	subscribe(cb: (value: T) => void): () => void;
 }
 
+export function action<T extends (...args: any[]) => any>(fn: T): T;
 export function signal<T>(initialValue: T): Signal<T>;
 export function computed<T>(fn: () => T): ReadonlySignal<T>;
 export function effect(fn: () => void): () => void;
@@ -22,6 +23,8 @@ export function useLayoutEffect(callback: () => void | (() => void), deps?: read
 export function html(strings: TemplateStringsArray, ...values: any[]): any;
 export default html;
 
+export function render(vnode: any, parent: HTMLElement, replaceNode?: HTMLElement | HTMLElement[]): void;
+
 export interface ForProps<T> {
 	each: Signal<T[]> | ReadonlySignal<T[]> | (() => T[] | Signal<T[]> | ReadonlySignal<T[]>);
 	fallback?: any;
@@ -30,5 +33,3 @@ export interface ForProps<T> {
 }
 
 export function For<T>(props: ForProps<T>): any;
-
-export function render(vnode: any, parent: HTMLElement, replaceNode?: HTMLElement | HTMLElement[]): void;

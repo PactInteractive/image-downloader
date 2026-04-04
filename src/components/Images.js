@@ -1,19 +1,19 @@
 // @ts-check
-import html, { useEffect, useSignal } from '../html.js';
+import html, { For, useEffect, useSignal } from '../html.js';
 
 import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
 import {
 	allImages,
+	columns,
 	displayedImages,
 	erroredImages,
 	filteredOutImages,
+	loadedImages,
 	matchingImages,
-	options,
 	selectedImages,
 	tab,
-	updateOptions,
 } from './data.js';
 import { useImageStats } from './useImageStats.js';
 
@@ -41,8 +41,6 @@ import { useImageStats } from './useImageStats.js';
  */
 
 export function Images(/** @type {ImagesProps} */ { class: className, style, ...props }) {
-	if (!options.value) return null;
-
 	const allImagesFromCurrentTabAreSelected = displayedImages.value.every(isIncludedIn(selectedImages.value));
 
 	return html`
@@ -122,18 +120,18 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 					type="button"
 					class="h-6 w-6 font-bold"
 					aria-label="Fewer columns"
-					onClick=${() => updateOptions({ columns: Math.max(1, (options.value?.columns || 0) - 1) })}
+					onClick=${() => (columns.value = Math.max(1, columns.value - 1))}
 				>
 					-
 				</button>
 
-				${options.value.columns}
+				${columns.value}
 
 				<button
 					type="button"
 					class="h-6 w-6 font-bold"
 					aria-label="More columns"
-					onClick=${() => updateOptions({ columns: Math.min((options.value?.columns || 0) + 1, 6) })}
+					onClick=${() => (columns.value = Math.min(columns.value + 1, 6))}
 				>
 					+
 				</button>
@@ -142,11 +140,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 
 		<div
 			class="grid grid-cols-(--image-columns) gap-2 p-2"
-			style=${{ '--image-columns': `repeat(${options.value.columns}, minmax(0, 1fr))`, ...style }}
+			style=${{ '--image-columns': `repeat(${columns.value}, minmax(0, 1fr))`, ...style }}
 			...${props}
 		>
-			${displayedImages.value.map(
-				/** @param {string} imageUrl */ (imageUrl) => html`
+			<${For} each=${displayedImages}>
+				${(/** @type {string} */ imageUrl) => html`
 					<${ImageCard}
 						key=${imageUrl}
 						imageUrl=${imageUrl}
@@ -156,8 +154,8 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 								: [...selectedImages.value, imageUrl];
 						}}
 					/>
-				`
-			)}
+				`}
+			<//>
 		</div>
 	`;
 }

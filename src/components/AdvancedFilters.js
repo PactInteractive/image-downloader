@@ -1,21 +1,30 @@
 // @ts-check
 import html, { useEffect, useRef } from '../html.js';
+import { setToCheckboxValue } from '../utils.js';
 
-/** @typedef {{ create(el: Element, opts: Record<string, any>): void }} NoUiSlider */
+/** @typedef {{ create(element: Element, options: Record<string, any>): void }} NoUiSlider */
 /** @typedef {HTMLDivElement & { noUiSlider?: { on(event: string, callback: Function): void; destroy(): void } }} SliderElement */
 
 const noUiSlider = /** @type {NoUiSlider} */ (/** @type {any} */ (globalThis).noUiSlider);
 
 import { Checkbox } from './Checkbox.js';
-import { defaults, options, updateOptions } from './data.js';
+import {
+	defaults,
+	filterMaxHeight,
+	filterMaxHeightEnabled,
+	filterMaxWidth,
+	filterMaxWidthEnabled,
+	filterMinHeight,
+	filterMinHeightEnabled,
+	filterMinWidth,
+	filterMinWidthEnabled,
+	onlyImagesFromLinks,
+	onlyUniqueImages,
+} from './data.js';
 
 export function AdvancedFilters() {
 	const widthSliderRef = useSlider('width');
 	const heightSliderRef = useSlider('height');
-
-	const setCheckboxOption = (/** @type {keyof import('./data.js').Options} */ key) => (/** @type {Event} */ e) => {
-		updateOptions({ [key]: /** @type {HTMLInputElement} */ (e.currentTarget).checked });
-	};
 
 	return html`
 		<div class="p-2 pt-0">
@@ -32,14 +41,14 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.value?.filter_min_width_enabled ? '' : 'text-slate-500'} flex items-center justify-end"
-							title=${getSliderCheckboxTooltip(options.value?.filter_min_width_enabled)}
+							class="${filterMinWidthEnabled.value ? '' : 'text-slate-500'} flex items-center justify-end"
+							title=${getSliderCheckboxTooltip(filterMinWidthEnabled.value)}
 						>
-							<small>${options.value?.filter_min_width}px ≤</small>
+							<small>${filterMinWidth.value}px ≤</small>
 							<input
 								type="checkbox"
-								checked=${options.value?.filter_min_width_enabled}
-								onChange=${setCheckboxOption('filter_min_width_enabled')}
+								checked=${filterMinWidthEnabled.value}
+								onChange=${setToCheckboxValue(filterMinWidthEnabled)}
 							/>
 						</label>
 					</td>
@@ -50,17 +59,15 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.value?.filter_max_width_enabled
-								? ''
-								: 'text-slate-500'} flex items-center justify-start text-nowrap"
-							title=${getSliderCheckboxTooltip(options.value?.filter_max_width_enabled)}
+							class="${filterMaxWidthEnabled.value ? '' : 'text-slate-500'} flex items-center justify-start text-nowrap"
+							title=${getSliderCheckboxTooltip(filterMaxWidthEnabled.value)}
 						>
 							<input
 								type="checkbox"
-								checked=${options.value?.filter_max_width_enabled}
-								onChange=${setCheckboxOption('filter_max_width_enabled')}
+								checked=${filterMaxWidthEnabled.value}
+								onChange=${setToCheckboxValue(filterMaxWidthEnabled)}
 							/>
-							<small>≤ ${options.value?.filter_max_width}px</small>
+							<small>≤ ${filterMaxWidth.value}px</small>
 						</label>
 					</td>
 				</tr>
@@ -70,16 +77,14 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.value?.filter_min_height_enabled
-								? ''
-								: 'text-slate-500'} flex items-center justify-end text-nowrap"
-							title=${getSliderCheckboxTooltip(options.value?.filter_min_height_enabled)}
+							class="${filterMinHeightEnabled.value ? '' : 'text-slate-500'} flex items-center justify-end text-nowrap"
+							title=${getSliderCheckboxTooltip(filterMinHeightEnabled.value)}
 						>
-							<small>${options.value?.filter_min_height}px ≤</small>
+							<small>${filterMinHeight.value}px ≤</small>
 							<input
 								type="checkbox"
-								checked=${options.value?.filter_min_height_enabled}
-								onChange=${setCheckboxOption('filter_min_height_enabled')}
+								checked=${filterMinHeightEnabled.value}
+								onChange=${setToCheckboxValue(filterMinHeightEnabled)}
 							/>
 						</label>
 					</td>
@@ -90,17 +95,17 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${options.value?.filter_max_height_enabled
+							class="${filterMaxHeightEnabled.value
 								? ''
 								: 'text-slate-500'} flex items-center justify-start text-nowrap"
-							title=${getSliderCheckboxTooltip(options.value?.filter_max_height_enabled)}
+							title=${getSliderCheckboxTooltip(filterMaxHeightEnabled.value)}
 						>
 							<input
 								type="checkbox"
-								checked=${options.value?.filter_max_height_enabled}
-								onChange=${setCheckboxOption('filter_max_height_enabled')}
+								checked=${filterMaxHeightEnabled.value}
+								onChange=${setToCheckboxValue(filterMaxHeightEnabled)}
 							/>
-							<small>≤ ${options.value?.filter_max_height}px</small>
+							<small>≤ ${filterMaxHeight.value}px</small>
 						</label>
 					</td>
 				</tr>
@@ -110,8 +115,8 @@ export function AdvancedFilters() {
 				<${Checkbox}
 					class="py-1"
 					title="Attempt to deduplicate images by keeping only the highest resolution and best format"
-					checked=${options.value?.only_unique_images}
-					onChange=${setCheckboxOption('only_unique_images')}
+					checked=${onlyUniqueImages.value}
+					onChange=${setToCheckboxValue(onlyUniqueImages)}
 				>
 					Only unique
 				<//>
@@ -119,8 +124,8 @@ export function AdvancedFilters() {
 				<${Checkbox}
 					class="py-1"
 					title="Only show images from direct links on the page; useful on some websites"
-					checked=${options.value?.only_images_from_links}
-					onChange=${setCheckboxOption('only_images_from_links')}
+					checked=${onlyImagesFromLinks.value}
+					onChange=${setToCheckboxValue(onlyImagesFromLinks)}
 				>
 					Only links
 				<//>
@@ -136,6 +141,11 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 		const slider = sliderRef.current;
 		if (!slider) return;
 
+		const minDefault = dimension === 'width' ? defaults.filter_min_width : defaults.filter_min_height;
+		const maxDefault = dimension === 'width' ? defaults.filter_max_width : defaults.filter_max_height;
+		const minSignal = dimension === 'width' ? filterMinWidth : filterMinHeight;
+		const maxSignal = dimension === 'width' ? filterMaxWidth : filterMaxHeight;
+
 		noUiSlider.create(slider, {
 			behaviour: 'extend-tap',
 			connect: true,
@@ -144,21 +154,16 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 				to: (/** @type {string} */ value) => parseInt(value, 10).toString(),
 			},
 			range: {
-				min: (options.value || defaults)[`filter_min_${dimension}_default`],
-				max: (options.value || defaults)[`filter_max_${dimension}_default`],
+				min: minDefault,
+				max: maxDefault,
 			},
 			step: 10,
-			start: [
-				(options.value || defaults)[`filter_min_${dimension}`],
-				(options.value || defaults)[`filter_max_${dimension}`],
-			],
+			start: [minSignal.value, maxSignal.value],
 		});
 
 		slider.noUiSlider?.on('update', (/** @type [number, number] */ [min, max]) => {
-			updateOptions({
-				[`filter_min_${dimension}`]: min,
-				[`filter_max_${dimension}`]: max,
-			});
+			minSignal.value = min;
+			maxSignal.value = max;
 		});
 
 		return () => {
@@ -172,21 +177,29 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 		const slider = sliderRef.current;
 		if (!slider) return;
 
-		if (options.value?.[`filter_min_${dimension}_enabled`] || options.value?.[`filter_max_${dimension}_enabled`]) {
+		const minEnabled = dimension === 'width' ? filterMinWidthEnabled.value : filterMinHeightEnabled.value;
+		const maxEnabled = dimension === 'width' ? filterMaxWidthEnabled.value : filterMaxHeightEnabled.value;
+
+		if (minEnabled || maxEnabled) {
 			slider.removeAttribute('disabled');
 		} else {
 			slider.setAttribute('disabled', 'true');
 		}
-	}, [options.value?.[`filter_min_${dimension}_enabled`], options.value?.[`filter_max_${dimension}_enabled`]]);
+	}, [
+		filterMinWidthEnabled.value,
+		filterMaxWidthEnabled.value,
+		filterMinHeightEnabled.value,
+		filterMaxHeightEnabled.value,
+	]);
 
 	useDisableSliderHandle(
 		() => sliderRef.current?.querySelectorAll('.noUi-origin')[0],
-		options.value?.[`filter_min_${dimension}_enabled`]
+		dimension === 'width' ? filterMinWidthEnabled.value : filterMinHeightEnabled.value
 	);
 
 	useDisableSliderHandle(
 		() => sliderRef.current?.querySelectorAll('.noUi-origin')[1],
-		options.value?.[`filter_max_${dimension}_enabled`]
+		dimension === 'width' ? filterMaxWidthEnabled.value : filterMaxHeightEnabled.value
 	);
 
 	return sliderRef;

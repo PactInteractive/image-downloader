@@ -1,9 +1,9 @@
 // @ts-check
 import htm from '../lib/htm.js';
-import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from '../lib/preact-hooks.module.js';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from '../lib/preact-hooks.module.js';
 import { Fragment, h, render } from '../lib/preact.module.js';
 import { useComputed, useSignal, useSignalEffect } from '../lib/signals.module.js';
-export { computed, effect, signal } from '../lib/signals-core.module.js';
+export { action, computed, effect, signal } from '../lib/signals-core.module.js';
 
 const html = htm.bind(h);
 export default html;

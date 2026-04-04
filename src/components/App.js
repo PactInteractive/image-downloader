@@ -1,7 +1,16 @@
 // @ts-check
 import html, { For, useEffect } from '../html.js';
 
-import { allImages, erroredImages, imagesCache, initialize, loadedImages, loadImagesFromActiveTab, options, reloadImagesWhenPageLoads } from './data.js';
+import {
+	allImages,
+	erroredImages,
+	imagesCache,
+	initialize,
+	initialized,
+	loadedImages,
+	loadImagesFromActiveTab,
+	reloadImagesWhenPageLoads,
+} from './data.js';
 import { Footer } from './Footer.js';
 import { Header } from './Header.js';
 import { Images } from './Images.js';
@@ -14,8 +23,8 @@ export function App() {
 		initialize().then(() => loadImagesFromActiveTab({ waitForIdleDOM: false }));
 	}, []);
 
-	if (!options.value) {
-		return html`<div class="p-4">Loading...</div>`;
+	if (!initialized.value) {
+		return html`<div class="p-4">Initializing...</div>`;
 	}
 
 	return html`

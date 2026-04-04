@@ -39,7 +39,7 @@ function getNormalizedBaseKey(/** @type {string} */ url) {
 		const basename = nameWithoutExtension.replace(/[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w|\d+x)$/i, '');
 
 		// Extract identifier: look for hash-like pattern at end (e.g., 7qulxnmlw8sg1 from longer names)
-		const identifierMatch = nameWithoutExtension.match(/([a-zA-Z0-9]{6,})$/);
+		const identifierMatch = nameWithoutExtension.match(/((?=.*\d)[a-zA-Z0-9]{6,})$/);
 		let identifier = identifierMatch ? identifierMatch[1] : basename;
 
 		// Extract special query params

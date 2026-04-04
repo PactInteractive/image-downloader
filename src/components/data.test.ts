@@ -1,7 +1,26 @@
 import { beforeEach, describe, expect, it } from 'bun:test';
 import { mockChrome } from '../test-helpers';
 
-import { initialize, options, updateOption, updateOptions } from './data.js';
+import {
+	columns,
+	filterMaxHeight,
+	filterMaxHeightEnabled,
+	filterMaxWidth,
+	filterMaxWidthEnabled,
+	filterMinHeight,
+	filterMinHeightEnabled,
+	filterMinWidth,
+	filterMinWidthEnabled,
+	filterUrl,
+	filterUrlMode,
+	folderName,
+	initialize,
+	newFileName,
+	openMode,
+	selectedImages,
+	showAdvancedFilters,
+	showDownloadConfirmation,
+} from './data.js';
 
 let localStorageData: Record<string, string>;
 
@@ -35,8 +54,19 @@ function setupMocks(initialStorage?: Record<string, any>) {
 }
 
 beforeEach(() => {
+	openMode.value = 'sidebar';
+	filterUrl.value = '';
+	filterUrlMode.value = 'normal';
+	showAdvancedFilters.value = true;
+	filterMinWidth.value = 0;
+	filterMaxWidth.value = 3000;
+	filterMinHeight.value = 0;
+	filterMaxHeight.value = 3000;
+	selectedImages.value = [];
+	columns.value = 2;
+	folderName.value = '';
+	newFileName.value = '';
 	setupMocks();
-	options.value = null;
 });
 
 describe('useOptions', () => {
@@ -44,76 +74,80 @@ describe('useOptions', () => {
 		it('should initialize with default values when chrome.storage is empty', async () => {
 			await initialize();
 
-			expect(options.value!.folder_name).toBe('');
-			expect(options.value!.new_file_name).toBe('');
-			expect(options.value!.filter_url).toBe('');
-			expect(options.value!.filter_url_mode).toBe('normal');
-			expect(options.value!.show_advanced_filters).toBe(true);
-			expect(options.value!.filter_min_width).toBe(0);
-			expect(options.value!.filter_max_width).toBe(3000);
-			expect(options.value!.filter_min_height).toBe(0);
-			expect(options.value!.filter_max_height).toBe(3000);
-			expect(options.value!.selected_images).toEqual([]);
-			expect(options.value!.columns).toBe(2);
+			expect(openMode.value).toBe('sidebar');
+			expect(filterUrl.value).toBe('');
+			expect(filterUrlMode.value).toBe('normal');
+			expect(showAdvancedFilters.value).toBe(true);
+			expect(filterMinWidthEnabled.value).toBe(false);
+			expect(filterMinWidth.value).toBe(0);
+			expect(filterMaxWidthEnabled.value).toBe(false);
+			expect(filterMaxWidth.value).toBe(3000);
+			expect(filterMinHeightEnabled.value).toBe(false);
+			expect(filterMinHeight.value).toBe(0);
+			expect(filterMaxHeightEnabled.value).toBe(false);
+			expect(filterMaxHeight.value).toBe(3000);
+			expect(folderName.value).toBe('');
+			expect(newFileName.value).toBe('');
+			expect(showDownloadConfirmation.value).toBe(true);
+			expect(selectedImages.value).toEqual([]);
+			expect(columns.value).toBe(2);
 		});
 
 		it('should load values from chrome.storage', async () => {
-			setupMocks({ folder_name: 'TestFolder', columns: 4 });
-			options.value = null;
-
+			setupMocks({ columns: 4 });
 			await initialize();
-
-			expect(options.value!.folder_name).toBe('TestFolder');
-			expect(options.value!.columns).toBe(4);
+			expect(columns.value).toBe(4);
 		});
 
 		it('should migrate values from localStorage and clear it', async () => {
-			localStorageData.folder_name = 'MigratedFolder';
 			localStorageData.columns = '5';
 			localStorageData.unknown_key = 'should_be_ignored';
 
 			await initialize();
-
-			expect(options.value!.folder_name).toBe('MigratedFolder');
-			expect(options.value!.columns).toBe(5);
+			expect(columns.value).toBe(5);
 			expect(Object.keys(localStorageData).length).toBe(0);
 
 			const stored = await chrome.storage.local.get(null);
-			expect(stored.folder_name).toBe('MigratedFolder');
 			expect(stored.columns).toBe(5);
 			expect(stored.unknown_key).toBeUndefined();
 		});
 
 		it('should not overwrite existing chrome.storage data during migration', async () => {
-			setupMocks({ folder_name: 'ExistingFolder', columns: 3 });
-			localStorageData.folder_name = 'OldLocalFolder';
-			localStorageData.new_file_name = 'MigratedFile';
+			setupMocks({ columns: 3 });
+			localStorageData.columns = '4';
 
 			await initialize();
-
-			expect(options.value!.folder_name).toBe('ExistingFolder');
-			expect(options.value!.new_file_name).toBe('MigratedFile');
+			expect(columns.value).toBe(3);
 			expect(Object.keys(localStorageData).length).toBe(0);
 		});
 	});
 
 	describe('updates', () => {
-		it('should update options with updateOption', async () => {
+		it('should update filterUrl signal and sync to storage', async () => {
 			await initialize();
 
-			updateOption('folder_name', 'NewFolder');
+			filterUrl.value = 'test.jpg';
 
-			const stored = await chrome.storage.local.get(['folder_name']);
-			expect(stored.folder_name).toBe('NewFolder');
+			const stored = await chrome.storage.local.get(['filter_url']);
+			expect(stored.filter_url).toBe('test.jpg');
 		});
 
-		it('should update options with updateOptions', async () => {
+		it('should update filterUrlMode signal and sync to storage', async () => {
 			await initialize();
 
-			updateOptions({ folder_name: 'NewFolder' });
+			filterUrlMode.value = 'regex';
 
-			const stored = await chrome.storage.local.get(['folder_name']);
-			expect(stored.folder_name).toBe('NewFolder');
+			const stored = await chrome.storage.local.get(['filter_url_mode']);
+			expect(stored.filter_url_mode).toBe('regex');
+		});
+
+		it('should update openMode signal and sync to storage', async () => {
+			await initialize();
+
+			openMode.value = 'popup';
+
+			const stored = await chrome.storage.local.get(['open_mode']);
+			expect(stored.open_mode).toBe('popup');
 		});
 	});
 
@@ -121,7 +155,7 @@ describe('useOptions', () => {
 		it('should store numbers as numbers', async () => {
 			await initialize();
 
-			updateOption('filter_min_width', 100);
+			filterMinWidth.value = 100;
 
 			const stored = await chrome.storage.local.get(['filter_min_width']);
 			expect(stored.filter_min_width).toBe(100);
@@ -131,17 +165,18 @@ describe('useOptions', () => {
 		it('should store booleans as booleans', async () => {
 			await initialize();
 
-			updateOption('show_advanced_filters', false);
+			showAdvancedFilters.value = false;
 
 			const stored = await chrome.storage.local.get(['show_advanced_filters']);
 			expect(stored.show_advanced_filters).toBe(false);
 			expect(typeof stored.show_advanced_filters).toBe('boolean');
 		});
 
-		it('should store objects as objects', async () => {
+		it('should store arrays as arrays', async () => {
 			await initialize();
 
-			updateOptions({ selected_images: ['img1.jpg', 'img2.jpg'] });
+			selectedImages.value = ['img1.jpg', 'img2.jpg'];
+			await new Promise((resolve) => setTimeout(resolve, 0));
 
 			const stored = await chrome.storage.local.get(['selected_images']);
 			expect(stored.selected_images).toEqual(['img1.jpg', 'img2.jpg']);

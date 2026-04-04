@@ -1,9 +1,9 @@
 // @ts-check
 import html, { useSignal } from '../html.js';
 
-import { removeSpecialCharacters } from '../utils.js';
+import { removeSpecialCharacters, setToInvertedCheckboxValue } from '../utils.js';
 import * as actions from './actions.js';
-import { options, selectedImages, updateOptions } from './data.js';
+import { folderName, newFileName, selectedImages, showDownloadConfirmation } from './data.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { useRunAfterUpdate } from './useRunAfterUpdate.js';
@@ -14,7 +14,7 @@ export function Footer(/** @type {Object} */ props) {
 	const downloadConfirmationIsShown = useSignal(false);
 
 	function maybeDownloadImages() {
-		if (options.value?.show_download_confirmation && selectedImages.value.length > 1) {
+		if (showDownloadConfirmation.value && selectedImages.value.length > 1) {
 			downloadConfirmationIsShown.value = true;
 		} else {
 			downloadImages();
@@ -35,11 +35,7 @@ export function Footer(/** @type {Object} */ props) {
 				? html`
 						<${DownloadConfirmation}
 							numberOfImages=${selectedImages.value.length}
-							onCheckboxChange=${(/** @type {Event} */ e) => {
-								updateOptions({
-									show_download_confirmation: !(/** @type {HTMLInputElement} */ (e.currentTarget).checked),
-								});
-							}}
+							onCheckboxChange=${setToInvertedCheckboxValue(showDownloadConfirmation)}
 							onClose=${() => (downloadConfirmationIsShown.value = false)}
 							onConfirm=${downloadImages}
 						/>
@@ -52,7 +48,7 @@ export function Footer(/** @type {Object} */ props) {
 								type="text"
 								placeholder="Save to subfolder"
 								title="Set the name of the subfolder you want to download the images to."
-								value=${options.value?.folder_name}
+								value=${folderName.value}
 								onChange=${(/** @type {Event} */ e) => {
 									const input = /** @type HTMLInputElement */ (e.currentTarget);
 									const savedSelectionStart = removeSpecialCharacters(
@@ -63,7 +59,7 @@ export function Footer(/** @type {Object} */ props) {
 										input.selectionStart = input.selectionEnd = savedSelectionStart;
 									});
 
-									updateOptions({ folder_name: removeSpecialCharacters(input.value) });
+									folderName.value = removeSpecialCharacters(input.value);
 								}}
 							/>
 
@@ -73,7 +69,7 @@ export function Footer(/** @type {Object} */ props) {
 								type="text"
 								placeholder="Rename files"
 								title="Set a new file name for the images you want to download."
-								value=${options.value?.new_file_name}
+								value=${newFileName.value}
 								onChange=${(/** @type {Event} */ e) => {
 									const input = /** @type HTMLInputElement */ (e.currentTarget);
 									const savedSelectionStart = removeSpecialCharacters(
@@ -84,7 +80,7 @@ export function Footer(/** @type {Object} */ props) {
 										input.selectionStart = input.selectionEnd = savedSelectionStart;
 									});
 
-									updateOptions({ new_file_name: removeSpecialCharacters(input.value) });
+									newFileName.value = removeSpecialCharacters(input.value);
 								}}
 							/>
 
