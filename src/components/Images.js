@@ -44,73 +44,70 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 
 	return html`
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
-			${displayedImages.value.length > 0 &&
-			html`
-				<${Badge}
-					as="ul"
-					class="overflow-hidden border-slate-300"
-					onChange=${
-						/** @param {Event} e */ (e) => {
-							tab.value = /** @type {HTMLInputElement} */ (e.target).value;
-						}
+			<${Badge}
+				as="ul"
+				class="overflow-hidden border-slate-300"
+				onChange=${
+					/** @param {Event} e */ (e) => {
+						tab.value = /** @type {HTMLInputElement} */ (e.target).value;
 					}
-				>
+				}
+			>
+				<li>
+					<${Tab}
+						class="text-slate-600 has-checked:text-slate-700"
+						title="Images matching your filters"
+						input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
+					>
+						<${Circle} class="bg-green-600 text-white">+<//>
+						${matchingImages.value.length} matching
+					<//>
+				</li>
+
+				${filteredOutImages.value.length > 0 &&
+				html`
 					<li>
 						<${Tab}
-							class="text-slate-600 has-checked:text-slate-700"
-							title="Images matching your filters"
-							input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
+							class="border-l border-slate-300 text-slate-600 has-checked:text-slate-700"
+							title="Images removed by your filters"
+							input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 						>
-							<${Circle} class="bg-green-600 text-white">+<//>
-							${matchingImages.value.length} matching
+							<${Circle} class="bg-slate-600 text-white">-<//>
+							${filteredOutImages.value.length} filtered out
 						<//>
 					</li>
+				`}
+				${erroredImages.value.length > 0 &&
+				html`
+					<li>
+						<${Tab}
+							class="border-l border-slate-300 text-red-600 has-checked:text-red-700"
+							title="Images that failed to load"
+							input=${{ name: 'visibility', value: 'errors', checked: tab.value === 'errors' }}
+						>
+							<${Circle} class="bg-red-600 text-white">×<//>
+							${erroredImages.value.length} ${erroredImages.value.length === 1 ? 'error' : 'errors'}
+						<//>
+					</li>
+				`}
+			<//>
 
-					${filteredOutImages.value.length > 0 &&
-					html`
-						<li>
-							<${Tab}
-								class="border-l border-slate-300 text-slate-600 has-checked:text-slate-700"
-								title="Images removed by your filters"
-								input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
-							>
-								<${Circle} class="bg-slate-600 text-white">-<//>
-								${filteredOutImages.value.length} filtered out
-							<//>
-						</li>
-					`}
-					${erroredImages.value.length > 0 &&
-					html`
-						<li>
-							<${Tab}
-								class="border-l border-slate-300 text-red-600 has-checked:text-red-700"
-								title="Images that failed to load"
-								input=${{ name: 'visibility', value: 'errors', checked: tab.value === 'errors' }}
-							>
-								<${Circle} class="bg-red-600 text-white">×<//>
-								${erroredImages.value.length} ${erroredImages.value.length === 1 ? 'error' : 'errors'}
-							<//>
-						</li>
-					`}
-				<//>
-
-				<${Badge}
-					as=${Checkbox}
-					class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
-					checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
-					indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
-					disabled=${allImages.value.length === 0}
-					title="Click to select or unselect all visible images"
-					onChange=${(/** @type {Event} */ e) => {
-						const { checked } = /** @type {HTMLInputElement} */ (e.currentTarget);
-						selectedImages.value = checked
-							? unique([...selectedImages.value, ...displayedImages.value])
-							: selectedImages.value.filter(isNotIncludedIn(displayedImages.value));
-					}}
-				>
-					${selectedImages.value.length} selected
-				<//>
-			`}
+			<${Badge}
+				as=${Checkbox}
+				class="gap-1 border-slate-300 bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100"
+				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
+				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
+				disabled=${allImages.value.length === 0}
+				title="Click to select or unselect all visible images"
+				onChange=${(/** @type {Event} */ e) => {
+					const { checked } = /** @type {HTMLInputElement} */ (e.currentTarget);
+					selectedImages.value = checked
+						? unique([...selectedImages.value, ...displayedImages.value])
+						: selectedImages.value.filter(isNotIncludedIn(displayedImages.value));
+				}}
+			>
+				${selectedImages.value.length} selected
+			<//>
 
 			<div class="mt-px ml-auto flex items-center gap-1.5">
 				Columns:
