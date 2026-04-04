@@ -5,11 +5,14 @@ interface Window {
 }
 
 declare global {
-	const noUiSlider: NoUiSliderStatic;
-
 	interface HTMLElement {
 		noUiSlider?: NoUiSliderInstance;
 	}
+}
+
+declare module '../lib/nouislider.mjs' {
+	export function create(element: HTMLElement, options: NoUiSliderOptions): void;
+	export const cssClasses: Record<string, string>;
 }
 
 interface NoUiSliderInstance {
@@ -30,8 +33,4 @@ interface NoUiSliderOptions {
 	};
 	step?: number;
 	start?: [number, number];
-}
-
-interface NoUiSliderStatic {
-	create(element: HTMLElement, options: NoUiSliderOptions): void;
 }

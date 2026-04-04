@@ -116,7 +116,15 @@ export function About() {
   `;
 }
 
-function Project({ href, src, title, subtitle, children, ...props }) {
+function Project(
+	/** @type {{
+    href: string;
+    src: string;
+    title: string;
+    subtitle: string;
+    children: any;
+  }} */ { href, src, title, subtitle, children, ...props }
+) {
 	return html`
 		<${ExternalLink} href=${href} ...${props}>
 			<div>

@@ -2,11 +2,7 @@
 import html, { useEffect, useRef } from '../html.js';
 import { setToCheckboxValue } from '../utils.js';
 
-/** @typedef {{ create(element: Element, options: Record<string, any>): void }} NoUiSlider */
-/** @typedef {HTMLDivElement & { noUiSlider?: { on(event: string, callback: Function): void; destroy(): void } }} SliderElement */
-
-const noUiSlider = /** @type {NoUiSlider} */ (/** @type {any} */ (globalThis).noUiSlider);
-
+import noUiSlider from '../../lib/nouislider.mjs';
 import { Checkbox } from './Checkbox.js';
 import {
 	defaults,
@@ -134,6 +130,7 @@ export function AdvancedFilters() {
 	`;
 }
 
+/** @typedef {HTMLDivElement & { noUiSlider?: { on(event: string, callback: Function): void; destroy(): void } }} SliderElement */
 function useSlider(/** @type {'width' | 'height'} */ dimension) {
 	const sliderRef = useRef(/** @type {SliderElement | null} */ (null));
 
