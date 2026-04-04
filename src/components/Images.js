@@ -1,5 +1,5 @@
 // @ts-check
-import html, { For, useEffect, useSignal } from '../html.js';
+import html, { For, useSignal } from '../html.js';
 
 import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
@@ -10,7 +10,6 @@ import {
 	displayedImages,
 	erroredImages,
 	filteredOutImages,
-	loadedImages,
 	matchingImages,
 	selectedImages,
 	tab,
@@ -217,9 +216,6 @@ function ImageCard({ imageUrl, ...props }) {
 	const stats = useImageStats();
 	const retryCount = useSignal(0);
 	const isSelected = selectedImages.value.includes(imageUrl);
-
-	// TODO: Reset stats when imageUrl changes to avoid showing stale data
-	useEffect(stats.reset, [imageUrl, stats.reset]);
 
 	return html`
 		<div

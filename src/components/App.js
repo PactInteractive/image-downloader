@@ -35,7 +35,7 @@ export function App() {
 				${(/** @type {string} */ url) => html`
 					<img
 						key=${url}
-						src=${encodeURI(url)}
+						src=${url}
 						onLoad=${() => (loadedImages.value = [...loadedImages.value, url])}
 						onError=${() => (erroredImages.value = [...erroredImages.value, url])}
 					/>

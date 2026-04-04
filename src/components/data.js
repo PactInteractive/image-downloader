@@ -231,9 +231,7 @@ export const matchingImages = computed(() => {
 	filtered = filtered.filter((url) => {
 		if (!imagesCache.value) return false;
 
-		/** @type {HTMLImageElement | null} */ const image = imagesCache.value.querySelector(
-			`img[src="${encodeURI(url)}"]`
-		);
+		/** @type {HTMLImageElement | null} */ const image = imagesCache.value.querySelector(`img[src="${url}"]`);
 
 		return (
 			image &&

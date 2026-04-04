@@ -38,7 +38,6 @@ export function useImageStats() {
 		status: 'idle',
 	});
 
-	// TODO: Maybe convert all of these to actions
 	function onLoad(/** @type {Event} */ e) {
 		const img = /** @type {HTMLImageElement} */ (e.currentTarget);
 		const url = img.currentSrc || img.src;
