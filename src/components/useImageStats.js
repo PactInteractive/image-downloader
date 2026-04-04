@@ -25,18 +25,24 @@ import { useSignal } from '../html.js';
  * @property {() => void} reset
  */
 
-/**
- * @returns {ImageStats}
- */
-export function useImageStats() {
+/** @type {Map<string, ImageStatsData>} */
+const cache = new Map();
+const MAX_CACHE_SIZE = 500;
+
+/** @returns {ImageStats} */
+export function useImageStats(/** @type {string} */ imageUrl) {
+	const cached = cache.get(imageUrl);
+
 	/** @type {{ value: ImageStatsData }} */
-	const data = useSignal({
-		width: 0,
-		height: 0,
-		size: null,
-		extension: '',
-		status: 'idle',
-	});
+	const data = useSignal(
+		cached || {
+			width: 0,
+			height: 0,
+			size: null,
+			extension: '',
+			status: 'idle',
+		}
+	);
 
 	function onLoad(/** @type {Event} */ e) {
 		const img = /** @type {HTMLImageElement} */ (e.currentTarget);
@@ -44,19 +50,27 @@ export function useImageStats() {
 		const size = getImageResourceSize(img);
 		const urlExtension = getImageExtension(url);
 
-		data.value = {
+		const loaded = {
 			width: img.naturalWidth,
 			height: img.naturalHeight,
 			size,
 			extension: urlExtension,
-			status: 'loaded',
+			status: /** @type {'loaded'} */ ('loaded'),
 		};
+
+		if (cache.size >= MAX_CACHE_SIZE) {
+			const firstKey = cache.keys().next().value;
+			if (firstKey !== undefined) cache.delete(firstKey);
+		}
+		cache.set(url, loaded);
+		data.value = loaded;
 
 		// Refine extension via fetch if URL parsing was inconclusive
 		if (!urlExtension) {
 			fetchImageExtension(url).then((extension) => {
 				if (extension) {
 					data.value = { ...data.value, extension };
+					cache.set(url, data.value);
 				}
 			});
 		}
@@ -73,6 +87,7 @@ export function useImageStats() {
 	}
 
 	function reset() {
+		cache.delete(imageUrl);
 		data.value = {
 			width: 0,
 			height: 0,
@@ -223,7 +238,7 @@ export function getImageResourceSize(img) {
 	}
 
 	const entries = performance.getEntriesByName(url);
-	const entry = entries.find((entry) => /** @type {PerformanceResourceTiming} */ (entry).initiatorType === 'img');
+	const entry = entries.find((entry) => /** @type {PerformanceResourceTiming} */(entry).initiatorType === 'img');
 
 	if (!entry) return null;
 

@@ -32,7 +32,7 @@ async function testHook<T>(hookFn: () => T): Promise<T> {
 
 describe('useImageStats', () => {
 	it('should initialize with default data state', async () => {
-		const result = await testHook(useImageStats);
+		const result = await testHook(() => useImageStats('http://example.com/test.jpg'));
 
 		expect(result.data.value.width).toBe(0);
 		expect(result.data.value.height).toBe(0);
@@ -42,17 +42,17 @@ describe('useImageStats', () => {
 	});
 
 	it('should have callable onLoad handler', async () => {
-		const result = await testHook(useImageStats);
+		const result = await testHook(() => useImageStats('http://example.com/test.jpg'));
 		expect(typeof result.onLoad).toBe('function');
 	});
 
 	it('should have callable onError handler', async () => {
-		const result = await testHook(useImageStats);
+		const result = await testHook(() => useImageStats('http://example.com/test.jpg'));
 		expect(typeof result.onError).toBe('function');
 	});
 
 	it('should have callable reset handler', async () => {
-		const result = await testHook(useImageStats);
+		const result = await testHook(() => useImageStats('http://example.com/test.jpg'));
 		expect(typeof result.reset).toBe('function');
 	});
 });

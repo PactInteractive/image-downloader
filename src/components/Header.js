@@ -55,7 +55,7 @@ export function Header(/** @type {Object} */ props) {
 				<button
 					class="min-w-8"
 					title="Reload images from current tab"
-					onClick=${() => loadImagesFromActiveTab({ waitForIdleDOM: false })}
+					onClick=${() => loadImagesFromActiveTab({ waitForIdleDOM: 1 })}
 				>
 					<img class="inline w-3.5" src="/images/reload.svg" />
 				</button>

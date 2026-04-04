@@ -208,7 +208,7 @@ function Circle({ class: className = '', children, ...props }) {
  * @param {string} props.imageUrl
  */
 function ImageCard({ imageUrl, ...props }) {
-	const stats = useImageStats();
+	const stats = useImageStats(imageUrl);
 	const retryCount = useSignal(0);
 	const isSelected = selectedImages.value.includes(imageUrl);
 

@@ -25,14 +25,11 @@ export async function findImages(
 		});
 	}
 
+	// Maybe wait until DOM is likely idle
 	if (waitForIdleDOM !== false && waitForIdleDOM != null && waitForIdleDOM >= 0 && Number.isFinite(waitForIdleDOM)) {
 		await new Promise((/** @type {(...args: any[]) => void} */ resolve) => {
 			const observer = new context.window.MutationObserver(() => {
-				clearTimeout(context.window.__idleDomTimer);
-				context.window.__idleDomTimer = setTimeout(() => {
-					observer.disconnect();
-					resolve();
-				}, waitForIdleDOM);
+				resetTimer(waitForIdleDOM);
 			});
 
 			observer.observe(context.document.documentElement, {
@@ -42,12 +39,15 @@ export async function findImages(
 			});
 
 			context.window.__observer = observer;
+			resetTimer(waitForIdleDOM);
 
-			clearTimeout(context.window.__idleDomTimer);
-			context.window.__idleDomTimer = setTimeout(() => {
-				observer.disconnect();
-				resolve();
-			}, waitForIdleDOM);
+			function resetTimer(/** @type {number} */ waitForIdleDOM) {
+				clearTimeout(context.window.__idleDomTimer);
+				context.window.__idleDomTimer = setTimeout(() => {
+					observer.disconnect();
+					resolve();
+				}, waitForIdleDOM);
+			}
 		});
 	}
 

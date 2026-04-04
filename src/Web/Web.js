@@ -1,11 +1,12 @@
 // @ts-check
-import { App } from '../components/App.js';
 import html, { render, useSignal } from '../html.js';
+
+import { App } from '../components/App.js';
+import { loadImagesFromActiveTab } from '../components/data.js';
 
 function Wrapper() {
 	const iframeUrl = useSignal('/src/Options/index.html');
 	const inputUrl = useSignal(iframeUrl.value);
-	const iframeLoaded = useSignal(0);
 
 	return html`
 		<div class="flex" style=${{ width: '100dvw', height: '100dvh' }}>
@@ -41,7 +42,7 @@ function Wrapper() {
 					ref=${(/** @type {HTMLIFrameElement} */ iframe) => (window.__devIframe = iframe)}
 					src=${iframeUrl}
 					same-origin-referrerpolicy="no-referrer"
-					onLoad=${() => (iframeLoaded.value += 1)}
+					onLoad=${() => loadImagesFromActiveTab({ waitForIdleDOM: false })}
 				/>
 			</div>
 
@@ -49,7 +50,7 @@ function Wrapper() {
 				class="flex flex-1 flex-col overflow-auto bg-slate-50"
 				style=${{ borderLeft: '1px', borderStyle: 'solid', borderColor: 'lightgrey' }}
 			>
-				<${App} key=${iframeLoaded} />
+				<${App} />
 			</div>
 		</div>
 	`;
