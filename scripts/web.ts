@@ -26,11 +26,13 @@ Bun.serve({
 	async fetch(request) {
 		const url = new URL(request.url);
 		const filepath = url.pathname === '/' ? '/src/Web/index.html' : url.pathname;
-		const shouldServeFromBuild = /^\/lib\//.test(filepath) || config.copy.include.some((pattern) =>
-			sync(pattern, {
-				ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
-			}).includes(`.${filepath}`)
-		);
+		const shouldServeFromBuild =
+			/^\/lib\//.test(filepath) ||
+			config.copy.include.some((pattern) =>
+				sync(pattern, {
+					ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
+				}).includes(`.${filepath}`)
+			);
 
 		const file = Bun.file(join(__dirname, '..', (shouldServeFromBuild ? config.build : '') + filepath));
 
@@ -42,7 +44,7 @@ Bun.serve({
 			if (extension === '.html') {
 				const injectScripts = `${
 					url.searchParams.has('debug')
-						? `<script src="/src/Web/eruda.min.js"></script><script>eruda.init()</script>`
+						? `<script src="/src/Web/lib/eruda.min.js"></script><script>eruda.init()</script>`
 						: ''
 				}<script src="/src/Web/chrome.shim.js"></script>`;
 				const html = (await file.text()).replace('<script', `${injectScripts}<script`);

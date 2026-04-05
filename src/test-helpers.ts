@@ -1,4 +1,5 @@
-import { mock, Mock } from 'bun:test';
+import { mock } from 'bun:test';
+import { Window } from 'happy-dom';
 import { mockRecursivePartial } from 'sneer';
 import manifest from '../manifest.json';
 
@@ -47,4 +48,13 @@ export const mockChrome = (opts?: { storage?: Record<string, any> }) => {
 	return chrome;
 };
 
-export const asMockedFunction = <T extends (...args: any[]) => any>(fn: T) => fn as unknown as Mock<T>;
+export function mockDOM(options?: { localStorage?: boolean }) {
+	const win = new Window();
+	(globalThis as any).document = win.document;
+	(globalThis as any).window = win;
+	(globalThis as any).CSS = win.CSS;
+	(globalThis as any).getComputedStyle = win.getComputedStyle.bind(win);
+	if (!win.SyntaxError) win.SyntaxError = SyntaxError;
+	if (options?.localStorage) (globalThis as any).localStorage = win.localStorage;
+	return win;
+}

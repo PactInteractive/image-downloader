@@ -1,12 +1,7 @@
 import { beforeEach, expect, it, mock } from 'bun:test';
-import { Window } from 'happy-dom';
-import { mockChrome } from '../test-helpers';
+import { mockChrome, mockDOM } from '../test-helpers';
 
-const window = new Window();
-(globalThis as any).document = window.document;
-(globalThis as any).window = window;
-if (!window.SyntaxError) window.SyntaxError = SyntaxError;
-(globalThis as any).localStorage = window.localStorage;
+mockDOM({ localStorage: true });
 
 beforeEach(() => {
 	(global as any).chrome = mockChrome();
