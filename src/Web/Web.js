@@ -56,4 +56,4 @@ function Wrapper() {
 	`;
 }
 
-render(html`<${Wrapper} />`, document.querySelector('main'));
+render(html`<${Wrapper} />`, /** @type {HTMLElement} */ (document.querySelector('main')));

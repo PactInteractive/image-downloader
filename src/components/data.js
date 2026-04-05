@@ -326,7 +326,7 @@ export const loadImagesFromActiveTab = action(
 );
 
 export const reloadImagesWhenPageLoads = action(
-	(/** @type {number}*/ tabId, /** @type {any} */ changeInfo, /** @type {any} */ tab) => {
+	(/** @type {number | undefined}*/ tabId, /** @type {any} */ changeInfo, /** @type {any} */ tab) => {
 		if (!tab) {
 			hostname.value = '';
 			loadImagesFromActiveTab({ waitForIdleDOM: 1 });

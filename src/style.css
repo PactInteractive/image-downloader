@@ -1,4 +1,4 @@
-@import 'nouislider/dist/nouislider.css';
+@import 'nouislider/dist/nouislider.min.css';
 @import 'tailwindcss';
 
 @theme {

@@ -130,9 +130,8 @@ export function AdvancedFilters() {
 	`;
 }
 
-/** @typedef {HTMLDivElement & { noUiSlider?: { on(event: string, callback: Function): void; destroy(): void } }} SliderElement */
 function useSlider(/** @type {'width' | 'height'} */ dimension) {
-	const sliderRef = useRef(/** @type {SliderElement | null} */ (null));
+	const sliderRef = useRef(/** @type {HTMLElement | null} */ (null));
 
 	useEffect(() => {
 		const slider = sliderRef.current;
@@ -148,7 +147,7 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 			connect: true,
 			format: {
 				from: (/** @type {string} */ value) => parseInt(value, 10),
-				to: (/** @type {string} */ value) => parseInt(value, 10).toString(),
+				to: (/** @type {number} */ value) => Math.trunc(value).toString(),
 			},
 			range: {
 				min: minDefault,
@@ -168,7 +167,7 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 				slider.noUiSlider.destroy();
 			}
 		};
-	}, []);
+	}, [dimension]);
 
 	useEffect(() => {
 		const slider = sliderRef.current;
@@ -183,6 +182,7 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 			slider.setAttribute('disabled', 'true');
 		}
 	}, [
+		dimension,
 		filterMinWidthEnabled.value,
 		filterMaxWidthEnabled.value,
 		filterMinHeightEnabled.value,

@@ -40,7 +40,7 @@ export function useImageStats(/** @type {string} */ imageUrl) {
 			height: 0,
 			size: null,
 			extension: '',
-			status: 'idle',
+			status: /** @type {ImageStatsData['status']} */ ('idle'),
 		}
 	);
 
