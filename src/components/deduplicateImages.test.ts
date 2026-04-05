@@ -28,6 +28,9 @@ describe('deduplicateImages', () => {
 			{ naturalWidth: 256, naturalHeight: 144 },
 		[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=384&q=75')}`]:
 			{ naturalWidth: 384, naturalHeight: 216 },
+		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no.webp': { naturalWidth: 512, naturalHeight: 384 },
+		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@2x.webp': { naturalWidth: 1024, naturalHeight: 768 },
+		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@3x.webp': { naturalWidth: 1536, naturalHeight: 1152 },
 	};
 
 	const imagesCache = {
@@ -200,5 +203,14 @@ describe('deduplicateImages', () => {
 			'https://i.redd.it/7qulxnmlw8sg1.jpeg',
 		];
 		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[0]]);
+	});
+
+	it('should deduplicate based on @2x & @3x variants', () => {
+		const urls = [
+			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no.webp',
+			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@2x.webp',
+			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@3x.webp',
+		];
+		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[2]]);
 	});
 });

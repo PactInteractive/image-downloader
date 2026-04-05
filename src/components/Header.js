@@ -1,5 +1,5 @@
 // @ts-check
-import html, { Show } from '../html.js';
+import html, { Show, useComputed } from '../html.js';
 
 import { toggle } from '../utils.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
@@ -32,9 +32,11 @@ export function Header(/** @type {Object} */ props) {
 		onlyImagesFromLinks,
 	].filter((s) => s.value).length;
 
+	const hostnameIsLimited = useComputed(() => limitedAccessHostnames.test(hostname.value));
+
 	return html`
 		<header ...${props}>
-			<${Show} when=${limitedAccessHostnames.test(hostname.value)}>
+			<${Show} when=${hostnameIsLimited}>
 				<div class="bg-sky-100 p-2 text-sky-800">
 					<span class="text-shadow">🛡️</span> Image Downloader has limited access to sensitive domains like
 					<b>${hostname.value}</b>
