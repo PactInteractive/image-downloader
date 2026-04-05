@@ -1,5 +1,12 @@
 import { describe, expect, it } from 'bun:test';
+import { Window } from 'happy-dom';
 import { deduplicateImages } from './deduplicateImages.js';
+
+const window = new Window();
+(globalThis as any).document = window.document;
+(globalThis as any).window = window;
+(globalThis as any).CSS = window.CSS;
+if (!window.SyntaxError) window.SyntaxError = SyntaxError;
 
 describe('deduplicateImages', () => {
 	const images: Record<string, { naturalWidth: number; naturalHeight: number }> = {

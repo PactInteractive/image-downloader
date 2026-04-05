@@ -2,7 +2,7 @@
 import html, { useEffect, useRef } from '../html.js';
 import { setToCheckboxValue } from '../utils.js';
 
-import noUiSlider from '../../lib/nouislider.mjs';
+import noUiSlider from 'nouislider';
 import { Checkbox } from './Checkbox.js';
 import {
 	defaults,

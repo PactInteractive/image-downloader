@@ -7,7 +7,7 @@ export const style = './src/style.css';
 export const build = 'build';
 
 export const copy = {
-	include: [manifestJson, './images/**/*', './lib/**/*', './src/**'],
+	include: [manifestJson, './images/**/*', './src/**'],
 	exclude: [style, './src/Web/**', './src/**/*.ts'],
 };
 

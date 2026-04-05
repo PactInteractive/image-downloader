@@ -5,13 +5,6 @@ import sharp from 'sharp';
 
 import * as config from './config';
 
-const importmap: Record<string, string> = {
-	'"preact"': '"./preact.module.js"',
-	'"preact/hooks"': '"./hooks.module.js"',
-	'"@preact/signals-core"': '"./signals-core.module.js"',
-	'"@preact/signals"': '"./signals.module.js"',
-};
-
 export async function clean() {
 	await fs.emptyDir(config.build);
 }
@@ -35,24 +28,6 @@ export async function buildCss() {
 
 export async function copyFile(path: string) {
 	await fs.copy(path, join(config.build, path));
-}
-
-export async function copyAndTransformFile(path: string, transforms: ((content: string) => string)[] = []) {
-	const dest = join(config.build, path);
-	await fs.ensureDir(join(dest, '..'));
-	let content = await fs.readFile(path, 'utf-8');
-	for (const transform of transforms) {
-		content = transform(content);
-	}
-	await fs.writeFile(dest, content);
-}
-
-export function replaceImports(content: string): string {
-	let result = content;
-	for (const [from, to] of Object.entries(importmap)) {
-		result = result.replace(new RegExp(`from${from.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}`, 'g'), `from${to}`);
-	}
-	return result;
 }
 
 export async function removeFile(path: string) {

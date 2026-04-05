@@ -238,7 +238,7 @@ export function getImageResourceSize(img) {
 	}
 
 	const entries = performance.getEntriesByName(url);
-	const entry = entries.find((entry) => /** @type {PerformanceResourceTiming} */(entry).initiatorType === 'img');
+	const entry = entries.find((entry) => /** @type {PerformanceResourceTiming} */ (entry).initiatorType === 'img');
 
 	if (!entry) return null;
 

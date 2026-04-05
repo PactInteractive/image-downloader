@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'bun:test';
 import { Window } from 'happy-dom';
-import { h, render } from '../../lib/preact.module.js';
+import { h, render } from 'preact';
 
 import { formatFileSize, getImageExtension, getImageResourceSize, useImageStats } from './useImageStats.js';
 
@@ -8,6 +8,8 @@ import { formatFileSize, getImageExtension, getImageResourceSize, useImageStats 
 const window = new Window();
 (globalThis as any).document = window.document;
 (globalThis as any).window = window;
+(globalThis as any).CSS = window.CSS;
+(globalThis as any).getComputedStyle = window.getComputedStyle.bind(window);
 if (!window.SyntaxError) window.SyntaxError = SyntaxError;
 
 async function testHook<T>(hookFn: () => T): Promise<T> {

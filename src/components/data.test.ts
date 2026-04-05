@@ -1,5 +1,13 @@
 import { beforeEach, describe, expect, it } from 'bun:test';
+import { Window } from 'happy-dom';
 import { mockChrome } from '../test-helpers';
+
+const window = new Window();
+(globalThis as any).document = window.document;
+(globalThis as any).window = window;
+(globalThis as any).CSS = window.CSS;
+(globalThis as any).getComputedStyle = window.getComputedStyle.bind(window);
+if (!window.SyntaxError) window.SyntaxError = SyntaxError;
 
 import {
 	columns,
