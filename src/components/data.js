@@ -83,7 +83,7 @@ export const newFileName = storedSignal('new_file_name');
 export const showDownloadConfirmation = storedSignal('show_download_confirmation');
 
 // Images
-/** @type {import('../html.js').Signal<string[]>} */
+/** @type {import('@preact/signals').Signal<string[]>} */
 export const selectedImages = storedSignal('selected_images');
 
 export const columns = storedSignal('columns');
@@ -170,13 +170,13 @@ function parseLocalStorageValue(
 }
 
 // State
-/** @type {import('../html.js').Signal<string[]>} */
+/** @type {import('@preact/signals').Signal<string[]>} */
 export const allImages = signal([]);
 
-/** @type {import('../html.js').Signal<string[]>} */
+/** @type {import('@preact/signals').Signal<string[]>} */
 export const linkedImages = signal([]);
 
-/** @type {import('../html.js').Signal<HTMLDivElement | null>} */
+/** @type {import('@preact/signals').Signal<HTMLDivElement | null>} */
 export const imagesCache = signal(null); // Not displayed; only used for filtering by natural width / height
 
 export const tab = signal('matching');
@@ -254,7 +254,7 @@ export const selectedFilteredOutImages = computed(() =>
 	selectedImages.value.filter(isIncludedIn(filteredOutImages.value))
 );
 
-/** @type {import('../html.js').Signal<string[]>} */
+/** @type {import('@preact/signals').Signal<string[]>} */
 export const erroredImages = signal([]);
 export const selectedErroredImages = computed(() => selectedImages.value.filter(isIncludedIn(erroredImages.value)));
 

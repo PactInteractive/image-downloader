@@ -1,5 +1,5 @@
 // @ts-check
-import html, { For, useSignal } from '../html.js';
+import html, { For, Show, useSignal } from '../html.js';
 
 import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
@@ -70,8 +70,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 					<//>
 				</li>
 
-				${filteredOutImages.value.length > 0 &&
-				html`
+				<${Show} when=${filteredOutImages.value.length > 0}>
 					<li>
 						<${Tab}
 							class="border-l border-slate-300 text-slate-600 has-checked:text-slate-700"
@@ -86,9 +85,9 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 							${filteredOutImages.value.length} filtered out
 						<//>
 					</li>
-				`}
-				${erroredImages.value.length > 0 &&
-				html`
+				<//>
+
+				<${Show} when=${erroredImages.value.length > 0}>
 					<li>
 						<${Tab}
 							class="border-l border-slate-300 text-red-600 has-checked:text-red-700"
@@ -103,7 +102,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 							${erroredImages.value.length} ${erroredImages.value.length === 1 ? 'error' : 'errors'}
 						<//>
 					</li>
-				`}
+				<//>
 			</ul>
 
 			<${Checkbox}
@@ -273,13 +272,10 @@ function ImageCard({ imageUrl, ...props }) {
 				<div class="group-hover:hidden flex gap-1">
 					<${ImageStat} class="uppercase">${stats.data.value.extension}</${ImageStat}>
 
-					${
-						stats.data.value.status === 'loaded' &&
-						html`
+					<${Show} when=${stats.data.value.status === 'loaded'}>
 						<${ImageStat}>${stats.data.value.width}×${stats.data.value.height}</${ImageStat}>
 						<${ImageStat} class="small-caps lowercase">${stats.data.value.size ? stats.data.value.size.formatted : ''}</${ImageStat}>
-					`
-					}
+					<//>
 				</div>
 			</div>
 		</div>
@@ -304,10 +300,7 @@ function ImageError({ onClick, ...props }) {
 			}
 			...${props}
 		>
-			<div>
-				<${Circle} class="bg-red-600 text-white">×<//>
-				${' '}Error loading image
-			</div>
+			<div><${Circle} class="bg-red-600 text-white">×<//> Error loading image</div>
 			Click to retry
 		</button>
 	`;

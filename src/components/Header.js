@@ -1,5 +1,5 @@
 // @ts-check
-import html from '../html.js';
+import html, { Show } from '../html.js';
 
 import { toggle } from '../utils.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
@@ -34,22 +34,18 @@ export function Header(/** @type {Object} */ props) {
 
 	return html`
 		<header ...${props}>
-			${hostname.value &&
-			limitedAccessHostnames.test(hostname.value) &&
-			html`
+			<${Show} when=${hostname.value && limitedAccessHostnames.test(hostname.value)}
 				<div class="bg-sky-100 p-2 text-sky-800">
-					<span class="text-shadow">🛡️</span> Image Downloader has limited access to sensitive domains like ${' '}<b
-						>${hostname.value}</b
-					>
+					<span class="text-shadow">🛡️</span> Image Downloader has limited access to sensitive domains like <b>${hostname.value}</b>
 				</div>
-			`}
-			${scriptError.value &&
-			html`
+			<//>
+
+			<${Show} when=${scriptError.value}
 				<div class="bg-amber-100 p-2 text-amber-800">
 					<span class="text-shadow">⚠️</span> Image Downloader cannot access the contents of this page - please close
 					the extension and open it again
 				</div>
-			`}
+			<//>
 
 			<div class="flex items-center gap-1 p-2">
 				<button
@@ -74,15 +70,16 @@ export function Header(/** @type {Object} */ props) {
 				<${UrlFilterMode}
 					id="url_filter_mode_select"
 					value=${filterUrlMode.value}
-					onChange=${(/** @type {Event} */ e) =>
-						(filterUrlMode.value = /** @type {HTMLInputElement} */ (e.currentTarget).value)}
+					onChange=${(/** @type {Event} */ e) => (filterUrlMode.value = /** @type {HTMLInputElement} */ (e.currentTarget).value)}
 				/>
 
 				<button
 					class="relative min-w-8"
-					title=${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
-						? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
-						: 'Toggle advanced filters'}
+					title=${
+						!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
+							? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
+							: 'Toggle advanced filters'
+					}
 					onClick=${toggle(showAdvancedFilters)}
 				>
 					<img
@@ -116,7 +113,7 @@ export function Header(/** @type {Object} */ props) {
 				</button>
 			</div>
 
-			${showAdvancedFilters.value && html`<${AdvancedFilters} />`}
+			<${Show} when=${showAdvancedFilters.value}><${AdvancedFilters} /><//>
 		</header>
 	`;
 }

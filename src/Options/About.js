@@ -42,10 +42,7 @@ export function About() {
     <p>
       The extension will remain <b>free</b>, <b>open-source</b>, and
       <b> without targeted ads or tracking algorithms</b>.
-      The source code can be found on GitHub:${' '}
-      <${ExternalLink}
-        href="https://github.com/PactInteractive/image-downloader"
-      />
+      The source code can be found on GitHub: <${ExternalLink} href="https://github.com/PactInteractive/image-downloader" />
     </p>
 
     <hr />
