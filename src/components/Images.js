@@ -135,7 +135,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 					-
 				</button>
 
-				${columns.value}
+				${columns}
 
 				<button
 					type="button"
@@ -236,7 +236,7 @@ function ImageCard({ imageUrl, ...props }) {
 							}}
 						/>`
 					: html`<img
-							key=${retryCount.value}
+							key=${retryCount}
 							class="drop-shadow-md"
 							src=${imageUrl}
 							onLoad=${stats.onLoad}

@@ -24,7 +24,7 @@ function Wrapper() {
 					<input
 						class="flex-1 rounded bg-slate-700 px-3 py-1.5 text-sm text-slate-100 placeholder-slate-400 outline-none focus:ring-1 focus:ring-blue-500"
 						type="text"
-						value=${inputUrl.value}
+						value=${inputUrl}
 						onInput=${(/** @type {Event} */ e) => (inputUrl.value = /** @type {HTMLInputElement} */ (e.target).value)}
 						placeholder="Enter URL..."
 					/>

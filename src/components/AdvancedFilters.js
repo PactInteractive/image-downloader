@@ -40,10 +40,10 @@ export function AdvancedFilters() {
 							class="${filterMinWidthEnabled.value ? '' : 'text-slate-500'} flex items-center justify-end"
 							title=${getSliderCheckboxTooltip(filterMinWidthEnabled.value)}
 						>
-							<small>${filterMinWidth.value}px ≤</small>
+							<small>${filterMinWidth}px ≤</small>
 							<input
 								type="checkbox"
-								checked=${filterMinWidthEnabled.value}
+								checked=${filterMinWidthEnabled}
 								onChange=${setToCheckboxValue(filterMinWidthEnabled)}
 							/>
 						</label>
@@ -60,10 +60,10 @@ export function AdvancedFilters() {
 						>
 							<input
 								type="checkbox"
-								checked=${filterMaxWidthEnabled.value}
+								checked=${filterMaxWidthEnabled}
 								onChange=${setToCheckboxValue(filterMaxWidthEnabled)}
 							/>
-							<small>≤ ${filterMaxWidth.value}px</small>
+							<small>≤ ${filterMaxWidth}px</small>
 						</label>
 					</td>
 				</tr>
@@ -76,10 +76,10 @@ export function AdvancedFilters() {
 							class="${filterMinHeightEnabled.value ? '' : 'text-slate-500'} flex items-center justify-end text-nowrap"
 							title=${getSliderCheckboxTooltip(filterMinHeightEnabled.value)}
 						>
-							<small>${filterMinHeight.value}px ≤</small>
+							<small>${filterMinHeight}px ≤</small>
 							<input
 								type="checkbox"
-								checked=${filterMinHeightEnabled.value}
+								checked=${filterMinHeightEnabled}
 								onChange=${setToCheckboxValue(filterMinHeightEnabled)}
 							/>
 						</label>
@@ -98,10 +98,10 @@ export function AdvancedFilters() {
 						>
 							<input
 								type="checkbox"
-								checked=${filterMaxHeightEnabled.value}
+								checked=${filterMaxHeightEnabled}
 								onChange=${setToCheckboxValue(filterMaxHeightEnabled)}
 							/>
-							<small>≤ ${filterMaxHeight.value}px</small>
+							<small>≤ ${filterMaxHeight}px</small>
 						</label>
 					</td>
 				</tr>

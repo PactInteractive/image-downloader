@@ -39,7 +39,7 @@ export function Header(/** @type {Object} */ props) {
 			<${Show} when=${hostnameIsLimited}>
 				<div class="bg-sky-100 p-2 text-sky-800">
 					<span class="text-shadow">🛡️</span> Image Downloader has limited access to sensitive domains like
-					<b>${hostname.value}</b>
+					<b>${hostname}</b>
 				</div>
 			<//>
 
@@ -64,7 +64,7 @@ export function Header(/** @type {Object} */ props) {
 					type="text"
 					placeholder="Filter by URL"
 					title="Filter by parts of the URL or regular expressions."
-					value=${filterUrl.value}
+					value=${filterUrl}
 					class="flex-1"
 					onChange=${(/** @type {Event} */ e) =>
 						(filterUrl.value = /** @type {HTMLInputElement} */ (e.currentTarget).value.trim())}
@@ -72,7 +72,7 @@ export function Header(/** @type {Object} */ props) {
 
 				<${UrlFilterMode}
 					id="url_filter_mode_select"
-					value=${filterUrlMode.value}
+					value=${filterUrlMode}
 					onChange=${(/** @type {Event} */ e) =>
 						(filterUrlMode.value = /** @type {HTMLInputElement} */ (e.currentTarget).value)}
 				/>

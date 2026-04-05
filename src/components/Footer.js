@@ -48,7 +48,7 @@ export function Footer(/** @type {Object} */ props) {
 								type="text"
 								placeholder="Save to subfolder"
 								title="Set the name of the subfolder you want to download the images to."
-								value=${folderName.value}
+								value=${folderName}
 								onChange=${(/** @type {Event} */ e) => {
 									const input = /** @type HTMLInputElement */ (e.currentTarget);
 									const savedSelectionStart = removeSpecialCharacters(
@@ -69,7 +69,7 @@ export function Footer(/** @type {Object} */ props) {
 								type="text"
 								placeholder="Rename files"
 								title="Set a new file name for the images you want to download."
-								value=${newFileName.value}
+								value=${newFileName}
 								onChange=${(/** @type {Event} */ e) => {
 									const input = /** @type HTMLInputElement */ (e.currentTarget);
 									const savedSelectionStart = removeSpecialCharacters(

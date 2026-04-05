@@ -30,7 +30,7 @@ export function App() {
 		<${Header} class="sticky top-0 z-1 bg-white shadow-md" />
 
 		<div id="images_cache" ref=${(/** @type {HTMLDivElement} */ element) => (imagesCache.value = element)} hidden>
-			<${For} each=${allImages.value}>
+			<${For} each=${allImages}>
 				${(/** @type {string} */ url) => html`
 					<img key=${url} src=${url} onError=${() => (erroredImages.value = [...erroredImages.value, url])} />
 				`}
