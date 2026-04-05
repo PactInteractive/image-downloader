@@ -134,7 +134,7 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 	const sliderRef = useRef(/** @type {HTMLElement | null} */ (null));
 
 	useEffect(() => {
-		const slider = sliderRef.current;
+		const slider = /** @type {import('nouislider').target | null} */ (sliderRef.current);
 		if (!slider) return;
 
 		const minDefault = dimension === 'width' ? defaults.filter_min_width : defaults.filter_min_height;
@@ -157,9 +157,9 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 			start: [minSignal.value, maxSignal.value],
 		});
 
-		slider.noUiSlider?.on('update', (/** @type [number, number] */ [min, max]) => {
-			minSignal.value = min;
-			maxSignal.value = max;
+		slider.noUiSlider?.on('update', (/** @type {(string | number)[]} */ [min, max]) => {
+			minSignal.value = /** @type {number} */ (min);
+			maxSignal.value = /** @type {number} */ (max);
 		});
 
 		return () => {

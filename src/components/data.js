@@ -274,7 +274,7 @@ export const limitedAccessHostnames = /\.google\.com/;
 export const scriptError = signal('');
 
 export const loadImagesFromActiveTab = action(
-	(/** @type {{ waitForIdleDOM: number | false }} */ { waitForIdleDOM }) => {
+	(/** @type {{ waitForIdleDOM: number | false }} */ { waitForIdleDOM } = { waitForIdleDOM: false }) => {
 		chrome.windows.getCurrent((currentWindow) => {
 			chrome.tabs.query({ active: true, windowId: currentWindow.id }, (activeTabs) => {
 				if (activeTabs.length === 0) return;
