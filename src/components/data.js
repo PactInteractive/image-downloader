@@ -230,11 +230,11 @@ export const matchingImages = computed(() => {
 		/** @type {HTMLImageElement | null} */ const image = imagesCache.value.querySelector(`img[src="${url}"]`);
 
 		return (
-			image &&
-			(!filterMinWidthEnabled.value || filterMinWidth.value <= image.naturalWidth) &&
-			(!filterMaxWidthEnabled.value || image.naturalWidth <= filterMaxWidth.value) &&
-			(!filterMinHeightEnabled.value || filterMinHeight.value <= image.naturalHeight) &&
-			(!filterMaxHeightEnabled.value || image.naturalHeight <= filterMaxHeight.value) &&
+			// image && <-- we don't want this, it results in overly filtered images on initial load
+			(!filterMinWidthEnabled.value || filterMinWidth.value <= (image?.naturalWidth || 0)) &&
+			(!filterMaxWidthEnabled.value || (image?.naturalWidth || 0) <= filterMaxWidth.value) &&
+			(!filterMinHeightEnabled.value || filterMinHeight.value <= (image?.naturalHeight || 0)) &&
+			(!filterMaxHeightEnabled.value || (image?.naturalHeight || 0) <= filterMaxHeight.value) &&
 			!erroredImages.value.includes(url)
 		);
 	});
