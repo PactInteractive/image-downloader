@@ -176,8 +176,8 @@ export const allImages = signal([]);
 /** @type {import('@preact/signals').Signal<string[]>} */
 export const linkedImages = signal([]);
 
-/** @type {import('@preact/signals').Signal<HTMLDivElement | null>} */
-export const imagesCache = signal(null); // Not displayed; only used for filtering by natural width / height
+/** @type {{ value: HTMLDivElement | null }} */
+export const imagesCache = { value: null }; // Not displayed; only used for filtering by natural width / height
 
 export const tab = signal('matching');
 
