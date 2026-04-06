@@ -149,8 +149,8 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 		</div>
 
 		<div
-			class="grid grid-cols-(--image-columns) gap-2 p-2"
-			style=${{ '--image-columns': `repeat(${columns.value}, minmax(0, 1fr))`, ...style }}
+			class="grid gap-2 p-2"
+			style=${{ gridTemplateColumns: `repeat(${columns.value}, minmax(0, 1fr))`, ...style }}
 			...${props}
 		>
 			<${For} each=${displayedImages}>

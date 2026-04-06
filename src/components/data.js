@@ -1,5 +1,5 @@
 // @ts-check
-import { action, computed, effect, signal } from '../html.js';
+import { action, batch, computed, effect, signal } from '../html.js';
 import { isIncludedIn, unique } from '../utils.js';
 import { deduplicateImages } from './deduplicateImages.js';
 import { findImages } from './findImages.js';
@@ -298,18 +298,23 @@ export const loadImagesFromActiveTab = action(
 						args: [{ waitForIdleDOM }],
 					})
 					.then((messages) => {
-						erroredImages.value = [];
-						allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
-						linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));
-						for (const message of messages) {
-							if (message.result?.origin) {
-								try {
-									hostname.value = new URL(message?.result?.origin).hostname;
-								} catch (error) {
-									// ignore
+						batch(() => {
+							erroredImages.value = [];
+							allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
+							linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));
+							selectedImages.value = selectedImages.value.filter(isIncludedIn(allImages.value));
+
+							for (const message of messages) {
+								if (message.result?.origin) {
+									try {
+										hostname.value = new URL(message?.result?.origin).hostname;
+									} catch (error) {
+										// ignore
+									}
 								}
 							}
-						}
+						});
+
 						if (!waitForIdleDOM) {
 							loadImagesFromActiveTab({ waitForIdleDOM: 1000 });
 						}

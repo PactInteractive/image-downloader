@@ -147,7 +147,7 @@ function useSlider(/** @type {'width' | 'height'} */ dimension) {
 			connect: true,
 			format: {
 				from: (/** @type {string} */ value) => parseInt(value, 10),
-				to: (/** @type {number} */ value) => Math.trunc(value).toString(),
+				to: (/** @type {number} */ value) => Math.trunc(value),
 			},
 			range: {
 				min: minDefault,
