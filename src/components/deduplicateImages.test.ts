@@ -5,6 +5,7 @@ import { deduplicateImages } from './deduplicateImages.js';
 mockDOM();
 
 describe('deduplicateImages', () => {
+	// prettier-ignore
 	const images: Record<string, { naturalWidth: number; naturalHeight: number }> = {
 		'https://example.com/photo-512w.avif': { naturalWidth: 512, naturalHeight: 384 },
 		'https://example.com/photo-512w.bmp': { naturalWidth: 512, naturalHeight: 384 },

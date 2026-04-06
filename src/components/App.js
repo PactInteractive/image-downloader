@@ -10,11 +10,16 @@ import {
 	loadImagesFromActiveTab,
 	reloadImagesWhenPageLoads,
 } from './data.js';
+import { ErrorBoundary } from './ErrorBoundary.js';
 import { Footer } from './Footer.js';
 import { Header } from './Header.js';
 import { Images } from './Images.js';
 
 export function App() {
+	return html`<${ErrorBoundary}><${AppWithoutErrorBoundary} /><//>`;
+}
+
+function AppWithoutErrorBoundary() {
 	useEffect(() => {
 		chrome.tabs.onUpdated.addListener(reloadImagesWhenPageLoads);
 		chrome.tabs.onActivated.addListener(({ tabId }) => reloadImagesWhenPageLoads(tabId, {}, null));
