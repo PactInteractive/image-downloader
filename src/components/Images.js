@@ -1,15 +1,17 @@
 // @ts-check
-import html, { For, Show, useComputed, useSignal } from '../html.js';
+import html, { batch, For, Show, useComputed, useSignal } from '../html.js';
 
 import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
 import {
-	allImages,
 	columns,
 	displayedImages,
 	erroredImages,
 	filteredOutImages,
+	imageErrored,
+	imageLoaded,
+	loadedImages,
 	matchingImages,
 	selectedErroredImages,
 	selectedFilteredOutImages,
@@ -111,7 +113,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 				class="flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 p-1 text-xs text-nowrap text-slate-600 transition-colors hover:bg-slate-100"
 				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
 				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
-				disabled=${allImages.value.length === 0}
+				disabled=${loadedImages.value.length === 0}
 				title="Click to select or unselect all visible images"
 				onChange=${(/** @type {Event} */ e) => {
 					const { checked } = /** @type {HTMLInputElement} */ (e.currentTarget);
@@ -230,7 +232,6 @@ function ImageCard({ imageUrl, ...props }) {
 				stats.data.value.status === 'error'
 					? html`<${ImageError}
 							onClick=${() => {
-								erroredImages.value = erroredImages.value.filter(isNotStrictEqual(imageUrl));
 								retryCount.value++;
 								stats.reset();
 							}}
@@ -239,8 +240,14 @@ function ImageCard({ imageUrl, ...props }) {
 							key=${retryCount}
 							class="drop-shadow-md"
 							src=${imageUrl}
-							onLoad=${stats.onLoad}
-							onError=${stats.onError}
+							onLoad=${(/** @type {Event}  */ e) => {
+								imageLoaded(imageUrl);
+								stats.onLoad(e);
+							}}
+							onError=${(/** @type {Event}  */ e) => {
+								imageErrored(imageUrl);
+								stats.onError();
+							}}
 						/>`
 			}
 

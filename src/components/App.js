@@ -3,7 +3,8 @@ import html, { For, useEffect } from '../html.js';
 
 import {
 	allImages,
-	erroredImages,
+	imageErrored,
+	imageLoaded,
 	imagesCache,
 	initialize,
 	initialized,
@@ -37,7 +38,12 @@ function AppWithoutErrorBoundary() {
 		<div id="images_cache" ref=${(/** @type {HTMLDivElement} */ element) => (imagesCache.value = element)} hidden>
 			<${For} each=${allImages}>
 				${(/** @type {string} */ url) => html`
-					<img key=${url} src=${url} onError=${() => (erroredImages.value = [...erroredImages.value, url])} />
+					<img
+						key=${url}
+						src=${url}
+						onLoad=${() => imageLoaded(url)}
+						onError=${() => imageErrored(url)}
+					/>
 				`}
 			<//>
 		</div>

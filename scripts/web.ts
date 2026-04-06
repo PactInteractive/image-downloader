@@ -27,12 +27,12 @@ Bun.serve({
 		const url = new URL(request.url);
 		const path = url.pathname === '/' ? '/src/Web/index.html' : url.pathname;
 		const shouldServeFromBuild =
-		/^\/lib\//.test(path) ||
-		config.copy.include.some((pattern) =>
-			sync(pattern, {
-				ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
-			}).includes(`.${path}`)
-		);
+			/^\/lib\//.test(path) ||
+			config.copy.include.some((pattern) =>
+				sync(pattern, {
+					ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
+				}).includes(`.${path}`)
+			);
 
 		const file = Bun.file(join(__dirname, '..', (shouldServeFromBuild ? config.build : '') + path));
 

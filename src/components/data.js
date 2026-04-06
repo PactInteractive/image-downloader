@@ -1,6 +1,6 @@
 // @ts-check
 import { action, batch, computed, effect, signal } from '../html.js';
-import { isIncludedIn, unique } from '../utils.js';
+import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, unique } from '../utils.js';
 import { deduplicateImages } from './deduplicateImages.js';
 import { findImages } from './findImages.js';
 
@@ -170,19 +170,42 @@ function parseLocalStorageValue(
 }
 
 // State
-/** @type {import('@preact/signals').Signal<string[]>} */
-export const allImages = signal([]);
+export const allImages = signal(/** @type {string[]} */ ([]));
+export const linkedImages = signal(/** @type {string[]} */ ([]));
 
-/** @type {import('@preact/signals').Signal<string[]>} */
-export const linkedImages = signal([]);
+export const imagesCache = { value: /** @type {HTMLDivElement | null} */ (null) }; // Not displayed; used for loading images and their stats like size or resolution
 
-/** @type {{ value: HTMLDivElement | null }} */
-export const imagesCache = { value: null }; // Not displayed; only used for filtering by natural width / height
+export const loadedImages = signal(/** @type {string[]} */ ([]));
+export const imageLoaded = action((/** @type {string} */ url) => {
+	batch(() => {
+		if (!loadedImages.peek().includes(url)) {
+			loadedImages.value = [...loadedImages.value, url];
+		}
+		if (erroredImages.peek().includes(url)) {
+			erroredImages.value = erroredImages.value.filter(isNotStrictEqual(url));
+		}
+	});
+});
 
+export const erroredImages = signal(/** @type {string[]} */ ([]));
+export const imageErrored = action((/** @type {string} */ url) => {
+	batch(() => {
+		if (!erroredImages.peek().includes(url)) {
+			erroredImages.value = [...erroredImages.value, url];
+		}
+		if (loadedImages.peek().includes(url)) {
+			loadedImages.value = loadedImages.value.filter(isNotStrictEqual(url));
+		}
+	});
+});
+
+// Tabs
 export const tab = signal('matching');
 
 export const matchingImages = computed(() => {
-	let filtered = onlyImagesFromLinks.value ? linkedImages.value : allImages.value;
+	let filtered = onlyImagesFromLinks.value
+		? loadedImages.value.filter(isIncludedIn(linkedImages.value))
+		: loadedImages.value;
 
 	let filterValue = filterUrl.value;
 	if (filterValue) {
@@ -245,18 +268,8 @@ export const matchingImages = computed(() => {
 
 	return filtered;
 });
-export const selectedMatchingImages = computed(() => selectedImages.value.filter(isIncludedIn(matchingImages.value)));
 
-export const filteredOutImages = computed(() =>
-	allImages.value.filter((url) => !matchingImages.value.includes(url) && !erroredImages.value.includes(url))
-);
-export const selectedFilteredOutImages = computed(() =>
-	selectedImages.value.filter(isIncludedIn(filteredOutImages.value))
-);
-
-/** @type {import('@preact/signals').Signal<string[]>} */
-export const erroredImages = signal([]);
-export const selectedErroredImages = computed(() => selectedImages.value.filter(isIncludedIn(erroredImages.value)));
+export const filteredOutImages = computed(() => loadedImages.value.filter(isNotIncludedIn(matchingImages.value)));
 
 export const displayedImages = computed(() => {
 	return (
@@ -268,6 +281,14 @@ export const displayedImages = computed(() => {
 	);
 });
 
+// Selection
+export const selectedMatchingImages = computed(() => selectedImages.value.filter(isIncludedIn(matchingImages.value)));
+export const selectedFilteredOutImages = computed(() =>
+	selectedImages.value.filter(isIncludedIn(filteredOutImages.value))
+);
+export const selectedErroredImages = computed(() => selectedImages.value.filter(isIncludedIn(erroredImages.value)));
+
+// Loading
 export const hostname = signal('');
 export const limitedAccessHostnames = /\.google\.com/;
 
@@ -299,9 +320,11 @@ export const loadImagesFromActiveTab = action(
 					})
 					.then((messages) => {
 						batch(() => {
-							erroredImages.value = [];
 							allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
 							linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));
+							// Shouldn't reset these as they may be cached in the DOM and not load again
+							loadedImages.value = loadedImages.value.filter(isIncludedIn(allImages.value));
+							erroredImages.value = erroredImages.value.filter(isIncludedIn(allImages.value));
 							selectedImages.value = selectedImages.value.filter(isIncludedIn(allImages.value));
 
 							for (const message of messages) {
