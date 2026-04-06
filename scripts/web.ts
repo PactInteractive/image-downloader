@@ -25,20 +25,20 @@ Bun.serve({
 	port,
 	async fetch(request) {
 		const url = new URL(request.url);
-		const filepath = url.pathname === '/' ? '/src/Web/index.html' : url.pathname;
+		const path = url.pathname === '/' ? '/src/Web/index.html' : url.pathname;
 		const shouldServeFromBuild =
-			/^\/lib\//.test(filepath) ||
-			config.copy.include.some((pattern) =>
-				sync(pattern, {
-					ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
-				}).includes(`.${filepath}`)
-			);
+		/^\/lib\//.test(path) ||
+		config.copy.include.some((pattern) =>
+			sync(pattern, {
+				ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
+			}).includes(`.${path}`)
+		);
 
-		const file = Bun.file(join(__dirname, '..', (shouldServeFromBuild ? config.build : '') + filepath));
+		const file = Bun.file(join(__dirname, '..', (shouldServeFromBuild ? config.build : '') + path));
 
 		if (await file.exists()) {
 			console.log(`${request.method} ${url.href} 200`);
-			const extension = filepath.slice(filepath.lastIndexOf('.'));
+			const extension = path.slice(path.lastIndexOf('.'));
 			const contentType = mimeTypes[extension] || 'application/octet-stream';
 
 			if (extension === '.html') {

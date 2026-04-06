@@ -26,12 +26,25 @@ export async function buildCss() {
 	await $`bunx @tailwindcss/cli -i ./src/style.css -o ./${config.build}/src/style.css`;
 }
 
+export async function rewriteModuleImports(path: string) {
+	let content = await fs.readFile(path, 'utf8');
+	for (const [from, to] of Object.entries(config.importmap)) {
+		content = content.split(from).join(to);
+	}
+	await fs.writeFile(path, content);
+	return path;
+}
+
 export async function copyFile(path: string) {
-	await fs.copy(path, join(config.build, path));
+	const target = join(config.build, path);
+	await fs.copy(path, target);
+	return target;
 }
 
 export async function removeFile(path: string) {
-	await fs.remove(join(config.build, path));
+	const target = join(config.build, path);
+	await fs.remove(target);
+	return target;
 }
 
 // See https://wxt.dev/api/config.html

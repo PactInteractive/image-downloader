@@ -3,34 +3,7 @@ import { sync } from 'glob';
 import { join } from 'path';
 
 import * as config from './config';
-import { buildCss, clean, copyFile, updateManifest } from './tasks';
-
-const importmap = {
-	'"@preact/signals-core"': '"/lib/preact-signals-core.mjs"',
-	"'@preact/signals-core'": "'/lib/preact-signals-core.mjs'",
-	'"@preact/signals"': '"/lib/preact-signals.mjs"',
-	"'@preact/signals'": "'/lib/preact-signals.mjs'",
-	'"@preact/signals/utils"': '"/lib/preact-signals-utils.mjs"',
-	"'@preact/signals/utils'": "'/lib/preact-signals-utils.mjs'",
-	'"htm"': '"/lib/htm.mjs"',
-	"'htm'": "'/lib/htm.mjs'",
-	'"htm/preact"': '"/lib/htm-preact.mjs"',
-	"'htm/preact'": "'/lib/htm-preact.mjs'",
-	'"nouislider"': '"/lib/nouislider.mjs"',
-	"'nouislider'": "'/lib/nouislider.mjs'",
-	'"preact"': '"/lib/preact.mjs"',
-	"'preact'": "'/lib/preact.mjs'",
-	'"preact/hooks"': '"/lib/preact-hooks.mjs"',
-	"'preact/hooks'": "'/lib/preact-hooks.mjs'",
-};
-
-function rewriteImports(filePath: string) {
-	let content = fs.readFileSync(filePath, 'utf8');
-	for (const [from, to] of Object.entries(importmap)) {
-		content = content.split(from).join(to);
-	}
-	fs.writeFileSync(filePath, content);
-}
+import { buildCss, clean, copyFile, rewriteModuleImports, updateManifest } from './tasks';
 
 async function build() {
 	await clean();
@@ -57,13 +30,11 @@ async function build() {
 		.reduce((parent, child) => [...parent, ...child], [])
 		.filter((file) => !fs.statSync(file).isDirectory());
 
-	await Promise.all(files.map((file) => copyFile(file)));
+	await Promise.all(files.map(copyFile));
 
 	// Rewrite bare imports to absolute lib paths in all JS files
 	const allJsFiles = sync(join(config.build, '**/*.{js,mjs}'));
-	for (const file of allJsFiles) {
-		rewriteImports(file);
-	}
+	await Promise.all(allJsFiles.map(rewriteModuleImports));
 
 	await buildCss();
 }
