@@ -66,7 +66,7 @@ export function Header(/** @type {Object} */ props) {
 					title="Filter by parts of the URL or regular expressions."
 					value=${filterUrl}
 					class="flex-1"
-					onChange=${(/** @type {Event} */ e) =>
+					onInput=${(/** @type {Event} */ e) =>
 						(filterUrl.value = /** @type {HTMLInputElement} */ (e.currentTarget).value.trim())}
 				/>
 
