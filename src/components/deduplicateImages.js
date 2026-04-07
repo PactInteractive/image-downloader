@@ -29,13 +29,11 @@ function getNormalizedBaseKey(/** @type {string} */ url) {
 	try {
 		const parsed = new URL(url);
 
-		// Extract actual filename (last path segment) for cross-subdomain deduplication
-		const filename = parsed.pathname.split('/').filter(isTruthy).at(-1) || '';
-		const parts = filename.split('.');
+		const parts = parsed.pathname.split('.');
 		const nameWithoutExtension =
 			parts.length > 1 && priorities.includes(/** @type {string} */ (parts.at(-1)))
 				? parts.slice(0, -1).join('.')
-				: filename;
+				: parsed.pathname;
 
 		// Get base name without resolution suffix
 		const basename = nameWithoutExtension.replace(/(?:[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w)|@\d+x)$/i, '');

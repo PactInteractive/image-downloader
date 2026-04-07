@@ -223,4 +223,13 @@ describe('deduplicateImages', () => {
 		];
 		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
 	});
+
+	it('should not deduplicate only based on last path', () => {
+		const urls = [
+			'https://imagedelivery.net/9lr8zq_Jvl7h6OFWqEi9IA/2204e5ec-b2c8-40b8-212d-d20e9dfaa900/public',
+			'https://imagedelivery.net/9lr8zq_Jvl7h6OFWqEi9IA/36cfe2eb-a89f-4283-1aa4-6cd72afcd900/public',
+			'https://imagedelivery.net/9lr8zq_Jvl7h6OFWqEi9IA/cdc70901-8253-4000-2492-eb577d099400/public',
+		];
+		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+	});
 });
