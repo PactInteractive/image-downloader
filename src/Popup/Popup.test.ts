@@ -56,5 +56,5 @@ it(`renders images`, async () => {
 
 	await new Promise((resolve) => setTimeout(resolve, 50));
 
-	expect(document.querySelectorAll('#images_container img').length).toBe(3);
+	expect(document.querySelectorAll('#images_cache img').length).toBe(3);
 });

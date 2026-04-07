@@ -24,6 +24,8 @@ export function deduplicateImages(/** @type {string[]} */ urls, /** @type {HTMLD
 
 /** @returns {string} */
 function getNormalizedBaseKey(/** @type {string} */ url) {
+	if (url.startsWith('data:')) return url;
+
 	try {
 		const parsed = new URL(url);
 
