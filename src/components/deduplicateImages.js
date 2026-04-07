@@ -104,8 +104,7 @@ function pickBestImageUrl(/** @type {string[]} */ urlStrings, /** @type {HTMLDiv
 
 	if (realUrls.length === 0) return undefined;
 
-	/** @param {URL} url */
-	const getResolution = (url) => {
+	const getResolution = (/** @type {URL} */ url) => {
 		const img = /** @type {HTMLImageElement | null} */ (imagesCache.querySelector(`img[src="${url.href}"]`));
 		return img ? { width: img.naturalWidth, height: img.naturalHeight } : { width: 0, height: 0 };
 	};

@@ -176,7 +176,9 @@ export const linkedImages = signal(/** @type {string[]} */ ([]));
 export const imagesCache = { value: /** @type {HTMLDivElement | null} */ (null) }; // Not displayed; used for loading images and their stats like size or resolution
 
 export const loadedImages = signal(/** @type {string[]} */ ([]));
-export const imageLoaded = action((/** @type {string} */ url) => {
+export const imageLoaded = action((/** @type {string | undefined} */ url) => {
+	if (!url) return;
+
 	batch(() => {
 		if (!loadedImages.peek().includes(url)) {
 			loadedImages.value = [...loadedImages.value, url];
@@ -188,7 +190,9 @@ export const imageLoaded = action((/** @type {string} */ url) => {
 });
 
 export const erroredImages = signal(/** @type {string[]} */ ([]));
-export const imageErrored = action((/** @type {string} */ url) => {
+export const imageErrored = action((/** @type {string | undefined} */ url) => {
+	if (!url) return;
+
 	batch(() => {
 		if (!erroredImages.peek().includes(url)) {
 			erroredImages.value = [...erroredImages.value, url];

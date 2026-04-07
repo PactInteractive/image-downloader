@@ -20,6 +20,7 @@ import {
 	tab,
 } from './data.js';
 import { useImageStats } from './useImageStats.js';
+import { useScrollToEnd } from './useScrollToEnd.js';
 
 /**
  * @typedef {import('./useImageStats.js').ImageStatsData} ImageStatsData
@@ -53,11 +54,9 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
 			<ul
 				class="flex items-center overflow-hidden rounded-full border border-slate-300 text-xs text-nowrap"
-				onChange=${
-					/** @param {Event} e */ (e) => {
-						tab.value = /** @type {HTMLInputElement} */ (e.target).value;
-					}
-				}
+				onChange=${(/** @type {Event} */ e) => {
+					tab.value = /** @type {HTMLInputElement} */ (e.target).value;
+				}}
 			>
 				<li>
 					<${Tab}
@@ -172,13 +171,14 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 	`;
 }
 
-/**
- * @param {Object} props
- * @param {string} [props.class]
- * @param {any} [props.children]
- * @param {{ name: string, value: string, checked: boolean }} [props.input]
- */
-function Tab({ class: className = '', children, input, ...props }) {
+function Tab(
+	/** @type {{ class?: string, children?: any, input?: { name: string, value: string, checked: boolean } }} */ {
+		class: className = '',
+		children,
+		input,
+		...props
+	}
+) {
 	return html`
 		<label
 			class="${className} bg-slate-50 p-1 transition-colors hover:bg-slate-100 has-checked:bg-slate-200"
@@ -190,12 +190,7 @@ function Tab({ class: className = '', children, input, ...props }) {
 	`;
 }
 
-/**
- * @param {Object} props
- * @param {string} [props.class]
- * @param {any} [props.children]
- */
-function Circle({ class: className = '', children, ...props }) {
+function Circle(/** @type {{ class?: string, children?: any }} */ { class: className = '', children, ...props }) {
 	return html`
 		<span
 			class="corner-round ${className} inline-block h-4 min-w-4 rounded-full px-1 text-center font-bold"
@@ -206,11 +201,7 @@ function Circle({ class: className = '', children, ...props }) {
 	`;
 }
 
-/**
- * @param {Object} props
- * @param {string} props.imageUrl
- */
-function ImageCard({ imageUrl, ...props }) {
+function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 	const stats = useImageStats(imageUrl);
 	const statsAreLoaded = useComputed(() => stats.data.value.status === 'loaded');
 	const retryCount = useSignal(0);
@@ -290,22 +281,16 @@ function ImageCard({ imageUrl, ...props }) {
 	`;
 }
 
-/**
- * @param {Object} props
- * @param {(e: MouseEvent) => void} [props.onClick]
- */
-function ImageError({ onClick, ...props }) {
+function ImageError(/** @type {{ onClick?: (e: MouseEvent) => void }} */ { onClick, ...props }) {
 	return html`
 		<button
 			class="flex h-auto flex-col items-center justify-center gap-1 border-red-300 bg-red-50 p-4 text-xs text-red-600 hover:bg-red-100"
 			type="button"
 			title="Retry loading image"
-			onClick=${
-				/** @param {MouseEvent} e */ (e) => {
-					e.stopPropagation();
-					onClick?.(e);
-				}
-			}
+			onClick=${(/** @type {MouseEvent} e */ e) => {
+				e.stopPropagation();
+				onClick?.(e);
+			}}
 			...${props}
 		>
 			<div><${Circle} class="bg-red-600 text-white">×<//> Error loading image</div>
@@ -314,16 +299,10 @@ function ImageError({ onClick, ...props }) {
 	`;
 }
 
-/**
- * @param {Object} props
- * @param {string} props.imageUrl
- * @param {(e: MouseEvent) => void} [props.onClick]
- */
-function OpenImageButton({ imageUrl, onClick, ...props }) {
-	/**
-	 * @param {MouseEvent} e
-	 */
-	function openNewTab(e) {
+function OpenImageButton(
+	/** @type {{ imageUrl: string, onClick?: (e: MouseEvent) => void }} */ { imageUrl, onClick, ...props }
+) {
+	function openNewTab(/** @type {MouseEvent} */ e) {
 		chrome.tabs.create({ url: imageUrl, active: false });
 		if (onClick) {
 			onClick(e);
@@ -342,16 +321,10 @@ function OpenImageButton({ imageUrl, onClick, ...props }) {
 	`;
 }
 
-/**
- * @param {Object} props
- * @param {string} props.imageUrl
- * @param {(e: MouseEvent) => void} [props.onClick]
- */
-function DownloadImageButton({ imageUrl, onClick, ...props }) {
-	/**
-	 * @param {MouseEvent} e
-	 */
-	function downloadImages(e) {
+function DownloadImageButton(
+	/** @type {{ imageUrl: string, onClick?: (e: MouseEvent) => void }} */ { imageUrl, onClick, ...props }
+) {
+	function downloadImages(/** @type {MouseEvent} */ e) {
 		actions.downloadImages([imageUrl]);
 		if (onClick) {
 			onClick(e);
@@ -370,43 +343,23 @@ function DownloadImageButton({ imageUrl, onClick, ...props }) {
 	`;
 }
 
-/**
- * @param {Object} props
- * @param {string} [props.class]
- * @param {any} [props.children]
- */
-function ImageStat({ class: className = '', children, ...props }) {
+function ImageStat(/** @type {{ class?: string; children?: any }} */ { class: className = '', children, ...props }) {
 	return html`
 		<small class="${className} rounded bg-slate-950/80 px-1 text-white empty:hidden" ...${props}>${children}</small>
 	`;
 }
 
-/**
- * @param {Object} props
- */
-function ImageUrlTextbox(props) {
-	// TODO: Implement
-	// const inputRef = useRef(null);
-
-	// function scrollToEnd() {
-	// 	const input = inputRef.current;
-	// 	if (input) {
-	// 		input.scrollLeft = input.scrollWidth;
-	// 	}
-	// }
-
-	// useLayoutEffect(scrollToEnd, []);
-
+function ImageUrlTextbox(/** @type {Object} */ props) {
+	const inputRef = useScrollToEnd();
 	return html`
 		<input
+			ref=${inputRef}
 			type="text"
 			readonly
-			onClick=${
-				/** @param {MouseEvent} e */ (e) => {
-					e.stopPropagation();
-					/** @type {HTMLInputElement} */ (e.currentTarget).select();
-				}
-			}
+			onClick=${(/** @type {MouseEvent} */ e) => {
+				e.stopPropagation();
+				/** @type {HTMLInputElement} */ (e.currentTarget).select();
+			}}
 			...${props}
 		/>
 	`;

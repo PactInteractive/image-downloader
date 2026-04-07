@@ -1,7 +1,6 @@
 // @ts-check
 import { useLayoutEffect, useRef } from '../html.js';
 
-// TODO: Rewrite with signals or get rid of this
 export function useRunAfterUpdate() {
 	const handlersRef = useRef(/** @type {(() => void)[]} */ ([]));
 
@@ -10,8 +9,7 @@ export function useRunAfterUpdate() {
 		handlersRef.current = [];
 	});
 
-	/** @param {() => void} handler */
-	return (handler) => {
+	return (/** @type {() => void} */ handler) => {
 		handlersRef.current.push(handler);
 	};
 }

@@ -105,11 +105,8 @@ export function useImageStats(/** @type {string} */ imageUrl) {
 	};
 }
 
-/**
- * @param {string} url
- * @returns {string}
- */
-export function getImageExtension(url) {
+/** @returns {string} */
+export function getImageExtension(/** @type {string} */ url) {
 	if (!url) return '';
 
 	// Handle data URIs: data:image/png;base64,... or data:image/svg+xml,...
@@ -165,11 +162,8 @@ const mimeExtensions = {
 	'image/vnd.microsoft.icon': 'ico',
 };
 
-/**
- * @param {string} url
- * @returns {Promise<string>}
- */
-export async function fetchImageExtension(url) {
+/** @returns {Promise<string>} */
+export async function fetchImageExtension(/** @type {string} */ url) {
 	if (!url) return '';
 
 	// Blob URLs: fetch the blob and read its type property
@@ -200,11 +194,8 @@ export async function fetchImageExtension(url) {
 	return '';
 }
 
-/**
- * @param {HTMLImageElement} img
- * @returns {ImageSize | null}
- */
-export function getImageResourceSize(img) {
+/** @returns {ImageSize | null} */
+export function getImageResourceSize(/** @type {HTMLImageElement} */ img) {
 	const url = img.src;
 	if (!url) return null;
 
@@ -259,11 +250,8 @@ export function getImageResourceSize(img) {
 	};
 }
 
-/**
- * @param {number} bytes
- * @returns {string}
- */
-export function formatFileSize(bytes) {
+/** @returns {string} */
+export function formatFileSize(/** @type {number} */ bytes) {
 	if (bytes === 0 || bytes == null || isNaN(bytes)) return '';
 
 	const units = ['KB', 'MB', 'GB'];
