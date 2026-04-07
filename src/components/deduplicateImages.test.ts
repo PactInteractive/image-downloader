@@ -25,13 +25,12 @@ describe('deduplicateImages', () => {
 		'https://example.com/photo-1024w.jpg': { naturalWidth: 1024, naturalHeight: 768 },
 		'https://example.com/photo-1024w.png': { naturalWidth: 1024, naturalHeight: 768 },
 		'https://example.com/photo-1024w.webp': { naturalWidth: 1024, naturalHeight: 768 },
-		[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=256&q=75')}`]:
-			{ naturalWidth: 256, naturalHeight: 144 },
-		[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=384&q=75')}`]:
-			{ naturalWidth: 384, naturalHeight: 216 },
+		[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=256&q=75')}`]: { naturalWidth: 256, naturalHeight: 144 },
+		[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=384&q=75')}`]: { naturalWidth: 384, naturalHeight: 216 },
 		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no.webp': { naturalWidth: 512, naturalHeight: 384 },
 		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@2x.webp': { naturalWidth: 1024, naturalHeight: 768 },
 		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@3x.webp': { naturalWidth: 1536, naturalHeight: 1152 },
+		'https://i.redd.it/7qulxnmlw8sg1.jpeg': { naturalWidth: 2048, naturalHeight: 1366 },
 	};
 
 	const imagesCache = {
@@ -203,7 +202,7 @@ describe('deduplicateImages', () => {
 			'https://preview.redd.it/favorite-character-that-fits-this-trope-v0-7qulxnmlw8sg1.jpeg?auto=webp&s=353f09a2df4a7e9209907dcdd844f6236682440a',
 			'https://i.redd.it/7qulxnmlw8sg1.jpeg',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[0]]);
+		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[1]]);
 	});
 
 	it('should deduplicate based on @2x & @3x variants', () => {
