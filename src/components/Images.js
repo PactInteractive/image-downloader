@@ -1,5 +1,5 @@
 // @ts-check
-import html, { batch, For, Show, useComputed, useSignal } from '../html.js';
+import html, { For, Show, useComputed, useSignal } from '../html.js';
 
 import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';

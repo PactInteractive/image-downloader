@@ -38,12 +38,7 @@ function AppWithoutErrorBoundary() {
 		<div id="images_cache" ref=${(/** @type {HTMLDivElement} */ element) => (imagesCache.value = element)} hidden>
 			<${For} each=${allImages}>
 				${(/** @type {string} */ url) => html`
-					<img
-						key=${url}
-						src=${url}
-						onLoad=${() => imageLoaded(url)}
-						onError=${() => imageErrored(url)}
-					/>
+					<img key=${url} src=${url} onLoad=${() => imageLoaded(url)} onError=${() => imageErrored(url)} />
 				`}
 			<//>
 		</div>
