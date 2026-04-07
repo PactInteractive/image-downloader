@@ -110,11 +110,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 			</ul>
 
 			<${Checkbox}
-				class="flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 p-1 text-xs text-nowrap text-slate-600 transition-colors hover:bg-slate-100"
+				class="flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 p-1 text-xs text-nowrap text-slate-600 hover:bg-slate-100"
 				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
 				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
 				disabled=${loadedImages.value.length === 0}
-				title="Click to select or unselect all visible images"
+				title="Click to select or unselect all displayed images"
 				onChange=${(/** @type {Event} */ e) => {
 					const { checked } = /** @type {HTMLInputElement} */ (e.currentTarget);
 					selectedImages.value = checked
@@ -125,7 +125,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 				${selectedImages.value.length} selected
 			<//>
 
-			<div class="mt-px ml-auto flex items-center gap-1.5">
+			<div class="mt-px ml-auto flex items-center gap-1.5 text-xs">
 				Columns:
 
 				<button
@@ -218,7 +218,7 @@ function ImageCard({ imageUrl, ...props }) {
 
 	return html`
 		<div
-			class="group relative cursor-pointer flex justify-center items-center overflow-hidden rounded-xl shadow-md"
+			class="group relative cursor-pointer flex justify-center items-center overflow-hidden rounded-xl shadow-md border ${isSelected ? 'border-sky-600 outline-2 outline-sky-600' : 'border-slate-300'}"
 			style=${{
 				minHeight: `192px`,
 				backgroundImage:
@@ -256,7 +256,6 @@ function ImageCard({ imageUrl, ...props }) {
 					absolute top-1 left-1
 					w-7 h-7
 					rounded-md border shadow-md
-					transition-all
 					${isSelected ? 'border-sky-600 bg-sky-600' : 'hidden border-slate-400 bg-white'}
 					group-hover:block
 					after:content-['']
@@ -265,7 +264,6 @@ function ImageCard({ imageUrl, ...props }) {
 					after:w-4.5 after:h-2.5
 					after:border-3 after:border-t-0 after:border-r-0
 					after:-rotate-45
-					after:transition-all
 					${isSelected ? 'after:border-white' : 'after:border-slate-400'}
 				`}
 			></div>
