@@ -266,7 +266,7 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 
 			<div class="absolute right-1 bottom-1 left-1">
 				<!-- Toggle opacity - toggling display messes with the input content scrolling -->
-				<${ImageUrlTextbox} class="opacity-0 group-hover:opacity-100 w-full" value=${imageUrl} />
+				<${ImageUrlTextbox} class="opacity-0 group-hover:opacity-100 w-full" url=${imageUrl} />
 
 				<div class="group-hover:hidden flex gap-1">
 					<${ImageStat} class="uppercase">${stats.data.value.extension}</${ImageStat}>
@@ -349,18 +349,42 @@ function ImageStat(/** @type {{ class?: string; children?: any }} */ { class: cl
 	`;
 }
 
-function ImageUrlTextbox(/** @type {Object} */ props) {
+function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class: className = '', url, ...props }) {
 	const inputRef = useScrollToEnd();
+
+	function setInputValue(/** @type {string} */ value) {
+		if (inputRef.current) {
+			inputRef.current.value = value;
+		}
+	}
+
 	return html`
-		<input
-			ref=${inputRef}
-			type="text"
-			readonly
-			onClick=${(/** @type {MouseEvent} */ e) => {
-				e.stopPropagation();
-				/** @type {HTMLInputElement} */ (e.currentTarget).select();
-			}}
-			...${props}
-		/>
+		<div class="flex ${className}">
+			<input
+				ref=${inputRef}
+				class="flex-1 rounded-r-none border-r-0"
+				type="text"
+				readonly
+				value=${url}
+				onClick=${(/** @type {MouseEvent} */ e) => {
+					e.stopPropagation();
+					/** @type {HTMLInputElement} */ (e.currentTarget).select();
+				}}
+				...${props}
+			/>
+
+			<button
+				type="button"
+				class="w-8 rounded-l-none bg-no-repeat bg-center"
+				style=${{ backgroundImage: 'url("/images/copy.svg")' }}
+				title="Copy image URL to clipboard"
+				onClick=${async (/** @type {Event} */ e) => {
+					e.stopPropagation();
+					await window.navigator.clipboard.writeText(url);
+					setInputValue('Copied URL!');
+					setTimeout(() => setInputValue(url), 2000);
+				}}
+			/>
+		</div>
 	`;
 }
