@@ -7,7 +7,12 @@ interface MockElement {
 	src?: string;
 	href?: string;
 	id?: number;
+	shadowRoot?: MockShadowRoot;
 	getAttribute?: (attr: string) => string | null;
+}
+
+interface MockShadowRoot {
+	querySelectorAll: (selector: string) => MockElement[];
 }
 
 interface MockDocument {
@@ -916,5 +921,38 @@ describe('findImages', () => {
 
 		expect(result.allImages).toHaveLength(0);
 		expect(result.linkedImages).toHaveLength(0);
+	});
+
+	it('extracts images from within a custom element shadow root', async () => {
+		// HTML: <custom-element>#shadow-root<img src="http://example.com/shadow-image.jpg" /></custom-element>
+		// Expected: ['http://example.com/shadow-image.jpg']
+		const shadowImg: MockElement & { shadowRoot?: MockShadowRoot } = {
+			tagName: 'IMG',
+			src: 'http://example.com/shadow-image.jpg',
+		};
+		const mockShadowRoot: MockShadowRoot = {
+			querySelectorAll(selector: string) {
+				if (selector.includes('img')) return [shadowImg];
+				return [];
+			},
+		};
+		const customElement: MockElement & { shadowRoot?: MockShadowRoot } = {
+			tagName: 'CUSTOM-ELEMENT',
+			shadowRoot: mockShadowRoot,
+		};
+		const mockDocument: MockDocument = {
+			querySelectorAll(selector: string) {
+				if (selector === '*' || selector.includes('custom-element')) return [customElement];
+				return [];
+			},
+		};
+		const mockWindow: MockWindow = {
+			location: { origin: 'http://example.com' },
+			getComputedStyle: () => ({ backgroundImage: '' }),
+		};
+
+		const result = await runFindImages(mockDocument, mockWindow);
+
+		expect(result.allImages).toContain('http://example.com/shadow-image.jpg');
 	});
 });

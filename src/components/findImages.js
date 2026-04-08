@@ -55,14 +55,41 @@ export async function findImages(
 	const imageUrlRegex =
 		/(?:([^:\/?#]+):)?(?:\/\/([^\/?#]*))?([^?#]*\.(?:bmp|gif|ico|jfif|jpe?g|png|svg|tiff?|webp|avif))(?:\?([^#]*))?(?:#(.*))?/i;
 
+	/** @returns {(Document | ShadowRoot)[]} */
+	function getRoots(/** @type {Document} */ root) {
+		/** @type {(Document | ShadowRoot)[]} */
+		const roots = [root];
+
+		/** @type {Document | ShadowRoot | undefined} */ let current;
+		for (let index = 0; index < roots.length; index++) {
+			const current = roots[index];
+			// Find all potential shadow hosts in this root
+			for (const element of current.querySelectorAll('*')) {
+				if (element.shadowRoot) {
+					roots.push(element.shadowRoot);
+				}
+			}
+		}
+
+		return roots;
+	}
+
 	/** @returns {string[]} */
-	function extractImagesFromSelector(/** @type {string} */ selector) {
+	function extractImagesFromSelector(/** @type {(Document | ShadowRoot)[]} */ roots, /** @type {string} */ selector) {
 		const images = /** @type {Set<string>} */ (new Set());
-		context.document.querySelectorAll(selector).forEach((element) => {
-			const urls = extractImageUrlsFromElement(element);
-			urls?.forEach((url) => images.add(relativeUrlToAbsolute(url)));
-		});
-		return [...images];
+
+		for (const root of roots) {
+			root.querySelectorAll(selector).forEach((element) => {
+				const urls = extractImageUrlsFromElement(element);
+				urls?.forEach((url) => {
+					if (url) {
+						images.add(relativeUrlToAbsolute(url));
+			 		}
+				});
+			});
+		}
+
+		return [...images];	
 	}
 
 	/** @returns {string[] | null | undefined} */
@@ -103,8 +130,11 @@ export async function findImages(
 
 		if (element.tagName.toLowerCase() === 'image') {
 			const src = /** @type {string}  */ (element.getAttribute('xlink:href'));
-			const hashIndex = src.indexOf('#');
-			return [hashIndex >= 0 ? src.slice(0, hashIndex) : src];
+			if (src) {
+				const hashIndex = src.indexOf('#');
+				return [hashIndex >= 0 ? src.slice(0, hashIndex) : src];
+			}
+			return null;
 		}
 
 		if (element.tagName.toLowerCase() === 'use') {
@@ -184,9 +214,10 @@ export async function findImages(
 		return url.indexOf('/') === 0 && url.indexOf('//') !== 0 ? `${context.window.location.origin}${url}` : url;
 	}
 
+	const roots = getRoots(context.document);
 	return {
-		allImages: extractImagesFromSelector('img, image, source, use, a, [class], [style]'),
-		linkedImages: extractImagesFromSelector('a'), // Do not merge into `allImages` - we want to preserve the order of images from the DOM
+		allImages: extractImagesFromSelector(roots, 'img, image, source, use, a, [class], [style]'),
+		linkedImages: extractImagesFromSelector(roots, 'a'), // Do not merge into `allImages` - we want to preserve the order of images from the DOM
 		origin: context.window.location.origin,
 	};
 }
