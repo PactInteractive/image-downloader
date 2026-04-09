@@ -84,12 +84,12 @@ export async function findImages(
 				urls?.forEach((url) => {
 					if (url) {
 						images.add(relativeUrlToAbsolute(url));
-			 		}
+					}
 				});
 			});
 		}
 
-		return [...images];	
+		return [...images];
 	}
 
 	/** @returns {string[] | null | undefined} */
@@ -158,7 +158,7 @@ export async function findImages(
 
 		if (element.tagName.toLowerCase() === 'a') {
 			const href = /** @type {HTMLAnchorElement} */ (element).href;
-			if (isImageURL(href)) {
+			if (isImageURLForLink(href)) {
 				return [href];
 			}
 		}
@@ -177,6 +177,16 @@ export async function findImages(
 
 	function isImageURL(/** @type {string} */ url) {
 		return url.indexOf('data:image') === 0 || imageUrlRegex.test(url);
+	}
+
+	function isImageURLForLink(/** @type {string} */ url) {
+		try {
+			const urlObj = new URL(url);
+			const pathname = urlObj.pathname;
+			return imageUrlRegex.test(pathname);
+		} catch {
+			return false;
+		}
 	}
 
 	function extractSrcsetURLs(/** @type {string} */ srcset) {

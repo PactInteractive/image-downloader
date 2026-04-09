@@ -955,4 +955,26 @@ describe('findImages', () => {
 
 		expect(result.allImages).toContain('http://example.com/shadow-image.jpg');
 	});
+
+	it('should not extract non-images from links', async () => {
+		const link: MockElement = {
+			tagName: 'A',
+			href: 'https://canva.com/content-partner/?utm_medium=partner&utm_source=pixabay&utm_campaign=retouch_in_canva_edit_image&image-url=https%3A%2F%2Fpixabay.com%2Fget%2Fgc96b3ab13f832a16dadbc5472646a6f2f9074e9c666fb886abae26465fbaff3e68405ddf79be9fa25de1a37fb2b05afd_1920.jpg%3Flonglived%3D&external-id=8510899&canva-media-id=&utm_term=54.1%2165.2',
+		};
+		const mockDocument: MockDocument = {
+			querySelectorAll: (selector: string) => {
+				if (selector === 'a' || selector.includes('a')) return [link];
+				return [];
+			},
+		};
+		const mockWindow: MockWindow = {
+			location: { origin: 'http://canva.com' },
+			getComputedStyle: () => ({ backgroundImage: '' }),
+		};
+
+		const result = await runFindImages(mockDocument, mockWindow);
+
+		expect(result.allImages).toHaveLength(0);
+		expect(result.linkedImages).toHaveLength(0);
+	})
 });
