@@ -181,7 +181,8 @@ export const imageLoaded = action((/** @type {string | undefined} */ url) => {
 
 	batch(() => {
 		if (!loadedImages.peek().includes(url)) {
-			loadedImages.value = [...loadedImages.value, url];
+			// Use `allImages` to preserve order
+			loadedImages.value = allImages.value.filter(isIncludedIn([...loadedImages.value, url]));
 		}
 		if (erroredImages.peek().includes(url)) {
 			erroredImages.value = erroredImages.value.filter(isNotStrictEqual(url));
@@ -195,7 +196,8 @@ export const imageErrored = action((/** @type {string | undefined} */ url) => {
 
 	batch(() => {
 		if (!erroredImages.peek().includes(url)) {
-			erroredImages.value = [...erroredImages.value, url];
+			// Use `allImages` to preserve order
+			erroredImages.value = allImages.value.filter(isIncludedIn([...erroredImages.value, url]));
 		}
 		if (loadedImages.peek().includes(url)) {
 			loadedImages.value = loadedImages.value.filter(isNotStrictEqual(url));
@@ -327,9 +329,10 @@ export const loadImagesFromActiveTab = action(
 							allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
 							linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));
 							// Shouldn't reset these as they may be cached in the DOM and not load again
-							loadedImages.value = loadedImages.value.filter(isIncludedIn(allImages.value));
-							erroredImages.value = erroredImages.value.filter(isIncludedIn(allImages.value));
-							selectedImages.value = selectedImages.value.filter(isIncludedIn(allImages.value));
+							// Use `allImages` to preserve order
+							loadedImages.value = allImages.value.filter(isIncludedIn(loadedImages.value));
+							erroredImages.value = allImages.value.filter(isIncludedIn(erroredImages.value));
+							selectedImages.value = allImages.value.filter(isIncludedIn(selectedImages.value));
 
 							for (const message of messages) {
 								if (message.result?.origin) {
