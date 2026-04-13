@@ -36,3 +36,10 @@ export const setToCheckboxValue = (/** @type {{ value: boolean }} */ signal) => 
 export const setToInvertedCheckboxValue = (/** @type {{ value: boolean }} */ signal) => (/** @type {Event} */ e) => {
 	signal.value = !(/** @type {HTMLInputElement} */ (e.currentTarget).checked);
 };
+
+export const getReferralUrl = (/** @type {string} */ origin, /** @type {Object} */ params) => `${origin}/?${new URLSearchParams({
+	utm_source: 'image_downloader',
+	utm_medium: 'chrome_extension',
+	utm_campaign: 'internal_referral',
+	...params,
+}).toString()}`;

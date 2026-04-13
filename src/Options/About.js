@@ -1,12 +1,14 @@
 // @ts-check
 import { ExternalLink } from '../components/ExternalLink.js';
 import html from '../html.js';
+import { getReferralUrl } from '../utils.js';
 
 const numberOfActiveUsers = '1,900,000+';
 const years = new Date().getFullYear() - 2012;
+const cutoutMagicReferralUrl = getReferralUrl('https://cutoutmagic.com', { utm_content: 'about_page' });
 
 export function About() {
-	return html`
+  return html`
     <h1 class="flex justify-center items-center gap-2 mb-8 text-2xl font-bold">
       <img class="rounded-xl h-8" src="/images/logo.svg" />
       Image Downloader
@@ -49,16 +51,16 @@ export function About() {
 
     <p>
       We have other paid products you can use - our premium
-      service <${ExternalLink} class="font-bold text-nowrap" href="https://cutoutmagic.com">Cutout Magic</a> can
+      service <${ExternalLink} class="font-bold text-nowrap" href="${cutoutMagicReferralUrl}">Cutout Magic</a> can
       identify objects, clear obstructions, or remove background instantly with 1 click!
     </p>
 
     <p>
-      Try it now at <${ExternalLink} class="font-bold text-nowrap" href="https://cutoutmagic.com">cutoutmagic.com</a> -
+      Try it now at <${ExternalLink} class="font-bold text-nowrap" href="${cutoutMagicReferralUrl}">cutoutmagic.com</a> -
       free to start, no credit card needed!
     </p>
 
-    <${ExternalLink} href="https://cutoutmagic.com">
+    <${ExternalLink} href="${cutoutMagicReferralUrl}">
       <img class="shadow rounded-2xl" src="https://cutoutmagic.com/cover-1280x720.jpg" />
     <//>
 
@@ -122,7 +124,7 @@ function Project(
     children: any;
   }} */ { href, src, title, subtitle, children, ...props }
 ) {
-	return html`
+  return html`
 		<${ExternalLink} href=${href} ...${props}>
 			<div>
 				<h2 class="flex items-center gap-1 font-bold">
