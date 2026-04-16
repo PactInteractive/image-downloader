@@ -84,12 +84,12 @@ export async function findImages(
 				urls?.forEach((url) => {
 					if (url) {
 						images.add(relativeUrlToAbsolute(url));
-			 		}
+					}
 				});
 			});
 		}
 
-		return [...images];	
+		return [...images];
 	}
 
 	/** @returns {string[] | null | undefined} */

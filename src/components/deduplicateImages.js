@@ -1,5 +1,5 @@
 // @ts-check
-import { isTruthy, unique } from '../utils.js';
+import { unique } from '../utils.js';
 
 const priorities = ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'avif'];
 

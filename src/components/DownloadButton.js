@@ -17,7 +17,9 @@ export function DownloadButton(
 
 	return html`
 		<button
-			class="${loading ? 'animate-pulse' : ''} ${className} bg-sky-600 px-2 text-white hover:bg-sky-700 active:bg-sky-800"
+			class="${loading
+				? 'animate-pulse'
+				: ''} ${className} bg-sky-600 px-2 text-white hover:bg-sky-700 active:bg-sky-800"
 			type="button"
 			disabled=${disabled || loading}
 			title=${tooltip}

@@ -3,12 +3,12 @@ import { ExternalLink } from '../components/ExternalLink.js';
 import html from '../html.js';
 import { getReferralUrl } from '../utils.js';
 
-const numberOfActiveUsers = '1,900,000+';
+const numberOfActiveUsers = '2,000,000+';
 const years = new Date().getFullYear() - 2012;
 const cutoutMagicReferralUrl = getReferralUrl('https://cutoutmagic.com', { utm_content: 'about_page' });
 
 export function About() {
-  return html`
+	return html`
     <h1 class="flex justify-center items-center gap-2 mb-8 text-2xl font-bold">
       <img class="rounded-xl h-8" src="/images/logo.svg" />
       Image Downloader
@@ -20,9 +20,9 @@ export function About() {
         class="w-32 h-32 shadow rounded-[3rem] mx-auto mb-1"
         src="/images/me.jpg"
       />
-      <span class="text-slate-700">Made by</span> @vdsabev
+      <span class="text-slate-700 dark:text-slate-200">Made by</span> @vdsabev
       <br />
-      <small class="text-slate-500">(🐕 with Ruby's help)</small>
+      <small class="text-slate-500 dark:text-slate-400">(🐕 with Ruby's help)</small>
     </a>
 
     <p>
@@ -78,7 +78,7 @@ export function About() {
         title="Gumroad page"
         subtitle="Support Image Downloader on Gumroad"
       >
-        <img class="flex-1" src="/images/gumroad.svg" />
+        <img class="flex-1 dark:invert" src="/images/gumroad.svg" />
       <//>
 
       <${Project}
@@ -124,7 +124,7 @@ function Project(
     children: any;
   }} */ { href, src, title, subtitle, children, ...props }
 ) {
-  return html`
+	return html`
 		<${ExternalLink} href=${href} ...${props}>
 			<div>
 				<h2 class="flex items-center gap-1 font-bold">

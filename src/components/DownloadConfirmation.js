@@ -15,7 +15,7 @@ export function DownloadConfirmation(
 		<div ...${props}>
 			<div>
 				<p class="my-0.5">Please take a quick look at your browser settings.</p>
-				<p class="my-0.5 text-red-600">
+				<p class="my-0.5 text-red-600 dark:text-red-400">
 					If the <b>Ask where to save each file before downloading</b> option is checked you will get
 					<b>${numberOfImages} popup windows</b>!
 				</p>

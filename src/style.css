@@ -1,6 +1,8 @@
 @import 'nouislider/dist/nouislider.min.css';
 @import 'tailwindcss';
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
 	--breakpoint-2xs: 24rem;
 	--breakpoint-xs: 30rem;
@@ -30,6 +32,7 @@
 
 	:root,
 	body {
+		@apply text-slate-950 dark:text-white;
 		font:
 			16px/1.5 'Lucida Grande',
 			Arial,
@@ -41,11 +44,9 @@
 	}
 
 	a {
-		color: var(--color-sky-600);
+		@apply text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300;
 	}
-	a:hover {
-		color: var(--color-sky-700);
-	}
+
 	/* https://stackoverflow.com/questions/11243337/a-taller-than-its-img-child */
 	a > img {
 		display: block;
@@ -75,28 +76,20 @@
 	input[type='text'],
 	select {
 		min-width: 0;
-		border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);
-		background-color: var(--color-slate-100);
 		border-radius: 12px;
+		@apply border border-[color-mix(in_srgb,var(--color-slate-400)_20%,transparent)] dark:border-[color-mix(in_srgb,var(--color-slate-600)_20%,transparent)];
 		padding: 0 8px;
+		@apply bg-slate-100 text-slate-950 dark:bg-slate-200;
 	}
 
 	button,
 	.btn {
-		border: 1px solid color-mix(in srgb, var(--color-slate-400) 20%, transparent);
-		background-color: var(--color-slate-200);
 		border-radius: 12px;
+		@apply border border-[color-mix(in_srgb,var(--color-slate-400)_20%,transparent)] dark:border-[color-mix(in_srgb,var(--color-slate-600)_20%,transparent)];
 		text-align: center;
 		line-height: 1;
 		transition: background-color 200ms;
-
-		&:hover {
-			background-color: var(--color-slate-300);
-		}
-
-		&:active {
-			background-color: var(--color-slate-400);
-		}
+		@apply text-slate-950 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 dark:bg-slate-300 dark:hover:bg-slate-400 dark:active:bg-slate-500;
 	}
 
 	label {
@@ -114,7 +107,7 @@
 	}
 
 	hr {
-		border-top: 1px dotted var(--color-slate-300);
+		@apply border-t border-dotted border-slate-300;
 	}
 }
 
@@ -127,12 +120,12 @@
 }
 
 .noUi-target {
-	border-color: var(--color-sky-600);
+	@apply border border-sky-600;
 	transition: border-color 200ms;
 }
 
 .noUi-target[disabled] {
-	border-color: var(--color-slate-400);
+	@apply border border-slate-400;
 }
 
 .noUi-connects {
@@ -140,12 +133,12 @@
 }
 
 .noUi-connect {
-	background-color: var(--color-sky-600);
+	@apply bg-sky-600;
 	transition: background-color 200ms;
 }
 
 .noUi-target[disabled] .noUi-connect {
-	background-color: var(--color-slate-100);
+	@apply bg-slate-100;
 }
 
 .noUi-horizontal .noUi-origin .noUi-handle {
@@ -157,15 +150,15 @@
 	box-shadow: none;
 	outline: 1px solid white;
 	border-radius: 50%;
-	border-color: var(--color-sky-600);
-	background-color: var(--color-sky-600);
+	@apply border border-sky-600;
+	@apply bg-sky-600;
 	transition: all 200ms;
 }
 
 .noUi-horizontal .noUi-origin[disabled] .noUi-handle {
 	cursor: help;
-	border-color: var(--color-slate-400);
-	background-color: var(--color-slate-100);
+	@apply border border-slate-400;
+	@apply bg-slate-100;
 }
 
 .noUi-handle::before,
@@ -178,7 +171,7 @@
 
 .noUi-origin[disabled] .noUi-handle::before,
 .noUi-origin[disabled] .noUi-handle::after {
-	background-color: var(--color-slate-400);
+	@apply bg-slate-400;
 }
 
 .noUi-handle::before {

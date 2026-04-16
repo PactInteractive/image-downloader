@@ -18,6 +18,7 @@ import {
 	selectedImages,
 	selectedMatchingImages,
 	tab,
+	theme,
 } from './data.js';
 import { useImageStats } from './useImageStats.js';
 import { useScrollToEnd } from './useScrollToEnd.js';
@@ -50,17 +51,29 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 	const hasFilteredOutImages = useComputed(() => filteredOutImages.value.length > 0);
 	const hasErroredImages = useComputed(() => erroredImages.value.length > 0);
 
+	const themeTooltip = {
+		system: 'Using your system theme',
+		dark: 'Using dark theme',
+		light: 'Using light theme',
+	}[theme.value];
+
+	const themeIcon = {
+		system: '/images/system.svg',
+		dark: '/images/moon.svg',
+		light: '/images/sun.svg',
+	}[theme.value];
+
 	return html`
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
 			<ul
-				class="flex items-center overflow-hidden rounded-full border border-slate-300 text-xs text-nowrap"
+				class="flex items-center overflow-hidden rounded-full border border-slate-300 dark:border-slate-600 text-xs text-nowrap"
 				onChange=${(/** @type {Event} */ e) => {
 					tab.value = /** @type {HTMLInputElement} */ (e.target).value;
 				}}
 			>
 				<li>
 					<${Tab}
-						class="text-slate-600 has-checked:text-slate-700"
+						class="text-slate-600 has-checked:text-slate-700 dark:text-slate-300 dark:has-checked:text-slate-200"
 						title="Images matching your filters"
 						input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
 					>
@@ -76,7 +89,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 				<${Show} when=${hasFilteredOutImages}>
 					<li>
 						<${Tab}
-							class="border-l border-slate-300 text-slate-600 has-checked:text-slate-700"
+							class="border-l border-slate-300 dark:border-slate-600 text-slate-600 has-checked:text-slate-700 dark:text-slate-300 dark:has-checked:text-slate-200"
 							title="Images removed by your filters"
 							input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 						>
@@ -93,7 +106,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 				<${Show} when=${hasErroredImages}>
 					<li>
 						<${Tab}
-							class="border-l border-slate-300 text-red-600 has-checked:text-red-700"
+							class="border-l border-slate-300 dark:border-slate-600 text-red-600 has-checked:text-red-700 dark:text-red-400 dark:has-checked:text-red-300"
 							title="Images that failed to load"
 							input=${{ name: 'visibility', value: 'errors', checked: tab.value === 'errors' }}
 						>
@@ -109,7 +122,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 			</ul>
 
 			<${Checkbox}
-				class="flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 p-1 text-xs text-nowrap text-slate-600 hover:bg-slate-100"
+				class="flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-600 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 p-1 text-xs text-nowrap text-slate-600 dark:text-slate-300"
 				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
 				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
 				disabled=${loadedImages.value.length === 0}
@@ -125,26 +138,36 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 			<//>
 
 			<div class="mt-px ml-auto flex items-center gap-1.5 text-xs">
-				Columns:
+				<div class="flex items-baseline gap-1 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+					<button
+						type="button"
+						class="size-6 rounded-none font-bold"
+						aria-label="Fewer columns"
+						onClick=${() => (columns.value = Math.max(1, columns.value - 1))}
+					>
+						-
+					</button>
+
+					<span title="Number of columns">${columns}</span>
+
+					<button
+						type="button"
+						class="size-6 rounded-none font-bold"
+						aria-label="More columns"
+						onClick=${() => (columns.value = Math.min(columns.value + 1, 6))}
+					>
+						+
+					</button>
+				</div>
 
 				<button
-					type="button"
-					class="h-6 w-6 font-bold"
-					aria-label="Fewer columns"
-					onClick=${() => (columns.value = Math.max(1, columns.value - 1))}
+					class="size-6.5"
+					title=${`${themeTooltip} (click to cycle)`}
+					onClick=${() => {
+						theme.value = theme.value === 'system' ? 'light' : theme.value === 'light' ? 'dark' : 'system';
+					}}
 				>
-					-
-				</button>
-
-				${columns}
-
-				<button
-					type="button"
-					class="h-6 w-6 font-bold"
-					aria-label="More columns"
-					onClick=${() => (columns.value = Math.min(columns.value + 1, 6))}
-				>
-					+
+					<img class="inline w-4" src=${themeIcon} />
 				</button>
 			</div>
 		</div>
@@ -181,7 +204,7 @@ function Tab(
 ) {
 	return html`
 		<label
-			class="${className} bg-slate-50 p-1 transition-colors hover:bg-slate-100 has-checked:bg-slate-200"
+			class="${className} p-1 transition-colors bg-slate-50 hover:bg-slate-100 has-checked:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 dark:has-checked:bg-slate-700"
 			...${props}
 		>
 			<input class="sr-only" type="radio" ...${input} />
@@ -209,11 +232,9 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 
 	return html`
 		<div
-			class="group relative cursor-pointer flex justify-center items-center overflow-hidden rounded-xl shadow-md border ${isSelected ? 'border-sky-600 outline-2 outline-sky-600' : 'border-slate-300'}"
+			class="group relative cursor-pointer flex justify-center items-center overflow-hidden rounded-xl shadow-md border bg-[conic-gradient(var(--color-slate-100)_90deg,var(--color-slate-300)_90deg_180deg,var(--color-slate-100)_180deg_270deg,var(--color-slate-300)_270deg)] dark:bg-[conic-gradient(var(--color-slate-800)_90deg,var(--color-slate-700)_90deg_180deg,var(--color-slate-800)_180deg_270deg,var(--color-slate-700)_270deg)] ${isSelected ? 'border-sky-600 dark:border-sky-400 outline-2 outline-sky-600 dark:outline-sky-400' : 'border-slate-300 dark:border-slate-700'}"
 			style=${{
 				minHeight: `192px`,
-				backgroundImage:
-					'conic-gradient(var(--color-slate-100) 90deg, var(--color-slate-300) 90deg 180deg, var(--color-slate-100) 180deg 270deg, var(--color-slate-300) 270deg)',
 				backgroundRepeat: 'repeat',
 				backgroundSize: '12px 12px',
 			}}
@@ -359,7 +380,7 @@ function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class:
 	}
 
 	return html`
-		<div class="flex ${className}">
+		<div class="${className} flex">
 			<input
 				ref=${inputRef}
 				class="flex-1 rounded-r-none border-r-0"
@@ -375,7 +396,7 @@ function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class:
 
 			<button
 				type="button"
-				class="w-8 rounded-l-none bg-no-repeat bg-center"
+				class="w-8 rounded-l-none bg-center bg-no-repeat"
 				style=${{ backgroundImage: 'url("/images/copy.svg")' }}
 				title="Copy image URL to clipboard"
 				onClick=${async (/** @type {Event} */ e) => {

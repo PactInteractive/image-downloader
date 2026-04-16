@@ -9,6 +9,7 @@ import { findImages } from './findImages.js';
 export const defaults = {
 	// UI
 	open_mode: 'sidebar',
+	theme: 'system',
 	// Filters
 	filter_url: '',
 	filter_url_mode: 'normal',
@@ -50,6 +51,8 @@ export const initialized = signal(false);
 
 // UI
 export const openMode = storedSignal('open_mode');
+
+export const theme = storedSignal('theme');
 
 // Filters
 export const filterUrl = storedSignal('filter_url');
@@ -94,6 +97,7 @@ export const initialize = action(async () => {
 
 	const options = {
 		open_mode: openMode,
+		theme: theme,
 		filter_url: filterUrl,
 		filter_url_mode: filterUrlMode,
 		show_advanced_filters: showAdvancedFilters,
