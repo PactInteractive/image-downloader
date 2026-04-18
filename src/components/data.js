@@ -332,10 +332,9 @@ export const loadImagesFromActiveTab = action(
 						batch(() => {
 							allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
 							linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));
-							// Shouldn't reset these as they may be cached in the DOM and not load again
-							// Use `allImages` to preserve order
-							loadedImages.value = allImages.value.filter(isIncludedIn(loadedImages.value));
-							erroredImages.value = allImages.value.filter(isIncludedIn(erroredImages.value));
+							// Use `allImages` to preserve original DOM order.
+							erroredImages.value = allImages.value.filter(isIncludedIn(erroredImages.value)); // Recompute errored images first
+							loadedImages.value = allImages.value.filter(isNotIncludedIn(erroredImages.value)); // Show users immediate feedback (except for known errors)
 							selectedImages.value = allImages.value.filter(isIncludedIn(selectedImages.value));
 
 							for (const message of messages) {
