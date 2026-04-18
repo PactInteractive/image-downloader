@@ -35,12 +35,15 @@ function getNormalizedBaseKey(/** @type {string} */ url) {
 				? parts.slice(0, -1).join('.')
 				: parsed.pathname;
 
-		// Get base name without resolution suffix
-		const basename = nameWithoutExtension.replace(/(?:[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w)|@\d+x)$/i, '');
+		// Get base name without resolution suffixes
+		const basename = nameWithoutExtension.replace(
+			/(?:[-_](?:\d{2,4}x\d{2,4}|\d{2,4}w)|@\d+x|@._V1_(FMjpg_UY\d+_?)?)$/i,
+			''
+		);
 
 		// Extract identifier: look for hash-like pattern at end (e.g., 7qulxnmlw8sg1 from longer names)
 		const identifierMatch = basename.match(/((?=.*\d)[a-zA-Z0-9]{6,})$/);
-		let identifier = identifierMatch ? identifierMatch[1] : basename;
+		const identifier = identifierMatch ? identifierMatch[1] : basename;
 
 		// Extract special query params
 		const urlParamKeys = ['url', 'domain'];

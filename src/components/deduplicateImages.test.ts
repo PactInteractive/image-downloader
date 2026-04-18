@@ -5,7 +5,6 @@ import { deduplicateImages } from './deduplicateImages.js';
 mockDOM();
 
 describe('deduplicateImages', () => {
-	// prettier-ignore
 	const images: Record<string, { naturalWidth: number; naturalHeight: number }> = {
 		'https://example.com/photo-512w.avif': { naturalWidth: 512, naturalHeight: 384 },
 		'https://example.com/photo-512w.bmp': { naturalWidth: 512, naturalHeight: 384 },
@@ -25,49 +24,45 @@ describe('deduplicateImages', () => {
 		'https://example.com/photo-1024w.jpg': { naturalWidth: 1024, naturalHeight: 768 },
 		'https://example.com/photo-1024w.png': { naturalWidth: 1024, naturalHeight: 768 },
 		'https://example.com/photo-1024w.webp': { naturalWidth: 1024, naturalHeight: 768 },
-		[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=256&q=75')}`]: { naturalWidth: 256, naturalHeight: 144 },
-		[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=384&q=75')}`]: { naturalWidth: 384, naturalHeight: 216 },
-		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no.webp': { naturalWidth: 512, naturalHeight: 384 },
-		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@2x.webp': { naturalWidth: 1024, naturalHeight: 768 },
-		'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@3x.webp': { naturalWidth: 1536, naturalHeight: 1152 },
-		'https://i.redd.it/7qulxnmlw8sg1.jpeg': { naturalWidth: 2048, naturalHeight: 1366 },
 	};
 
-	const imagesCache = {
-		querySelector(selector: string): { naturalWidth: number; naturalHeight: number } | null {
-			const match = selector.match(/src="([^"]+)"/);
-			const url = match?.[1] ?? selector;
-			return images[url] ?? null;
-		},
-	} as unknown as HTMLDivElement;
+	function createCache(images: Record<string, { naturalWidth: number; naturalHeight: number }>) {
+		return {
+			querySelector(selector: string): { naturalWidth: number; naturalHeight: number } | null {
+				const match = selector.match(/src="([^"]+)"/);
+				const url = match?.[1] ?? selector;
+				return images[url] ?? null;
+			},
+		} as unknown as HTMLDivElement;
+	}
 
 	it('should handle empty array', () => {
-		expect(deduplicateImages([], imagesCache)).toEqual([]);
+		expect(deduplicateImages([], createCache(images))).toEqual([]);
 	});
 
 	it('should handle single image', () => {
 		const urls = ['https://example.com/photo.png'];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo.png']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo.png']);
 	});
 
 	it('should deduplicate exact same URLs', () => {
 		const urls = ['https://example.com/photo.jpg', 'https://example.com/photo.jpg', 'https://example.com/photo.jpg'];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo.jpg']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo.jpg']);
 	});
 
 	it('should keep images with different base names', () => {
 		const urls = ['https://example.com/bird.avif', 'https://example.com/cat.bmp', 'https://example.com/dog.jpeg'];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
 	it('should keep different filenames without extension', () => {
 		const urls = ['https://example.com/abcd123', 'https://example.com/xyz789'];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
 	it('should keep image extensions not in the priority list', () => {
 		const urls = ['https://example.com/photo.png', 'https://example.com/photo.svg'];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
 	it('should prefer png over all other formats', () => {
@@ -79,7 +74,7 @@ describe('deduplicateImages', () => {
 			'https://example.com/photo.png',
 			'https://example.com/photo.webp',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo.png']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo.png']);
 	});
 
 	it('should prefer jpg over webp and avif for same base name', () => {
@@ -88,7 +83,7 @@ describe('deduplicateImages', () => {
 			'https://example.com/photo-1024w.jpg',
 			'https://example.com/photo-1024w.webp',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo-1024w.jpg']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo-1024w.jpg']);
 	});
 
 	it('should prefer jpg over jpeg, bmp, webp, avif', () => {
@@ -99,7 +94,7 @@ describe('deduplicateImages', () => {
 			'https://example.com/photo.jpg',
 			'https://example.com/photo.webp',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo.jpg']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo.jpg']);
 	});
 
 	it('should prefer jpeg over bmp, webp, avif', () => {
@@ -109,17 +104,17 @@ describe('deduplicateImages', () => {
 			'https://example.com/photo.jpeg',
 			'https://example.com/photo.webp',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo.jpeg']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo.jpeg']);
 	});
 
 	it('should prefer bmp over webp and avif', () => {
 		const urls = ['https://example.com/photo.avif', 'https://example.com/photo.bmp', 'https://example.com/photo.webp'];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo.bmp']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo.bmp']);
 	});
 
 	it('should prefer webp over avif', () => {
 		const urls = ['https://example.com/photo.avif', 'https://example.com/photo.webp'];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo.webp']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo.webp']);
 	});
 
 	it('should pick the highest resolution when the extensions are the same', () => {
@@ -128,7 +123,7 @@ describe('deduplicateImages', () => {
 			'https://example.com/photo-800w.png',
 			'https://example.com/photo-1024w.png',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo-1024w.png']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo-1024w.png']);
 	});
 
 	it('should pick the highest resolution when the extensions are different', () => {
@@ -137,12 +132,12 @@ describe('deduplicateImages', () => {
 			'https://example.com/photo-800w.jpg',
 			'https://example.com/photo-1024w.webp',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo-1024w.webp']);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo-1024w.webp']);
 	});
 
 	it('should pick the highest resolution png of all resolutions and extensions', () => {
-		const urls = Object.keys(images).filter((url) => url.startsWith('https://example.com/photo-'));
-		expect(deduplicateImages(urls, imagesCache)).toEqual(['https://example.com/photo-1024w.png']);
+		const urls = Object.keys(images);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(['https://example.com/photo-1024w.png']);
 	});
 
 	it('should NOT group images with same path but different url query params', () => {
@@ -150,15 +145,17 @@ describe('deduplicateImages', () => {
 			`https://www.reddit.com/media?url=${encodeURIComponent('https://i.redd.it/abc123.jpeg')}`,
 			`https://www.reddit.com/media?url=${encodeURIComponent('https://i.redd.it/def456.jpeg')}`,
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
 	it('should recursively parse query params', () => {
-		const urls = [
-			`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=256&q=75')}`,
-			`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=384&q=75')}`,
-		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[1]]);
+		// prettier-ignore
+		const images = {
+			[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=256&q=75')}`]: { naturalWidth: 256, naturalHeight: 144 },
+			[`https://tailwindcss.com/_next/image?url=${encodeURIComponent('/_next/static/media/course-promo.d3d6bc78.jpg&w=384&q=75')}`]: { naturalWidth: 384, naturalHeight: 216 },
+		};
+		const urls = Object.keys(images);
+		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[1]]);
 	});
 
 	it('should deduplicate based on the "url" query params', () => {
@@ -166,7 +163,7 @@ describe('deduplicateImages', () => {
 			'https://example.com/photo.jpg',
 			`https://example.com/image?url=${encodeURIComponent('https://example.com/photo.jpg')}`,
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[0]]);
+		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[0]]);
 	});
 
 	it('should deduplicate based on the "domain" query params', () => {
@@ -175,7 +172,7 @@ describe('deduplicateImages', () => {
 			'https://www.google.com/s2/favicons?domain=stackoverflow.com&sz=256',
 			'https://www.google.com/s2/favicons?domain=reddit.com&sz=256',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
 	it('should not deduplicate based on the first part of the path only', () => {
@@ -186,7 +183,7 @@ describe('deduplicateImages', () => {
 			'https://images.cutoutmagic.com/6lkr4uWYb0JTl96g3yXwQunP6ETAEXNt/7b4f49831ed9/PH203361_rs.crop.chair.nobg.jpg-6c7d295a213b-cutout.png',
 			'https://images.cutoutmagic.com/6lkr4uWYb0JTl96g3yXwQunP6ETAEXNt/2d62773d552f/before.couch.nobg.jpg-7ad7bba4c6c1-cutout.png',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
 	it('should deduplicate based on same filename across subdomains', () => {
@@ -194,24 +191,50 @@ describe('deduplicateImages', () => {
 			'https://preview.redd.it/abc123.jpeg?width=1080&crop=smart&auto=webp&s=7cf1d33c34ab20623b04dfc4f05b9a2320c44cad',
 			'https://i.redd.it/abc123.jpeg',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[0]]);
+		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[0]]);
 	});
 
 	it('should deduplicate based on same filename ending across subdomains', () => {
-		const urls = [
-			'https://preview.redd.it/favorite-character-that-fits-this-trope-v0-7qulxnmlw8sg1.jpeg?auto=webp&s=353f09a2df4a7e9209907dcdd844f6236682440a',
-			'https://i.redd.it/7qulxnmlw8sg1.jpeg',
-		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[1]]);
+		// prettier-ignore
+		const images = {
+			'https://preview.redd.it/favorite-character-that-fits-this-trope-v0-7qulxnmlw8sg1.jpeg?auto=webp&s=353f09a2df4a7e9209907dcdd844f6236682440a': { naturalWidth: 1024, naturalHeight: 768 },
+			'https://i.redd.it/7qulxnmlw8sg1.jpeg': { naturalWidth: 2048, naturalHeight: 1366 },
+		};
+		const urls = Object.keys(images);
+		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[1]]);
 	});
 
 	it('should deduplicate based on @2x & @3x variants', () => {
-		const urls = [
-			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no.webp',
-			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@2x.webp',
-			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@3x.webp',
-		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual([urls[2]]);
+		// prettier-ignore
+		const images = {
+			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no.webp': { naturalWidth: 512, naturalHeight: 384 },
+			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@2x.webp': { naturalWidth: 1024, naturalHeight: 768 },
+			'https://www.giornalone.it/t/2026/04/05/corriere-della-sera-0500122no@3x.webp': { naturalWidth: 1536, naturalHeight: 1152 },
+		};
+		const urls = Object.keys(images);
+		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[2]]);
+	});
+
+	it('should deduplicate based on iMDB resolution suffixes', () => {
+		// prettier-ignore
+		const images = {
+			'https://m.media-amazon.com/images/M/MV5BMTM0Njc2MzctNWVkYi00OGZiLTg3NDYtYjkzMWY3ODM3MzJlXkEyXkFqcGc@._V1_.jpg': { naturalWidth: 4500, naturalHeight: 6000 },
+			'https://m.media-amazon.com/images/M/MV5BMTM0Njc2MzctNWVkYi00OGZiLTg3NDYtYjkzMWY3ODM3MzJlXkEyXkFqcGc@._V1_FMjpg_UY426_.jpg': { naturalWidth: 320, naturalHeight: 426 },
+			'https://m.media-amazon.com/images/M/MV5BMTM0Njc2MzctNWVkYi00OGZiLTg3NDYtYjkzMWY3ODM3MzJlXkEyXkFqcGc@._V1_FMjpg_UY640_.jpg': { naturalWidth: 480, naturalHeight: 640 },
+			'https://m.media-amazon.com/images/M/MV5BMTM0Njc2MzctNWVkYi00OGZiLTg3NDYtYjkzMWY3ODM3MzJlXkEyXkFqcGc@._V1_FMjpg_UY337_.jpg': { naturalWidth: 253, naturalHeight: 337 },
+			'https://m.media-amazon.com/images/M/MV5BMTM0Njc2MzctNWVkYi00OGZiLTg3NDYtYjkzMWY3ODM3MzJlXkEyXkFqcGc@._V1_FMjpg_UY576_.jpg': { naturalWidth: 432, naturalHeight: 576 },
+			'https://m.media-amazon.com/images/M/MV5BMTM0Njc2MzctNWVkYi00OGZiLTg3NDYtYjkzMWY3ODM3MzJlXkEyXkFqcGc@._V1_FMjpg_UY720_.jpg': { naturalWidth: 540, naturalHeight: 720 },
+			'https://m.media-amazon.com/images/M/MV5BMTM0Njc2MzctNWVkYi00OGZiLTg3NDYtYjkzMWY3ODM3MzJlXkEyXkFqcGc@._V1_FMjpg_UY6000_.jpg': { naturalWidth: 3750, naturalHeight: 5000 },
+			'https://m.media-amazon.com/images/M/MV5BNDkxYmRlYWYtOGQyYy00Mzk1LTg2OTctYzkxMDIyYjRhYzVkXkEyXkFqcGc@._V1_.jpg': { naturalWidth: 4500, naturalHeight: 6000 },
+			'https://m.media-amazon.com/images/M/MV5BNDkxYmRlYWYtOGQyYy00Mzk1LTg2OTctYzkxMDIyYjRhYzVkXkEyXkFqcGc@._V1_FMjpg_UY426_.jpg': { naturalWidth: 320, naturalHeight: 426 },
+			'https://m.media-amazon.com/images/M/MV5BNDkxYmRlYWYtOGQyYy00Mzk1LTg2OTctYzkxMDIyYjRhYzVkXkEyXkFqcGc@._V1_FMjpg_UY640_.jpg': { naturalWidth: 480, naturalHeight: 640 },
+			'https://m.media-amazon.com/images/M/MV5BNDkxYmRlYWYtOGQyYy00Mzk1LTg2OTctYzkxMDIyYjRhYzVkXkEyXkFqcGc@._V1_FMjpg_UY337_.jpg': { naturalWidth: 253, naturalHeight: 337 },
+			'https://m.media-amazon.com/images/M/MV5BNDkxYmRlYWYtOGQyYy00Mzk1LTg2OTctYzkxMDIyYjRhYzVkXkEyXkFqcGc@._V1_FMjpg_UY576_.jpg': { naturalWidth: 432, naturalHeight: 576 },
+			'https://m.media-amazon.com/images/M/MV5BNDkxYmRlYWYtOGQyYy00Mzk1LTg2OTctYzkxMDIyYjRhYzVkXkEyXkFqcGc@._V1_FMjpg_UY720_.jpg': { naturalWidth: 540, naturalHeight: 720 },
+			'https://m.media-amazon.com/images/M/MV5BNDkxYmRlYWYtOGQyYy00Mzk1LTg2OTctYzkxMDIyYjRhYzVkXkEyXkFqcGc@._V1_FMjpg_UY6000_.jpg': { naturalWidth: 3750, naturalHeight: 5000 },
+		};
+		const urls = Object.keys(images);
+		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[0], urls[7]]);
 	});
 
 	it('should not deduplicate different octet streams', () => {
@@ -221,7 +244,7 @@ describe('deduplicateImages', () => {
 			'data:application/octet-stream;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAwKChQOFBUUFBUhFxgXISIiGxsiIiUfIiEiHyUmJyYpKSYnJiclKi0qJScpKjAwKiktNjU2LTYyMjY7NTs1NSsBDAgIEQ0REBEREBoRFBEaGBgSEhgYHRUWFRYVHR8bGRsbGRsfHBoYFRgaHB4aHx8aHh8YGxgfHh8fHi4xLi0t///CABEIB/8GBgMBIgACEQEDEQH/xADr/9k=',
 			'data:application/octet-stream;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wCEAAwKChQOFBUUFBUhFxgXISIiGxsiIiUfIiEiHyUmJyYpKSYnJiclKi0qJScpKjAwKiktNjU2LTYyMjY7NTs1NSsBDAgIEQ0REBEREBoRFBEaGBgSEhgYHRUWFRYVHR8bGRsbGRsfHBoYFRgaHB4aHx8aHh8YGxgfHh8fHi4xLi0t///CABEIBgYIAAMBIgACEQEDEQH/xADm/2Q==',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
 	it('should not deduplicate only based on last path', () => {
@@ -230,6 +253,6 @@ describe('deduplicateImages', () => {
 			'https://imagedelivery.net/9lr8zq_Jvl7h6OFWqEi9IA/36cfe2eb-a89f-4283-1aa4-6cd72afcd900/public',
 			'https://imagedelivery.net/9lr8zq_Jvl7h6OFWqEi9IA/cdc70901-8253-4000-2492-eb577d099400/public',
 		];
-		expect(deduplicateImages(urls, imagesCache)).toEqual(urls);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 });
