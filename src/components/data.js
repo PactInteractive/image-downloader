@@ -9,7 +9,7 @@ import { findImages } from './findImages.js';
 export const defaults = {
 	// UI
 	open_mode: 'sidebar',
-	theme: 'system',
+	theme: 'light',
 	// Filters
 	filter_url: '',
 	filter_url_mode: 'normal',
@@ -25,6 +25,7 @@ export const defaults = {
 	filter_max_height: 3000,
 	only_unique_images: true,
 	only_images_from_links: false,
+	include_errored_images: true,
 	// Download
 	folder_name: '',
 	new_file_name: '',
@@ -78,6 +79,8 @@ export const onlyUniqueImages = storedSignal('only_unique_images');
 
 export const onlyImagesFromLinks = storedSignal('only_images_from_links');
 
+export const includeErroredImages = storedSignal('include_errored_images');
+
 // Download
 export const folderName = storedSignal('folder_name');
 
@@ -111,6 +114,7 @@ export const initialize = action(async () => {
 		filter_max_height: filterMaxHeight,
 		only_unique_images: onlyUniqueImages,
 		only_images_from_links: onlyImagesFromLinks,
+		include_errored_images: includeErroredImages,
 		folder_name: folderName,
 		new_file_name: newFileName,
 		show_download_confirmation: showDownloadConfirmation,
@@ -175,19 +179,14 @@ function parseLocalStorageValue(
 
 // State
 export const allImages = signal(/** @type {string[]} */ ([]));
-export const linkedImages = signal(/** @type {string[]} */ ([]));
+const linkedImages = signal(/** @type {string[]} */ ([]));
 
 export const imagesCache = { value: /** @type {HTMLDivElement | null} */ (null) }; // Not displayed; used for loading images and their stats like size or resolution
 
-export const loadedImages = signal(/** @type {string[]} */ ([]));
 export const imageLoaded = action((/** @type {string | undefined} */ url) => {
 	if (!url) return;
 
 	batch(() => {
-		if (!loadedImages.peek().includes(url)) {
-			// Use `allImages` to preserve order
-			loadedImages.value = allImages.value.filter(isIncludedIn([...loadedImages.value, url]));
-		}
 		if (erroredImages.peek().includes(url)) {
 			erroredImages.value = erroredImages.value.filter(isNotStrictEqual(url));
 		}
@@ -203,9 +202,6 @@ export const imageErrored = action((/** @type {string | undefined} */ url) => {
 			// Use `allImages` to preserve order
 			erroredImages.value = allImages.value.filter(isIncludedIn([...erroredImages.value, url]));
 		}
-		if (loadedImages.peek().includes(url)) {
-			loadedImages.value = loadedImages.value.filter(isNotStrictEqual(url));
-		}
 	});
 });
 
@@ -213,9 +209,7 @@ export const imageErrored = action((/** @type {string | undefined} */ url) => {
 export const tab = signal('matching');
 
 export const matchingImages = computed(() => {
-	let filtered = onlyImagesFromLinks.value
-		? loadedImages.value.filter(isIncludedIn(linkedImages.value))
-		: loadedImages.value;
+	let filtered = onlyImagesFromLinks.value ? linkedImages.value : allImages.value;
 
 	let filterValue = filterUrl.value;
 	if (filterValue) {
@@ -268,7 +262,7 @@ export const matchingImages = computed(() => {
 			(!filterMaxWidthEnabled.value || (image?.naturalWidth || 0) <= filterMaxWidth.value) &&
 			(!filterMinHeightEnabled.value || filterMinHeight.value <= (image?.naturalHeight || 0)) &&
 			(!filterMaxHeightEnabled.value || (image?.naturalHeight || 0) <= filterMaxHeight.value) &&
-			!erroredImages.value.includes(url)
+			(includeErroredImages.value || !erroredImages.value.includes(url))
 		);
 	});
 
@@ -279,14 +273,13 @@ export const matchingImages = computed(() => {
 	return filtered;
 });
 
-export const filteredOutImages = computed(() => loadedImages.value.filter(isNotIncludedIn(matchingImages.value)));
+export const filteredOutImages = computed(() => allImages.value.filter(isNotIncludedIn(matchingImages.value)));
 
 export const displayedImages = computed(() => {
 	return (
 		{
 			matching: matchingImages.value,
 			filtered_out: filteredOutImages.value,
-			errors: erroredImages.value,
 		}[tab.value] ?? []
 	);
 });
@@ -296,7 +289,6 @@ export const selectedMatchingImages = computed(() => selectedImages.value.filter
 export const selectedFilteredOutImages = computed(() =>
 	selectedImages.value.filter(isIncludedIn(filteredOutImages.value))
 );
-export const selectedErroredImages = computed(() => selectedImages.value.filter(isIncludedIn(erroredImages.value)));
 
 // Loading
 export const hostname = signal('');
@@ -333,8 +325,7 @@ export const loadImagesFromActiveTab = action(
 							allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
 							linkedImages.value = unique(messages.flatMap((message) => message.result?.linkedImages || []));
 							// Use `allImages` to preserve original DOM order.
-							erroredImages.value = allImages.value.filter(isIncludedIn(erroredImages.value)); // Recompute errored images first
-							loadedImages.value = allImages.value.filter(isNotIncludedIn(erroredImages.value)); // Show users immediate feedback (except for known errors)
+							erroredImages.value = allImages.value.filter(isIncludedIn(erroredImages.value));
 							selectedImages.value = allImages.value.filter(isIncludedIn(selectedImages.value));
 
 							for (const message of messages) {

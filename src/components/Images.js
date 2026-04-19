@@ -7,13 +7,10 @@ import { Checkbox } from './Checkbox.js';
 import {
 	columns,
 	displayedImages,
-	erroredImages,
 	filteredOutImages,
 	imageErrored,
 	imageLoaded,
-	loadedImages,
 	matchingImages,
-	selectedErroredImages,
 	selectedFilteredOutImages,
 	selectedImages,
 	selectedMatchingImages,
@@ -48,8 +45,6 @@ import { useScrollToEnd } from './useScrollToEnd.js';
 
 export function Images(/** @type {ImagesProps} */ { class: className, style, ...props }) {
 	const allImagesFromCurrentTabAreSelected = displayedImages.value.every(isIncludedIn(selectedImages.value));
-	const hasFilteredOutImages = useComputed(() => filteredOutImages.value.length > 0);
-	const hasErroredImages = useComputed(() => erroredImages.value.length > 0);
 
 	const themeTooltip = {
 		system: 'Using your system theme',
@@ -73,7 +68,6 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 			>
 				<li>
 					<${Tab}
-						class="text-slate-600 has-checked:text-slate-700 dark:text-slate-300 dark:has-checked:text-slate-200"
 						title="Images matching your filters"
 						input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
 					>
@@ -86,46 +80,27 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 					<//>
 				</li>
 
-				<${Show} when=${hasFilteredOutImages}>
-					<li>
-						<${Tab}
-							class="border-l border-slate-300 dark:border-slate-600 text-slate-600 has-checked:text-slate-700 dark:text-slate-300 dark:has-checked:text-slate-200"
-							title="Images removed by your filters"
-							input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
-						>
-							<${Circle} class="bg-slate-600 text-white">
-								${selectedFilteredOutImages.value.length > 0
-									? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
-									: '-'}
-							<//>
-							${filteredOutImages.value.length} filtered out
+				<li>
+					<${Tab}
+						class="border-l border-slate-300 dark:border-slate-600"
+						title="Images removed by your filters"
+						input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
+					>
+						<${Circle} class="bg-slate-600 text-white">
+							${selectedFilteredOutImages.value.length > 0
+								? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
+								: '-'}
 						<//>
-					</li>
-				<//>
-
-				<${Show} when=${hasErroredImages}>
-					<li>
-						<${Tab}
-							class="border-l border-slate-300 dark:border-slate-600 text-red-600 has-checked:text-red-700 dark:text-red-400 dark:has-checked:text-red-300"
-							title="Images that failed to load"
-							input=${{ name: 'visibility', value: 'errors', checked: tab.value === 'errors' }}
-						>
-							<${Circle} class="bg-red-600 text-white">
-								${selectedErroredImages.value.length > 0
-									? html`<span class="text-2xs">${selectedErroredImages.value.length}</span>`
-									: '×'}
-							<//>
-							${erroredImages.value.length} ${erroredImages.value.length === 1 ? 'error' : 'errors'}
-						<//>
-					</li>
-				<//>
+						${filteredOutImages.value.length} filtered out
+					<//>
+				</li>
 			</ul>
 
 			<${Checkbox}
 				class="flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-600 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 p-1 text-xs text-nowrap text-slate-600 dark:text-slate-300"
 				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
 				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
-				disabled=${loadedImages.value.length === 0}
+				disabled=${displayedImages.value.length === 0}
 				title="Click to select or unselect all displayed images"
 				onChange=${(/** @type {Event} */ e) => {
 					const { checked } = /** @type {HTMLInputElement} */ (e.currentTarget);
@@ -204,7 +179,7 @@ function Tab(
 ) {
 	return html`
 		<label
-			class="${className} p-1 transition-colors bg-slate-50 hover:bg-slate-100 has-checked:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 dark:has-checked:bg-slate-700"
+			class="${className} p-1 transition-colors bg-slate-50 hover:bg-slate-100 has-checked:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 dark:has-checked:bg-slate-700 text-slate-600 has-checked:text-slate-700 dark:text-slate-300 dark:has-checked:text-slate-200"
 			...${props}
 		>
 			<input class="sr-only" type="radio" ...${input} />

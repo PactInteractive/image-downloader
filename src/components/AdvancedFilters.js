@@ -16,6 +16,7 @@ import {
 	filterMinWidthEnabled,
 	onlyImagesFromLinks,
 	onlyUniqueImages,
+	includeErroredImages,
 } from './data.js';
 
 export function AdvancedFilters() {
@@ -124,6 +125,15 @@ export function AdvancedFilters() {
 					onChange=${setToCheckboxValue(onlyImagesFromLinks)}
 				>
 					Only links
+				<//>
+
+				<${Checkbox}
+					class="py-1"
+					title="Show images that failed to load"
+					checked=${includeErroredImages.value}
+					onChange=${setToCheckboxValue(includeErroredImages)}
+				>
+					Include errors
 				<//>
 			</div>
 		</div>
