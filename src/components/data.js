@@ -25,7 +25,7 @@ export const defaults = {
 	filter_max_height: 3000,
 	only_unique_images: true,
 	only_images_from_links: false,
-	include_errored_images: true,
+	hide_errored_images: false,
 	// Download
 	folder_name: '',
 	new_file_name: '',
@@ -79,7 +79,7 @@ export const onlyUniqueImages = storedSignal('only_unique_images');
 
 export const onlyImagesFromLinks = storedSignal('only_images_from_links');
 
-export const includeErroredImages = storedSignal('include_errored_images');
+export const hideErroredImages = storedSignal('hide_errored_images');
 
 // Download
 export const folderName = storedSignal('folder_name');
@@ -114,7 +114,7 @@ export const initialize = action(async () => {
 		filter_max_height: filterMaxHeight,
 		only_unique_images: onlyUniqueImages,
 		only_images_from_links: onlyImagesFromLinks,
-		include_errored_images: includeErroredImages,
+		hide_errored_images: hideErroredImages,
 		folder_name: folderName,
 		new_file_name: newFileName,
 		show_download_confirmation: showDownloadConfirmation,
@@ -262,7 +262,7 @@ export const matchingImages = computed(() => {
 			(!filterMaxWidthEnabled.value || (image?.naturalWidth || 0) <= filterMaxWidth.value) &&
 			(!filterMinHeightEnabled.value || filterMinHeight.value <= (image?.naturalHeight || 0)) &&
 			(!filterMaxHeightEnabled.value || (image?.naturalHeight || 0) <= filterMaxHeight.value) &&
-			(includeErroredImages.value || !erroredImages.value.includes(url))
+			(!hideErroredImages.value || !erroredImages.value.includes(url))
 		);
 	});
 

@@ -19,7 +19,7 @@ import {
 	openMode,
 	scriptError,
 	showAdvancedFilters,
-	includeErroredImages,
+	hideErroredImages,
 } from './data.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
@@ -31,7 +31,7 @@ export function Header(/** @type {Object} */ props) {
 		filterMaxHeightEnabled,
 		onlyUniqueImages,
 		onlyImagesFromLinks,
-		includeErroredImages,
+		hideErroredImages,
 	].filter((s) => s.value).length;
 
 	const hostnameIsLimited = useComputed(() => limitedAccessHostnames.test(hostname.value));
