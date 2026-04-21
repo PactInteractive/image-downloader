@@ -1,7 +1,7 @@
 // @ts-check
 import html, { For, Show, useComputed, useSignal } from '../html.js';
 
-import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
+import { getReferralUrl, isIncludedIn, isNotIncludedIn, isNotStrictEqual, stopPropagation, unique } from '../utils.js';
 import * as actions from './actions.js';
 import { Checkbox } from './Checkbox.js';
 import {
@@ -17,6 +17,7 @@ import {
 	tab,
 	theme,
 } from './data.js';
+import { ExternalLink } from './ExternalLink.js';
 import { useImageStats } from './useImageStats.js';
 import { useScrollToEnd } from './useScrollToEnd.js';
 
@@ -61,7 +62,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 	return html`
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
 			<ul
-				class="flex items-center overflow-hidden rounded-full border border-slate-300 dark:border-slate-600 text-xs text-nowrap"
+				class="flex items-center overflow-hidden rounded-full border border-slate-300 text-xs text-nowrap dark:border-slate-600"
 				onChange=${(/** @type {Event} */ e) => {
 					tab.value = /** @type {HTMLInputElement} */ (e.target).value;
 				}}
@@ -72,9 +73,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
 					>
 						<${Circle} class="bg-green-600 text-white">
-							${selectedMatchingImages.value.length > 0
-								? html`<span class="text-2xs">${selectedMatchingImages.value.length}</span>`
-								: '+'}
+							${
+								selectedMatchingImages.value.length > 0
+									? html`<span class="text-2xs">${selectedMatchingImages.value.length}</span>`
+									: '+'
+							}
 						<//>
 						${matchingImages.value.length} matching
 					<//>
@@ -87,9 +90,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 					>
 						<${Circle} class="bg-slate-600 text-white">
-							${selectedFilteredOutImages.value.length > 0
-								? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
-								: '-'}
+							${
+								selectedFilteredOutImages.value.length > 0
+									? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
+									: '-'
+							}
 						<//>
 						${filteredOutImages.value.length} filtered out
 					<//>
@@ -97,7 +102,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 			</ul>
 
 			<${Checkbox}
-				class="flex items-center gap-1 rounded-full border border-slate-300 dark:border-slate-600 bg-slate-50 hover:bg-slate-100 dark:bg-slate-900 dark:hover:bg-slate-800 p-1 text-xs text-nowrap text-slate-600 dark:text-slate-300"
+				class="flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 p-1 text-xs text-nowrap text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
 				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
 				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
 				disabled=${displayedImages.value.length === 0}
@@ -179,7 +184,7 @@ function Tab(
 ) {
 	return html`
 		<label
-			class="${className} p-1 transition-colors bg-slate-50 hover:bg-slate-100 has-checked:bg-slate-200 dark:bg-slate-900 dark:hover:bg-slate-800 dark:has-checked:bg-slate-700 text-slate-600 has-checked:text-slate-700 dark:text-slate-300 dark:has-checked:text-slate-200"
+			class="${className} bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100 has-checked:bg-slate-200 has-checked:text-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:has-checked:bg-slate-700 dark:has-checked:text-slate-200"
 			...${props}
 		>
 			<input class="sr-only" type="radio" ...${input} />
@@ -256,6 +261,7 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 			></div>
 
 			<div class="absolute top-1 right-1 hidden group-hover:flex gap-1">
+				<${RemoveBackgroundButton} imageUrl=${imageUrl} />
 				<${OpenImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
 				<${DownloadImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
 			</div>
@@ -292,6 +298,20 @@ function ImageError(/** @type {{ onClick?: (e: MouseEvent) => void }} */ { onCli
 			<div><${Circle} class="bg-red-600 text-white">×<//> Error loading image</div>
 			Click to retry
 		</button>
+	`;
+}
+
+function RemoveBackgroundButton(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
+	return html`
+		<${ExternalLink}
+			...${props}
+			class="btn h-7 w-7 rounded bg-size-[20px] bg-center bg-no-repeat text-transparent shadow-md"
+			style=${{ backgroundImage: 'url("/images/cutout.svg")' }}
+			href=${getReferralUrl('https://cutoutmagic.com', { url: imageUrl, utm_content: 'remove_background_button' })}
+			title="Remove background with CutoutMagic.com"
+		>
+			Remove background with CutoutMagic.com
+		<//>
 	`;
 }
 

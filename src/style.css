@@ -44,7 +44,7 @@
 	}
 
 	a {
-		@apply text-sky-600 dark:text-sky-400 hover:text-sky-700 dark:hover:text-sky-300;
+		@apply text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300;
 	}
 
 	/* https://stackoverflow.com/questions/11243337/a-taller-than-its-img-child */
@@ -89,7 +89,7 @@
 		text-align: center;
 		line-height: 1;
 		transition: background-color 200ms;
-		@apply text-slate-950 bg-slate-200 hover:bg-slate-300 active:bg-slate-400 dark:bg-slate-300 dark:hover:bg-slate-400 dark:active:bg-slate-500;
+		@apply bg-slate-200 text-slate-950 hover:bg-slate-300 active:bg-slate-400 dark:bg-slate-300 dark:hover:bg-slate-400 dark:active:bg-slate-500;
 	}
 
 	label {

@@ -11,6 +11,7 @@ import {
 	filterMinWidthEnabled,
 	filterUrl,
 	filterUrlMode,
+	hideErroredImages,
 	hostname,
 	limitedAccessHostnames,
 	loadImagesFromActiveTab,
@@ -19,7 +20,6 @@ import {
 	openMode,
 	scriptError,
 	showAdvancedFilters,
-	hideErroredImages,
 } from './data.js';
 import { UrlFilterMode } from './UrlFilterMode.js';
 
