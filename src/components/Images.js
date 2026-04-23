@@ -309,6 +309,7 @@ function RemoveBackgroundButton(/** @type {{ imageUrl: string }} */ { imageUrl, 
 			style=${{ backgroundImage: 'url("/images/cutout.svg")' }}
 			href=${getReferralUrl('https://cutoutmagic.com/library', { url: imageUrl, utm_content: 'remove_background_button' })}
 			title="Remove background with CutoutMagic.com"
+			onClick=${stopPropagation}
 		>
 			Remove background with CutoutMagic.com
 		<//>
