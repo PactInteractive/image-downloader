@@ -56,12 +56,11 @@ export function About() {
     </p>
 
     <p>
-      Try it now at <${ExternalLink} class="font-bold text-nowrap" href="${cutoutMagicReferralUrl}">cutoutmagic.com</a> -
-      free to start, no credit card needed!
+      Try it now at <${ExternalLink} class="font-bold text-nowrap" href="${cutoutMagicReferralUrl}">cutoutmagic.com</a>
     </p>
 
     <${ExternalLink} href="${cutoutMagicReferralUrl}">
-      <img class="shadow rounded-2xl" src="https://cutoutmagic.com/cover-1280x720.jpg" />
+      <img class="shadow rounded-2xl" src="https://images.cutoutmagic.com/cover.jpg" />
     <//>
 
     <hr class="mt-4" />
