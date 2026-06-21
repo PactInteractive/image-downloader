@@ -36,7 +36,10 @@ function AppWithoutErrorBoundary() {
 	}
 
 	return html`
-		<${Header} class="sticky top-0 z-1 bg-white shadow-md dark:bg-slate-900" />
+		<${Header}
+			class="material sticky top-0 z-1 border-b border-black/8 dark:border-white/8"
+			style=${{ boxShadow: '0 1px 8px -2px rgb(0 0 0 / 0.08)' }}
+		/>
 
 		<div id="images_cache" ref=${(/** @type {HTMLDivElement} */ element) => (imagesCache.value = element)} hidden>
 			<${For} each=${allImages}>
@@ -49,11 +52,8 @@ function AppWithoutErrorBoundary() {
 		<${Images} id="images_container" />
 
 		<${Footer}
-			class="sticky bottom-0 mt-auto bg-white p-2 dark:bg-slate-900"
-			style=${{
-				boxShadow:
-					'0 -4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1))',
-			}}
+			class="material sticky bottom-0 mt-auto border-t border-black/8 p-2 dark:border-white/8"
+			style=${{ boxShadow: '0 -1px 8px -2px rgb(0 0 0 / 0.08)' }}
 		/>
 	`;
 }

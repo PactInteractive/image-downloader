@@ -7,6 +7,8 @@
 	--breakpoint-2xs: 24rem;
 	--breakpoint-xs: 30rem;
 	--ease-elastic: cubic-bezier(0.5, 2.5, 0.5, 0.5);
+	/* macOS-style spring-ish easing for everyday state changes */
+	--ease-macos: cubic-bezier(0.32, 0.72, 0, 1);
 }
 
 @utility corner-* {
@@ -25,6 +27,13 @@
 	font-size: 0.625rem;
 }
 
+/* Translucent "vibrancy" material — frosted, blurred chrome like macOS toolbars. */
+@utility material {
+	@apply bg-white/72 dark:bg-slate-900/72;
+	backdrop-filter: saturate(180%) blur(20px);
+	-webkit-backdrop-filter: saturate(180%) blur(20px);
+}
+
 @layer base {
 	* {
 		corner-shape: squircle;
@@ -33,10 +42,18 @@
 	:root,
 	body {
 		@apply text-slate-950 dark:text-white;
+		/* Use the real system UI font — SF Pro on macOS — for native feel. */
 		font:
-			16px/1.5 'Lucida Grande',
+			14px/1.5 -apple-system,
+			BlinkMacSystemFont,
+			'SF Pro Text',
+			'Helvetica Neue',
 			Arial,
 			sans-serif;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+		text-rendering: optimizeLegibility;
+		font-variant-numeric: tabular-nums;
 	}
 
 	main {
@@ -76,26 +93,122 @@
 	input[type='text'],
 	select {
 		min-width: 0;
-		border-radius: 12px;
-		@apply border border-[color-mix(in_srgb,var(--color-slate-400)_20%,transparent)] dark:border-[color-mix(in_srgb,var(--color-slate-600)_20%,transparent)];
-		padding: 0 8px;
-		@apply bg-slate-100 text-slate-950 dark:bg-slate-200;
+		border-radius: 10px;
+		@apply border border-[color-mix(in_srgb,var(--color-slate-400)_28%,transparent)] dark:border-[color-mix(in_srgb,var(--color-slate-500)_30%,transparent)];
+		padding: 0 10px;
+		@apply bg-white/80 text-slate-950 dark:bg-slate-800/80 dark:text-white;
+		transition:
+			border-color 150ms var(--ease-macos),
+			box-shadow 150ms var(--ease-macos);
+	}
+
+	/* macOS focus ring — a soft accent halo rather than a hard outline. */
+	input[type='text']:focus-visible,
+	select:focus-visible,
+	button:focus-visible {
+		outline: none;
+		@apply border-sky-500;
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-sky-500) 35%, transparent);
 	}
 
 	button,
 	.btn {
-		border-radius: 12px;
-		@apply border border-[color-mix(in_srgb,var(--color-slate-400)_20%,transparent)] dark:border-[color-mix(in_srgb,var(--color-slate-600)_20%,transparent)];
+		border-radius: 10px;
+		@apply border border-[color-mix(in_srgb,var(--color-slate-400)_22%,transparent)] dark:border-[color-mix(in_srgb,var(--color-slate-500)_24%,transparent)];
 		text-align: center;
 		line-height: 1;
-		transition: background-color 200ms;
-		@apply bg-slate-200 text-slate-950 hover:bg-slate-300 active:bg-slate-400 dark:bg-slate-300 dark:hover:bg-slate-400 dark:active:bg-slate-500;
+		@apply bg-white text-slate-950 hover:bg-slate-50 dark:bg-slate-700 dark:text-white dark:hover:bg-slate-600;
+		/* Layered shadow reads as a raised key, not a flat border. */
+		box-shadow:
+			0 1px 1px rgb(0 0 0 / 0.04),
+			0 1px 2px rgb(0 0 0 / 0.06);
+		transition:
+			background-color 200ms var(--ease-macos),
+			box-shadow 200ms var(--ease-macos),
+			scale 120ms var(--ease-macos);
+	}
+
+	/* Tactile press — subtle scale, never below 0.95. */
+	button:active,
+	.btn:active {
+		scale: 0.96;
+	}
+
+	button:disabled {
+		@apply opacity-50;
+		scale: 1;
+		box-shadow: none;
+	}
+
+	/* ── Custom checkboxes (macOS filled rounded-square) ─────────────────────
+	   Styles every native checkbox, so bare <input type=checkbox> and the
+	   <Checkbox> component share one look. Check/dash drawn via a masked SVG. */
+	input[type='checkbox'] {
+		appearance: none;
+		-webkit-appearance: none;
+		flex: none;
+		width: 18px;
+		height: 18px;
+		margin: 0;
+		corner-shape: superellipse(2.2);
+		border-radius: 6px;
+		@apply border border-[color-mix(in_srgb,var(--color-slate-400)_55%,transparent)] bg-white dark:border-[color-mix(in_srgb,var(--color-slate-400)_45%,transparent)] dark:bg-slate-700;
+		box-shadow: inset 0 1px 1px rgb(0 0 0 / 0.05);
+		display: inline-grid;
+		place-content: center;
+		transition:
+			background-color 150ms var(--ease-macos),
+			border-color 150ms var(--ease-macos),
+			box-shadow 150ms var(--ease-macos);
+	}
+
+	input[type='checkbox']::after {
+		content: '';
+		width: 14px;
+		height: 14px;
+		background-color: white;
+		-webkit-mask: var(--checkbox-check) center / 13px no-repeat;
+		mask: var(--checkbox-check) center / 13px no-repeat;
+		scale: 0;
+		transition: scale 150ms var(--ease-elastic);
+	}
+
+	input[type='checkbox']:checked,
+	input[type='checkbox']:indeterminate {
+		@apply border-sky-600 bg-sky-600 dark:border-sky-500 dark:bg-sky-500;
+		box-shadow:
+			inset 0 1px 0 rgb(255 255 255 / 0.25),
+			0 1px 2px color-mix(in srgb, var(--color-sky-600) 40%, transparent);
+	}
+
+	input[type='checkbox']:checked::after,
+	input[type='checkbox']:indeterminate::after {
+		scale: 1;
+	}
+
+	input[type='checkbox']:indeterminate::after {
+		-webkit-mask-image: var(--checkbox-dash);
+		mask-image: var(--checkbox-dash);
+	}
+
+	input[type='checkbox']:disabled {
+		@apply opacity-40;
+	}
+
+	input[type='checkbox']:focus-visible {
+		outline: none;
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-sky-500) 35%, transparent);
+	}
+
+	:root {
+		--checkbox-check: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20256%20256'%3E%3Cpath%20d='M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z'/%3E%3C/svg%3E");
+		--checkbox-dash: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20256%20256'%3E%3Cpath%20d='M224,128a8,8,0,0,1-8,8H40a8,8,0,0,1,0-16H216A8,8,0,0,1,224,128Z'/%3E%3C/svg%3E");
 	}
 
 	label {
 		display: inline-flex;
 		align-items: center;
-		gap: 4px;
+		gap: 6px;
 	}
 
 	p:not(:only-child) {
@@ -116,68 +229,67 @@
 }
 
 .noUi-horizontal {
-	height: 12px;
+	height: 6px;
 }
 
 .noUi-target {
-	@apply border border-sky-600;
-	transition: border-color 200ms;
+	@apply border-0 bg-slate-200 dark:bg-slate-700;
+	border-radius: 999px;
+	box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.08);
+	transition: opacity 200ms var(--ease-macos);
 }
 
 .noUi-target[disabled] {
-	@apply border border-slate-400;
+	@apply opacity-50;
 }
 
 .noUi-connects {
 	cursor: pointer;
+	border-radius: 999px;
 }
 
 .noUi-connect {
-	@apply bg-sky-600;
-	transition: background-color 200ms;
+	@apply bg-sky-600 dark:bg-sky-500;
+	transition: background-color 200ms var(--ease-macos);
 }
 
 .noUi-target[disabled] .noUi-connect {
-	@apply bg-slate-100;
+	@apply bg-slate-400;
 }
 
 .noUi-horizontal .noUi-origin .noUi-handle {
 	cursor: grab;
-	top: -5px;
-	right: -9px;
+	top: -7px;
+	right: -10px;
 	width: 20px;
 	height: 20px;
-	box-shadow: none;
-	outline: 1px solid white;
+	border: none;
 	border-radius: 50%;
-	@apply border border-sky-600;
-	@apply bg-sky-600;
-	transition: all 200ms;
+	background: white;
+	box-shadow:
+		0 0 0 0.5px rgb(0 0 0 / 0.04),
+		0 1px 3px rgb(0 0 0 / 0.2),
+		0 2px 6px rgb(0 0 0 / 0.12);
+	transition:
+		box-shadow 200ms var(--ease-macos),
+		scale 120ms var(--ease-macos);
+}
+
+.noUi-horizontal .noUi-origin .noUi-handle:active {
+	scale: 1.1;
+	cursor: grabbing;
 }
 
 .noUi-horizontal .noUi-origin[disabled] .noUi-handle {
 	cursor: help;
-	@apply border border-slate-400;
-	@apply bg-slate-100;
+	background: white;
+	box-shadow:
+		0 0 0 0.5px rgb(0 0 0 / 0.04),
+		0 1px 2px rgb(0 0 0 / 0.12);
 }
 
+/* The default nouislider handle grips don't suit a clean macOS knob. */
 .noUi-handle::before,
 .noUi-handle::after {
-	top: 4px;
-	height: 10px;
-	background-color: white;
-	transition: all 200ms;
-}
-
-.noUi-origin[disabled] .noUi-handle::before,
-.noUi-origin[disabled] .noUi-handle::after {
-	@apply bg-slate-400;
-}
-
-.noUi-handle::before {
-	left: 6.5px;
-}
-
-.noUi-handle::after {
-	left: 9.5px;
+	display: none;
 }

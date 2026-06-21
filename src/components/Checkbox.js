@@ -11,7 +11,7 @@ export function Checkbox(
 ) {
 	return html`
 		<label ...${{ class: className, title }}>
-			<input class="mb-px" ref=${setIndeterminate(indeterminate)} type="checkbox" ...${props} />
+			<input ref=${setIndeterminate(indeterminate)} type="checkbox" ...${props} />
 			${children}
 		</label>
 	`;

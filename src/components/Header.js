@@ -4,6 +4,7 @@ import html, { Show, useComputed } from '../html.js';
 import { toggle } from '../utils.js';
 import { AdvancedFilters } from './AdvancedFilters.js';
 import { Bubble } from './Bubble.js';
+import { Icon } from './Icon.js';
 import {
 	filterMaxHeightEnabled,
 	filterMaxWidthEnabled,
@@ -54,11 +55,11 @@ export function Header(/** @type {Object} */ props) {
 
 			<div class="flex items-center gap-1 p-2">
 				<button
-					class="min-w-8"
+					class="inline-flex min-w-8 items-center justify-center text-slate-600 dark:text-slate-300"
 					title="Reload images from current tab"
 					onClick=${() => loadImagesFromActiveTab({ waitForIdleDOM: 1 })}
 				>
-					<img class="inline w-3.5" src="/images/reload.svg" />
+					<${Icon} name="reload" size=${16} />
 				</button>
 
 				<input
@@ -80,15 +81,16 @@ export function Header(/** @type {Object} */ props) {
 				/>
 
 				<button
-					class="relative min-w-8"
+					class="relative inline-flex min-w-8 items-center justify-center text-slate-600 dark:text-slate-300"
 					title=${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
 						? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
 						: 'Toggle advanced filters'}
 					onClick=${toggle(showAdvancedFilters)}
 				>
-					<img
-						class="${showAdvancedFilters.value ? '' : '-rotate-90'} inline w-3 transition-transform"
-						src="/images/chevron.svg"
+					<${Icon}
+						name="caretDown"
+						size=${16}
+						class="${showAdvancedFilters.value ? '' : '-rotate-90'} transition-transform duration-300"
 					/>
 
 					<${Bubble} show=${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0}>
@@ -97,7 +99,7 @@ export function Header(/** @type {Object} */ props) {
 				</button>
 
 				<button
-					class="min-w-8"
+					class="inline-flex min-w-8 items-center justify-center text-slate-600 dark:text-slate-300"
 					title=${openMode.value === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
 					onClick=${async () => {
 						if (openMode.value === 'sidebar') {
@@ -109,11 +111,15 @@ export function Header(/** @type {Object} */ props) {
 						}
 					}}
 				>
-					<img class="inline w-5" src=${openMode.value === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'} />
+					<${Icon} name=${openMode.value === 'sidebar' ? 'window' : 'sidebar'} size=${17} />
 				</button>
 
-				<button class="min-w-8" title="Close extension" onClick=${() => window.close()}>
-					<img class="inline w-3" src="/images/times.svg" />
+				<button
+					class="inline-flex min-w-8 items-center justify-center text-slate-600 dark:text-slate-300"
+					title="Close extension"
+					onClick=${() => window.close()}
+				>
+					<${Icon} name="x" size=${16} />
 				</button>
 			</div>
 

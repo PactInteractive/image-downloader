@@ -18,6 +18,7 @@ import {
 	theme,
 } from './data.js';
 import { ExternalLink } from './ExternalLink.js';
+import { Icon } from './Icon.js';
 import { useImageStats } from './useImageStats.js';
 import { useScrollToEnd } from './useScrollToEnd.js';
 
@@ -53,16 +54,14 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 		light: 'Using light theme',
 	}[theme.value];
 
-	const themeIcon = {
-		system: '/images/system.svg',
-		dark: '/images/moon.svg',
-		light: '/images/sun.svg',
-	}[theme.value];
+	const themeIcon = /** @type {'monitor' | 'moon' | 'sun'} */ (
+		{ system: 'monitor', dark: 'moon', light: 'sun' }[theme.value]
+	);
 
 	return html`
 		<div class="flex flex-wrap items-start gap-2 p-2 pb-0 tabular-nums">
 			<ul
-				class="flex items-center overflow-hidden rounded-full border border-slate-300 text-xs text-nowrap dark:border-slate-600"
+				class="flex items-center gap-0.5 rounded-[10px] border border-black/8 bg-black/5 p-0.5 text-xs text-nowrap dark:border-white/10 dark:bg-white/5"
 				onChange=${(/** @type {Event} */ e) => {
 					tab.value = /** @type {HTMLInputElement} */ (e.target).value;
 				}}
@@ -85,7 +84,6 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 
 				<li>
 					<${Tab}
-						class="border-l border-slate-300 dark:border-slate-600"
 						title="Images removed by your filters"
 						input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 					>
@@ -102,7 +100,7 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 			</ul>
 
 			<${Checkbox}
-				class="flex items-center gap-1 rounded-full border border-slate-300 bg-slate-50 p-1 text-xs text-nowrap text-slate-600 hover:bg-slate-100 dark:border-slate-600 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800"
+				class="flex h-7.5 items-center gap-1.5 rounded-[10px] border border-black/8 bg-white px-2.5 text-xs text-nowrap text-slate-600 transition-colors hover:bg-slate-50 dark:border-white/10 dark:bg-slate-800 dark:text-slate-300 dark:hover:bg-slate-700"
 				checked=${selectedImages.value.length > 0 && allImagesFromCurrentTabAreSelected}
 				indeterminate=${selectedImages.value.length > 0 && !allImagesFromCurrentTabAreSelected}
 				disabled=${displayedImages.value.length === 0}
@@ -118,36 +116,38 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 			<//>
 
 			<div class="mt-px ml-auto flex items-center gap-1.5 text-xs">
-				<div class="flex items-baseline gap-1 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700">
+				<div
+					class="flex items-center gap-0.5 overflow-hidden rounded-[10px] border border-black/8 bg-white p-0.5 dark:border-white/10 dark:bg-slate-800"
+				>
 					<button
 						type="button"
-						class="size-6 rounded-none font-bold"
+						class="inline-flex size-6 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 shadow-none hover:bg-black/5 dark:text-slate-300 dark:hover:bg-white/10"
 						aria-label="Fewer columns"
 						onClick=${() => (columns.value = Math.max(1, columns.value - 1))}
 					>
-						-
+						<${Icon} name="minus" size=${14} />
 					</button>
 
-					<span title="Number of columns">${columns}</span>
+					<span class="min-w-4 text-center tabular-nums" title="Number of columns">${columns}</span>
 
 					<button
 						type="button"
-						class="size-6 rounded-none font-bold"
+						class="inline-flex size-6 items-center justify-center rounded-lg border-0 bg-transparent text-slate-600 shadow-none hover:bg-black/5 dark:text-slate-300 dark:hover:bg-white/10"
 						aria-label="More columns"
 						onClick=${() => (columns.value = Math.min(columns.value + 1, 6))}
 					>
-						+
+						<${Icon} name="plus" size=${14} />
 					</button>
 				</div>
 
 				<button
-					class="size-6.5"
+					class="inline-flex size-7 items-center justify-center text-slate-600 dark:text-slate-300"
 					title=${`${themeTooltip} (click to cycle)`}
 					onClick=${() => {
 						theme.value = theme.value === 'system' ? 'light' : theme.value === 'light' ? 'dark' : 'system';
 					}}
 				>
-					<img class="inline w-4" src=${themeIcon} />
+					<${Icon} name=${themeIcon} size=${16} />
 				</button>
 			</div>
 		</div>
@@ -184,7 +184,7 @@ function Tab(
 ) {
 	return html`
 		<label
-			class="${className} bg-slate-50 p-1 text-slate-600 transition-colors hover:bg-slate-100 has-checked:bg-slate-200 has-checked:text-slate-700 dark:bg-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:has-checked:bg-slate-700 dark:has-checked:text-slate-200"
+			class="${className} flex items-center gap-1 rounded-lg px-2 py-1 text-slate-500 transition-[background-color,color,box-shadow] duration-200 hover:text-slate-700 has-checked:bg-white has-checked:text-slate-800 has-checked:shadow-[0_1px_1px_rgb(0_0_0/0.04),0_1px_3px_rgb(0_0_0/0.1)] dark:text-slate-400 dark:hover:text-slate-200 dark:has-checked:bg-slate-600 dark:has-checked:text-white"
 			...${props}
 		>
 			<input class="sr-only" type="radio" ...${input} />
@@ -212,7 +212,7 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 
 	return html`
 		<div
-			class="group relative cursor-pointer flex justify-center items-center overflow-hidden rounded-xl shadow-md border bg-[conic-gradient(var(--color-slate-100)_90deg,var(--color-slate-300)_90deg_180deg,var(--color-slate-100)_180deg_270deg,var(--color-slate-300)_270deg)] dark:bg-[conic-gradient(var(--color-slate-800)_90deg,var(--color-slate-700)_90deg_180deg,var(--color-slate-800)_180deg_270deg,var(--color-slate-700)_270deg)] ${isSelected ? 'border-sky-600 dark:border-sky-400 outline-2 outline-sky-600 dark:outline-sky-400' : 'border-slate-300 dark:border-slate-700'}"
+			class="group relative flex cursor-pointer items-center justify-center overflow-hidden rounded-2xl border bg-[conic-gradient(var(--color-slate-100)_90deg,var(--color-slate-300)_90deg_180deg,var(--color-slate-100)_180deg_270deg,var(--color-slate-300)_270deg)] transition-[box-shadow,outline-color] duration-200 dark:bg-[conic-gradient(var(--color-slate-800)_90deg,var(--color-slate-700)_90deg_180deg,var(--color-slate-800)_180deg_270deg,var(--color-slate-700)_270deg)] ${isSelected ? 'border-sky-600 shadow-[0_4px_14px_-2px_color-mix(in_srgb,var(--color-sky-600)_45%,transparent)] outline-2 outline-sky-600 dark:border-sky-400 dark:outline-sky-400' : 'border-black/8 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_4px_12px_-4px_rgb(0_0_0/0.12)] hover:shadow-[0_2px_6px_rgb(0_0_0/0.08),0_8px_22px_-6px_rgb(0_0_0/0.18)] dark:border-white/10'}"
 			style=${{
 				minHeight: `192px`,
 				backgroundRepeat: 'repeat',
@@ -230,7 +230,7 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 						/>`
 					: html`<img
 							key=${retryCount}
-							class="drop-shadow-md"
+							class="outline outline-1 -outline-offset-1 outline-black/10 drop-shadow-sm dark:outline-white/10"
 							src=${imageUrl}
 							onLoad=${(/** @type {Event}  */ e) => {
 								imageLoaded(imageUrl);
@@ -245,22 +245,22 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 
 			<div
 				class=${`
-					absolute top-1 left-1
-					w-7 h-7
-					rounded-md border shadow-md
-					${isSelected ? 'border-sky-600 bg-sky-600' : 'hidden border-slate-400 bg-white'}
-					group-hover:block
-					after:content-['']
-					after:absolute after:top-1/2 after:left-1/2
-					after:-translate-x-1/2 after:-translate-y-2/3
-					after:w-4.5 after:h-2.5
-					after:border-3 after:border-t-0 after:border-r-0
-					after:-rotate-45
-					${isSelected ? 'after:border-white' : 'after:border-slate-400'}
+					absolute top-1.5 left-1.5
+					flex h-6 w-6 items-center justify-center
+					rounded-lg border shadow-md backdrop-blur-sm
+					transition-[background-color,border-color,color] duration-150
+					group-hover:flex
+					${
+						isSelected
+							? 'flex border-sky-600 bg-sky-600 text-white'
+							: 'hidden border-black/10 bg-white/85 text-transparent dark:border-white/15 dark:bg-slate-900/70'
+					}
 				`}
-			></div>
+			>
+				<${Icon} name="check" size=${14} />
+			</div>
 
-			<div class="absolute top-1 right-1 hidden group-hover:flex gap-1">
+			<div class="absolute top-1.5 right-1.5 hidden gap-1 group-hover:flex">
 				<${RemoveBackgroundButton} imageUrl=${imageUrl} />
 				<${OpenImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
 				<${DownloadImageButton} imageUrl=${imageUrl} onClick=${stopPropagation} />
@@ -305,7 +305,7 @@ function RemoveBackgroundButton(/** @type {{ imageUrl: string }} */ { imageUrl, 
 	return html`
 		<${ExternalLink}
 			...${props}
-			class="btn h-7 w-7 rounded bg-size-[20px] bg-center bg-no-repeat text-transparent shadow-md"
+			class="btn flex h-7 w-7 items-center justify-center rounded-lg bg-size-[18px] bg-center bg-no-repeat text-transparent shadow-md"
 			style=${{ backgroundImage: 'url("/images/cutout.svg")' }}
 			href=${getReferralUrl('https://cutoutmagic.com/library', { url: imageUrl, utm_content: 'remove_background_button' })}
 			title="Remove background with CutoutMagic.com"
@@ -328,13 +328,14 @@ function OpenImageButton(
 
 	return html`
 		<button
-			class="h-7 w-7 rounded bg-size-[20px] bg-center bg-no-repeat shadow-md"
-			style=${{ backgroundImage: 'url("/images/open.svg")' }}
+			class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/85 text-slate-700 shadow-md backdrop-blur-sm hover:bg-white dark:bg-slate-800/85 dark:text-slate-100 dark:hover:bg-slate-800"
 			type="button"
 			title="Open in new tab"
 			onClick=${openNewTab}
 			...${props}
-		/>
+		>
+			<${Icon} name="open" size=${16} />
+		</button>
 	`;
 }
 
@@ -350,19 +351,20 @@ function DownloadImageButton(
 
 	return html`
 		<button
-			class="h-7 w-7 rounded bg-size-[20px] bg-center bg-no-repeat shadow-md"
-			style=${{ backgroundImage: 'url("/images/download.svg")' }}
+			class="inline-flex h-7 w-7 items-center justify-center rounded-lg bg-white/85 text-slate-700 shadow-md backdrop-blur-sm hover:bg-white dark:bg-slate-800/85 dark:text-slate-100 dark:hover:bg-slate-800"
 			type="button"
 			title="Download"
 			onClick=${downloadImages}
 			...${props}
-		/>
+		>
+			<${Icon} name="download" size=${16} />
+		</button>
 	`;
 }
 
 function ImageStat(/** @type {{ class?: string; children?: any }} */ { class: className = '', children, ...props }) {
 	return html`
-		<small class="${className} rounded bg-slate-950/80 px-1 text-white empty:hidden" ...${props}>${children}</small>
+		<small class="${className} rounded-md bg-slate-950/75 px-1.5 py-0.5 text-white backdrop-blur-sm empty:hidden" ...${props}>${children}</small>
 	`;
 }
 
@@ -392,8 +394,7 @@ function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class:
 
 			<button
 				type="button"
-				class="w-8 rounded-l-none bg-center bg-no-repeat"
-				style=${{ backgroundImage: 'url("/images/copy.svg")' }}
+				class="inline-flex w-8 items-center justify-center rounded-l-none text-slate-600 dark:text-slate-300"
 				title="Copy image URL to clipboard"
 				onClick=${async (/** @type {Event} */ e) => {
 					e.stopPropagation();
@@ -401,7 +402,9 @@ function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class:
 					setInputValue('Copied URL!');
 					setTimeout(() => setInputValue(url), 2000);
 				}}
-			/>
+			>
+				<${Icon} name="copy" size=${15} />
+			</button>
 		</div>
 	`;
 }
