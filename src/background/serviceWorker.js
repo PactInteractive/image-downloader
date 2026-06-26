@@ -22,7 +22,9 @@ updateActionPopup();
 
 async function updateActionPopup() {
 	const { open_mode = 'sidebar' } = await chrome.storage.local.get('open_mode');
-	if (open_mode === 'sidebar') {
+	// Some Chromium-based browsers (e.g. Opera) don't implement the sidePanel
+	// API. Fall back to the popup so the extension stays functional there.
+	if (open_mode === 'sidebar' && chrome.sidePanel != null) {
 		// Clear popup so onClicked listener fires
 		await chrome.action.setPopup({ popup: '' });
 	} else {
@@ -32,9 +34,11 @@ async function updateActionPopup() {
 }
 
 // Handle icon click - open sidebar (only fires when popup is cleared)
-chrome.action.onClicked.addListener(async (tab) => {
-	await chrome.sidePanel.open({ windowId: tab.windowId });
-});
+if (chrome.sidePanel != null) {
+	chrome.action.onClicked.addListener(async (tab) => {
+		await chrome.sidePanel.open({ windowId: tab.windowId });
+	});
+}
 
 // Download images
 /** @typedef {{
