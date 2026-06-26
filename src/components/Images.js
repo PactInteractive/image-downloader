@@ -286,7 +286,7 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 function ImageError(/** @type {{ onClick?: (e: MouseEvent) => void }} */ { onClick, ...props }) {
 	return html`
 		<button
-			class="flex h-auto flex-col items-center justify-center gap-1 border-red-300 bg-red-50 p-4 text-xs text-red-600 hover:bg-red-100"
+			class="flex h-auto flex-col items-center justify-center gap-1 border-red-300 m-2 bg-red-50 p-4 text-xs text-red-600 hover:bg-red-100"
 			type="button"
 			title="Retry loading image"
 			onClick=${(/** @type {MouseEvent} e */ e) => {
