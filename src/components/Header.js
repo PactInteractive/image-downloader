@@ -96,7 +96,7 @@ export function Header(/** @type {Object} */ props) {
 					<//>
 				</button>
 
-				<${Show} when=${chrome.sidePanel != null}>
+				${chrome.sidePanel ? html`
 					<button
 						class="min-w-8"
 						title=${openMode.value === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
@@ -112,7 +112,7 @@ export function Header(/** @type {Object} */ props) {
 					>
 						<img class="inline w-5" src=${openMode.value === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'} />
 					</button>
-				<//>
+				` : null}
 
 				<button class="min-w-8" title="Close extension" onClick=${() => window.close()}>
 					<img class="inline w-3" src="/images/times.svg" />

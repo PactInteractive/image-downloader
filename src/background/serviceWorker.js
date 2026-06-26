@@ -24,7 +24,7 @@ async function updateActionPopup() {
 	const { open_mode = 'sidebar' } = await chrome.storage.local.get('open_mode');
 	// Some Chromium-based browsers (e.g. Opera) don't implement the sidePanel
 	// API. Fall back to the popup so the extension stays functional there.
-	if (open_mode === 'sidebar' && chrome.sidePanel != null) {
+	if (open_mode === 'sidebar' && chrome.sidePanel) {
 		// Clear popup so onClicked listener fires
 		await chrome.action.setPopup({ popup: '' });
 	} else {
@@ -34,7 +34,7 @@ async function updateActionPopup() {
 }
 
 // Handle icon click - open sidebar (only fires when popup is cleared)
-if (chrome.sidePanel != null) {
+if (chrome.sidePanel) {
 	chrome.action.onClicked.addListener(async (tab) => {
 		await chrome.sidePanel.open({ windowId: tab.windowId });
 	});
