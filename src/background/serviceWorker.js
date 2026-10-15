@@ -51,8 +51,19 @@ if (chrome.sidePanel) {
 const tasksByDownloadId = new Map();
 
 chrome.runtime.onMessage.addListener(startDownload);
-chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 chrome.downloads.onChanged.addListener(cleanupCompletedDownloadTasks);
+
+function ensureFilenameListener() {
+	if (!chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)) {
+		chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+	}
+}
+
+function cleanupFilenameListenerIfIdle() {
+	if (tasksByDownloadId.size === 0 && chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)) {
+		chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
+	}
+}
 
 // NOTE: Don't directly use an `async` function as a listener for `onMessage`:
 // https://stackoverflow.com/a/56483156
@@ -74,6 +85,8 @@ function startDownload(
 }
 
 async function downloadImages(/** @type {Task} */ task) {
+	ensureFilenameListener();
+
 	const promises = task.imagesToDownload.map((image, index) => {
 		return new Promise((/** @type {(response?: any) => void} */ resolve) => {
 			chrome.downloads.download({ url: image }, (downloadId) => {
@@ -98,14 +111,16 @@ async function downloadImages(/** @type {Task} */ task) {
 function suggestNewFilename(item, suggest) {
 	const task = tasksByDownloadId.get(item.id);
 	if (!task) {
-		suggest();
+		suggest({ filename: item.filename });
+		cleanupFilenameListenerIfIdle();
 		return;
 	}
 
 	const index = task.indices.get(item.id);
 	if (index === undefined) {
-		suggest();
+		suggest({ filename: item.filename });
 		tasksByDownloadId.delete(item.id);
+		cleanupFilenameListenerIfIdle();
 		return;
 	}
 
@@ -133,11 +148,13 @@ function suggestNewFilename(item, suggest) {
 
 	task.indices.delete(item.id);
 	tasksByDownloadId.delete(item.id);
+	cleanupFilenameListenerIfIdle();
 }
 
 function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
 	if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
 		tasksByDownloadId.delete(delta.id);
+		cleanupFilenameListenerIfIdle();
 	}
 }
 
