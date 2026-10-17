@@ -1,23 +1,34 @@
-import { beforeAll, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { mockChrome } from '../test-helpers';
 
 // `serviceWorker.js` is a classic script with no exports: importing it registers its
-// listeners as a side effect. Set up the chrome mock first, and import it through a
-// variable so `bun check` (which sees no module type) stays happy.
-const chrome = mockChrome();
-
-const downloadIds: number[] = [];
-chrome.downloads.download = mock((_options: any, callback: (downloadId?: number) => void) => {
-	const downloadId = downloadIds.length + 1;
-	downloadIds.push(downloadId);
-	callback(downloadId);
-});
-
+// listeners as a side effect. Each test imports a fresh instance (a new query string
+// bypasses the module cache) against a fresh chrome mock, through a variable so
+// `bun check` (which sees no module type) stays happy.
 const serviceWorkerPath = './serviceWorker.js';
+let serviceWorkerInstance = 0;
 
-beforeAll(async () => {
+let chrome: ReturnType<typeof mockChrome>;
+let downloadIds: number[];
+let deferDownloadCallbacks: boolean;
+let pendingDownloadCallbacks: (() => void)[];
+
+beforeEach(async () => {
+	chrome = mockChrome();
+	downloadIds = [];
+	deferDownloadCallbacks = false;
+	pendingDownloadCallbacks = [];
+	chrome.downloads.download = mock((_options: any, callback: (downloadId?: number) => void) => {
+		const downloadId = downloadIds.length + 1;
+		downloadIds.push(downloadId);
+		const respond = () => callback(downloadId);
+		if (deferDownloadCallbacks) pendingDownloadCallbacks.push(respond);
+		else respond();
+	});
+
 	(globalThis as any).chrome = chrome;
-	await import(serviceWorkerPath);
+	serviceWorkerInstance += 1;
+	await import(`${serviceWorkerPath}?${serviceWorkerInstance}`);
 });
 
 function startBatch(images: string[], options: any = {}) {
@@ -67,6 +78,32 @@ describe('serviceWorker filename suggestions', () => {
 		expect(suggest.mock.calls).toEqual([[{ filename: 'folder/name1.jpg', conflictAction: 'uniquify' }]]);
 
 		await done;
+		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
+	});
+
+	it('keeps listening until every download in the batch has been named', async () => {
+		deferDownloadCallbacks = true;
+		const done = startBatch(['https://example.com/1.jpg', 'https://example.com/2.jpg']);
+		deferDownloadCallbacks = false;
+		const [firstId, secondId] = downloadIds.slice(-2);
+		const [registerFirst, registerSecond] = pendingDownloadCallbacks.splice(0);
+
+		registerFirst();
+		filenameListener()({ id: firstId, filename: '1.jpg' }, mock());
+		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(1);
+
+		registerSecond();
+		filenameListener()({ id: secondId, filename: '2.jpg' }, mock());
+		await done;
+		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
+	});
+
+	it('stops listening after a batch whose downloads all failed to start', async () => {
+		chrome.downloads.download.mockImplementationOnce((_options: any, callback: (downloadId?: number) => void) =>
+			callback(undefined)
+		);
+
+		await startBatch(['https://example.com/broken.jpg']);
 		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
 	});
 });
