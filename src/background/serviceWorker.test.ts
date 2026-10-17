@@ -107,3 +107,43 @@ describe('serviceWorker filename suggestions', () => {
 		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
 	});
 });
+
+describe('Firefox', () => {
+	describe('serviceWorker without onDeterminingFilename', () => {
+		beforeEach(() => {
+			chrome.downloads.onDeterminingFilename = undefined;
+		});
+
+		it('passes the configured folder and filename to downloads.download()', async () => {
+			await startBatch(['https://example.com/path/a.png?size=large'], { folder_name: 'folder', new_file_name: 'name' });
+
+			expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({
+				url: 'https://example.com/path/a.png?size=large',
+				filename: 'folder/name1.png',
+				conflictAction: 'uniquify',
+			});
+		});
+
+		it('takes the extension of a data: URL from its MIME type', async () => {
+			const url = 'data:image/png;base64,iVBORw0KGgo/AAAA+BBB=';
+			await startBatch([url], { folder_name: 'folder', new_file_name: 'name' });
+
+			expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({
+				url,
+				filename: 'folder/name1.png',
+				conflictAction: 'uniquify',
+			});
+		});
+
+		it('names a download without a URL filename "image" when only a folder is set', async () => {
+			const url = 'data:image/png;base64,iVBORw0KGgo/AAAA+BBB=';
+			await startBatch([url], { folder_name: 'folder' });
+
+			expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({
+				url,
+				filename: 'folder/image.png',
+				conflictAction: 'uniquify',
+			});
+		});
+	});
+});

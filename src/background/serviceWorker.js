@@ -58,14 +58,20 @@ let activeBatchCount = 0;
 chrome.runtime.onMessage.addListener(startDownload);
 chrome.downloads.onChanged.addListener(cleanupCompletedDownloadTasks);
 
+// Firefox has no `onDeterminingFilename`, but takes the filename in `downloads.download()`.
+function canSuggestFilename() {
+	return Boolean(chrome.downloads.onDeterminingFilename);
+}
+
 function ensureFilenameListener() {
-	if (!chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)) {
+	if (canSuggestFilename() && !chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)) {
 		chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 	}
 }
 
 function removeFilenameListenerIfIdle() {
 	if (
+		canSuggestFilename() &&
 		activeBatchCount === 0 &&
 		tasksByDownloadId.size === 0 &&
 		chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)
@@ -100,7 +106,8 @@ async function downloadImages(/** @type {Task} */ task) {
 	try {
 		const promises = task.imagesToDownload.map((image, index) => {
 			return new Promise((/** @type {(response?: any) => void} */ resolve) => {
-				chrome.downloads.download({ url: image }, (downloadId) => {
+				const downloadOptions = canSuggestFilename() ? { url: image } : withFilename(task, index, image);
+				chrome.downloads.download(downloadOptions, (downloadId) => {
 					if (downloadId != null) {
 						task.indices.set(downloadId, index);
 						tasksByDownloadId.set(downloadId, task);
@@ -142,31 +149,55 @@ function suggestNewFilename(item, suggest) {
 		return;
 	}
 
-	let newFilename = '';
-	if (task.options.folder_name) {
-		newFilename += `${task.options.folder_name}/`;
-	}
-
-	if (task.options.new_file_name) {
-		const regex = /(?:\.([^.]+))?$/;
-		const extension = regex.exec(item.filename)?.[1] || item.mime?.split('/')?.[1]?.replace('jpeg', 'jpg');
-
-		const numberOfDigits = task.imagesToDownload.length.toString().length;
-		const formattedImageNumber = `${index + 1}`.padStart(numberOfDigits, '0');
-
-		newFilename += `${task.options.new_file_name}${formattedImageNumber}${extension ? `.${extension}` : ''}`;
-	} else {
-		newFilename += item.filename;
-	}
-
 	suggest({
-		filename: normalizeSlashes(newFilename),
+		filename: buildFilename(task, index, item.filename, item.mime),
 		conflictAction: 'uniquify',
 	});
 
 	task.indices.delete(item.id);
 	tasksByDownloadId.delete(item.id);
 	removeFilenameListenerIfIdle();
+}
+
+/** @returns {chrome.downloads.DownloadOptions} */
+function withFilename(/** @type {Task} */ task, /** @type {number} */ index, /** @type {string} */ url) {
+	if (!task.options.folder_name && !task.options.new_file_name) return { url };
+
+	// A `data:` URL's path is its payload, not a filename.
+	const isDataUrl = url.startsWith('data:');
+	const urlFilename = isDataUrl ? '' : decodeURIComponent(new URL(url).pathname.split('/').pop() || '');
+	const mime = isDataUrl ? url.slice('data:'.length).split(/[;,]/)[0] : undefined;
+	return {
+		url,
+		filename: buildFilename(task, index, urlFilename, mime),
+		conflictAction: 'uniquify',
+	};
+}
+
+function buildFilename(
+	/** @type {Task} */ task,
+	/** @type {number} */ index,
+	/** @type {string} */ originalFilename,
+	/** @type {string | undefined} */ mime = undefined
+) {
+	let newFilename = '';
+	if (task.options.folder_name) {
+		newFilename += `${task.options.folder_name}/`;
+	}
+
+	const regex = /(?:\.([^.]+))?$/;
+	const extension = regex.exec(originalFilename)?.[1] || mime?.split('/')?.[1]?.replace('jpeg', 'jpg');
+
+	if (task.options.new_file_name) {
+		const numberOfDigits = task.imagesToDownload.length.toString().length;
+		const formattedImageNumber = `${index + 1}`.padStart(numberOfDigits, '0');
+
+		newFilename += `${task.options.new_file_name}${formattedImageNumber}${extension ? `.${extension}` : ''}`;
+	} else {
+		newFilename += originalFilename || `image${extension ? `.${extension}` : ''}`;
+	}
+
+	return normalizeSlashes(newFilename);
 }
 
 function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
