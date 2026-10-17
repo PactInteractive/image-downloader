@@ -210,6 +210,28 @@ describe('deduplicateImages', () => {
 		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[2]]);
 	});
 
+	it('should deduplicate numeric width suffixes when the unsuffixed image is also present', () => {
+		// prettier-ignore
+		const images = {
+			'https://example.com/assets/backgrounds/banner-2026-566.avif?v=101': { naturalWidth: 566, naturalHeight: 318 },
+			'https://example.com/assets/backgrounds/banner-2026-1132.jpg?v=102': { naturalWidth: 1132, naturalHeight: 637 },
+			'https://example.com/assets/backgrounds/banner-2026-1920.avif?v=103': { naturalWidth: 1920, naturalHeight: 1080 },
+			'https://example.com/assets/backgrounds/banner-2026.avif?v=104': { naturalWidth: 2400, naturalHeight: 1350 },
+		};
+		const urls = Object.keys(images);
+		expect(deduplicateImages(urls, createCache(images))).toEqual([urls[3]]);
+	});
+
+	it('should not deduplicate numeric suffixes when the unsuffixed image is missing', () => {
+		// prettier-ignore
+		const images = {
+			'https://example.com/reports/report-2025.jpg': { naturalWidth: 800, naturalHeight: 600 },
+			'https://example.com/reports/report-2026.jpg': { naturalWidth: 800, naturalHeight: 600 },
+		};
+		const urls = Object.keys(images);
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
+	});
+
 	it('should deduplicate based on iMDB resolution suffixes', () => {
 		// prettier-ignore
 		const images = {

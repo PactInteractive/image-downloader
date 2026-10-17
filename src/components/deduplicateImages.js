@@ -4,10 +4,12 @@ import { findImageBySrc, unique } from '../utils.js';
 const priorities = ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'avif'];
 
 export function deduplicateImages(/** @type {string[]} */ urls, /** @type {HTMLDivElement} */ imagesCache) {
-	const groups = new Map();
+	const keysByUrl = new Map(urls.map((url) => [url, getNormalizedBaseKey(url)]));
+	const keys = new Set(keysByUrl.values());
 
+	const groups = new Map();
 	for (const url of urls) {
-		const key = getNormalizedBaseKey(url);
+		const key = removeWidthSuffix(/** @type {string} */ (keysByUrl.get(url)), keys);
 		if (!groups.has(key)) groups.set(key, []);
 		groups.get(key).push(url);
 	}
@@ -20,6 +22,13 @@ export function deduplicateImages(/** @type {string[]} */ urls, /** @type {HTMLD
 		}
 	}
 	return result;
+}
+
+// A bare `-<digits>` suffix (`banner-1920`) is a width only when the unsuffixed image
+// is on the page too; otherwise it is likely part of the name (`report-2026`).
+function removeWidthSuffix(/** @type {string} */ key, /** @type {Set<string>} */ keys) {
+	const unsuffixedKey = key.replace(/-\d+$/, '');
+	return keys.has(unsuffixedKey) ? unsuffixedKey : key;
 }
 
 /** @returns {string} */
