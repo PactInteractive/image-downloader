@@ -124,7 +124,7 @@ export const initialize = action(async () => {
 	for (const key in options) {
 		const defaultValue = defaults[/** @type {keyof Options} */ (key)];
 		if (Array.isArray(defaultValue) ? Array.isArray(stored[key]) : typeof stored[key] === typeof defaultValue) {
-			options[/** @type {keyof Options} */ (key)].value = stored[key];
+			options[/** @type {keyof Options} */ (key)].value = /** @type {Options[keyof Options]} */ (stored[key]);
 		}
 	}
 

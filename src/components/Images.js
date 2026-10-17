@@ -73,9 +73,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
 					>
 						<${Circle} class="bg-green-600 text-white">
-							${selectedMatchingImages.value.length > 0
-								? html`<span class="text-2xs">${selectedMatchingImages.value.length}</span>`
-								: '+'}
+							${
+								selectedMatchingImages.value.length > 0
+									? html`<span class="text-2xs">${selectedMatchingImages.value.length}</span>`
+									: '+'
+							}
 						<//>
 						${matchingImages.value.length} matching
 					<//>
@@ -88,9 +90,11 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 					>
 						<${Circle} class="bg-slate-600 text-white">
-							${selectedFilteredOutImages.value.length > 0
-								? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
-								: '-'}
+							${
+								selectedFilteredOutImages.value.length > 0
+									? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
+									: '-'
+							}
 						<//>
 						${filteredOutImages.value.length} filtered out
 					<//>

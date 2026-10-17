@@ -1,4 +1,4 @@
-import { sync } from 'glob';
+import { globSync } from 'glob';
 import { join } from 'node:path';
 
 import * as config from './config';
@@ -29,9 +29,9 @@ Bun.serve({
 		const shouldServeFromBuild =
 			/^\/lib\//.test(path) ||
 			config.copy.include.some((pattern) =>
-				sync(pattern, {
-					ignore: config.copy.exclude.filter((pattern) => pattern !== config.style),
-				}).includes(`.${path}`)
+				globSync(pattern, {
+					ignore: config.copy.exclude.filter((excludePattern) => excludePattern !== config.style),
+				}).includes(path.slice(1))
 			);
 
 		const file = Bun.file(join(__dirname, '..', (shouldServeFromBuild ? config.build : '') + path));

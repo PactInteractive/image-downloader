@@ -1,5 +1,5 @@
 import fs from 'fs-extra';
-import { sync } from 'glob';
+import { globSync } from 'glob';
 import { join } from 'path';
 
 import * as config from './config';
@@ -26,14 +26,14 @@ async function build() {
 
 	// Copy all source files
 	const files = config.copy.include
-		.map((pattern) => sync(pattern, { ignore: config.copy.exclude }))
+		.map((pattern) => globSync(pattern, { ignore: config.copy.exclude }))
 		.reduce((parent, child) => [...parent, ...child], [])
 		.filter((file) => !fs.statSync(file).isDirectory());
 
 	await Promise.all(files.map(copyFile));
 
 	// Rewrite bare imports to absolute lib paths in all JS files
-	const allJsFiles = sync(join(config.build, '**/*.{js,mjs}'));
+	const allJsFiles = globSync(`${config.build}/**/*.{js,mjs}`);
 	await Promise.all(allJsFiles.map(rewriteModuleImports));
 
 	await buildCss();

@@ -38,9 +38,9 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${filterMinWidthEnabled.value
-								? ''
-								: 'text-slate-500 dark:text-slate-300'} flex items-center justify-end"
+							class="${
+								filterMinWidthEnabled.value ? '' : 'text-slate-500 dark:text-slate-300'
+							} flex items-center justify-end"
 							title=${getSliderCheckboxTooltip(filterMinWidthEnabled.value)}
 						>
 							<small>${filterMinWidth}px ≤</small>
@@ -58,9 +58,9 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${filterMaxWidthEnabled.value
-								? ''
-								: 'text-slate-500 dark:text-slate-300'} flex items-center justify-start text-nowrap"
+							class="${
+								filterMaxWidthEnabled.value ? '' : 'text-slate-500 dark:text-slate-300'
+							} flex items-center justify-start text-nowrap"
 							title=${getSliderCheckboxTooltip(filterMaxWidthEnabled.value)}
 						>
 							<input
@@ -78,9 +78,9 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${filterMinHeightEnabled.value
-								? ''
-								: 'text-slate-500 dark:text-slate-300'} flex items-center justify-end text-nowrap"
+							class="${
+								filterMinHeightEnabled.value ? '' : 'text-slate-500 dark:text-slate-300'
+							} flex items-center justify-end text-nowrap"
 							title=${getSliderCheckboxTooltip(filterMinHeightEnabled.value)}
 						>
 							<small>${filterMinHeight}px ≤</small>
@@ -98,9 +98,9 @@ export function AdvancedFilters() {
 
 					<td>
 						<label
-							class="${filterMaxHeightEnabled.value
-								? ''
-								: 'text-slate-500 dark:text-slate-300'} flex items-center justify-start text-nowrap"
+							class="${
+								filterMaxHeightEnabled.value ? '' : 'text-slate-500 dark:text-slate-300'
+							} flex items-center justify-start text-nowrap"
 							title=${getSliderCheckboxTooltip(filterMaxHeightEnabled.value)}
 						>
 							<input

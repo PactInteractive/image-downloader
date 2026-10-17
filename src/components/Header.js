@@ -81,9 +81,11 @@ export function Header(/** @type {Object} */ props) {
 
 				<button
 					class="relative min-w-8"
-					title=${!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
-						? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
-						: 'Toggle advanced filters'}
+					title=${
+						!showAdvancedFilters.value && numberOfActiveAdvancedFilters > 0
+							? `${numberOfActiveAdvancedFilters} advanced ${numberOfActiveAdvancedFilters === 1 ? 'filter' : 'filters'} active`
+							: 'Toggle advanced filters'
+					}
 					onClick=${toggle(showAdvancedFilters)}
 				>
 					<img
@@ -96,28 +98,30 @@ export function Header(/** @type {Object} */ props) {
 					<//>
 				</button>
 
-				${chrome.sidePanel
-					? html`
-							<button
-								class="min-w-8"
-								title=${openMode.value === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
-								onClick=${async () => {
-									if (openMode.value === 'sidebar') {
-										openMode.value = 'popup';
-										openPopup();
-									} else {
-										openMode.value = 'sidebar';
-										openSidebar();
-									}
-								}}
-							>
-								<img
-									class="inline w-5"
-									src=${openMode.value === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'}
-								/>
-							</button>
-						`
-					: null}
+				${
+					chrome.sidePanel
+						? html`
+								<button
+									class="min-w-8"
+									title=${openMode.value === 'sidebar' ? 'Switch to popup mode' : 'Switch to sidebar mode'}
+									onClick=${async () => {
+										if (openMode.value === 'sidebar') {
+											openMode.value = 'popup';
+											openPopup();
+										} else {
+											openMode.value = 'sidebar';
+											openSidebar();
+										}
+									}}
+								>
+									<img
+										class="inline w-5"
+										src=${openMode.value === 'sidebar' ? '/images/window.svg' : '/images/sidebar.svg'}
+									/>
+								</button>
+							`
+						: null
+				}
 
 				<button class="min-w-8" title="Close extension" onClick=${() => window.close()}>
 					<img class="inline w-3" src="/images/times.svg" />

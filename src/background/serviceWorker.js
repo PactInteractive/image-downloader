@@ -123,7 +123,7 @@ async function downloadImages(/** @type {Task} */ task) {
 }
 
 // https://developer.chrome.com/docs/extensions/reference/downloads/#event-onDeterminingFilename
-/** @type {Parameters<chrome.downloads.DownloadDeterminingFilenameEvent['addListener']>[0]} */
+/** @type {Parameters<typeof chrome.downloads.onDeterminingFilename.addListener>[0]} */
 function suggestNewFilename(item, suggest) {
 	const task = tasksByDownloadId.get(item.id);
 	if (!task) {

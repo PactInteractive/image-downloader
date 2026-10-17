@@ -83,8 +83,7 @@ export class ErrorBoundary extends Component {
 								}}
 							>
 								${errorStack}
-							</pre
-							>
+							</pre>
 						</details>
 
 						<div style=${{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>

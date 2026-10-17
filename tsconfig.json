@@ -10,7 +10,7 @@
 		"resolveJsonModule": true,
 		"noEmit": true,
 		"moduleResolution": "bundler",
-		"types": ["chrome", "jquery", "bun", "node"],
+		"types": ["chrome", "bun", "node"],
 		"typeRoots": ["./node_modules/@types"],
 		"allowJs": true,
 		"checkJs": false
