@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it } from 'bun:test';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { mockChrome, mockDOM } from '../test-helpers';
 
 mockDOM();
@@ -19,6 +19,8 @@ import {
 	folderName,
 	imagesCache,
 	initialize,
+	linkedImages,
+	loadImagesFromActiveTab,
 	matchingImages,
 	newFileName,
 	openMode,
@@ -230,5 +232,36 @@ describe('matchingImages', () => {
 
 		filterUrl.value = 'a+b';
 		expect(matchingImages.value).toEqual(['https://example.com/a+b.png']);
+	});
+});
+
+describe('loadImagesFromActiveTab', () => {
+	it("reads blob URLs in the page's own world, in the frame that found them", async () => {
+		const chrome = (global as any).chrome;
+		chrome.windows.getCurrent = (callback: any) => callback({ id: 1 });
+		chrome.tabs.query = (_query: any, callback: any) => callback([{ id: 7, url: 'https://example.com/' }]);
+		const blobUrl = 'blob:https://example.com/0f8c3a52-5d1e-4c0b-9a7e-2b6f1d9e4c11';
+		const dataUrl = 'data:image/webp;base64,AAAA';
+		chrome.scripting = {
+			executeScript: mock(async (injection: any) =>
+				injection.world === 'MAIN'
+					? [{ frameId: 3, result: [dataUrl] }]
+					: [
+							{ frameId: 0, result: { allImages: ['https://example.com/a.png'], linkedImages: [] } },
+							{ frameId: 3, result: { allImages: [blobUrl], linkedImages: [blobUrl] } },
+						]
+			),
+		};
+
+		loadImagesFromActiveTab({ waitForIdleDOM: 1 });
+		await new Promise((resolve) => setTimeout(resolve, 10));
+
+		expect(chrome.scripting.executeScript.mock.calls[1][0]).toMatchObject({
+			target: { tabId: 7, frameIds: [3] },
+			world: 'MAIN',
+			args: [[blobUrl]],
+		});
+		expect(allImages.value).toEqual(['https://example.com/a.png', dataUrl]);
+		expect(linkedImages.value).toEqual([dataUrl]);
 	});
 });

@@ -301,16 +301,28 @@ function ImageError(/** @type {{ onClick?: (e: MouseEvent) => void }} */ { onCli
 	`;
 }
 
+// `data:` and `blob:` URLs mean nothing outside this browser - and a `data:` URL is the whole image as text.
+const isBrowserOnlyUrl = (/** @type {string} */ url) => url.startsWith('data:') || url.startsWith('blob:');
+
+// A `blob:` URL is left only where `readBlobUrls()` couldn't read it, and nothing outside the page can either
+const isUnreadableBlobUrl = (/** @type {string} */ url) => url.startsWith('blob:');
+
 function RemoveBackgroundButton(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
+	const disabled = isBrowserOnlyUrl(imageUrl);
 	return html`
 		<${ExternalLink}
 			...${props}
 			class="btn h-7 w-7 rounded bg-size-[20px] bg-center bg-no-repeat text-transparent shadow-md"
 			style=${{ backgroundImage: 'url("/images/cutout.svg")' }}
-			href=${getReferralUrl('https://cutoutmagic.com/library', {
-				url: imageUrl,
-				utm_content: 'remove_background_button',
-			})}
+			href=${
+				disabled
+					? undefined
+					: getReferralUrl('https://cutoutmagic.com/library', {
+							url: imageUrl,
+							utm_content: 'remove_background_button',
+						})
+			}
+			aria-disabled=${disabled}
 			title="Remove background with CutoutMagic.com"
 			onClick=${stopPropagation}
 		>
@@ -323,7 +335,7 @@ function OpenImageButton(
 	/** @type {{ imageUrl: string, onClick?: (e: MouseEvent) => void }} */ { imageUrl, onClick, ...props }
 ) {
 	function openNewTab(/** @type {MouseEvent} */ e) {
-		chrome.tabs.create({ url: imageUrl, active: false });
+		actions.openImage(imageUrl);
 		if (onClick) {
 			onClick(e);
 		}
@@ -334,6 +346,7 @@ function OpenImageButton(
 			class="h-7 w-7 rounded bg-size-[20px] bg-center bg-no-repeat shadow-md"
 			style=${{ backgroundImage: 'url("/images/open.svg")' }}
 			type="button"
+			disabled=${isUnreadableBlobUrl(imageUrl)}
 			title="Open in new tab"
 			onClick=${openNewTab}
 			...${props}
@@ -371,6 +384,8 @@ function ImageStat(/** @type {{ class?: string; children?: any }} */ { class: cl
 
 function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class: className = '', url, ...props }) {
 	const inputRef = useScrollToEnd();
+	const isTextboxDisabled = isBrowserOnlyUrl(url);
+	const displayedUrl = isTextboxDisabled ? `${url.slice(0, url.indexOf(':') + 1)}…` : url;
 
 	function setInputValue(/** @type {string} */ value) {
 		if (inputRef.current) {
@@ -385,7 +400,8 @@ function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class:
 				class="flex-1 rounded-r-none border-r-0"
 				type="text"
 				readonly
-				value=${url}
+				disabled=${isTextboxDisabled}
+				value=${displayedUrl}
 				onClick=${(/** @type {MouseEvent} */ e) => {
 					e.stopPropagation();
 					/** @type {HTMLInputElement} */ (e.currentTarget).select();
@@ -397,12 +413,13 @@ function ImageUrlTextbox(/** @type {{ class?: string; url: string }} */ { class:
 				type="button"
 				class="w-8 rounded-l-none bg-center bg-no-repeat"
 				style=${{ backgroundImage: 'url("/images/copy.svg")' }}
+				disabled=${isUnreadableBlobUrl(url)}
 				title="Copy image URL to clipboard"
 				onClick=${async (/** @type {Event} */ e) => {
 					e.stopPropagation();
 					await window.navigator.clipboard.writeText(url);
 					setInputValue('Copied URL!');
-					setTimeout(() => setInputValue(url), 2000);
+					setTimeout(() => setInputValue(displayedUrl), 2000);
 				}}
 			/>
 		</div>

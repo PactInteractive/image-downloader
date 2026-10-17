@@ -3,6 +3,7 @@ import { action, batch, computed, effect, signal } from '../html.js';
 import { findImageBySrc, isIncludedIn, isNotIncludedIn, isNotStrictEqual, unique } from '../utils.js';
 import { deduplicateImages } from './deduplicateImages.js';
 import { findImages } from './findImages.js';
+import { readBlobUrls } from './readBlobUrls.js';
 
 // Options
 /** @typedef {typeof defaults} Options */
@@ -179,7 +180,7 @@ function parseLocalStorageValue(
 
 // State
 export const allImages = signal(/** @type {string[]} */ ([]));
-const linkedImages = signal(/** @type {string[]} */ ([]));
+export const linkedImages = signal(/** @type {string[]} */ ([]));
 
 export const imagesCache = { value: /** @type {HTMLDivElement | null} */ (null) }; // Not displayed; used for loading images and their stats like size or resolution
 
@@ -316,13 +317,15 @@ export const loadImagesFromActiveTab = action(
 
 				scriptError.value = '';
 				if (activeTab.id == null) return;
+				const tabId = activeTab.id;
 
 				chrome.scripting
 					.executeScript({
-						target: { tabId: activeTab.id, allFrames: true },
+						target: { tabId, allFrames: true },
 						func: findImages,
 						args: [{ waitForIdleDOM }],
 					})
+					.then((messages) => Promise.all(messages.map((message) => withBlobUrlsRead(tabId, message))))
 					.then((messages) => {
 						batch(() => {
 							allImages.value = unique(messages.flatMap((message) => message.result?.allImages || []));
@@ -356,6 +359,39 @@ export const loadImagesFromActiveTab = action(
 		});
 	}
 );
+
+/**
+ * Neither the popup nor `findImages()` can read the page's `blob:` URLs - see `readBlobUrls()`.
+ * @template {{ frameId: number, result?: ReturnType<typeof findImages> extends Promise<infer R> ? R : never }} Message
+ */
+async function withBlobUrlsRead(/** @type {number} */ tabId, /** @type {Message} */ message) {
+	const { result } = message;
+	if (!result) return message;
+
+	const blobUrls = unique([...result.allImages, ...result.linkedImages].filter((url) => url.startsWith('blob:')));
+	if (blobUrls.length === 0) return message;
+
+	const [injection] = await chrome.scripting
+		.executeScript({
+			target: { tabId, frameIds: [message.frameId] },
+			world: 'MAIN',
+			func: readBlobUrls,
+			args: [blobUrls],
+		})
+		.catch(() => []);
+	/** @type {string[]} */
+	const dataUrls = injection?.result || [];
+
+	// The page's world can return anything, so keep only image `data:` URLs
+	const dataUrlsByBlobUrl = new Map(
+		blobUrls.map((url, index) => [url, dataUrls[index]?.startsWith('data:image/') ? dataUrls[index] : url])
+	);
+	const read = (/** @type {string} */ url) => dataUrlsByBlobUrl.get(url) ?? url;
+	return {
+		...message,
+		result: { ...result, allImages: result.allImages.map(read), linkedImages: result.linkedImages.map(read) },
+	};
+}
 
 export const reloadImagesWhenPageLoads = action(
 	(/** @type {number | undefined}*/ tabId, /** @type {any} */ changeInfo, /** @type {any} */ tab) => {

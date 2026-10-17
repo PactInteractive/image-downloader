@@ -15,3 +15,9 @@ export const downloadImages = (/** @type {string[]} */ imagesToDownload) =>
 			resolve
 		);
 	});
+
+export const openImage = async (/** @type {string} */ url) => {
+	// Browsers refuse to open `data:` URLs in a tab, but open a blob from the extension's own origin
+	const tabUrl = url.startsWith('data:') ? URL.createObjectURL(await (await fetch(url)).blob()) : url;
+	await chrome.tabs.create({ url: tabUrl, active: false });
+};
