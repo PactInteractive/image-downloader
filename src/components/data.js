@@ -300,6 +300,8 @@ export const limitedAccessHostnames = /\.google\.com/;
 
 export const scriptError = signal('');
 
+const browserPageUrl = /^(about|chrome|chrome-extension|edge|moz-extension|view-source):/;
+
 export const loadImagesFromActiveTab = action(
 	(/** @type {{ waitForIdleDOM: number | false }} */ { waitForIdleDOM } = { waitForIdleDOM: false }) => {
 		chrome.windows.getCurrent((currentWindow) => {
@@ -352,6 +354,8 @@ export const loadImagesFromActiveTab = action(
 					.catch((error) => {
 						// Ignore some errors that happen regularly when navigating around
 						if (error.message === 'Cannot access a chrome:// URL') return;
+						// Extensions can't access browser pages, and Firefox's error for them is the same as for losing access to a web page
+						if (activeTab.url && browserPageUrl.test(activeTab.url)) return;
 
 						scriptError.value = error.message;
 					});

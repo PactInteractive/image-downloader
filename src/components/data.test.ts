@@ -24,6 +24,7 @@ import {
 	matchingImages,
 	newFileName,
 	openMode,
+	scriptError,
 	selectedImages,
 	showAdvancedFilters,
 	showDownloadConfirmation,
@@ -263,5 +264,32 @@ describe('loadImagesFromActiveTab', () => {
 		});
 		expect(allImages.value).toEqual(['https://example.com/a.png', dataUrl]);
 		expect(linkedImages.value).toEqual([dataUrl]);
+	});
+
+	const firefoxError = 'Missing host permission for the tab or frames';
+
+	function failToAccess(url: string) {
+		const chrome = (global as any).chrome;
+		chrome.windows.getCurrent = (callback: any) => callback({ id: 1 });
+		chrome.tabs.query = (_query: any, callback: any) => callback([{ id: 7, url }]);
+		chrome.scripting = { executeScript: mock(async () => Promise.reject(new Error(firefoxError))) };
+	}
+
+	it("doesn't report failing to access a browser page", async () => {
+		failToAccess('about:home');
+
+		loadImagesFromActiveTab({ waitForIdleDOM: 1 });
+		await new Promise((resolve) => setTimeout(resolve, 10));
+
+		expect(scriptError.value).toBe('');
+	});
+
+	it('reports failing to access a web page', async () => {
+		failToAccess('https://example.com/');
+
+		loadImagesFromActiveTab({ waitForIdleDOM: 1 });
+		await new Promise((resolve) => setTimeout(resolve, 10));
+
+		expect(scriptError.value).toBe(firefoxError);
 	});
 });
