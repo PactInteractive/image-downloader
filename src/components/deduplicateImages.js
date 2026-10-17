@@ -31,6 +31,14 @@ function removeWidthSuffix(/** @type {string} */ key, /** @type {Set<string>} */
 	return keys.has(unsuffixedKey) ? unsuffixedKey : key;
 }
 
+// Common country suffixes like .co.uk and .com.au, so sites under them aren't treated as one domain.
+const secondLevelLabels = ['co', 'com', 'net', 'org', 'gov', 'ac', 'edu', 'ne', 'or'];
+
+function hasTwoPartSuffix(/** @type {string[]} */ hostnameParts) {
+	const [secondLevel, topLevel] = hostnameParts.slice(-2);
+	return hostnameParts.length > 2 && topLevel.length === 2 && secondLevelLabels.includes(secondLevel);
+}
+
 /** @returns {string} */
 function getNormalizedBaseKey(/** @type {string} */ url) {
 	if (url.startsWith('data:')) return url;
@@ -90,7 +98,8 @@ function getNormalizedBaseKey(/** @type {string} */ url) {
 
 		// Normalize subdomain: use hostname without subdomain for deduplication
 		const hostnameParts = parsed.hostname.split('.');
-		const domain = hostnameParts.length > 2 ? hostnameParts.slice(-2).join('.') : parsed.hostname;
+		const domainPartCount = hasTwoPartSuffix(hostnameParts) ? 3 : 2;
+		const domain = hostnameParts.slice(-domainPartCount).join('.');
 
 		// Use filename for cross-subdomain matching, full path otherwise
 		const normalizedPath = identifier || basename;

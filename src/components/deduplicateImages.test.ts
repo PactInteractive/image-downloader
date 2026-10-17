@@ -186,6 +186,11 @@ describe('deduplicateImages', () => {
 		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
+	it('should not deduplicate the same path on different .co.uk sites', () => {
+		const urls = ['https://www.example.co.uk/images/banner.png', 'https://www.other.co.uk/images/banner.png'];
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
+	});
+
 	it('should deduplicate based on same filename across subdomains', () => {
 		const urls = [
 			'https://preview.redd.it/abc123.jpeg?width=1080&crop=smart&auto=webp&s=7cf1d33c34ab20623b04dfc4f05b9a2320c44cad',
