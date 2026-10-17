@@ -22,6 +22,14 @@ export async function updateManifest() {
 	return normalize(config.manifestJson);
 }
 
+export async function buildFirefox() {
+	await fs.emptyDir(config.firefox.build);
+	await fs.copy(config.build, config.firefox.build);
+	const manifestPath = join(config.firefox.build, 'manifest.json');
+	const manifest = await fs.readJson(manifestPath);
+	await fs.writeJson(manifestPath, { ...manifest, ...config.firefox.manifest }, { spaces: '\t' });
+}
+
 export async function buildCss() {
 	await $`bunx @tailwindcss/cli -i ./src/style.css -o ./${config.build}/src/style.css`;
 }
@@ -90,6 +98,7 @@ export const tasks = {
 	clean,
 	updateManifest,
 	buildCss,
+	buildFirefox,
 	copyFile,
 	removeFile,
 } satisfies Record<string, Task>;

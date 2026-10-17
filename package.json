@@ -11,7 +11,7 @@
 		"tailscale": "tailscale serve reset && tailscale serve --bg --http=3001 3000 && tailscale serve --bg --http=4096 4095",
 		"start": "bun run build && bun scripts/watch.ts",
 		"build": "bun scripts/build.ts && bun run build:zip",
-		"build:zip": "rm -f ../image-downloader.zip && cd build && zip -r ../../image-downloader.zip .",
+		"build:zip": "rm -f ../image-downloader.zip ../image-downloader-firefox.zip && (cd build && zip -qr ../../image-downloader.zip .) && (cd build-firefox && zip -qr ../../image-downloader-firefox.zip .)",
 		"task": "bun scripts/task.ts",
 		"test": "bun test",
 		"lint": "bunx prettier --write .",

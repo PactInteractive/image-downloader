@@ -3,7 +3,7 @@ import { globSync } from 'glob';
 import { join } from 'path';
 
 import * as config from './config';
-import { buildCss, clean, copyFile, rewriteModuleImports, updateManifest } from './tasks';
+import { buildCss, buildFirefox, clean, copyFile, rewriteModuleImports, updateManifest } from './tasks';
 
 async function build() {
 	await clean();
@@ -37,6 +37,7 @@ async function build() {
 	await Promise.all(allJsFiles.map(rewriteModuleImports));
 
 	await buildCss();
+	await buildFirefox();
 }
 
 build();

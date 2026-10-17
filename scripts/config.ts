@@ -6,6 +6,21 @@ export const style = './src/style.css';
 
 export const build = 'build';
 
+// `build` stays loadable in Chromium and passes the Edge store, which rejects `background.scripts`.
+export const firefox = {
+	build: 'build-firefox',
+	manifest: {
+		background: { scripts: ['src/background/serviceWorker.js'] },
+		browser_specific_settings: {
+			gecko: {
+				id: 'image-downloader@vdsabev',
+				strict_min_version: '140.0',
+				data_collection_permissions: { required: ['none'] },
+			},
+		},
+	},
+};
+
 export const copy = {
 	include: [manifestJson, './images/**/*', './src/**'],
 	exclude: [style, './src/Web/**', './src/**/*.ts'],
