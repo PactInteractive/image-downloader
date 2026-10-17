@@ -73,11 +73,9 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						input=${{ name: 'visibility', value: 'matching', checked: tab.value === 'matching' }}
 					>
 						<${Circle} class="bg-green-600 text-white">
-							${
-								selectedMatchingImages.value.length > 0
-									? html`<span class="text-2xs">${selectedMatchingImages.value.length}</span>`
-									: '+'
-							}
+							${selectedMatchingImages.value.length > 0
+								? html`<span class="text-2xs">${selectedMatchingImages.value.length}</span>`
+								: '+'}
 						<//>
 						${matchingImages.value.length} matching
 					<//>
@@ -90,11 +88,9 @@ export function Images(/** @type {ImagesProps} */ { class: className, style, ...
 						input=${{ name: 'visibility', value: 'filtered_out', checked: tab.value === 'filtered_out' }}
 					>
 						<${Circle} class="bg-slate-600 text-white">
-							${
-								selectedFilteredOutImages.value.length > 0
-									? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
-									: '-'
-							}
+							${selectedFilteredOutImages.value.length > 0
+								? html`<span class="text-2xs">${selectedFilteredOutImages.value.length}</span>`
+								: '-'}
 						<//>
 						${filteredOutImages.value.length} filtered out
 					<//>
@@ -286,7 +282,7 @@ function ImageCard(/** @type {{ imageUrl: string }} */ { imageUrl, ...props }) {
 function ImageError(/** @type {{ onClick?: (e: MouseEvent) => void }} */ { onClick, ...props }) {
 	return html`
 		<button
-			class="flex h-auto flex-col items-center justify-center gap-1 border-red-300 m-2 bg-red-50 p-4 text-xs text-red-600 hover:bg-red-100"
+			class="m-2 flex h-auto flex-col items-center justify-center gap-1 border-red-300 bg-red-50 p-4 text-xs text-red-600 hover:bg-red-100"
 			type="button"
 			title="Retry loading image"
 			onClick=${(/** @type {MouseEvent} e */ e) => {
@@ -307,7 +303,10 @@ function RemoveBackgroundButton(/** @type {{ imageUrl: string }} */ { imageUrl, 
 			...${props}
 			class="btn h-7 w-7 rounded bg-size-[20px] bg-center bg-no-repeat text-transparent shadow-md"
 			style=${{ backgroundImage: 'url("/images/cutout.svg")' }}
-			href=${getReferralUrl('https://cutoutmagic.com/library', { url: imageUrl, utm_content: 'remove_background_button' })}
+			href=${getReferralUrl('https://cutoutmagic.com/library', {
+				url: imageUrl,
+				utm_content: 'remove_background_button',
+			})}
 			title="Remove background with CutoutMagic.com"
 			onClick=${stopPropagation}
 		>

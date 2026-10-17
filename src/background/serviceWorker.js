@@ -50,9 +50,29 @@ if (chrome.sidePanel) {
 /** @type {Map<number, Task>} */
 const tasksByDownloadId = new Map();
 
+// Chromium ignores the `filename` passed to `downloads.download()` by other
+// extensions whenever any extension listens for `onDeterminingFilename`, so only
+// listen while Image Downloader is itself downloading.
+let activeBatchCount = 0;
+
 chrome.runtime.onMessage.addListener(startDownload);
-chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
 chrome.downloads.onChanged.addListener(cleanupCompletedDownloadTasks);
+
+function ensureFilenameListener() {
+	if (!chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)) {
+		chrome.downloads.onDeterminingFilename.addListener(suggestNewFilename);
+	}
+}
+
+function removeFilenameListenerIfIdle() {
+	if (
+		activeBatchCount === 0 &&
+		tasksByDownloadId.size === 0 &&
+		chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)
+	) {
+		chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
+	}
+}
 
 // NOTE: Don't directly use an `async` function as a listener for `onMessage`:
 // https://stackoverflow.com/a/56483156
@@ -74,23 +94,32 @@ function startDownload(
 }
 
 async function downloadImages(/** @type {Task} */ task) {
-	const promises = task.imagesToDownload.map((image, index) => {
-		return new Promise((/** @type {(response?: any) => void} */ resolve) => {
-			chrome.downloads.download({ url: image }, (downloadId) => {
-				if (downloadId != null) {
-					task.indices.set(downloadId, index);
-					tasksByDownloadId.set(downloadId, task);
-				} else {
-					if (chrome.runtime.lastError) {
-						console.error(`${image}:`, chrome.runtime.lastError.message);
+	activeBatchCount += 1;
+	ensureFilenameListener();
+
+	try {
+		const promises = task.imagesToDownload.map((image, index) => {
+			return new Promise((/** @type {(response?: any) => void} */ resolve) => {
+				chrome.downloads.download({ url: image }, (downloadId) => {
+					if (downloadId != null) {
+						task.indices.set(downloadId, index);
+						tasksByDownloadId.set(downloadId, task);
+					} else {
+						if (chrome.runtime.lastError) {
+							console.error(`${image}:`, chrome.runtime.lastError.message);
+						}
 					}
-				}
-				resolve();
+					resolve();
+				});
 			});
 		});
-	});
 
-	await Promise.allSettled(promises);
+		await Promise.allSettled(promises);
+	} finally {
+		// Runs even when the batch registered no downloads, so the listener can't leak.
+		activeBatchCount -= 1;
+		removeFilenameListenerIfIdle();
+	}
 }
 
 // https://developer.chrome.com/docs/extensions/reference/downloads/#event-onDeterminingFilename
@@ -98,7 +127,10 @@ async function downloadImages(/** @type {Task} */ task) {
 function suggestNewFilename(item, suggest) {
 	const task = tasksByDownloadId.get(item.id);
 	if (!task) {
+		// Bare `suggest()` means "use `item.filename`" and is not an override, so it
+		// won't clobber a filename another extension suggested.
 		suggest();
+		removeFilenameListenerIfIdle();
 		return;
 	}
 
@@ -106,6 +138,7 @@ function suggestNewFilename(item, suggest) {
 	if (index === undefined) {
 		suggest();
 		tasksByDownloadId.delete(item.id);
+		removeFilenameListenerIfIdle();
 		return;
 	}
 
@@ -133,11 +166,13 @@ function suggestNewFilename(item, suggest) {
 
 	task.indices.delete(item.id);
 	tasksByDownloadId.delete(item.id);
+	removeFilenameListenerIfIdle();
 }
 
 function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
 	if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
 		tasksByDownloadId.delete(delta.id);
+		removeFilenameListenerIfIdle();
 	}
 }
 

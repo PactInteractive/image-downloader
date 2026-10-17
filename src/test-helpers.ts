@@ -3,13 +3,31 @@ import { Window } from 'happy-dom';
 import { mockRecursivePartial } from 'sneer';
 import manifest from '../manifest.json';
 
+/** A `chrome.events.Event` mock whose `hasListener`/`removeListener` reflect what was added. */
+export const createChromeEvent = () => {
+	const listeners = new Set<(...args: any[]) => void>();
+	return {
+		addListener: mock((listener: (...args: any[]) => void) => {
+			listeners.add(listener);
+		}),
+		removeListener: mock((listener: (...args: any[]) => void) => {
+			listeners.delete(listener);
+		}),
+		hasListener: mock((listener: (...args: any[]) => void) => listeners.has(listener)),
+		listeners,
+	};
+};
+
 export const mockChrome = (opts?: { storage?: Record<string, any> }) => {
 	const store = opts?.storage ?? {};
 	const chrome = mockRecursivePartial<any>({
+		action: {
+			setPopup: mock(),
+		},
 		downloads: {
-			onDeterminingFilename: {
-				addListener: mock(),
-			},
+			download: mock(),
+			onChanged: createChromeEvent(),
+			onDeterminingFilename: createChromeEvent(),
 		},
 		runtime: {
 			getManifest: () => manifest,
@@ -30,6 +48,7 @@ export const mockChrome = (opts?: { storage?: Record<string, any> }) => {
 		},
 	});
 	chrome.storage = {
+		onChanged: createChromeEvent(),
 		local: {
 			get: async (keys: any) => {
 				if (keys === null || keys === undefined) return { ...store };
