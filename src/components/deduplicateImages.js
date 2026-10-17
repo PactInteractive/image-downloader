@@ -50,8 +50,9 @@ function getNormalizedBaseKey(/** @type {string} */ url) {
 			''
 		);
 
-		// Extract identifier: look for hash-like pattern at end (e.g., 7qulxnmlw8sg1 from longer names)
-		const identifierMatch = basename.match(/((?=.*\d)[a-zA-Z0-9]{6,})$/);
+		// Extract identifier: look for hash-like pattern at end (e.g., 7qulxnmlw8sg1 from longer names).
+		// Shorter names like photo01 recur across folders for different images.
+		const identifierMatch = basename.match(/((?=[a-zA-Z0-9]*\d)(?=[a-zA-Z0-9]*[a-zA-Z])[a-zA-Z0-9]{10,})$/);
 		const identifier = identifierMatch ? identifierMatch[1] : basename;
 
 		// Extract special query params

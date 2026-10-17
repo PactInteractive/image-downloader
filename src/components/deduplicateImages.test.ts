@@ -181,6 +181,11 @@ describe('deduplicateImages', () => {
 		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
 	});
 
+	it('should not deduplicate the same short filename in different folders', () => {
+		const urls = ['https://example.com/products/123/photo01.jpg', 'https://example.com/products/456/photo01.jpg'];
+		expect(deduplicateImages(urls, createCache(images))).toEqual(urls);
+	});
+
 	it('should deduplicate based on same filename across subdomains', () => {
 		const urls = [
 			'https://preview.redd.it/abc123.jpeg?width=1080&crop=smart&auto=webp&s=7cf1d33c34ab20623b04dfc4f05b9a2320c44cad',
