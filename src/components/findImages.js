@@ -210,8 +210,11 @@ export async function findImages(
 	}
 
 	function relativeUrlToAbsolute(/** @type {string} */ url) {
-		// Only convert root-relative URLs (single /), not protocol-relative URLs (//)
-		return url.indexOf('/') === 0 && url.indexOf('//') !== 0 ? `${context.window.location.origin}${url}` : url;
+		try {
+			return new URL(url, context.document.baseURI).href;
+		} catch {
+			return url;
+		}
 	}
 
 	const roots = getRoots(context.document);

@@ -16,6 +16,7 @@ interface MockShadowRoot {
 }
 
 interface MockDocument {
+	baseURI?: string;
 	querySelectorAll: (selector: string) => MockElement[];
 }
 
@@ -37,6 +38,7 @@ describe('findImages', () => {
 	async function runFindImages(documentMock: MockDocument, windowMock: MockWindow) {
 		// Set up global mocks using type assertions
 		(global as unknown as { document: MockDocument & { readyState: string } }).document = {
+			baseURI: `${windowMock.location.origin}/`,
 			...documentMock,
 			readyState: 'complete',
 		};
@@ -239,6 +241,29 @@ describe('findImages', () => {
 		const result = await runFindImages(mockDocument, mockWindow);
 
 		expect(result.allImages).toContain('http://example.com/images/photo.jpg');
+	});
+
+	it('resolves relative srcset URLs against the page URL', async () => {
+		// HTML on http://example.com/gallery/index.html: <img srcset="images/hero-2x.jpg 2x" />
+		const img: MockElement = {
+			tagName: 'IMG',
+			getAttribute: (attr: string) => (attr === 'srcset' ? 'images/hero-2x.jpg 2x' : null),
+		};
+		const mockDocument: MockDocument = {
+			baseURI: 'http://example.com/gallery/index.html',
+			querySelectorAll: (selector: string) => {
+				if (selector.includes('img')) return [img];
+				return [];
+			},
+		};
+		const mockWindow: MockWindow = {
+			location: { origin: 'http://example.com' },
+			getComputedStyle: () => ({ backgroundImage: '' }),
+		};
+
+		const result = await runFindImages(mockDocument, mockWindow);
+
+		expect(result.allImages).toEqual(['http://example.com/gallery/images/hero-2x.jpg']);
 	});
 
 	it('removes duplicate URLs', async () => {
@@ -692,7 +717,7 @@ describe('findImages', () => {
 
 		const result = await runFindImages(mockDocument, mockWindow);
 
-		expect(result.allImages).toContain('//cdn.example.com/image.jpg');
+		expect(result.allImages).toContain('http://cdn.example.com/image.jpg');
 	});
 
 	it('extracts protocol-relative URLs from background-image', async () => {
@@ -720,7 +745,7 @@ describe('findImages', () => {
 
 		const result = await runFindImages(mockDocument, mockWindow);
 
-		expect(result.allImages).toContain('//cdn.example.com/background.png');
+		expect(result.allImages).toContain('http://cdn.example.com/background.png');
 	});
 
 	it('extracts blob URLs from img src', async () => {
