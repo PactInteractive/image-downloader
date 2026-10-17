@@ -237,7 +237,10 @@ export const matchingImages = computed(() => {
 				});
 				break;
 			case 'wildcard':
-				filterValue = filterValue.replace(/([.^$[\]\\(){}|-])/g, '\\$1').replace(/([?*+])/, '.$1');
+				filterValue = filterValue
+					.replace(/([.^$[\]\\(){}|+-])/g, '\\$1')
+					.replace(/\*/g, '.*')
+					.replace(/\?/g, '.');
 			/* fall through */
 			case 'regex':
 				filtered = filtered.filter((url) => {

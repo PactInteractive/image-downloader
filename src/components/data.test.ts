@@ -203,4 +203,32 @@ describe('matchingImages', () => {
 
 		expect(matchingImages.value).toEqual([url]);
 	});
+
+	it('should treat every * in a wildcard filter as any sequence of characters', () => {
+		imagesCache.value = document.createElement('div');
+		allImages.value = ['https://example.com/ac.png', 'https://example.com/abc.png'];
+
+		filterUrlMode.value = 'wildcard';
+		filterUrl.value = 'a*b*c';
+
+		expect(matchingImages.value).toEqual(['https://example.com/abc.png']);
+	});
+
+	it('should treat ? in a wildcard filter as exactly one character and + as itself', () => {
+		imagesCache.value = document.createElement('div');
+		allImages.value = [
+			'https://example.com/photo.png',
+			'https://example.com/photo1.png',
+			'https://example.com/photo12.png',
+			'https://example.com/a+b.png',
+			'https://example.com/aab.png',
+		];
+		filterUrlMode.value = 'wildcard';
+
+		filterUrl.value = 'photo?.png';
+		expect(matchingImages.value).toEqual(['https://example.com/photo1.png']);
+
+		filterUrl.value = 'a+b';
+		expect(matchingImages.value).toEqual(['https://example.com/a+b.png']);
+	});
 });
