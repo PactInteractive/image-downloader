@@ -37,10 +37,11 @@ export const setToInvertedCheckboxValue = (/** @type {{ value: boolean }} */ sig
 	signal.value = !(/** @type {HTMLInputElement} */ (e.currentTarget).checked);
 };
 
-export const getReferralUrl = (/** @type {string} */ origin, /** @type {Object} */ params) =>
-	`${origin}/?${new URLSearchParams({
-		utm_source: 'image_downloader',
-		utm_medium: 'chrome_extension',
-		utm_campaign: 'internal_referral',
-		...params,
-	}).toString()}`;
+export const getReferralUrl = (/** @type {string} */ origin, /** @type {Object} */ params) => {
+	const url = new URL(origin);
+	url.searchParams.set('utm_source', 'image_downloader');
+	url.searchParams.set('utm_medium', 'chrome_extension');
+	url.searchParams.set('utm_campaign', 'internal_referral');
+	for (const [key, value] of Object.entries(params)) url.searchParams.set(key, value);
+	return url.toString();
+};
