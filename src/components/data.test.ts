@@ -4,6 +4,7 @@ import { mockChrome, mockDOM } from '../test-helpers';
 mockDOM();
 
 import {
+	allImages,
 	columns,
 	filterMaxHeight,
 	filterMaxHeightEnabled,
@@ -16,7 +17,9 @@ import {
 	filterUrl,
 	filterUrlMode,
 	folderName,
+	imagesCache,
 	initialize,
+	matchingImages,
 	newFileName,
 	openMode,
 	selectedImages,
@@ -184,5 +187,20 @@ describe('useOptions', () => {
 			expect(stored.selected_images).toEqual(['img1.jpg', 'img2.jpg']);
 			expect(Array.isArray(stored.selected_images)).toBe(true);
 		});
+	});
+});
+
+describe('matchingImages', () => {
+	it('should include an image whose URL contains a double quote', () => {
+		const url = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg"/>';
+		const cache = document.createElement('div');
+		const image = document.createElement('img');
+		image.setAttribute('src', url);
+		cache.append(image);
+		imagesCache.value = cache;
+
+		allImages.value = [url];
+
+		expect(matchingImages.value).toEqual([url]);
 	});
 });

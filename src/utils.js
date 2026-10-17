@@ -16,6 +16,10 @@ export const isTruthy = (value) => !!value;
 /** @type {(value: string) => string} */
 export const removeSpecialCharacters = (value) => value.replace(/[<>:"|?*]/g, '');
 
+/** @type {(container: Element, src: string) => HTMLImageElement | undefined} */
+export const findImageBySrc = (container, src) =>
+	[...container.querySelectorAll('img')].find((image) => image.getAttribute('src') === src);
+
 /** @type {(e: Event) => void} */
 export const stopPropagation = (e) => e.stopPropagation();
 

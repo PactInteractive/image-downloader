@@ -1,5 +1,5 @@
 // @ts-check
-import { unique } from '../utils.js';
+import { findImageBySrc, unique } from '../utils.js';
 
 const priorities = ['png', 'jpg', 'jpeg', 'bmp', 'webp', 'avif'];
 
@@ -106,7 +106,7 @@ function pickBestImageUrl(/** @type {string[]} */ urlStrings, /** @type {HTMLDiv
 	if (realUrls.length === 0) return undefined;
 
 	const getResolution = (/** @type {URL} */ url) => {
-		const img = /** @type {HTMLImageElement | null} */ (imagesCache.querySelector(`img[src="${url.href}"]`));
+		const img = findImageBySrc(imagesCache, url.href);
 		return img ? { width: img.naturalWidth, height: img.naturalHeight } : { width: 0, height: 0 };
 	};
 

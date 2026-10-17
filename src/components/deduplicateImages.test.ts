@@ -27,13 +27,8 @@ describe('deduplicateImages', () => {
 	};
 
 	function createCache(images: Record<string, { naturalWidth: number; naturalHeight: number }>) {
-		return {
-			querySelector(selector: string): { naturalWidth: number; naturalHeight: number } | null {
-				const match = selector.match(/src="([^"]+)"/);
-				const url = match?.[1] ?? selector;
-				return images[url] ?? null;
-			},
-		} as unknown as HTMLDivElement;
+		const imageElements = Object.entries(images).map(([src, size]) => ({ ...size, getAttribute: () => src }));
+		return { querySelectorAll: () => imageElements } as unknown as HTMLDivElement;
 	}
 
 	it('should handle empty array', () => {

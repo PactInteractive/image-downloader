@@ -1,6 +1,6 @@
 // @ts-check
 import { action, batch, computed, effect, signal } from '../html.js';
-import { isIncludedIn, isNotIncludedIn, isNotStrictEqual, unique } from '../utils.js';
+import { findImageBySrc, isIncludedIn, isNotIncludedIn, isNotStrictEqual, unique } from '../utils.js';
 import { deduplicateImages } from './deduplicateImages.js';
 import { findImages } from './findImages.js';
 
@@ -254,7 +254,7 @@ export const matchingImages = computed(() => {
 	filtered = filtered.filter((url) => {
 		if (!imagesCache.value) return false;
 
-		/** @type {HTMLImageElement | null} */ const image = imagesCache.value.querySelector(`img[src="${url}"]`);
+		const image = findImageBySrc(imagesCache.value, url);
 
 		return (
 			// image && <-- we don't want this, it results in overly filtered images on initial load
