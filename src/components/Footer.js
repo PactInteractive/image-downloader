@@ -132,25 +132,28 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 										</p>`
 									: null
 							}
-							${
-								downloadFailures.value.length > 0
-									? html`
-											<details class="mt-1 text-xs text-amber-700 dark:text-amber-400" aria-live="polite">
-												<summary class="cursor-pointer">
-													${downloadFailures.value.length} image${downloadFailures.value.length === 1 ? '' : 's'} could
-													not be included in the .zip
-												</summary>
-												<ul class="mt-1 mb-0 max-h-24 overflow-y-auto pl-4">
-													<${For} each=${downloadFailures.value}>
-														${(/** @type {string} */ url) => html`
-															<li class="truncate" title=${url}>${imageLabel(url)}</li>
-														`}
-													<//>
-												</ul>
-											</details>
-										`
-									: null
-							}
+							<div role="status">
+								${
+									downloadFailures.value.length > 0
+										? html`
+												<details class="mt-1 text-xs text-amber-700 dark:text-amber-400">
+													<summary class="cursor-pointer">
+														${`${downloadFailures.value.length} image${
+															downloadFailures.value.length === 1 ? '' : 's'
+														} could not be included in the .zip`}
+													</summary>
+													<ul class="mt-1 mb-0 max-h-24 overflow-y-auto pl-4">
+														<${For} each=${downloadFailures.value}>
+															${(/** @type {string} */ url) => html`
+																<li class="truncate" title=${url}>${imageLabel(url)}</li>
+															`}
+														<//>
+													</ul>
+												</details>
+											`
+										: null
+								}
+							</div>
 						`
 			}
 		</footer>

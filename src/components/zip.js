@@ -32,12 +32,15 @@ export async function fetchImageFiles(urls, concurrency = 4) {
 			const index = nextIndex++;
 			const url = urls[index];
 			try {
-				const response = await fetch(url, { credentials: 'include' });
+				const response = await fetch(url, { credentials: 'include', signal: AbortSignal.timeout(30_000) });
 				if (!response.ok) {
 					throw new Error(`Could not read ${url} (${response.status})`);
 				}
 
 				const mime = (response.headers.get('content-type') || '').split(';')[0].trim();
+				if (isMarkupMime(mime)) {
+					throw new Error(`Unexpected content type for ${url} (${mime})`);
+				}
 				files[index] = { url, mime, data: new Uint8Array(await response.arrayBuffer()), index };
 			} catch (error) {
 				// Match individual downloads: keep the images that load instead of failing the batch.
@@ -53,6 +56,15 @@ export async function fetchImageFiles(urls, concurrency = 4) {
 		throw new Error('Could not download any of the selected images.');
 	}
 	return { files: loaded, failed: urls.filter((_, index) => !files[index]) };
+}
+
+/**
+ * Login and challenge pages sometimes answer with status 200. Reject only clearly non-image
+ * markup, so images served with an unexpected MIME type still make it into the zip.
+ * @param {string} mime
+ */
+function isMarkupMime(mime) {
+	return /^(?:text\/html|text\/xml|application\/(?:json|xml|xhtml\+xml|problem\+json))$/i.test(mime);
 }
 
 /** @param {string} url */
@@ -119,7 +131,9 @@ function isConcreteHostname(hostname) {
  */
 function entryName(file, index, count, newFileName) {
 	const original = originalFilename(file.url);
-	const extension = /(?:\.([^.]+))?$/.exec(original)?.[1] || extensionFromMime(file.mime);
+	const urlExtension = /(?:\.([^.]+))?$/.exec(original)?.[1];
+	const extension =
+		(urlExtension && /^[a-z0-9]{1,16}$/i.test(urlExtension) ? urlExtension : '') || extensionFromMime(file.mime);
 
 	const name = newFileName
 		? `${newFileName}${`${index + 1}`.padStart(`${count}`.length, '0')}${extension ? `.${extension}` : ''}`
@@ -149,12 +163,12 @@ function originalFilename(url) {
 }
 
 /** @param {string} name */
-function safeEntryName(name) {
+export function safeEntryName(name) {
 	const parts = name
 		.split(/[\\/]+/)
 		.map((part) =>
 			removeSpecialCharacters(part)
-				.replace(/[\u0000-\u001f]/g, '')
+				.replace(/[\u0000-\u001f\u007f-\u009f\u061c\u200b\u200e\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g, '')
 				.replace(/[. ]+$/g, '')
 		)
 		.filter(Boolean)

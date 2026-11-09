@@ -55,7 +55,7 @@ export function DownloadButton({
 		? 'Select some images to download them'
 		: loading
 			? mode === 'zip'
-				? 'Keep the extension open while the .zip is prepared'
+				? 'Keep the extension open until the .zip finishes downloading'
 				: 'If you want, you can close the extension popup\nwhile the images are downloading!'
 			: mode === 'zip'
 				? 'Download the selected images as a .zip'
@@ -133,15 +133,17 @@ export function DownloadButton({
 				type="button"
 				disabled=${loading}
 				title=${tooltip}
+				aria-busy=${loading}
 				aria-controls=${empty ? 'download_options' : undefined}
 				aria-expanded=${empty ? expanded.value : undefined}
 				onClick=${handleDownloadClick}
 				...${props}
 			>
-				<span class="leading-none tabular-nums">
+				<span class="leading-none tabular-nums" aria-hidden=${loading ? 'true' : undefined}>
 					${loading ? '•••' : selectedCount > 0 ? `Download (${selectedCount})` : 'Download'}
 				</span>
 				<span class="text-2xs leading-none text-sky-100"> ${mode === 'zip' ? 'as .zip' : 'as individual files'} </span>
+				${loading ? html`<span class="sr-only">Preparing download</span>` : null}
 			</button>
 
 			<button

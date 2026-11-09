@@ -31,16 +31,20 @@ beforeEach(async () => {
 	await import(`${serviceWorkerPath}?${serviceWorkerInstance}`);
 });
 
-function startBatch(images: string[], options: any = {}) {
-	const startDownload = chrome.runtime.onMessage.addListener.mock.calls[0][0];
-	return new Promise<void>((resolve) => {
-		startDownload({ type: 'downloadImages', imagesToDownload: images, options }, {}, resolve);
+function sendMessage(message: any) {
+	const handleMessage = chrome.runtime.onMessage.addListener.mock.calls[0][0];
+	return new Promise<any>((resolve) => {
+		handleMessage(message, {}, resolve);
 	});
+}
+
+function startBatch(images: string[], options: any = {}) {
+	return sendMessage({ type: 'downloadImages', imagesToDownload: images, options });
 }
 
 function filenameListener() {
 	return [...chrome.downloads.onDeterminingFilename.listeners][0] as (
-		item: { id: number; filename: string },
+		item: { id: number; filename: string; mime?: string },
 		suggest: (suggestion?: { filename: string }) => void
 	) => void;
 }
@@ -81,6 +85,17 @@ describe('serviceWorker filename suggestions', () => {
 		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
 	});
 
+	it('ignores a URL extension that is not plain alphanumerics', async () => {
+		const done = startBatch(['https://example.com/photo.%20'], { folder_name: 'folder', new_file_name: 'name' });
+		const downloadId = downloadIds[downloadIds.length - 1];
+
+		const suggest = mock();
+		filenameListener()({ id: downloadId, filename: 'photo. ', mime: 'image/png' }, suggest);
+		expect(suggest.mock.calls).toEqual([[{ filename: 'folder/name1.png', conflictAction: 'uniquify' }]]);
+
+		await done;
+	});
+
 	it('keeps listening until every download in the batch has been named', async () => {
 		deferDownloadCallbacks = true;
 		const done = startBatch(['https://example.com/1.jpg', 'https://example.com/2.jpg']);
@@ -106,6 +121,32 @@ describe('serviceWorker filename suggestions', () => {
 		await startBatch(['https://example.com/broken.jpg']);
 		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
 	});
+
+	it('suggests the zip filename', async () => {
+		const url = 'blob:chrome-extension://id/zip';
+		const done = sendMessage({ type: 'downloadZip', url, filename: 'folder/name.zip' });
+		const downloadId = downloadIds[downloadIds.length - 1];
+
+		expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({ url });
+
+		const suggest = mock();
+		filenameListener()({ id: downloadId, filename: 'name.zip' }, suggest);
+		expect(suggest.mock.calls).toEqual([[{ filename: 'folder/name.zip', conflictAction: 'uniquify' }]]);
+
+		expect(await done).toEqual({ downloadId });
+		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
+	});
+
+	it('reports a zip download that cannot start', async () => {
+		chrome.downloads.download.mockImplementationOnce((_options: any, callback: (downloadId?: number) => void) => {
+			chrome.runtime.lastError = { message: 'Download blocked' };
+			callback(undefined);
+		});
+
+		const response = await sendMessage({ type: 'downloadZip', url: 'blob:test', filename: 'name.zip' });
+		expect(response).toEqual({ error: 'Download blocked' });
+		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
+	});
 });
 
 describe('Firefox', () => {
@@ -124,6 +165,16 @@ describe('Firefox', () => {
 			});
 		});
 
+		it('ignores a URL extension that is not plain alphanumerics', async () => {
+			await startBatch(['https://example.com/photo.%20'], { folder_name: 'folder', new_file_name: 'name' });
+
+			expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({
+				url: 'https://example.com/photo.%20',
+				filename: 'folder/name1',
+				conflictAction: 'uniquify',
+			});
+		});
+
 		it('takes the extension of a data: URL from its MIME type', async () => {
 			const url = 'data:image/png;base64,iVBORw0KGgo/AAAA+BBB=';
 			await startBatch([url], { folder_name: 'folder', new_file_name: 'name' });
@@ -135,6 +186,17 @@ describe('Firefox', () => {
 			});
 		});
 
+		it('normalizes MIME extensions like zip entries', async () => {
+			const urls = ['data:image/svg+xml;base64,AAAA', 'data:image/x-icon;base64,AAAA', 'data:image/pjpeg;base64,AAAA'];
+			await startBatch(urls, { folder_name: 'folder', new_file_name: 'name' });
+
+			expect(chrome.downloads.download.mock.calls.map((call: any[]) => call[0].filename)).toEqual([
+				'folder/name1.svg',
+				'folder/name2.ico',
+				'folder/name3.jpg',
+			]);
+		});
+
 		it('names a download without a URL filename "image" when only a folder is set', async () => {
 			const url = 'data:image/png;base64,iVBORw0KGgo/AAAA+BBB=';
 			await startBatch([url], { folder_name: 'folder' });
@@ -142,6 +204,17 @@ describe('Firefox', () => {
 			expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({
 				url,
 				filename: 'folder/image.png',
+				conflictAction: 'uniquify',
+			});
+		});
+
+		it('passes the zip filename to downloads.download()', async () => {
+			const url = 'blob:chrome-extension://id/zip';
+			await sendMessage({ type: 'downloadZip', url, filename: 'folder/name.zip' });
+
+			expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({
+				url,
+				filename: 'folder/name.zip',
 				conflictAction: 'uniquify',
 			});
 		});

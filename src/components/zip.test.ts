@@ -77,6 +77,18 @@ it('falls back to the MIME extension when a URL filename ends with a dot', () =>
 	expect(zipEntries(files, { new_file_name: 'photo' }).map((entry) => entry.name)).toEqual(['photo1.png']);
 });
 
+it('ignores URL extensions that are not plain alphanumerics', () => {
+	const files = [
+		{ url: 'https://example.com/photo.%20', mime: 'image/png', data: new Uint8Array([1]) },
+		{ url: 'https://example.com/photo.%3Fx', mime: 'image/jpeg', data: new Uint8Array([2]) },
+	];
+
+	expect(zipEntries(files, { new_file_name: 'photo' }).map((entry) => entry.name)).toEqual([
+		'photo1.png',
+		'photo2.jpg',
+	]);
+});
+
 it('renames __proto__ entries so zip creation succeeds', async () => {
 	const entries = zipEntries([{ url: 'https://example.com/__proto__', mime: 'image/png', data: new Uint8Array([1]) }], {
 		new_file_name: '',
@@ -131,6 +143,25 @@ it('keeps the images that load when some fail', async () => {
 	expect(files.map((file) => file.url)).toEqual(['https://example.com/a.png', 'https://cdn.example.net/b.png']);
 	expect(files.map((file) => file.index)).toEqual([0, 3]);
 	expect(failed).toEqual(['https://example.com/missing.png', 'https://example.com/broken.png']);
+	expect((globalThis.fetch as any).mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
+});
+
+it('treats a markup response with status 200 as a failed image', async () => {
+	consoleError = spyOn(console, 'error').mockImplementation(() => {});
+	const challenge = 'https://example.com/challenge.png';
+	globalThis.fetch = mock(async (url: any) => {
+		if (String(url) === challenge) {
+			return new Response('<html>Just a moment...</html>', {
+				headers: { 'content-type': 'text/html; charset=UTF-8' },
+			});
+		}
+		return new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } });
+	}) as any;
+
+	const { files, failed } = await fetchImageFiles(['https://example.com/a.png', challenge]);
+
+	expect(files.map((file) => file.url)).toEqual(['https://example.com/a.png']);
+	expect(failed).toEqual([challenge]);
 });
 
 it('labels failed images with a filename or host', () => {
@@ -158,6 +189,9 @@ it('makes entry names safe to extract on Windows', () => {
 		{ url: 'https://example.com/NUL%20%20.png', mime: 'image/png', data: new Uint8Array([5]) },
 		{ url: 'https://example.com/..%2Ftraversal.png', mime: 'image/png', data: new Uint8Array([6]) },
 		{ url: 'https://example.com/trailing.%20', mime: 'image/png', data: new Uint8Array([7]) },
+		{ url: 'https://example.com/portrait%E2%80%AE.png', mime: 'image/png', data: new Uint8Array([8]) },
+		{ url: 'https://example.com/mark%E2%80%8E.png', mime: 'image/png', data: new Uint8Array([9]) },
+		{ url: 'https://example.com/arabic%D8%9C.png', mime: 'image/png', data: new Uint8Array([10]) },
 	];
 
 	expect(zipEntries(files, { new_file_name: '' }).map((entry) => entry.name)).toEqual([
@@ -168,5 +202,8 @@ it('makes entry names safe to extract on Windows', () => {
 		'_NUL  .png',
 		'traversal.png',
 		'trailing',
+		'portrait.png',
+		'mark.png',
+		'arabic.png',
 	]);
 });

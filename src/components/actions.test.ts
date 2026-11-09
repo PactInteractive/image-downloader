@@ -33,14 +33,40 @@ describe('openImage', () => {
 	});
 });
 
+function finishDownload(/** @type {number} */ downloadId = 1) {
+	for (const listener of [...chrome.downloads.onChanged.listeners]) {
+		listener({ id: downloadId, state: { current: 'complete' } });
+	}
+}
+
 describe('downloadImagesAsZip', () => {
+	let zipData: Promise<Uint8Array>;
+
 	beforeEach(async () => {
 		const { folderName, hostname, newFileName } = await import('./data.js');
 		folderName.value = '';
 		newFileName.value = '';
 		hostname.value = '';
+		zipData = Promise.resolve(new Uint8Array());
 		chrome.permissions = { request: mock(async () => true), contains: mock(async () => false) };
-		chrome.downloads.download = mock((_options: any, callback: (downloadId?: number) => void) => callback(1));
+		const onChanged = chrome.downloads.onChanged;
+		chrome.downloads.download = mock((options: any, callback: (downloadId?: number) => void) => {
+			// Read the zip while the blob URL is alive, before the simulated download completes.
+			zipData = realFetch(options.url).then(async (response) => new Uint8Array(await response.arrayBuffer()));
+			callback(1);
+			const finish = () =>
+				setTimeout(() => {
+					for (const listener of [...onChanged.listeners]) listener({ id: 1, state: { current: 'complete' } });
+				}, 0);
+			zipData.then(finish, finish);
+		});
+		chrome.runtime.sendMessage = mock((message: any, callback: (response?: any) => void) => {
+			chrome.downloads.download(
+				{ url: message.url, filename: message.filename, conflictAction: 'uniquify' },
+				(downloadId?: number) =>
+					callback(downloadId == null ? { error: chrome.runtime.lastError?.message } : { downloadId })
+			);
+		});
 	});
 
 	it('requests access to every image host, then downloads one zip into the configured folder', async () => {
@@ -63,8 +89,7 @@ describe('downloadImagesAsZip', () => {
 
 		const options = chrome.downloads.download.mock.calls[0][0];
 		expect(options.filename).toBe('folder/name.zip');
-		const blob = await (await realFetch(options.url)).blob();
-		const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()));
+		const entries = unzipSync(await zipData);
 		expect(Object.keys(entries).sort()).toEqual(['name1.png', 'name2.jpg']);
 		expect(entries['name1.png']).toEqual(new Uint8Array([1]));
 		expect(entries['name2.jpg']).toEqual(new Uint8Array([2]));
@@ -94,8 +119,7 @@ describe('downloadImagesAsZip', () => {
 
 		const options = chrome.downloads.download.mock.calls[0][0];
 		expect(options.filename).toBe('folder/name.zip');
-		const blob = await (await realFetch(options.url)).blob();
-		const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()));
+		const entries = unzipSync(await zipData);
 		expect(Object.keys(entries)).toEqual(['name1.png']);
 	});
 
@@ -122,10 +146,87 @@ describe('downloadImagesAsZip', () => {
 		consoleError.mockRestore();
 
 		expect(failed).toEqual([missing]);
-		const options = chrome.downloads.download.mock.calls[0][0];
-		const blob = await (await realFetch(options.url)).blob();
-		const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()));
+		const entries = unzipSync(await zipData);
 		expect(Object.keys(entries)).toEqual(['image.png']);
+	});
+
+	it('keeps the blob alive and resolves only when the download finishes', async () => {
+		const revoke = spyOn(URL, 'revokeObjectURL');
+		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
+			callback(1)
+		);
+		globalThis.fetch = mock(
+			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
+		) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		let finished = false;
+		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']).then(() => {
+			finished = true;
+		});
+
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		expect(revoke).not.toHaveBeenCalled();
+		expect(finished).toBe(false);
+
+		finishDownload();
+		await download;
+		expect(revoke).toHaveBeenCalledTimes(1);
+		revoke.mockRestore();
+	});
+
+	it('revokes the blob URL when the download completed before the listener was attached', async () => {
+		const revoke = spyOn(URL, 'revokeObjectURL');
+		chrome.downloads.search = mock((_query: any, callback: (downloads: any[]) => void) =>
+			callback([{ id: 1, state: 'complete' }])
+		);
+		globalThis.fetch = mock(
+			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
+		) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		await downloadImagesAsZip(['data:image/png;base64,AAAA']);
+		expect(revoke).toHaveBeenCalledTimes(1);
+		revoke.mockRestore();
+	});
+
+	it('reports a download that is interrupted', async () => {
+		const revoke = spyOn(URL, 'revokeObjectURL');
+		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
+			callback(1)
+		);
+		globalThis.fetch = mock(
+			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
+		) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		for (const listener of [...chrome.downloads.onChanged.listeners]) {
+			listener({ id: 1, state: { current: 'interrupted' }, error: { current: 'FILE_ACCESS_DENIED' } });
+		}
+		await expect(download).rejects.toThrow('The .zip download was interrupted.');
+		expect(revoke).toHaveBeenCalledTimes(1);
+		revoke.mockRestore();
+	});
+
+	it('does not report a download the user cancelled', async () => {
+		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
+			callback(1)
+		);
+		globalThis.fetch = mock(
+			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
+		) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		for (const listener of [...chrome.downloads.onChanged.listeners]) {
+			listener({ id: 1, state: { current: 'interrupted' }, error: { current: 'USER_CANCELED' } });
+		}
+		await expect(download).resolves.toEqual([]);
 	});
 
 	it('normalizes the zip path like individual downloads', async () => {
@@ -142,6 +243,19 @@ describe('downloadImagesAsZip', () => {
 		expect(chrome.downloads.download.mock.calls[0][0].filename).toBe('a/b/c.zip');
 	});
 
+	it('sanitizes the archive filename like archive entries', async () => {
+		const { newFileName } = await import('./data.js');
+		newFileName.value = 'CON';
+		globalThis.fetch = mock(
+			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
+		) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		await downloadImagesAsZip(['data:image/png;base64,AAAA']);
+
+		expect(chrome.downloads.download.mock.calls[0][0].filename).toBe('_CON.zip');
+	});
+
 	it('stops without downloading when host access is denied', async () => {
 		chrome.permissions.request = mock(async () => false);
 
@@ -154,10 +268,9 @@ describe('downloadImagesAsZip', () => {
 
 	it('reports when the zip download cannot start', async () => {
 		globalThis.fetch = mock(async () => new Response(new Uint8Array([1]))) as any;
-		chrome.downloads.download = mock((_options: any, callback: (downloadId?: number) => void) => {
-			chrome.runtime.lastError = { message: 'Download blocked' };
-			callback();
-		});
+		chrome.runtime.sendMessage = mock((_message: any, callback: (response?: any) => void) =>
+			callback({ error: 'Download blocked' })
+		);
 
 		const { downloadImagesAsZip } = await import('./actions.js');
 		await expect(downloadImagesAsZip(['data:image/png;base64,AAAA'])).rejects.toThrow('Download blocked');

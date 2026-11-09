@@ -1,7 +1,7 @@
 // @ts-check
-import { normalizeSlashes, removeSpecialCharacters } from '../utils.js';
+import { normalizeSlashes } from '../utils.js';
 import { folderName, hostname, newFileName } from './data.js';
-import { buildZip, fetchImageFiles, imageOrigins, zipEntries } from './zip.js';
+import { buildZip, fetchImageFiles, imageOrigins, safeEntryName, zipEntries } from './zip.js';
 
 export const downloadImages = (/** @type {string[]} */ imagesToDownload) =>
 	new Promise((resolve) => {
@@ -35,7 +35,7 @@ export const downloadImagesAsZip = async (/** @type {string[]} */ imagesToDownlo
 	const { files, failed } = await fetchImageFiles(imagesToDownload);
 	const blob = buildZip(zipEntries(files, { new_file_name: fileBaseName, count: imagesToDownload.length }));
 
-	const baseName = removeSpecialCharacters(fileBaseName || fallbackName || 'images').replace(/\.zip$/i, '');
+	const baseName = safeEntryName(fileBaseName || fallbackName || 'images').replace(/\.zip$/i, '');
 	const zipName = `${baseName || 'images'}.zip`;
 	const filename = normalizeSlashes(folder ? `${folder}/${zipName}` : zipName);
 	await downloadBlob(blob, filename);
@@ -51,23 +51,66 @@ async function downloadBlob(blob, filename) {
 	let started = false;
 
 	try {
-		await new Promise((resolve, reject) => {
-			chrome.downloads.download({ url, filename, conflictAction: 'uniquify' }, (downloadId) => {
-				if (downloadId == null) {
-					reject(new Error(chrome.runtime.lastError?.message || 'Could not start the .zip download.'));
+		/** @type {number | undefined} */
+		const downloadId = await new Promise((resolve, reject) => {
+			chrome.runtime.sendMessage({ type: 'downloadZip', url, filename }, (response) => {
+				if (chrome.runtime.lastError) {
+					reject(new Error(chrome.runtime.lastError.message));
+				} else if (response?.error) {
+					reject(new Error(response.error));
 				} else {
-					resolve(null);
+					resolve(response?.downloadId);
 				}
 			});
 		});
 		started = true;
-	} finally {
-		if (started) {
-			setTimeout(() => URL.revokeObjectURL(url), 60_000);
-		} else {
-			URL.revokeObjectURL(url);
+		const interruption = await revokeWhenDownloadFinishes(url, downloadId);
+		// The user knows when they cancel a download; other interruptions are failures.
+		if (interruption && interruption !== 'USER_CANCELED') {
+			throw new Error('The .zip download was interrupted.');
 		}
+	} finally {
+		if (!started) URL.revokeObjectURL(url);
 	}
+}
+
+/**
+ * Keep the blob alive until Chrome has finished reading it, so the caller keeps
+ * the extension open for the whole download.
+ * @param {string} url
+ * @param {number | undefined} downloadId
+ * @returns {Promise<string | undefined>} interruption reason, or undefined when completed
+ */
+function revokeWhenDownloadFinishes(url, downloadId) {
+	return new Promise((resolve) => {
+		if (downloadId == null) {
+			setTimeout(() => {
+				URL.revokeObjectURL(url);
+				resolve(undefined);
+			}, 60_000);
+			return;
+		}
+
+		let revoked = false;
+		const revoke = (/** @type {string | undefined} */ reason) => {
+			if (revoked) return;
+			revoked = true;
+			chrome.downloads.onChanged.removeListener(listener);
+			URL.revokeObjectURL(url);
+			resolve(reason);
+		};
+		const listener = (/** @type {chrome.downloads.DownloadDelta} */ delta) => {
+			if (delta.id !== downloadId) return;
+			if (delta.state?.current === 'complete') revoke(undefined);
+			else if (delta.state?.current === 'interrupted') revoke(delta.error?.current ?? 'interrupted');
+		};
+
+		chrome.downloads.onChanged.addListener(listener);
+		chrome.downloads.search?.({ id: downloadId }, ([download]) => {
+			if (download?.state === 'complete') revoke(undefined);
+			else if (download?.state === 'interrupted') revoke(download.error ?? 'interrupted');
+		});
+	});
 }
 
 export const openImage = async (/** @type {string} */ url) => {
