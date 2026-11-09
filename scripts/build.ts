@@ -14,6 +14,7 @@ async function build() {
 		['node_modules/@preact/signals-core/dist/signals-core.mjs', 'lib/preact-signals-core.mjs'],
 		['node_modules/@preact/signals/dist/signals.mjs', 'lib/preact-signals.mjs'],
 		['node_modules/@preact/signals/utils/dist/utils.mjs', 'lib/preact-signals-utils.mjs'],
+		['node_modules/fflate/esm/browser.js', 'lib/fflate.mjs'],
 		['node_modules/htm/dist/htm.mjs', 'lib/htm.mjs'],
 		['node_modules/htm/preact/index.mjs', 'lib/htm-preact.mjs'],
 		['node_modules/nouislider/dist/nouislider.min.css', 'lib/nouislider.min.css'],

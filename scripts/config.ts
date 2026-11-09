@@ -40,6 +40,8 @@ export const importmap = {
 	"'@preact/signals'": "'/lib/preact-signals.mjs'",
 	'"@preact/signals/utils"': '"/lib/preact-signals-utils.mjs"',
 	"'@preact/signals/utils'": "'/lib/preact-signals-utils.mjs'",
+	'"fflate"': '"/lib/fflate.mjs"',
+	"'fflate'": "'/lib/fflate.mjs'",
 	'"htm"': '"/lib/htm.mjs"',
 	"'htm'": "'/lib/htm.mjs'",
 	'"htm/preact"': '"/lib/htm-preact.mjs"',

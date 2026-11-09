@@ -1,20 +1,25 @@
 // @ts-check
-import html, { useSignal } from '../html.js';
+import html, { For, useSignal } from '../html.js';
 
 import { removeSpecialCharacters, setToInvertedCheckboxValue } from '../utils.js';
 import * as actions from './actions.js';
-import { folderName, newFileName, selectedImages, showDownloadConfirmation } from './data.js';
+import { downloadMode, folderName, newFileName, selectedImages, showDownloadConfirmation } from './data.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { useRunAfterUpdate } from './useRunAfterUpdate.js';
+import { imageLabel } from './zip.js';
 
-export function Footer(/** @type {Object} */ props) {
+export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup = false, ...props }) {
 	// Download
 	const downloadIsInProgress = useSignal(false);
 	const downloadConfirmationIsShown = useSignal(false);
+	const downloadError = useSignal('');
+	const downloadFailures = useSignal(/** @type {string[]} */ ([]));
 
 	function maybeDownloadImages() {
-		if (showDownloadConfirmation.value && selectedImages.value.length > 1) {
+		if (downloadMode.value === 'zip') {
+			downloadImages();
+		} else if (showDownloadConfirmation.value && selectedImages.value.length > 1) {
 			downloadConfirmationIsShown.value = true;
 		} else {
 			downloadImages();
@@ -23,8 +28,31 @@ export function Footer(/** @type {Object} */ props) {
 
 	async function downloadImages() {
 		downloadIsInProgress.value = true;
-		await actions.downloadImages(selectedImages.value);
-		downloadIsInProgress.value = false;
+		downloadError.value = '';
+		downloadFailures.value = [];
+
+		try {
+			if (downloadMode.value === 'zip') {
+				downloadFailures.value = await actions.downloadImagesAsZip(selectedImages.value);
+			} else {
+				await actions.downloadImages(selectedImages.value);
+			}
+		} catch (error) {
+			downloadError.value = error instanceof Error ? error.message : `${error}`;
+		} finally {
+			downloadIsInProgress.value = false;
+		}
+	}
+
+	function selectDownloadMode(/** @type {'individual' | 'zip'} */ mode) {
+		downloadError.value = '';
+		downloadFailures.value = [];
+		downloadMode.value = mode;
+		if (mode === 'zip') {
+			downloadImages();
+		} else {
+			maybeDownloadImages();
+		}
 	}
 
 	const runAfterUpdate = useRunAfterUpdate();
@@ -87,11 +115,42 @@ export function Footer(/** @type {Object} */ props) {
 
 								<${DownloadButton}
 									class="col-span-1"
-									disabled=${selectedImages.value.length === 0}
 									loading=${downloadIsInProgress.value}
+									selectedCount=${selectedImages.value.length}
+									selectedImages=${selectedImages.value}
+									mode=${downloadMode.value}
+									isPopup=${isPopup}
 									onClick=${maybeDownloadImages}
+									onSelectMode=${selectDownloadMode}
 								/>
 							</div>
+
+							${
+								downloadError.value
+									? html`<p role="alert" class="mt-1 mb-0 text-xs text-red-600 dark:text-red-400">
+											${downloadError.value}
+										</p>`
+									: null
+							}
+							${
+								downloadFailures.value.length > 0
+									? html`
+											<details class="mt-1 text-xs text-amber-700 dark:text-amber-400" aria-live="polite">
+												<summary class="cursor-pointer">
+													${downloadFailures.value.length} image${downloadFailures.value.length === 1 ? '' : 's'} could
+													not be included in the .zip
+												</summary>
+												<ul class="mt-1 mb-0 max-h-24 overflow-y-auto pl-4">
+													<${For} each=${downloadFailures.value}>
+														${(/** @type {string} */ url) => html`
+															<li class="truncate" title=${url}>${imageLabel(url)}</li>
+														`}
+													<//>
+												</ul>
+											</details>
+										`
+									: null
+							}
 						`
 			}
 		</footer>

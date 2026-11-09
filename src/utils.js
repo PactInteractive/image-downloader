@@ -16,6 +16,9 @@ export const isTruthy = (value) => !!value;
 /** @type {(value: string) => string} */
 export const removeSpecialCharacters = (value) => value.replace(/[<>:"|?*]/g, '');
 
+/** @type {(value: string) => string} */
+export const normalizeSlashes = (value) => value.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
+
 /** @type {(container: Element, src: string) => HTMLImageElement | undefined} */
 export const findImageBySrc = (container, src) =>
 	[...container.querySelectorAll('img')].find((image) => image.getAttribute('src') === src);

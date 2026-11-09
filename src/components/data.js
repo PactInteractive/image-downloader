@@ -30,6 +30,7 @@ export const defaults = {
 	// Download
 	folder_name: '',
 	new_file_name: '',
+	download_mode: /** @type {'individual' | 'zip'} */ ('individual'),
 	show_download_confirmation: true,
 	// Images
 	selected_images: /** @type {string[]} */ ([]),
@@ -87,6 +88,8 @@ export const folderName = storedSignal('folder_name');
 
 export const newFileName = storedSignal('new_file_name');
 
+export const downloadMode = storedSignal('download_mode');
+
 export const showDownloadConfirmation = storedSignal('show_download_confirmation');
 
 // Images
@@ -118,6 +121,7 @@ export const initialize = action(async () => {
 		hide_errored_images: hideErroredImages,
 		folder_name: folderName,
 		new_file_name: newFileName,
+		download_mode: downloadMode,
 		show_download_confirmation: showDownloadConfirmation,
 		selected_images: selectedImages,
 		columns: columns,

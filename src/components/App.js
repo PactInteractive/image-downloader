@@ -17,11 +17,11 @@ import { Header } from './Header.js';
 import { Images } from './Images.js';
 import { useTheme } from './useTheme.js';
 
-export function App() {
-	return html`<${ErrorBoundary}><${AppWithoutErrorBoundary} /><//>`;
+export function App(/** @type {{ isPopup?: boolean }} */ { isPopup = false } = {}) {
+	return html`<${ErrorBoundary}><${AppWithoutErrorBoundary} isPopup=${isPopup} /><//>`;
 }
 
-function AppWithoutErrorBoundary() {
+function AppWithoutErrorBoundary(/** @type {{ isPopup: boolean }} */ { isPopup }) {
 	useTheme();
 
 	useEffect(() => {
@@ -50,6 +50,7 @@ function AppWithoutErrorBoundary() {
 
 		<${Footer}
 			class="sticky bottom-0 mt-auto bg-white p-2 dark:bg-slate-900"
+			isPopup=${isPopup}
 			style=${{
 				boxShadow:
 					'0 -4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1))',
