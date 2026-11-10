@@ -10,6 +10,7 @@ import { imageOrigins } from './zip.js';
  * @param {{
  *   class?: string,
  *   loading: boolean,
+ *   preparing?: boolean,
  *   selectedCount: number,
  *   selectedImages: string[],
  *   mode: DownloadMode,
@@ -21,6 +22,7 @@ import { imageOrigins } from './zip.js';
 export function DownloadButton({
 	class: className = '',
 	loading,
+	preparing = false,
 	selectedCount,
 	selectedImages,
 	mode,
@@ -60,6 +62,7 @@ export function DownloadButton({
 			: mode === 'zip'
 				? 'Download the selected images as a .zip'
 				: 'Download the selected images as individual files';
+	const loadingLabel = mode === 'zip' && !preparing ? 'Downloading .zip' : 'Preparing download';
 
 	function positionMenu() {
 		const trigger = triggerRef.current;
@@ -80,6 +83,7 @@ export function DownloadButton({
 	function selectMode(/** @type {DownloadMode} */ selectedMode) {
 		const menu = menuRef.current;
 		if (menu?.matches(':popover-open')) menu.hidePopover();
+		if (selectedMode === mode) return;
 		onSelectMode(selectedMode);
 	}
 
@@ -143,7 +147,7 @@ export function DownloadButton({
 					${loading ? '•••' : selectedCount > 0 ? `Download (${selectedCount})` : 'Download'}
 				</span>
 				<span class="text-2xs leading-none text-sky-100"> ${mode === 'zip' ? 'as .zip' : 'as individual files'} </span>
-				${loading ? html`<span class="sr-only">Preparing download</span>` : null}
+				${loading ? html`<span class="sr-only">${loadingLabel}</span>` : null}
 			</button>
 
 			<button

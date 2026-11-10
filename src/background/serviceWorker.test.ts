@@ -34,7 +34,7 @@ beforeEach(async () => {
 function sendMessage(message: any) {
 	const handleMessage = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 	return new Promise<any>((resolve) => {
-		handleMessage(message, {}, resolve);
+		expect(handleMessage(message, {}, resolve)).toBe(true);
 	});
 }
 

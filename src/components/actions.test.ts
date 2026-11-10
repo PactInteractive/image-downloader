@@ -190,6 +190,23 @@ describe('downloadImagesAsZip', () => {
 		revoke.mockRestore();
 	});
 
+	it('reports a download that was already interrupted before the listener was attached', async () => {
+		const revoke = spyOn(URL, 'revokeObjectURL');
+		chrome.downloads.search = mock((_query: any, callback: (downloads: any[]) => void) =>
+			callback([{ id: 1, state: 'interrupted', error: 'FILE_ACCESS_DENIED' }])
+		);
+		globalThis.fetch = mock(
+			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
+		) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		await expect(downloadImagesAsZip(['data:image/png;base64,AAAA'])).rejects.toThrow(
+			'The .zip download was interrupted.'
+		);
+		expect(revoke).toHaveBeenCalledTimes(1);
+		revoke.mockRestore();
+	});
+
 	it('reports a download that is interrupted', async () => {
 		const revoke = spyOn(URL, 'revokeObjectURL');
 		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
@@ -209,6 +226,28 @@ describe('downloadImagesAsZip', () => {
 		await expect(download).rejects.toThrow('The .zip download was interrupted.');
 		expect(revoke).toHaveBeenCalledTimes(1);
 		revoke.mockRestore();
+	});
+
+	it('stops preparing the zip when the user cancels', async () => {
+		const controller = new AbortController();
+		let startFetch: () => void = () => {};
+		const fetchStarted = new Promise<void>((resolve) => (startFetch = resolve));
+		globalThis.fetch = mock((_url: any, options: any) => {
+			startFetch();
+			return new Promise((_resolve, reject) => {
+				const cancel = () => reject(controller.signal.reason);
+				controller.signal.addEventListener('abort', cancel);
+				options.signal?.addEventListener('abort', cancel);
+			});
+		}) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		const download = downloadImagesAsZip(['https://example.com/a.png'], controller.signal);
+		await fetchStarted;
+		controller.abort();
+
+		await expect(download).rejects.toHaveProperty('name', 'AbortError');
+		expect(chrome.downloads.download.mock.calls).toEqual([]);
 	});
 
 	it('does not report a download the user cancelled', async () => {

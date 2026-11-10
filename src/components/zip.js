@@ -19,20 +19,24 @@ export function buildZip(files) {
 /**
  * Images are already compressed, so the zip stores them as-is and only pays for the container.
  * @param {string[]} urls
+ * @param {AbortSignal} [signal]
  * @param {number} [concurrency]
  * @returns {Promise<{ files: ImageFile[], failed: string[] }>}
  */
-export async function fetchImageFiles(urls, concurrency = 4) {
+export async function fetchImageFiles(urls, signal, concurrency = 4) {
 	/** @type {(ImageFile | undefined)[]} */
 	const files = new Array(urls.length);
 	let nextIndex = 0;
 
 	async function fetchNext() {
-		while (nextIndex < urls.length) {
+		while (nextIndex < urls.length && !signal?.aborted) {
 			const index = nextIndex++;
 			const url = urls[index];
 			try {
-				const response = await fetch(url, { credentials: 'include', signal: AbortSignal.timeout(30_000) });
+				const response = await fetch(url, {
+					credentials: 'include',
+					signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000),
+				});
 				if (!response.ok) {
 					throw new Error(`Could not read ${url} (${response.status})`);
 				}
@@ -43,6 +47,7 @@ export async function fetchImageFiles(urls, concurrency = 4) {
 				}
 				files[index] = { url, mime, data: new Uint8Array(await response.arrayBuffer()), index };
 			} catch (error) {
+				if (signal?.aborted) throw signal.reason;
 				// Match individual downloads: keep the images that load instead of failing the batch.
 				console.error(`${url}:`, error);
 			}
@@ -50,6 +55,8 @@ export async function fetchImageFiles(urls, concurrency = 4) {
 	}
 
 	await Promise.all(Array.from({ length: Math.min(concurrency, urls.length) }, fetchNext));
+
+	if (signal?.aborted) throw signal.reason;
 
 	const loaded = files.filter(isTruthy);
 	if (urls.length > 0 && loaded.length === 0) {

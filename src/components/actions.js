@@ -18,7 +18,11 @@ export const downloadImages = (/** @type {string[]} */ imagesToDownload) =>
 		);
 	});
 
-export const downloadImagesAsZip = async (/** @type {string[]} */ imagesToDownload) => {
+export const downloadImagesAsZip = async (
+	/** @type {string[]} */ imagesToDownload,
+	/** @type {AbortSignal | undefined} */ signal = undefined,
+	/** @type {() => void} */ onDownloadStarted = () => {}
+) => {
 	// The permission prompt and the fetches can take a while; use the settings visible when Download was clicked.
 	const folder = folderName.value;
 	const fileBaseName = newFileName.value;
@@ -31,22 +35,32 @@ export const downloadImagesAsZip = async (/** @type {string[]} */ imagesToDownlo
 			throw new Error('Allow access to the image hosts to download them as a .zip.');
 		}
 	}
+	if (signal?.aborted) throw signal.reason;
 
-	const { files, failed } = await fetchImageFiles(imagesToDownload);
+	let { files, failed } = await fetchImageFiles(imagesToDownload, signal);
+	if (signal?.aborted) throw signal.reason;
+
 	const blob = buildZip(zipEntries(files, { new_file_name: fileBaseName, count: imagesToDownload.length }));
+	// The zip holds its own copy; drop the per-image buffers before waiting for the download.
+	files = [];
+	if (signal?.aborted) throw signal.reason;
 
 	const baseName = safeEntryName(fileBaseName || fallbackName || 'images').replace(/\.zip$/i, '');
 	const zipName = `${baseName || 'images'}.zip`;
 	const filename = normalizeSlashes(folder ? `${folder}/${zipName}` : zipName);
-	await downloadBlob(blob, filename);
+	await downloadBlob(blob, filename, signal, onDownloadStarted);
 	return failed;
 };
 
 /**
  * @param {Blob} blob
  * @param {string} filename
+ * @param {AbortSignal | undefined} signal
+ * @param {() => void} onDownloadStarted
  */
-async function downloadBlob(blob, filename) {
+async function downloadBlob(blob, filename, signal, onDownloadStarted) {
+	if (signal?.aborted) throw signal.reason;
+
 	const url = URL.createObjectURL(blob);
 	let started = false;
 
@@ -63,7 +77,19 @@ async function downloadBlob(blob, filename) {
 				}
 			});
 		});
+		if (signal?.aborted) {
+			if (downloadId != null) {
+				try {
+					// Wait for Chrome to stop reading before the finally block revokes the blob URL.
+					await chrome.downloads.cancel(downloadId);
+				} catch {
+					// The download may already have finished.
+				}
+			}
+			throw signal.reason;
+		}
 		started = true;
+		onDownloadStarted();
 		const interruption = await revokeWhenDownloadFinishes(url, downloadId);
 		// The user knows when they cancel a download; other interruptions are failures.
 		if (interruption && interruption !== 'USER_CANCELED') {
