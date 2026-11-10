@@ -44,7 +44,8 @@ if (chrome.sidePanel) {
 /** @typedef {{
  *   imagesToDownload: string[],
  *   options: any,
- *   indices: Map<number, number> // downloadId → original index
+ *   indices: Map<number, number>, // downloadId → original index
+ *   filename?: string // complete filename for a zip download
  * }} Task */
 
 /** @type {Map<number, Task>} */
@@ -55,7 +56,7 @@ const tasksByDownloadId = new Map();
 // listen while Image Downloader is itself downloading.
 let activeBatchCount = 0;
 
-chrome.runtime.onMessage.addListener(startDownload);
+chrome.runtime.onMessage.addListener(handleMessage);
 chrome.downloads.onChanged.addListener(cleanupCompletedDownloadTasks);
 
 // Firefox has no `onDeterminingFilename`, but takes the filename in `downloads.download()`.
@@ -83,11 +84,19 @@ function removeFilenameListenerIfIdle() {
 // NOTE: Don't directly use an `async` function as a listener for `onMessage`:
 // https://stackoverflow.com/a/56483156
 // https://developer.chrome.com/docs/extensions/reference/runtime/#event-onMessage
-function startDownload(
+function handleMessage(
 	/** @type {any} */ message,
 	/** @type {chrome.runtime.MessageSender} */ sender,
 	/** @type {(response?: any) => void} */ resolve
 ) {
+	if (message?.type === 'downloadZip') {
+		downloadZip(message.url, message.filename).then(
+			(downloadId) => resolve({ downloadId }),
+			(error) => resolve({ error: error instanceof Error ? error.message : `${error}` })
+		);
+		return true;
+	}
+
 	if (!(message && message.type === 'downloadImages')) return;
 
 	downloadImages({
@@ -97,6 +106,42 @@ function startDownload(
 	}).then(resolve);
 
 	return true; // Keeps the message channel open until `resolve` is called
+}
+
+/**
+ * The zip is built in the page, but the download must start here so
+ * `suggestNewFilename()` can name it when other extensions listen for
+ * `onDeterminingFilename`.
+ * @param {string} url
+ * @param {string} filename
+ * @returns {Promise<number>}
+ */
+async function downloadZip(url, filename) {
+	activeBatchCount += 1;
+	ensureFilenameListener();
+
+	try {
+		return await new Promise((resolve, reject) => {
+			/** @type {chrome.downloads.DownloadOptions} */
+			const options = canSuggestFilename() ? { url } : { url, filename, conflictAction: 'uniquify' };
+			chrome.downloads.download(options, (downloadId) => {
+				if (downloadId == null) {
+					reject(new Error(chrome.runtime.lastError?.message || 'Could not start the .zip download.'));
+				} else {
+					tasksByDownloadId.set(downloadId, {
+						imagesToDownload: [],
+						options: {},
+						indices: new Map(),
+						filename,
+					});
+					resolve(downloadId);
+				}
+			});
+		});
+	} finally {
+		activeBatchCount -= 1;
+		removeFilenameListenerIfIdle();
+	}
 }
 
 async function downloadImages(/** @type {Task} */ task) {
@@ -141,6 +186,13 @@ function suggestNewFilename(item, suggest) {
 		return;
 	}
 
+	if (task.filename) {
+		suggest({ filename: task.filename, conflictAction: 'uniquify' });
+		tasksByDownloadId.delete(item.id);
+		removeFilenameListenerIfIdle();
+		return;
+	}
+
 	const index = task.indices.get(item.id);
 	if (index === undefined) {
 		suggest();
@@ -174,6 +226,15 @@ function withFilename(/** @type {Task} */ task, /** @type {number} */ index, /**
 	};
 }
 
+/** @param {string | undefined} mime */
+function extensionFromMime(mime) {
+	const subtype = mime?.split('/')[1]?.split(';')[0]?.trim().toLowerCase();
+	if (!subtype) return '';
+	if (subtype === 'jpeg' || subtype === 'pjpeg') return 'jpg';
+	if (subtype.endsWith('icon')) return 'ico';
+	return subtype.split('+')[0];
+}
+
 function buildFilename(
 	/** @type {Task} */ task,
 	/** @type {number} */ index,
@@ -185,8 +246,9 @@ function buildFilename(
 		newFilename += `${task.options.folder_name}/`;
 	}
 
-	const regex = /(?:\.([^.]+))?$/;
-	const extension = regex.exec(originalFilename)?.[1] || mime?.split('/')?.[1]?.replace('jpeg', 'jpg');
+	const urlExtension = /(?:\.([^.]+))?$/.exec(originalFilename)?.[1];
+	const extension =
+		(urlExtension && /^[a-z0-9]{1,16}$/i.test(urlExtension) ? urlExtension : '') || extensionFromMime(mime);
 
 	if (task.options.new_file_name) {
 		const numberOfDigits = task.imagesToDownload.length.toString().length;

@@ -1,7 +1,7 @@
 {
 	"name": "Image Downloader",
 	"description": "Browse and download images on the web",
-	"version": "4.6.0",
+	"version": "4.7.0",
 	"minimum_chrome_version": "121",
 	"manifest_version": 3,
 	"icons": {
@@ -37,5 +37,9 @@
 		"downloads",
 		"sidePanel",
 		"storage"
+	],
+	"optional_host_permissions": [
+		"http://*/*",
+		"https://*/*"
 	]
 }

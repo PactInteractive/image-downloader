@@ -16,6 +16,9 @@ export const isTruthy = (value) => !!value;
 /** @type {(value: string) => string} */
 export const removeSpecialCharacters = (value) => value.replace(/[<>:"|?*]/g, '');
 
+/** @type {(value: string) => string} */
+export const normalizeSlashes = (value) => value.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
+
 /** @type {(container: Element, src: string) => HTMLImageElement | undefined} */
 export const findImageBySrc = (container, src) =>
 	[...container.querySelectorAll('img')].find((image) => image.getAttribute('src') === src);
@@ -25,6 +28,10 @@ export const stopPropagation = (e) => e.stopPropagation();
 
 /** @type {<T>(values: T[]) => T[]} */
 export const unique = (values) => [...new Set(values)];
+
+/** @type {<T>(left: T[], right: T[]) => boolean} */
+export const arraysEqual = (left, right) =>
+	left.length === right.length && left.every((value, index) => value === right[index]);
 
 // Signals
 export const increment = (/** @type {{ value: number }} */ signal) => () => signal.value++;
