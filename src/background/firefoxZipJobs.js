@@ -13,10 +13,26 @@ const jobs = createZipJobs({
 	closePage: () => {},
 });
 
+// Firefox suspends an idle background page after 30s, even mid-fetch, which loses the job and
+// revokes the zip's blob; an extension API call resets that timer.
+/** @type {ReturnType<typeof setInterval> | undefined} */
+let keepAwakeTimer;
+function keepAwakeWhileBusy() {
+	keepAwakeTimer ??= setInterval(() => {
+		if (jobs.isIdle()) {
+			clearInterval(keepAwakeTimer);
+			keepAwakeTimer = undefined;
+		} else {
+			chrome.runtime.getPlatformInfo();
+		}
+	}, 10_000);
+}
+
 const handleMessage = handleZipJobMessages(jobs);
 chrome.runtime.onMessage.addListener((message, sender, respond) => {
 	// The service worker forwards `startZip` to the offscreen document in Chrome.
 	if (message?.type === 'startZip') {
+		keepAwakeWhileBusy();
 		handleMessage({ target: 'zipJobs', type: 'start', request: message.request }, sender, respond);
 	} else {
 		handleMessage(message, sender, respond);

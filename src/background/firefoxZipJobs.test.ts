@@ -60,3 +60,18 @@ it('answers the panels about the current zip', async () => {
 		state: { status: 'idle', revision: 0 },
 	});
 });
+
+it('keeps the background page awake while a zip is being prepared', async () => {
+	const setIntervalSpy = spyOn(globalThis, 'setInterval');
+	chrome.runtime.getPlatformInfo = mock(async () => ({}));
+	globalThis.fetch = mock(() => new Promise(() => {})) as any;
+	const request = { images: ['https://example.com/a.png'], folder: '', fileBaseName: '', fallbackName: '' };
+
+	await sendMessage({ type: 'startZip', request });
+	const [[keepAwake]] = setIntervalSpy.mock.calls as any;
+	keepAwake();
+	setIntervalSpy.mockRestore();
+
+	expect(chrome.runtime.getPlatformInfo).toHaveBeenCalled();
+	await sendMessage({ target: 'zipJobs', type: 'cancel' });
+});
