@@ -77,3 +77,12 @@ export function mockDOM(options?: { localStorage?: boolean }) {
 	if (options?.localStorage) (globalThis as any).localStorage = win.localStorage;
 	return win;
 }
+
+/** Waits for async work that takes an unknown number of macrotasks, such as building a zip. */
+export async function waitFor(condition: () => boolean, timeoutMs = 1000) {
+	const deadline = Date.now() + timeoutMs;
+	while (!condition()) {
+		if (Date.now() > deadline) throw new Error('waitFor timed out');
+		await new Promise((resolve) => setTimeout(resolve, 0));
+	}
+}

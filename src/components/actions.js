@@ -40,10 +40,12 @@ export const downloadImagesAsZip = async (
 	let { files, failed } = await fetchImageFiles(imagesToDownload, signal);
 	if (signal?.aborted) throw signal.reason;
 
-	const blob = buildZip(zipEntries(files, { new_file_name: fileBaseName, count: imagesToDownload.length }));
+	const blob = await buildZip(
+		zipEntries(files, { new_file_name: fileBaseName, count: imagesToDownload.length }),
+		signal
+	);
 	// The zip holds its own copy; drop the per-image buffers before waiting for the download.
 	files = [];
-	if (signal?.aborted) throw signal.reason;
 
 	const baseName = safeEntryName(fileBaseName || fallbackName || 'images').replace(/\.zip$/i, '');
 	const zipName = `${baseName || 'images'}.zip`;

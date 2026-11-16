@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, expect, it, mock, spyOn } from 'bun:test';
 import { h, render } from 'preact';
-import { mockChrome, mockDOM } from '../test-helpers';
+import { mockChrome, mockDOM, waitFor } from '../test-helpers';
 
 mockDOM();
 
@@ -72,7 +72,7 @@ it('hides Cancel once the browser download starts and returns when it finishes',
 
 	render(h(Footer, {}), root);
 	button('Download (1)')?.click();
-	await new Promise((resolve) => setTimeout(resolve, 0));
+	await waitFor(() => chrome.runtime.sendMessage.mock.calls.length > 0);
 
 	expect(button('Cancel')?.tagName).toBe('BUTTON');
 	respond({ downloadId: 1 });
@@ -141,7 +141,7 @@ it('lists failed images and leaves data URLs out of the tooltip', async () => {
 
 		render(h(Footer, {}), root);
 		button('Download (2)')?.click();
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
 
 		const [listener] = [...chrome.downloads.onChanged.listeners];
 		listener({ id: 1, state: { current: 'complete' } });
@@ -168,7 +168,7 @@ it('cancels a download that starts while the handoff is pending', async () => {
 
 	render(h(Footer, {}), root);
 	button('Download (1)')?.click();
-	await new Promise((resolve) => setTimeout(resolve, 0));
+	await waitFor(() => chrome.runtime.sendMessage.mock.calls.length > 0);
 
 	button('Cancel')?.click();
 	respond({ downloadId: 42 });

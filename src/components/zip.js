@@ -1,5 +1,5 @@
 // @ts-check
-import { zipSync } from 'fflate';
+import { Zip, ZipPassThrough } from 'fflate';
 
 import { isTruthy, removeSpecialCharacters, unique } from '../utils.js';
 
@@ -8,12 +8,38 @@ import { isTruthy, removeSpecialCharacters, unique } from '../utils.js';
  */
 
 /**
+ * Streams the entries into the Blob without first joining them into one buffer,
+ * and yields between entries so the page stays responsive and can cancel.
  * @param {{ name: string, data: Uint8Array }[]} files
- * @returns {Blob}
+ * @param {AbortSignal} [signal]
+ * @returns {Promise<Blob>}
  */
-export function buildZip(files) {
-	const entries = Object.fromEntries(files.map(({ name, data }) => [name, data]));
-	return new Blob([zipSync(entries, { level: 0 })], { type: 'application/zip' });
+export async function buildZip(files, signal) {
+	/** @type {Uint8Array<ArrayBuffer>[]} */
+	const chunks = [];
+	/** @type {Error | null} */
+	let zipError = null;
+	const zip = new Zip((error, chunk) => {
+		if (error) zipError = error;
+		// fflate never allocates a `SharedArrayBuffer`.
+		else chunks.push(/** @type {Uint8Array<ArrayBuffer>} */ (chunk));
+	});
+
+	for (const { name, data } of files) {
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		if (signal?.aborted) {
+			zip.terminate();
+			throw signal.reason;
+		}
+		const entry = new ZipPassThrough(name);
+		zip.add(entry);
+		entry.push(data, true);
+		if (zipError) throw zipError;
+	}
+	zip.end();
+	if (zipError) throw zipError;
+
+	return new Blob(chunks, { type: 'application/zip' });
 }
 
 /**
@@ -187,7 +213,7 @@ export function safeEntryName(name) {
 		.map((part) => (reservedWindowsName.test(part) ? `_${part}` : part));
 
 	const entry = parts.join('/') || 'image';
-	// fflate assigns entries into a plain object; `__proto__` would change its prototype.
+	// JS unzippers such as fflate's `unzipSync` assign entries into a plain object; `__proto__` would change its prototype.
 	return entry.toLowerCase() === '__proto__' ? `_${entry}` : entry;
 }
 

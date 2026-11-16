@@ -13,11 +13,24 @@ afterEach(() => {
 });
 
 it('packs files into a zip archive', async () => {
-	const blob = buildZip([{ name: 'one.png', data: new Uint8Array([1, 2, 3]) }]);
+	const blob = await buildZip([{ name: 'one.png', data: new Uint8Array([1, 2, 3]) }]);
 
 	expect(blob.type).toBe('application/zip');
 	const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()));
 	expect(entries['one.png']).toEqual(new Uint8Array([1, 2, 3]));
+});
+
+it('stops building the zip when cancelled', async () => {
+	const controller = new AbortController();
+	const files = [
+		{ name: 'one.png', data: new Uint8Array([1]) },
+		{ name: 'two.png', data: new Uint8Array([2]) },
+	];
+
+	const blob = buildZip(files, controller.signal);
+	controller.abort(new DOMException('cancelled', 'AbortError'));
+
+	await expect(blob).rejects.toThrow('cancelled');
 });
 
 it('names entries like individual downloads and avoids collisions', () => {
@@ -96,7 +109,7 @@ it('renames __proto__ entries so zip creation succeeds', async () => {
 
 	expect(entries.map((entry) => entry.name)).toEqual(['___proto__']);
 
-	const blob = buildZip(entries);
+	const blob = await buildZip(entries);
 	const unzipped = unzipSync(new Uint8Array(await blob.arrayBuffer()));
 	expect(unzipped['___proto__']).toEqual(new Uint8Array([1]));
 });

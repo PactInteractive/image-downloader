@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
 import { unzipSync } from 'fflate';
-import { mockChrome } from '../test-helpers';
+import { mockChrome, waitFor } from '../test-helpers';
 
 let chrome: ReturnType<typeof mockChrome>;
 const realFetch = globalThis.fetch;
@@ -165,7 +165,7 @@ describe('downloadImagesAsZip', () => {
 			finished = true;
 		});
 
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
 		expect(revoke).not.toHaveBeenCalled();
 		expect(finished).toBe(false);
 
@@ -218,7 +218,7 @@ describe('downloadImagesAsZip', () => {
 
 		const { downloadImagesAsZip } = await import('./actions.js');
 		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
 
 		for (const listener of [...chrome.downloads.onChanged.listeners]) {
 			listener({ id: 1, state: { current: 'interrupted' }, error: { current: 'FILE_ACCESS_DENIED' } });
@@ -239,7 +239,7 @@ describe('downloadImagesAsZip', () => {
 
 		const { downloadImagesAsZip } = await import('./actions.js');
 		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
 
 		for (const listener of [...chrome.downloads.onChanged.listeners]) {
 			listener({ id: 1, paused: { previous: false, current: true } });
@@ -284,7 +284,7 @@ describe('downloadImagesAsZip', () => {
 
 		const { downloadImagesAsZip } = await import('./actions.js');
 		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
 
 		for (const listener of [...chrome.downloads.onChanged.listeners]) {
 			listener({ id: 1, state: { current: 'interrupted' }, error: { current: 'USER_CANCELED' } });
