@@ -59,8 +59,27 @@ const zipFilenamesByUrl = new Map();
 /** @type {Map<number, string>} */
 const zipUrlsByDownloadId = new Map();
 // The offscreen document has no `chrome.downloads`, and must keep a zip's blob alive until its download finishes.
-/** @type {Set<number>} */
-const offscreenZipDownloadIds = new Set();
+// Kept in session storage: Chrome may restart the worker while the zip downloads.
+const offscreenZipDownloadIdsKey = 'offscreenZipDownloadIds';
+
+/** @returns {Promise<number[]>} */
+async function offscreenZipDownloadIds() {
+	const { [offscreenZipDownloadIdsKey]: ids = [] } = await chrome.storage.session.get(offscreenZipDownloadIdsKey);
+	return /** @type {number[]} */ (ids);
+}
+
+async function addOffscreenZipDownloadId(/** @type {number} */ downloadId) {
+	const ids = await offscreenZipDownloadIds();
+	await chrome.storage.session.set({ [offscreenZipDownloadIdsKey]: [...ids, downloadId] });
+}
+
+/** @returns {Promise<boolean>} whether the id was there */
+async function deleteOffscreenZipDownloadId(/** @type {number} */ downloadId) {
+	const ids = await offscreenZipDownloadIds();
+	if (!ids.includes(downloadId)) return false;
+	await chrome.storage.session.set({ [offscreenZipDownloadIdsKey]: ids.filter((id) => id !== downloadId) });
+	return true;
+}
 
 // Chromium ignores the `filename` passed to `downloads.download()` by other
 // extensions whenever any extension listens for `onDeterminingFilename`, so only
@@ -212,8 +231,7 @@ async function downloadZip(url, filename) {
 					reject(new Error(chrome.runtime.lastError?.message || 'Could not start the .zip download.'));
 				} else {
 					if (zipFilenamesByUrl.has(url)) zipUrlsByDownloadId.set(downloadId, url);
-					offscreenZipDownloadIds.add(downloadId);
-					resolve(downloadId);
+					addOffscreenZipDownloadId(downloadId).then(() => resolve(downloadId), reject);
 				}
 			});
 		});
@@ -334,9 +352,9 @@ function buildFilename(
 
 function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
 	if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
-		if (offscreenZipDownloadIds.delete(delta.id)) {
-			chrome.runtime.sendMessage({ target: 'zipJobs', type: 'downloadChanged', delta }).catch(() => {});
-		}
+		deleteOffscreenZipDownloadId(delta.id).then((isZip) => {
+			if (isZip) chrome.runtime.sendMessage({ target: 'zipJobs', type: 'downloadChanged', delta }).catch(() => {});
+		});
 		tasksByDownloadId.delete(delta.id);
 		const zipUrl = zipUrlsByDownloadId.get(delta.id);
 		if (zipUrl) zipFilenamesByUrl.delete(zipUrl);

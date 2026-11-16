@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { mockChrome } from '../test-helpers';
+import { mockChrome, waitFor } from '../test-helpers';
 
 // `serviceWorker.js` has no exports: importing it registers its listeners as a side
 // effect. Each test imports a fresh instance (a new query string bypasses the module
@@ -207,6 +207,29 @@ describe('zip jobs in Chrome', () => {
 		const [listener] = [...chrome.downloads.onChanged.listeners];
 		listener({ id: downloadId, state: { current: 'in_progress' } });
 		listener({ id: downloadId, state: { current: 'complete' } });
+		await waitFor(() => chrome.runtime.sendMessage.mock.calls.length > 0);
+
+		expect(chrome.runtime.sendMessage.mock.calls).toEqual([
+			[{ target: 'zipJobs', type: 'downloadChanged', delta: { id: downloadId, state: { current: 'complete' } } }],
+		]);
+	});
+
+	it('forwards the finished zip download after the service worker restarts', async () => {
+		const sessionStorage = {};
+		chrome.storage.session = mockChrome({ sessionStorage }).storage.session;
+		const { downloadId } = await sendMessage({ type: 'downloadZip', url: 'blob:zip', filename: 'images.zip' });
+
+		const { offscreen } = chrome;
+		chrome = mockChrome({ sessionStorage });
+		chrome.offscreen = offscreen;
+		chrome.runtime.sendMessage = mock(async () => {});
+		(globalThis as any).chrome = chrome;
+		serviceWorkerInstance += 1;
+		await import(`${serviceWorkerPath}?${serviceWorkerInstance}`);
+
+		const [listener] = [...chrome.downloads.onChanged.listeners];
+		listener({ id: downloadId, state: { current: 'complete' } });
+		await waitFor(() => chrome.runtime.sendMessage.mock.calls.length > 0);
 
 		expect(chrome.runtime.sendMessage.mock.calls).toEqual([
 			[{ target: 'zipJobs', type: 'downloadChanged', delta: { id: downloadId, state: { current: 'complete' } } }],
