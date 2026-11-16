@@ -228,6 +228,30 @@ describe('downloadImagesAsZip', () => {
 		revoke.mockRestore();
 	});
 
+	it('resolves when the download is paused, but keeps the blob alive until it finishes', async () => {
+		const revoke = spyOn(URL, 'revokeObjectURL');
+		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
+			callback(1)
+		);
+		globalThis.fetch = mock(
+			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
+		) as any;
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		for (const listener of [...chrome.downloads.onChanged.listeners]) {
+			listener({ id: 1, paused: { previous: false, current: true } });
+		}
+		expect(await download).toEqual([]);
+		expect(revoke).not.toHaveBeenCalled();
+
+		finishDownload();
+		expect(revoke).toHaveBeenCalledTimes(1);
+		revoke.mockRestore();
+	});
+
 	it('stops preparing the zip when the user cancels', async () => {
 		const controller = new AbortController();
 		let startFetch: () => void = () => {};

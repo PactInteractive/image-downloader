@@ -102,10 +102,11 @@ async function downloadBlob(blob, filename, signal, onDownloadStarted) {
 
 /**
  * Keep the blob alive until Chrome has finished reading it, so the caller keeps
- * the extension open for the whole download.
+ * the extension open for the whole download. Resolves early when the download is
+ * paused, so the UI isn't locked until the user resumes it; the blob stays alive.
  * @param {string} url
  * @param {number | undefined} downloadId
- * @returns {Promise<string | undefined>} interruption reason, or undefined when completed
+ * @returns {Promise<string | undefined>} interruption reason, or undefined when completed or paused
  */
 function revokeWhenDownloadFinishes(url, downloadId) {
 	return new Promise((resolve) => {
@@ -129,12 +130,14 @@ function revokeWhenDownloadFinishes(url, downloadId) {
 			if (delta.id !== downloadId) return;
 			if (delta.state?.current === 'complete') revoke(undefined);
 			else if (delta.state?.current === 'interrupted') revoke(delta.error?.current ?? 'interrupted');
+			else if (delta.paused?.current) resolve(undefined);
 		};
 
 		chrome.downloads.onChanged.addListener(listener);
 		chrome.downloads.search?.({ id: downloadId }, ([download]) => {
 			if (download?.state === 'complete') revoke(undefined);
 			else if (download?.state === 'interrupted') revoke(download.error ?? 'interrupted');
+			else if (download?.paused) resolve(undefined);
 		});
 	});
 }
