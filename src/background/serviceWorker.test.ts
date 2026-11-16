@@ -44,7 +44,7 @@ function startBatch(images: string[], options: any = {}) {
 
 function filenameListener() {
 	return [...chrome.downloads.onDeterminingFilename.listeners][0] as (
-		item: { id: number; filename: string; mime?: string },
+		item: { id: number; filename: string; mime?: string; url?: string },
 		suggest: (suggestion?: { filename: string }) => void
 	) => void;
 }
@@ -130,11 +130,23 @@ describe('serviceWorker filename suggestions', () => {
 		expect(chrome.downloads.download.mock.calls.at(-1)[0]).toEqual({ url });
 
 		const suggest = mock();
-		filenameListener()({ id: downloadId, filename: 'name.zip' }, suggest);
+		filenameListener()({ id: downloadId, url, filename: 'name.zip' }, suggest);
 		expect(suggest.mock.calls).toEqual([[{ filename: 'folder/name.zip', conflictAction: 'uniquify' }]]);
 
 		expect(await done).toEqual({ downloadId });
 		expect(chrome.downloads.onDeterminingFilename.listeners.size).toBe(0);
+	});
+
+	it('suggests the zip filename when Chrome asks before the download callback', async () => {
+		const url = 'blob:chrome-extension://id/zip';
+		const suggest = mock();
+		chrome.downloads.download.mockImplementationOnce((_options: any, callback: (downloadId?: number) => void) => {
+			filenameListener()({ id: 1, url, filename: 'uuid' }, suggest);
+			callback(1);
+		});
+
+		await sendMessage({ type: 'downloadZip', url, filename: 'folder/name.zip' });
+		expect(suggest.mock.calls).toEqual([[{ filename: 'folder/name.zip', conflictAction: 'uniquify' }]]);
 	});
 
 	it('reports a zip download that cannot start', async () => {
