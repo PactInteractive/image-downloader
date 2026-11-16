@@ -1,7 +1,7 @@
 // @ts-check
 import html, { For, useEffect, useRef, useSignal, useSignalEffect } from '../html.js';
 
-import { arraysEqual, removeSpecialCharacters, setToInvertedCheckboxValue } from '../utils.js';
+import { arraysEqual, errorMessage, removeSpecialCharacters, setToInvertedCheckboxValue } from '../utils.js';
 import * as actions from './actions.js';
 import { downloadMode, folderName, newFileName, selectedImages, showDownloadConfirmation } from './data.js';
 import { DownloadButton } from './DownloadButton.js';
@@ -79,7 +79,7 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 			}
 		} catch (error) {
 			if (!controller.signal.aborted) {
-				downloadError.value = error instanceof Error ? error.message : `${error}`;
+				downloadError.value = errorMessage(error);
 			}
 		} finally {
 			if (cancelController.current === controller) cancelController.current = null;
@@ -97,7 +97,7 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 		zipIsPreparing.value = false;
 	}
 
-	function selectDownloadMode(/** @type {'individual' | 'zip'} */ mode) {
+	function selectDownloadMode(/** @type {import('./DownloadButton.js').DownloadMode} */ mode) {
 		downloadError.value = '';
 		downloadFailures.value = [];
 		downloadMode.value = mode;

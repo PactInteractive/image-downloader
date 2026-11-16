@@ -1,5 +1,6 @@
 // @ts-check
 import { folderName, hostname, newFileName } from './data.js';
+import { sendMessage } from '../utils.js';
 import { imageOrigins } from './zip.js';
 
 export const downloadImages = (/** @type {string[]} */ imagesToDownload) =>
@@ -44,7 +45,7 @@ export const downloadImagesAsZip = async (
 	}
 	if (signal?.aborted) throw signal.reason;
 
-	const { state } = await sendZipMessage({ type: 'startZip', request });
+	const { state } = await sendMessage({ type: 'startZip', request });
 	if (signal?.aborted) {
 		await cancelZip();
 		throw signal.reason;
@@ -52,26 +53,15 @@ export const downloadImagesAsZip = async (
 	return state;
 };
 
-export const cancelZip = () => sendZipMessage({ target: 'zipJobs', type: 'cancel' });
+export const cancelZip = () => sendMessage({ target: 'zipJobs', type: 'cancel' });
 
 /** @returns {Promise<import('../background/zipJobs.js').ZipJobState | undefined>} undefined when no job has run */
 export const getZipJob = () =>
-	sendZipMessage({ target: 'zipJobs', type: 'getState' }).then(
+	sendMessage({ target: 'zipJobs', type: 'getState' }).then(
 		(response) => response.state,
 		// Chrome has no offscreen document to answer until a job starts.
 		() => undefined
 	);
-
-/** @param {any} message */
-function sendZipMessage(message) {
-	return new Promise((resolve, reject) => {
-		chrome.runtime.sendMessage(message, (response) => {
-			if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
-			else if (response?.error) reject(new Error(response.error));
-			else resolve(response);
-		});
-	});
-}
 
 /**
  * The permission prompt can't be closed from code, so stop waiting for it instead.

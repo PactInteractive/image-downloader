@@ -1,4 +1,6 @@
 // @ts-check
+import { errorMessage, fileExtension, normalizeSlashes } from '../utils.js';
+
 // Handle updates
 chrome.runtime.onInstalled.addListener(async (details) => {
 	if (details.reason === 'install') {
@@ -56,6 +58,9 @@ const tasksByDownloadId = new Map();
 const zipFilenamesByUrl = new Map();
 /** @type {Map<number, string>} */
 const zipUrlsByDownloadId = new Map();
+// The offscreen document has no `chrome.downloads`, and must keep a zip's blob alive until its download finishes.
+/** @type {Set<number>} */
+const offscreenZipDownloadIds = new Set();
 
 // Chromium ignores the `filename` passed to `downloads.download()` by other
 // extensions whenever any extension listens for `onDeterminingFilename`, so only
@@ -98,14 +103,13 @@ function handleMessage(
 ) {
 	// Firefox has no offscreen documents; `firefoxZipJobs.js` answers there.
 	if (message?.type === 'startZip' && chrome.offscreen) {
-		startZipInOffscreenDocument(message.request).then(resolve, (error) =>
-			resolve({ error: error instanceof Error ? error.message : `${error}` })
-		);
+		startZipInOffscreenDocument(message.request).then(resolve, (error) => resolve({ error: errorMessage(error) }));
 		return true;
 	}
 
 	if (message?.type === 'findDownload') {
-		chrome.downloads.search({ id: message.downloadId }, ([download]) => resolve(download));
+		// Wrapped, because an interrupted download's own `error` would read as a failed request.
+		chrome.downloads.search({ id: message.downloadId }, ([download]) => resolve({ download }));
 		return true;
 	}
 
@@ -125,7 +129,7 @@ function handleMessage(
 	if (message?.type === 'downloadZip') {
 		downloadZip(message.url, message.filename).then(
 			(downloadId) => resolve({ downloadId }),
-			(error) => resolve({ error: error instanceof Error ? error.message : `${error}` })
+			(error) => resolve({ error: errorMessage(error) })
 		);
 		return true;
 	}
@@ -161,8 +165,7 @@ function queueOffscreenDocumentTask(task) {
 }
 
 /**
- * The zip is built in an offscreen document, which keeps going after the popup
- * closes; the service worker itself can't create blob URLs.
+ * The service worker can't create blob URLs, so the zip is built in an offscreen document.
  * @param {any} request
  */
 function startZipInOffscreenDocument(request) {
@@ -209,6 +212,7 @@ async function downloadZip(url, filename) {
 					reject(new Error(chrome.runtime.lastError?.message || 'Could not start the .zip download.'));
 				} else {
 					if (zipFilenamesByUrl.has(url)) zipUrlsByDownloadId.set(downloadId, url);
+					offscreenZipDownloadIds.add(downloadId);
 					resolve(downloadId);
 				}
 			});
@@ -303,15 +307,6 @@ function withFilename(/** @type {Task} */ task, /** @type {number} */ index, /**
 	};
 }
 
-/** @param {string | undefined} mime */
-function extensionFromMime(mime) {
-	const subtype = mime?.split('/')[1]?.split(';')[0]?.trim().toLowerCase();
-	if (!subtype) return '';
-	if (subtype === 'jpeg' || subtype === 'pjpeg') return 'jpg';
-	if (subtype.endsWith('icon')) return 'ico';
-	return subtype.split('+')[0];
-}
-
 function buildFilename(
 	/** @type {Task} */ task,
 	/** @type {number} */ index,
@@ -323,9 +318,7 @@ function buildFilename(
 		newFilename += `${task.options.folder_name}/`;
 	}
 
-	const urlExtension = /(?:\.([^.]+))?$/.exec(originalFilename)?.[1];
-	const extension =
-		(urlExtension && /^[a-z0-9]{1,16}$/i.test(urlExtension) ? urlExtension : '') || extensionFromMime(mime);
+	const extension = fileExtension(originalFilename, mime);
 
 	if (task.options.new_file_name) {
 		const numberOfDigits = task.imagesToDownload.length.toString().length;
@@ -341,25 +334,13 @@ function buildFilename(
 
 function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
 	if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
-		forwardToOffscreenDocument(delta);
+		if (offscreenZipDownloadIds.delete(delta.id)) {
+			chrome.runtime.sendMessage({ target: 'zipJobs', type: 'downloadChanged', delta }).catch(() => {});
+		}
 		tasksByDownloadId.delete(delta.id);
 		const zipUrl = zipUrlsByDownloadId.get(delta.id);
 		if (zipUrl) zipFilenamesByUrl.delete(zipUrl);
 		zipUrlsByDownloadId.delete(delta.id);
 		removeFilenameListenerIfIdle();
 	}
-}
-
-/**
- * The offscreen document has no `chrome.downloads`, and must keep the zip's blob
- * alive until its download finishes.
- * @param {chrome.downloads.DownloadDelta} delta
- */
-async function forwardToOffscreenDocument(delta) {
-	if (!chrome.offscreen || !(await chrome.offscreen.hasDocument())) return;
-	chrome.runtime.sendMessage({ target: 'zipJobs', type: 'downloadChanged', delta }).catch(() => {});
-}
-
-function normalizeSlashes(/** @type {string} */ filename) {
-	return filename.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
 }

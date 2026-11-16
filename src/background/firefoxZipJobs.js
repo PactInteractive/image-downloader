@@ -10,7 +10,7 @@ const jobs = createZipJobs({
 	findDownload: async (downloadId) => (await chrome.downloads.search({ id: downloadId }))[0],
 	cancelDownload: (downloadId) => chrome.downloads.cancel(downloadId),
 	publish: (state) => chrome.runtime.sendMessage({ type: 'zipJobChanged', state }).catch(() => {}),
-	release: () => {},
+	closePage: () => {},
 });
 
 const handleMessage = handleZipJobMessages(jobs);

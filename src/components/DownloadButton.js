@@ -31,10 +31,10 @@ export function DownloadButton({
 }) {
 	const triggerRef = useRef(/** @type {HTMLDivElement | null} */ (null));
 	const menuRef = useRef(/** @type {HTMLDivElement | null} */ (null));
-	const expanded = useSignal(false);
+	const menuIsExpanded = useSignal(false);
 	const permissionHosts = useSignal(/** @type {string[]} */ ([]));
 	const permissionCheckRef = useRef(0);
-	const empty = selectedCount === 0;
+	const selectionIsEmpty = selectedCount === 0;
 	const hosts = permissionHosts.value;
 	const additionalHostCount = hosts.length - 2;
 	const permissionHint =
@@ -51,7 +51,7 @@ export function DownloadButton({
 			? html` - after granting access, reopen the extension popup and click <b>Download</b> again.`
 			: null;
 
-	const tooltip = empty
+	const tooltip = selectionIsEmpty
 		? 'Select some images to download them'
 		: loading
 			? mode === 'zip'
@@ -94,7 +94,7 @@ export function DownloadButton({
 		if (permissionHosts.value.length > 0) permissionHosts.value = [];
 
 		const origins = imageOrigins(selectedImages);
-		if (empty || origins.length === 0 || !chrome.permissions) return;
+		if (selectionIsEmpty || origins.length === 0 || !chrome.permissions) return;
 
 		try {
 			/** @type {string[]} */
@@ -117,8 +117,8 @@ export function DownloadButton({
 		}
 	}
 
-	function handleDownloadClick(/** @type {MouseEvent} */ event) {
-		if (empty) {
+	function downloadOrOpenMenu(/** @type {MouseEvent} */ event) {
+		if (selectionIsEmpty) {
 			openMenu();
 		} else {
 			onClick(event);
@@ -135,9 +135,9 @@ export function DownloadButton({
 				disabled=${loading}
 				title=${tooltip}
 				aria-busy=${loading}
-				aria-controls=${empty ? 'download_options' : undefined}
-				aria-expanded=${empty ? expanded.value : undefined}
-				onClick=${handleDownloadClick}
+				aria-controls=${selectionIsEmpty ? 'download_options' : undefined}
+				aria-expanded=${selectionIsEmpty ? menuIsExpanded.value : undefined}
+				onClick=${downloadOrOpenMenu}
 				...${props}
 			>
 				<span class="leading-none tabular-nums" aria-hidden=${loading ? 'true' : undefined}>
@@ -153,7 +153,7 @@ export function DownloadButton({
 				disabled=${loading}
 				aria-label="Choose how to download"
 				aria-controls="download_options"
-				aria-expanded=${expanded.value}
+				aria-expanded=${menuIsExpanded.value}
 				title="Choose how to download"
 				popovertarget="download_options"
 			>
@@ -178,10 +178,10 @@ export function DownloadButton({
 					updatePermissionHint();
 				}
 			}}
-			onToggle=${(/** @type {{ newState: string }} */ event) => (expanded.value = event.newState === 'open')}
+			onToggle=${(/** @type {{ newState: string }} */ event) => (menuIsExpanded.value = event.newState === 'open')}
 		>
 			${
-				empty
+				selectionIsEmpty
 					? html`
 							<div
 								class="mx-1 mt-1 mb-2 flex items-start gap-1 rounded-lg border border-sky-200 bg-sky-50 p-2 text-xs leading-snug text-sky-900 dark:border-sky-700 dark:bg-sky-950 dark:text-sky-100"
@@ -196,8 +196,8 @@ export function DownloadButton({
 			<button
 				type="button"
 				aria-pressed=${mode === 'individual'}
-				autofocus=${!empty && mode === 'individual'}
-				disabled=${empty || loading}
+				autofocus=${!selectionIsEmpty && mode === 'individual'}
+				disabled=${selectionIsEmpty || loading}
 				class="flex h-8 w-full items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-left text-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent dark:bg-transparent dark:hover:bg-slate-700"
 				onClick=${() => selectMode('individual')}
 			>
@@ -217,8 +217,8 @@ export function DownloadButton({
 				type="button"
 				aria-pressed=${mode === 'zip'}
 				aria-describedby=${hosts.length > 0 ? 'download_permission_hint' : undefined}
-				autofocus=${!empty && mode === 'zip'}
-				disabled=${empty || loading}
+				autofocus=${!selectionIsEmpty && mode === 'zip'}
+				disabled=${selectionIsEmpty || loading}
 				class="flex h-8 w-full items-center gap-2 rounded-lg border-0 bg-transparent px-2 text-left text-sm hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-transparent dark:bg-transparent dark:hover:bg-slate-700"
 				onClick=${() => selectMode('zip')}
 			>

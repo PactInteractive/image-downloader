@@ -1,15 +1,15 @@
 // @ts-check
 import { Zip, ZipPassThrough } from 'fflate';
 
-import { isTruthy, removeSpecialCharacters, unique } from '../utils.js';
+import { fileExtension, isTruthy, removeSpecialCharacters, unique } from '../utils.js';
 
 /**
  * @typedef {{ url: string, mime: string, data: Uint8Array, index?: number }} ImageFile
  */
 
 /**
- * Streams the entries into the Blob without first joining them into one buffer,
- * and yields between entries so the page stays responsive and can cancel.
+ * Streams the entries into the Blob without first joining them into one buffer.
+ * Yields every so often rather than per entry, because each `setTimeout` costs at least 4ms.
  * @param {{ name: string, data: Uint8Array }[]} files
  * @param {AbortSignal} [signal]
  * @returns {Promise<Blob>}
@@ -25,8 +25,13 @@ export async function buildZip(files, signal) {
 		else chunks.push(/** @type {Uint8Array<ArrayBuffer>} */ (chunk));
 	});
 
+	let lastYield = -Infinity;
 	for (const { name, data } of files) {
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		if (performance.now() - lastYield > 50) {
+			// Lets a cancel message arrive.
+			await new Promise((resolve) => setTimeout(resolve, 0));
+			lastYield = performance.now();
+		}
 		if (signal?.aborted) {
 			zip.terminate();
 			throw signal.reason;
@@ -121,7 +126,7 @@ export function imageLabel(url) {
 
 /**
  * The zip itself goes into the configured subfolder, so its entries don't repeat that folder.
- * Names follow `buildFilename()` in `serviceWorker.js`, with MIME extensions normalized for data URLs.
+ * Names follow `buildFilename()` in `serviceWorker.js`.
  * @param {ImageFile[]} files
  * @param {{ new_file_name: string, count?: number }} options
  * @returns {{ name: string, data: Uint8Array }[]}
@@ -169,24 +174,13 @@ function isConcreteHostname(hostname) {
  */
 function entryName(file, index, count, newFileName) {
 	const original = originalFilename(file.url);
-	const urlExtension = /(?:\.([^.]+))?$/.exec(original)?.[1];
-	const extension =
-		(urlExtension && /^[a-z0-9]{1,16}$/i.test(urlExtension) ? urlExtension : '') || extensionFromMime(file.mime);
+	const extension = fileExtension(original, file.mime);
 
 	const name = newFileName
 		? `${newFileName}${`${index + 1}`.padStart(`${count}`.length, '0')}${extension ? `.${extension}` : ''}`
 		: original || `image${extension ? `.${extension}` : ''}`;
 
 	return safeEntryName(name);
-}
-
-/** @param {string | undefined} mime */
-function extensionFromMime(mime) {
-	const subtype = mime?.split('/')[1]?.split(';')[0]?.trim().toLowerCase();
-	if (!subtype) return '';
-	if (subtype === 'jpeg' || subtype === 'pjpeg') return 'jpg';
-	if (subtype.endsWith('icon')) return 'ico';
-	return subtype.split('+')[0];
 }
 
 /** @param {string} url */

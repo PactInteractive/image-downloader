@@ -1,10 +1,10 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { mockChrome } from '../test-helpers';
 
-// `serviceWorker.js` is a classic script with no exports: importing it registers its
-// listeners as a side effect. Each test imports a fresh instance (a new query string
-// bypasses the module cache) against a fresh chrome mock, through a variable so
-// `bun check` (which sees no module type) stays happy.
+// `serviceWorker.js` has no exports: importing it registers its listeners as a side
+// effect. Each test imports a fresh instance (a new query string bypasses the module
+// cache) against a fresh chrome mock, through a variable so `bun check` accepts the
+// query string.
 const serviceWorkerPath = './serviceWorker.js';
 let serviceWorkerInstance = 0;
 
@@ -202,21 +202,22 @@ describe('zip jobs in Chrome', () => {
 		expect(chrome.offscreen.createDocument).toHaveBeenCalledTimes(1);
 	});
 
-	it('forwards finished downloads to the offscreen document', async () => {
-		hasDocument = true;
+	it('forwards the finished zip download to the offscreen document', async () => {
+		const { downloadId } = await sendMessage({ type: 'downloadZip', url: 'blob:zip', filename: 'images.zip' });
 		const [listener] = [...chrome.downloads.onChanged.listeners];
-		listener({ id: 1, state: { current: 'in_progress' } });
-		listener({ id: 1, state: { current: 'complete' } });
-		await new Promise((resolve) => setTimeout(resolve, 0));
+		listener({ id: downloadId, state: { current: 'in_progress' } });
+		listener({ id: downloadId, state: { current: 'complete' } });
 
 		expect(chrome.runtime.sendMessage.mock.calls).toEqual([
-			[{ target: 'zipJobs', type: 'downloadChanged', delta: { id: 1, state: { current: 'complete' } } }],
+			[{ target: 'zipJobs', type: 'downloadChanged', delta: { id: downloadId, state: { current: 'complete' } } }],
 		]);
 	});
 
-	it('does not forward downloads when no offscreen document is open', async () => {
+	it('does not forward downloads that are not zips', async () => {
+		hasDocument = true;
+		await startBatch(['https://example.com/1.jpg']);
 		const [listener] = [...chrome.downloads.onChanged.listeners];
-		listener({ id: 1, state: { current: 'complete' } });
+		listener({ id: downloadIds[0], state: { current: 'complete' } });
 		await new Promise((resolve) => setTimeout(resolve, 0));
 
 		expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
@@ -263,7 +264,9 @@ describe('zip jobs in Chrome', () => {
 		);
 		chrome.downloads.cancel = mock((_id: number, callback: () => void) => callback());
 
-		expect(await sendMessage({ type: 'findDownload', downloadId: 7 })).toEqual({ id: 7, state: 'complete' });
+		expect(await sendMessage({ type: 'findDownload', downloadId: 7 })).toEqual({
+			download: { id: 7, state: 'complete' },
+		});
 		await sendMessage({ type: 'cancelDownload', downloadId: 7 });
 		expect(chrome.downloads.cancel.mock.calls[0][0]).toBe(7);
 	});

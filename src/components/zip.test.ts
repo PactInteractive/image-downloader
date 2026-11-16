@@ -84,6 +84,15 @@ it('derives readable extensions from MIME types', () => {
 	]);
 });
 
+it('leaves the extension off when the MIME type does not name an image format', () => {
+	const files = [
+		{ url: 'https://example.com/img/1', mime: 'application/octet-stream', data: new Uint8Array([1]) },
+		{ url: 'https://example.com/img/2', mime: 'binary/octet-stream', data: new Uint8Array([2]) },
+	];
+
+	expect(zipEntries(files, { new_file_name: 'photo' }).map((entry) => entry.name)).toEqual(['photo1', 'photo2']);
+});
+
 it('falls back to the MIME extension when a URL filename ends with a dot', () => {
 	const files = [{ url: 'https://example.com/photo.', mime: 'image/png', data: new Uint8Array([1]) }];
 

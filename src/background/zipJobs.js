@@ -1,6 +1,6 @@
 // @ts-check
 import { buildZip, fetchImageFiles, safeEntryName, zipEntries } from '../components/zip.js';
-import { normalizeSlashes } from '../utils.js';
+import { errorMessage, normalizeSlashes } from '../utils.js';
 
 /**
  * The settings visible when Download was clicked; the job can outlive the panel that started it.
@@ -22,15 +22,13 @@ import { normalizeSlashes } from '../utils.js';
  */
 
 /**
- * What the page running the jobs needs from the extension: the offscreen document
- * in Chrome reaches `chrome.downloads` through the service worker; Firefox's
- * background page calls it directly.
+ * What the page running the jobs needs from the extension; see `offscreen.js` and `firefoxZipJobs.js`.
  * @typedef {{
  *   download: (url: string, filename: string) => Promise<number>,
  *   findDownload: (downloadId: number) => Promise<chrome.downloads.DownloadItem | undefined>,
  *   cancelDownload: (downloadId: number) => Promise<void>,
  *   publish: (state: ZipJobState) => void,
- *   release: () => void,
+ *   closePage: () => void,
  * }} ZipJobHost
  */
 
@@ -40,9 +38,9 @@ export function createZipJobs(host) {
 	let state = { status: 'idle', revision: 0 };
 	/** @type {AbortController | null} */
 	let controller = null;
-	/** The blob must stay alive until Chrome has finished reading it. */
-	/** @type {Map<number, { url: string, images: string[], startedState: ZipJobState }>} */
-	const downloads = new Map();
+	/** Blob URLs must stay alive until Chrome has finished reading them.
+	 * @type {Map<number, { url: string, images: string[], startedState: ZipJobState }>} */
+	const zipDownloads = new Map();
 
 	function setState(/** @type {ZipJobStatus} */ next) {
 		// Wall-clock based, so a state from a recreated document still sorts after older ones.
@@ -52,11 +50,11 @@ export function createZipJobs(host) {
 	}
 
 	function isIdle() {
-		return !controller && downloads.size === 0;
+		return !controller && zipDownloads.size === 0;
 	}
 
-	function releaseIfIdle() {
-		if (isIdle()) host.release();
+	function closePageIfIdle() {
+		if (isIdle()) host.closePage();
 	}
 
 	/** @param {ZipRequest} request */
@@ -73,14 +71,14 @@ export function createZipJobs(host) {
 					const startedState = setState({ status: 'started', images: request.images, failed: started.failed });
 					trackDownload(started.downloadId, started.url, request.images, startedState);
 				}
-				releaseIfIdle();
+				closePageIfIdle();
 			},
 			(error) => {
 				if (controller === jobController) {
 					controller = null;
 					setState({ status: 'failed', images: request.images, error: errorMessage(error) });
 				}
-				releaseIfIdle();
+				closePageIfIdle();
 			}
 		);
 		return preparingState;
@@ -133,7 +131,7 @@ export function createZipJobs(host) {
 	 * @param {ZipJobState} startedState
 	 */
 	function trackDownload(downloadId, url, images, startedState) {
-		downloads.set(downloadId, { url, images, startedState });
+		zipDownloads.set(downloadId, { url, images, startedState });
 		// The download may have finished before it was tracked.
 		host.findDownload(downloadId).then(
 			(download) => download && downloadChanged(deltaFromItem(download)),
@@ -143,18 +141,18 @@ export function createZipJobs(host) {
 
 	/** @param {chrome.downloads.DownloadDelta} delta */
 	function downloadChanged(delta) {
-		const download = downloads.get(delta.id);
+		const download = zipDownloads.get(delta.id);
 		const finishedState = delta.state?.current;
 		if (!download || (finishedState !== 'complete' && finishedState !== 'interrupted')) return;
 
-		downloads.delete(delta.id);
+		zipDownloads.delete(delta.id);
 		URL.revokeObjectURL(download.url);
 		const reason = delta.error?.current ?? 'interrupted';
 		// The user knows when they cancel a download; other interruptions are failures.
 		if (finishedState === 'interrupted' && reason !== 'USER_CANCELED' && state === download.startedState) {
 			setState({ status: 'failed', images: download.images, error: 'The .zip download was interrupted.' });
 		}
-		releaseIfIdle();
+		closePageIfIdle();
 	}
 
 	function cancel() {
@@ -200,9 +198,4 @@ function deltaFromItem(download) {
 		state: { current: download.state },
 		error: download.error ? { current: download.error } : undefined,
 	});
-}
-
-/** @param {unknown} error */
-function errorMessage(error) {
-	return error instanceof Error ? error.message : `${error}`;
 }

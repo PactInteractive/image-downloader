@@ -19,7 +19,8 @@
 	},
 	"options_page": "src/Options/index.html",
 	"background": {
-		"service_worker": "src/background/serviceWorker.js"
+		"service_worker": "src/background/serviceWorker.js",
+		"type": "module"
 	},
 	"web_accessible_resources": [
 		{

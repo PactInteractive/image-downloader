@@ -12,7 +12,7 @@ let host: {
 	findDownload: ReturnType<typeof mock>;
 	cancelDownload: ReturnType<typeof mock>;
 	publish: ReturnType<typeof mock>;
-	release: ReturnType<typeof mock>;
+	closePage: ReturnType<typeof mock>;
 };
 let zipData: Promise<Uint8Array>;
 let revoke: ReturnType<typeof spyOn>;
@@ -29,7 +29,7 @@ beforeEach(() => {
 		findDownload: mock(async () => ({ id: 1, state: 'in_progress' })),
 		cancelDownload: mock(async () => {}),
 		publish: mock(),
-		release: mock(),
+		closePage: mock(),
 	};
 	globalThis.fetch = mock(async () => pngResponse()) as any;
 	revoke = spyOn(URL, 'revokeObjectURL');
@@ -104,18 +104,18 @@ it('names the zip after the page when no file name is set', async () => {
 	expect(host.download.mock.calls[0][1]).toBe('example.com.zip');
 });
 
-it('keeps the blob alive until the download finishes, then releases the page', async () => {
+it('keeps the blob alive until the download finishes, then closes the page', async () => {
 	const jobs = createZipJobs(host);
 	jobs.start(request());
 	await waitFor(() => host.findDownload.mock.calls.length > 0);
 	await new Promise((resolve) => setTimeout(resolve, 0));
 
 	expect(revoke).not.toHaveBeenCalled();
-	expect(host.release).not.toHaveBeenCalled();
+	expect(host.closePage).not.toHaveBeenCalled();
 
 	jobs.downloadChanged({ id: 1, state: { current: 'complete' } } as any);
 	expect(revoke).toHaveBeenCalledTimes(1);
-	expect(host.release).toHaveBeenCalledTimes(1);
+	expect(host.closePage).toHaveBeenCalledTimes(1);
 	expect(lastStatus()).toBe('started');
 });
 
@@ -123,7 +123,7 @@ it('releases the blob when the download finished before it was tracked', async (
 	host.findDownload = mock(async () => ({ id: 1, state: 'complete' }));
 
 	createZipJobs(host).start(request());
-	await waitFor(() => host.release.mock.calls.length > 0);
+	await waitFor(() => host.closePage.mock.calls.length > 0);
 
 	expect(revoke).toHaveBeenCalledTimes(1);
 });
@@ -170,7 +170,7 @@ it('stops preparing without downloading when cancelled', async () => {
 	await waitFor(() => (globalThis.fetch as any).mock.calls.length > 0);
 
 	expect(jobs.cancel().status).toBe('idle');
-	await waitFor(() => host.release.mock.calls.length > 0);
+	await waitFor(() => host.closePage.mock.calls.length > 0);
 	expect(host.download).not.toHaveBeenCalled();
 	expect(lastStatus()).toBe('idle');
 });
@@ -185,7 +185,7 @@ it('cancels a download that starts while the handoff is pending', async () => {
 
 	jobs.cancel();
 	respond(42);
-	await waitFor(() => host.release.mock.calls.length > 0);
+	await waitFor(() => host.closePage.mock.calls.length > 0);
 
 	expect(host.cancelDownload.mock.calls).toEqual([[42]]);
 	expect(revoke).toHaveBeenCalledTimes(1);
@@ -202,7 +202,7 @@ it('reports when the zip download cannot start', async () => {
 
 	expect(published().at(-1)).toMatchObject({ status: 'failed', error: 'Download blocked' });
 	expect(revoke).toHaveBeenCalledTimes(1);
-	expect(host.release).toHaveBeenCalledTimes(1);
+	expect(host.closePage).toHaveBeenCalledTimes(1);
 });
 
 it('reports when none of the images can be fetched', async () => {

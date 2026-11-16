@@ -19,6 +19,40 @@ export const removeSpecialCharacters = (value) => value.replace(/[<>:"|?*]/g, ''
 /** @type {(value: string) => string} */
 export const normalizeSlashes = (value) => value.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
 
+/**
+ * The URL's extension when it is plain, otherwise one named by an `image/*` MIME type.
+ * @param {string} filename
+ * @param {string | undefined} mime
+ */
+export function fileExtension(filename, mime) {
+	const urlExtension = /(?:\.([^.]+))?$/.exec(filename)?.[1];
+	if (urlExtension && /^[a-z0-9]{1,16}$/i.test(urlExtension)) return urlExtension;
+
+	const [type, subtype] = (mime?.split(';')[0].trim().toLowerCase() ?? '').split('/');
+	if (type !== 'image' || !subtype) return '';
+	if (subtype === 'jpeg' || subtype === 'pjpeg') return 'jpg';
+	if (subtype.endsWith('icon')) return 'ico';
+	return subtype.split('+')[0];
+}
+
+/** @param {unknown} error */
+export const errorMessage = (error) => (error instanceof Error ? error.message : `${error}`);
+
+/**
+ * Rejects when nothing answers or the answer carries an `error`.
+ * @param {any} message
+ * @returns {Promise<any>}
+ */
+export function sendMessage(message) {
+	return new Promise((resolve, reject) => {
+		chrome.runtime.sendMessage(message, (response) => {
+			if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+			else if (response?.error) reject(new Error(response.error));
+			else resolve(response);
+		});
+	});
+}
+
 /** @type {(container: Element, src: string) => HTMLImageElement | undefined} */
 export const findImageBySrc = (container, src) =>
 	[...container.querySelectorAll('img')].find((image) => image.getAttribute('src') === src);

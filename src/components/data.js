@@ -30,7 +30,7 @@ export const defaults = {
 	// Download
 	folder_name: '',
 	new_file_name: '',
-	download_mode: /** @type {'individual' | 'zip'} */ ('individual'),
+	download_mode: /** @type {import('./DownloadButton.js').DownloadMode} */ ('individual'),
 	show_download_confirmation: true,
 	// Images
 	selected_images: /** @type {string[]} */ ([]),
