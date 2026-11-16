@@ -69,10 +69,14 @@ export async function fetchImageFiles(urls, signal, concurrency = 4) {
 			const abortOnTimeout = () => request.abort(timeout.reason);
 			timeout.addEventListener('abort', abortOnTimeout);
 			try {
-				const response = await fetch(url, {
-					credentials: 'include',
-					signal: signal ? AbortSignal.any([signal, request.signal]) : request.signal,
-				}).finally(() => timeout.removeEventListener('abort', abortOnTimeout));
+				const requestSignal = signal ? AbortSignal.any([signal, request.signal]) : request.signal;
+				const response = await fetch(url, { credentials: 'include', signal: requestSignal })
+					.catch((error) => {
+						// Chrome fails a cookie-carrying redirect to a host without access, even one that allows any origin.
+						if (!(error instanceof TypeError) || requestSignal.aborted) throw error;
+						return fetch(url, { credentials: 'omit', signal: requestSignal });
+					})
+					.finally(() => timeout.removeEventListener('abort', abortOnTimeout));
 				if (!response.ok) {
 					throw new Error(`Could not read ${url} (${response.status})`);
 				}

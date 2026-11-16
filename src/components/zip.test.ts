@@ -168,6 +168,18 @@ it('keeps the images that load when some fail', async () => {
 	expect((globalThis.fetch as any).mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
 });
 
+it('retries without cookies an image that redirects to a host without access', async () => {
+	globalThis.fetch = mock(async (_url: any, options: any) => {
+		if (options.credentials === 'include') throw new TypeError('Failed to fetch');
+		return new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } });
+	}) as any;
+
+	const { files, failed } = await fetchImageFiles(['https://example.com/redirects-to-cdn']);
+
+	expect(files.map((file) => file.url)).toEqual(['https://example.com/redirects-to-cdn']);
+	expect(failed).toEqual([]);
+});
+
 it('does not time out an image whose body is still arriving', async () => {
 	consoleError = spyOn(console, 'error').mockImplementation(() => {});
 	const timeout = new AbortController();
