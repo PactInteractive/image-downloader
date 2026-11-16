@@ -1,5 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, mock, spyOn } from 'bun:test';
-import { unzipSync } from 'fflate';
+import { afterEach, beforeEach, describe, expect, it, mock } from 'bun:test';
 import { mockChrome, waitFor } from '../test-helpers';
 
 let chrome: ReturnType<typeof mockChrome>;
@@ -33,309 +32,126 @@ describe('openImage', () => {
 	});
 });
 
-function finishDownload(/** @type {number} */ downloadId = 1) {
-	for (const listener of [...chrome.downloads.onChanged.listeners]) {
-		listener({ id: downloadId, state: { current: 'complete' } });
-	}
-}
-
 describe('downloadImagesAsZip', () => {
-	let zipData: Promise<Uint8Array>;
-
 	beforeEach(async () => {
 		const { folderName, hostname, newFileName } = await import('./data.js');
 		folderName.value = '';
 		newFileName.value = '';
 		hostname.value = '';
-		zipData = Promise.resolve(new Uint8Array());
 		chrome.permissions = { request: mock(async () => true), contains: mock(async () => false) };
-		const onChanged = chrome.downloads.onChanged;
-		chrome.downloads.download = mock((options: any, callback: (downloadId?: number) => void) => {
-			// Read the zip while the blob URL is alive, before the simulated download completes.
-			zipData = realFetch(options.url).then(async (response) => new Uint8Array(await response.arrayBuffer()));
-			callback(1);
-			const finish = () =>
-				setTimeout(() => {
-					for (const listener of [...onChanged.listeners]) listener({ id: 1, state: { current: 'complete' } });
-				}, 0);
-			zipData.then(finish, finish);
-		});
-		chrome.runtime.sendMessage = mock((message: any, callback: (response?: any) => void) => {
-			chrome.downloads.download(
-				{ url: message.url, filename: message.filename, conflictAction: 'uniquify' },
-				(downloadId?: number) =>
-					callback(downloadId == null ? { error: chrome.runtime.lastError?.message } : { downloadId })
-			);
-		});
+		chrome.runtime.sendMessage = mock((_message: any, callback: (response?: any) => void) =>
+			callback({ state: { status: 'preparing', revision: 1 } })
+		);
 	});
 
-	it('requests access to every image host, then downloads one zip into the configured folder', async () => {
-		const { folderName, newFileName } = await import('./data.js');
+	it('requests access to every image host, then hands the zip to the background', async () => {
+		const { folderName, hostname, newFileName } = await import('./data.js');
 		folderName.value = 'folder';
 		newFileName.value = 'name';
-		globalThis.fetch = mock(async (url: any) => {
-			const isPng = String(url).endsWith('.png');
-			return new Response(new Uint8Array([isPng ? 1 : 2]), {
-				headers: { 'content-type': isPng ? 'image/png' : 'image/jpeg' },
-			});
-		}) as any;
+		hostname.value = 'example.com';
+		const images = ['https://example.com/a.png', 'https://cdn.example.net/b.jpg'];
 
 		const { downloadImagesAsZip } = await import('./actions.js');
-		await downloadImagesAsZip(['https://example.com/a.png', 'https://cdn.example.net/b.jpg']);
+		expect(await downloadImagesAsZip(images)).toEqual({ status: 'preparing', revision: 1 } as any);
 
 		expect(chrome.permissions.request.mock.calls).toEqual([
 			[{ origins: ['https://example.com/*', 'https://cdn.example.net/*'] }],
 		]);
-
-		const options = chrome.downloads.download.mock.calls[0][0];
-		expect(options.filename).toBe('folder/name.zip');
-		const entries = unzipSync(await zipData);
-		expect(Object.keys(entries).sort()).toEqual(['name1.png', 'name2.jpg']);
-		expect(entries['name1.png']).toEqual(new Uint8Array([1]));
-		expect(entries['name2.jpg']).toEqual(new Uint8Array([2]));
+		expect(chrome.runtime.sendMessage.mock.calls[0][0]).toEqual({
+			type: 'startZip',
+			request: { images, folder: 'folder', fileBaseName: 'name', fallbackName: 'example.com' },
+		});
 	});
 
 	it('uses the folder and file name that were set when the download started', async () => {
 		const { folderName, newFileName } = await import('./data.js');
 		folderName.value = 'folder';
 		newFileName.value = 'name';
-
-		let resolveFetch: (response: Response) => void = () => {};
-		globalThis.fetch = mock(
-			() =>
-				new Promise<Response>((resolve) => {
-					resolveFetch = resolve;
-				})
-		) as any;
+		let grant: (granted: boolean) => void = () => {};
+		chrome.permissions.request = mock(() => new Promise<boolean>((resolve) => (grant = resolve)));
 
 		const { downloadImagesAsZip } = await import('./actions.js');
 		const download = downloadImagesAsZip(['https://example.com/a.png']);
-		await new Promise((resolve) => setTimeout(resolve, 0));
-
 		folderName.value = 'changed';
 		newFileName.value = 'other';
-		resolveFetch(new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } }));
+		grant(true);
 		await download;
 
-		const options = chrome.downloads.download.mock.calls[0][0];
-		expect(options.filename).toBe('folder/name.zip');
-		const entries = unzipSync(await zipData);
-		expect(Object.keys(entries)).toEqual(['name1.png']);
+		expect(chrome.runtime.sendMessage.mock.calls[0][0].request).toMatchObject({
+			folder: 'folder',
+			fileBaseName: 'name',
+		});
 	});
 
 	it('does not ask for permission for data: images', async () => {
-		globalThis.fetch = mock(async () => new Response(new Uint8Array([1]))) as any;
-
 		const { downloadImagesAsZip } = await import('./actions.js');
 		await downloadImagesAsZip([`data:image/png;base64,${btoa('png')}`]);
 
 		expect(chrome.permissions.request.mock.calls).toEqual([]);
-		expect(chrome.downloads.download.mock.calls[0][0].filename).toBe('images.zip');
+		expect(chrome.runtime.sendMessage).toHaveBeenCalledTimes(1);
 	});
 
-	it('returns the images that failed while downloading the rest', async () => {
-		const consoleError = spyOn(console, 'error').mockImplementation(() => {});
-		const missing = 'https://example.com/missing.png';
-		globalThis.fetch = mock(async (url: any) => {
-			if (String(url) === missing) return new Response('', { status: 404 });
-			return new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } });
-		}) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		const failed = await downloadImagesAsZip(['data:image/png;base64,AAAA', missing]);
-		consoleError.mockRestore();
-
-		expect(failed).toEqual([missing]);
-		const entries = unzipSync(await zipData);
-		expect(Object.keys(entries)).toEqual(['image.png']);
-	});
-
-	it('keeps the blob alive and resolves only when the download finishes', async () => {
-		const revoke = spyOn(URL, 'revokeObjectURL');
-		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
-			callback(1)
-		);
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		let finished = false;
-		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']).then(() => {
-			finished = true;
-		});
-
-		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
-		expect(revoke).not.toHaveBeenCalled();
-		expect(finished).toBe(false);
-
-		finishDownload();
-		await download;
-		expect(revoke).toHaveBeenCalledTimes(1);
-		revoke.mockRestore();
-	});
-
-	it('revokes the blob URL when the download completed before the listener was attached', async () => {
-		const revoke = spyOn(URL, 'revokeObjectURL');
-		chrome.downloads.search = mock((_query: any, callback: (downloads: any[]) => void) =>
-			callback([{ id: 1, state: 'complete' }])
-		);
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		await downloadImagesAsZip(['data:image/png;base64,AAAA']);
-		expect(revoke).toHaveBeenCalledTimes(1);
-		revoke.mockRestore();
-	});
-
-	it('reports a download that was already interrupted before the listener was attached', async () => {
-		const revoke = spyOn(URL, 'revokeObjectURL');
-		chrome.downloads.search = mock((_query: any, callback: (downloads: any[]) => void) =>
-			callback([{ id: 1, state: 'interrupted', error: 'FILE_ACCESS_DENIED' }])
-		);
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		await expect(downloadImagesAsZip(['data:image/png;base64,AAAA'])).rejects.toThrow(
-			'The .zip download was interrupted.'
-		);
-		expect(revoke).toHaveBeenCalledTimes(1);
-		revoke.mockRestore();
-	});
-
-	it('reports a download that is interrupted', async () => {
-		const revoke = spyOn(URL, 'revokeObjectURL');
-		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
-			callback(1)
-		);
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
-		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
-
-		for (const listener of [...chrome.downloads.onChanged.listeners]) {
-			listener({ id: 1, state: { current: 'interrupted' }, error: { current: 'FILE_ACCESS_DENIED' } });
-		}
-		await expect(download).rejects.toThrow('The .zip download was interrupted.');
-		expect(revoke).toHaveBeenCalledTimes(1);
-		revoke.mockRestore();
-	});
-
-	it('resolves when the download is paused, but keeps the blob alive until it finishes', async () => {
-		const revoke = spyOn(URL, 'revokeObjectURL');
-		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
-			callback(1)
-		);
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
-		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
-
-		for (const listener of [...chrome.downloads.onChanged.listeners]) {
-			listener({ id: 1, paused: { previous: false, current: true } });
-		}
-		expect(await download).toEqual([]);
-		expect(revoke).not.toHaveBeenCalled();
-
-		finishDownload();
-		expect(revoke).toHaveBeenCalledTimes(1);
-		revoke.mockRestore();
-	});
-
-	it('stops preparing the zip when the user cancels', async () => {
-		const controller = new AbortController();
-		let startFetch: () => void = () => {};
-		const fetchStarted = new Promise<void>((resolve) => (startFetch = resolve));
-		globalThis.fetch = mock((_url: any, options: any) => {
-			startFetch();
-			return new Promise((_resolve, reject) => {
-				const cancel = () => reject(controller.signal.reason);
-				controller.signal.addEventListener('abort', cancel);
-				options.signal?.addEventListener('abort', cancel);
-			});
-		}) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		const download = downloadImagesAsZip(['https://example.com/a.png'], controller.signal);
-		await fetchStarted;
-		controller.abort();
-
-		await expect(download).rejects.toHaveProperty('name', 'AbortError');
-		expect(chrome.downloads.download.mock.calls).toEqual([]);
-	});
-
-	it('does not report a download the user cancelled', async () => {
-		chrome.downloads.download.mockImplementation((_options: any, callback: (downloadId?: number) => void) =>
-			callback(1)
-		);
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		const download = downloadImagesAsZip(['data:image/png;base64,AAAA']);
-		await waitFor(() => chrome.downloads.onChanged.listeners.size > 0);
-
-		for (const listener of [...chrome.downloads.onChanged.listeners]) {
-			listener({ id: 1, state: { current: 'interrupted' }, error: { current: 'USER_CANCELED' } });
-		}
-		await expect(download).resolves.toEqual([]);
-	});
-
-	it('normalizes the zip path like individual downloads', async () => {
-		const { folderName, newFileName } = await import('./data.js');
-		folderName.value = 'a/';
-		newFileName.value = 'b\\c';
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		await downloadImagesAsZip(['data:image/png;base64,AAAA']);
-
-		expect(chrome.downloads.download.mock.calls[0][0].filename).toBe('a/b/c.zip');
-	});
-
-	it('sanitizes the archive filename like archive entries', async () => {
-		const { newFileName } = await import('./data.js');
-		newFileName.value = 'CON';
-		globalThis.fetch = mock(
-			async () => new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } })
-		) as any;
-
-		const { downloadImagesAsZip } = await import('./actions.js');
-		await downloadImagesAsZip(['data:image/png;base64,AAAA']);
-
-		expect(chrome.downloads.download.mock.calls[0][0].filename).toBe('_CON.zip');
-	});
-
-	it('stops without downloading when host access is denied', async () => {
+	it('stops without starting the zip when host access is denied', async () => {
 		chrome.permissions.request = mock(async () => false);
 
 		const { downloadImagesAsZip } = await import('./actions.js');
 		await expect(downloadImagesAsZip(['https://example.com/a.png'])).rejects.toThrow(
 			'Allow access to the image hosts to download them as a .zip.'
 		);
-		expect(chrome.downloads.download.mock.calls).toEqual([]);
+		expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
 	});
 
-	it('reports when the zip download cannot start', async () => {
-		globalThis.fetch = mock(async () => new Response(new Uint8Array([1]))) as any;
+	it('stops waiting for the permission prompt when the user cancels', async () => {
+		chrome.permissions.request = mock(() => new Promise(() => {}));
+		const controller = new AbortController();
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		const download = downloadImagesAsZip(['https://example.com/a.png'], controller.signal);
+		controller.abort();
+
+		await expect(download).rejects.toHaveProperty('name', 'AbortError');
+		expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+	});
+
+	it('cancels a zip that started while the handoff was pending', async () => {
+		const controller = new AbortController();
+		let respond: (response?: any) => void = () => {};
+		chrome.runtime.sendMessage = mock((message: any, callback: (response?: any) => void) => {
+			if (message.type === 'startZip') respond = callback;
+			else callback({ state: { status: 'idle', revision: 2 } });
+		});
+
+		const { downloadImagesAsZip } = await import('./actions.js');
+		const download = downloadImagesAsZip(['data:image/png;base64,AAAA'], controller.signal);
+		await waitFor(() => chrome.runtime.sendMessage.mock.calls.length > 0);
+		controller.abort();
+		respond({ state: { status: 'preparing', revision: 1 } });
+
+		await expect(download).rejects.toHaveProperty('name', 'AbortError');
+		expect(chrome.runtime.sendMessage.mock.calls[1][0]).toEqual({ target: 'zipJobs', type: 'cancel' });
+	});
+
+	it('reports when the zip cannot start', async () => {
 		chrome.runtime.sendMessage = mock((_message: any, callback: (response?: any) => void) =>
-			callback({ error: 'Download blocked' })
+			callback({ error: 'A .zip is already being prepared.' })
 		);
 
 		const { downloadImagesAsZip } = await import('./actions.js');
-		await expect(downloadImagesAsZip(['data:image/png;base64,AAAA'])).rejects.toThrow('Download blocked');
+		await expect(downloadImagesAsZip(['data:image/png;base64,AAAA'])).rejects.toThrow(
+			'A .zip is already being prepared.'
+		);
+	});
+});
+
+describe('getZipJob', () => {
+	it('reports no job when nothing is there to answer', async () => {
+		chrome.runtime.sendMessage = mock((_message: any, callback: (response?: any) => void) => {
+			chrome.runtime.lastError = { message: 'Could not establish connection. Receiving end does not exist.' };
+			callback(undefined);
+			chrome.runtime.lastError = undefined;
+		});
+
+		const { getZipJob } = await import('./actions.js');
+		expect(await getZipJob()).toBeUndefined();
 	});
 });

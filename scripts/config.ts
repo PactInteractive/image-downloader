@@ -10,7 +10,7 @@ export const build = 'build';
 export const firefox = {
 	build: 'build-firefox',
 	manifest: {
-		background: { scripts: ['src/background/serviceWorker.js'] },
+		background: { scripts: ['src/background/serviceWorker.js', 'src/background/firefoxZipJobs.js'], type: 'module' },
 		browser_specific_settings: {
 			gecko: {
 				id: 'image-downloader@vdsabev',

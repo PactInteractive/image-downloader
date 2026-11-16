@@ -51,14 +51,8 @@ it('selects a different download mode', () => {
 	expect(props.onSelectMode).toHaveBeenCalledWith('zip');
 });
 
-it('announces when the zip download has started', () => {
-	renderButton({ mode: 'zip', loading: true, preparing: false });
-
-	expect(root.textContent).toContain('Downloading .zip');
-});
-
-it('announces that the zip is still being prepared', () => {
-	renderButton({ mode: 'zip', loading: true, preparing: true });
+it('announces that the zip is being prepared', () => {
+	renderButton({ mode: 'zip', loading: true });
 
 	expect(root.textContent).toContain('Preparing download');
 });

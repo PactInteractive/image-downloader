@@ -1,7 +1,6 @@
 // @ts-check
-import { normalizeSlashes } from '../utils.js';
 import { folderName, hostname, newFileName } from './data.js';
-import { buildZip, fetchImageFiles, imageOrigins, safeEntryName, zipEntries } from './zip.js';
+import { imageOrigins } from './zip.js';
 
 export const downloadImages = (/** @type {string[]} */ imagesToDownload) =>
 	new Promise((resolve) => {
@@ -18,15 +17,23 @@ export const downloadImages = (/** @type {string[]} */ imagesToDownload) =>
 		);
 	});
 
+/**
+ * Asks for host access, then hands the zip to the background, which keeps going
+ * after the panel closes. Resolves once the job is preparing.
+ * @returns {Promise<import('../background/zipJobs.js').ZipJobState>}
+ */
 export const downloadImagesAsZip = async (
 	/** @type {string[]} */ imagesToDownload,
-	/** @type {AbortSignal | undefined} */ signal = undefined,
-	/** @type {() => void} */ onDownloadStarted = () => {}
+	/** @type {AbortSignal | undefined} */ signal = undefined
 ) => {
-	// The permission prompt and the fetches can take a while; use the settings visible when Download was clicked.
-	const folder = folderName.value;
-	const fileBaseName = newFileName.value;
-	const fallbackName = hostname.value;
+	// The permission prompt can take a while; use the settings visible when Download was clicked.
+	/** @type {import('../background/zipJobs.js').ZipRequest} */
+	const request = {
+		images: imagesToDownload,
+		folder: folderName.value,
+		fileBaseName: newFileName.value,
+		fallbackName: hostname.value,
+	};
 
 	const origins = imageOrigins(imagesToDownload);
 	if (origins.length > 0 && chrome.permissions) {
@@ -37,22 +44,34 @@ export const downloadImagesAsZip = async (
 	}
 	if (signal?.aborted) throw signal.reason;
 
-	let { files, failed } = await fetchImageFiles(imagesToDownload, signal);
-	if (signal?.aborted) throw signal.reason;
-
-	const blob = await buildZip(
-		zipEntries(files, { new_file_name: fileBaseName, count: imagesToDownload.length }),
-		signal
-	);
-	// The zip holds its own copy; drop the per-image buffers before waiting for the download.
-	files = [];
-
-	const baseName = safeEntryName(fileBaseName || fallbackName || 'images').replace(/\.zip$/i, '');
-	const zipName = `${baseName || 'images'}.zip`;
-	const filename = normalizeSlashes(folder ? `${folder}/${zipName}` : zipName);
-	await downloadBlob(blob, filename, signal, onDownloadStarted);
-	return failed;
+	const { state } = await sendZipMessage({ type: 'startZip', request });
+	if (signal?.aborted) {
+		await cancelZip();
+		throw signal.reason;
+	}
+	return state;
 };
+
+export const cancelZip = () => sendZipMessage({ target: 'zipJobs', type: 'cancel' });
+
+/** @returns {Promise<import('../background/zipJobs.js').ZipJobState | undefined>} undefined when no job has run */
+export const getZipJob = () =>
+	sendZipMessage({ target: 'zipJobs', type: 'getState' }).then(
+		(response) => response.state,
+		// Chrome has no offscreen document to answer until a job starts.
+		() => undefined
+	);
+
+/** @param {any} message */
+function sendZipMessage(message) {
+	return new Promise((resolve, reject) => {
+		chrome.runtime.sendMessage(message, (response) => {
+			if (chrome.runtime.lastError) reject(new Error(chrome.runtime.lastError.message));
+			else if (response?.error) reject(new Error(response.error));
+			else resolve(response);
+		});
+	});
+}
 
 /**
  * The permission prompt can't be closed from code, so stop waiting for it instead.
@@ -68,96 +87,6 @@ function untilAborted(promise, signal) {
 		if (signal.aborted) return rejectWithReason();
 		signal.addEventListener('abort', rejectWithReason, { once: true });
 		promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', rejectWithReason));
-	});
-}
-
-/**
- * @param {Blob} blob
- * @param {string} filename
- * @param {AbortSignal | undefined} signal
- * @param {() => void} onDownloadStarted
- */
-async function downloadBlob(blob, filename, signal, onDownloadStarted) {
-	if (signal?.aborted) throw signal.reason;
-
-	const url = URL.createObjectURL(blob);
-	let started = false;
-
-	try {
-		/** @type {number | undefined} */
-		const downloadId = await new Promise((resolve, reject) => {
-			chrome.runtime.sendMessage({ type: 'downloadZip', url, filename }, (response) => {
-				if (chrome.runtime.lastError) {
-					reject(new Error(chrome.runtime.lastError.message));
-				} else if (response?.error) {
-					reject(new Error(response.error));
-				} else {
-					resolve(response?.downloadId);
-				}
-			});
-		});
-		if (signal?.aborted) {
-			if (downloadId != null) {
-				try {
-					// Wait for Chrome to stop reading before the finally block revokes the blob URL.
-					await chrome.downloads.cancel(downloadId);
-				} catch {
-					// The download may already have finished.
-				}
-			}
-			throw signal.reason;
-		}
-		started = true;
-		onDownloadStarted();
-		const interruption = await revokeWhenDownloadFinishes(url, downloadId);
-		// The user knows when they cancel a download; other interruptions are failures.
-		if (interruption && interruption !== 'USER_CANCELED') {
-			throw new Error('The .zip download was interrupted.');
-		}
-	} finally {
-		if (!started) URL.revokeObjectURL(url);
-	}
-}
-
-/**
- * Keep the blob alive until Chrome has finished reading it, so the caller keeps
- * the extension open for the whole download. Resolves early when the download is
- * paused, so the UI isn't locked until the user resumes it; the blob stays alive.
- * @param {string} url
- * @param {number | undefined} downloadId
- * @returns {Promise<string | undefined>} interruption reason, or undefined when completed or paused
- */
-function revokeWhenDownloadFinishes(url, downloadId) {
-	return new Promise((resolve) => {
-		if (downloadId == null) {
-			setTimeout(() => {
-				URL.revokeObjectURL(url);
-				resolve(undefined);
-			}, 60_000);
-			return;
-		}
-
-		let revoked = false;
-		const revoke = (/** @type {string | undefined} */ reason) => {
-			if (revoked) return;
-			revoked = true;
-			chrome.downloads.onChanged.removeListener(listener);
-			URL.revokeObjectURL(url);
-			resolve(reason);
-		};
-		const listener = (/** @type {chrome.downloads.DownloadDelta} */ delta) => {
-			if (delta.id !== downloadId) return;
-			if (delta.state?.current === 'complete') revoke(undefined);
-			else if (delta.state?.current === 'interrupted') revoke(delta.error?.current ?? 'interrupted');
-			else if (delta.paused?.current) resolve(undefined);
-		};
-
-		chrome.downloads.onChanged.addListener(listener);
-		chrome.downloads.search?.({ id: downloadId }, ([download]) => {
-			if (download?.state === 'complete') revoke(undefined);
-			else if (download?.state === 'interrupted') revoke(download.error ?? 'interrupted');
-			else if (download?.paused) resolve(undefined);
-		});
 	});
 }
 

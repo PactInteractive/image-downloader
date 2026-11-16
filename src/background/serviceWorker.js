@@ -96,6 +96,32 @@ function handleMessage(
 	/** @type {chrome.runtime.MessageSender} */ sender,
 	/** @type {(response?: any) => void} */ resolve
 ) {
+	// Firefox has no offscreen documents; `firefoxZipJobs.js` answers there.
+	if (message?.type === 'startZip' && chrome.offscreen) {
+		startZipInOffscreenDocument(message.request).then(resolve, (error) =>
+			resolve({ error: error instanceof Error ? error.message : `${error}` })
+		);
+		return true;
+	}
+
+	if (message?.type === 'findDownload') {
+		chrome.downloads.search({ id: message.downloadId }, ([download]) => resolve(download));
+		return true;
+	}
+
+	if (message?.type === 'cancelDownload') {
+		chrome.downloads.cancel(message.downloadId, () => resolve());
+		return true;
+	}
+
+	if (message?.type === 'closeOffscreen') {
+		closeIdleOffscreenDocument().then(
+			() => resolve(),
+			() => resolve()
+		);
+		return true;
+	}
+
 	if (message?.type === 'downloadZip') {
 		downloadZip(message.url, message.filename).then(
 			(downloadId) => resolve({ downloadId }),
@@ -115,8 +141,53 @@ function handleMessage(
 	return true; // Keeps the message channel open until `resolve` is called
 }
 
+const offscreenDocumentPath = 'src/Offscreen/index.html';
+// Creating, starting and closing run one at a time, so a close requested by a
+// finished job can't land on a job that has started since.
+let offscreenDocumentTask = Promise.resolve();
+
 /**
- * The zip is built in the page, but the download must start here so
+ * @template T
+ * @param {() => Promise<T>} task
+ * @returns {Promise<T>}
+ */
+function queueOffscreenDocumentTask(task) {
+	const result = offscreenDocumentTask.then(task);
+	offscreenDocumentTask = result.then(
+		() => {},
+		() => {}
+	);
+	return result;
+}
+
+/**
+ * The zip is built in an offscreen document, which keeps going after the popup
+ * closes; the service worker itself can't create blob URLs.
+ * @param {any} request
+ */
+function startZipInOffscreenDocument(request) {
+	return queueOffscreenDocumentTask(async () => {
+		if (!(await chrome.offscreen.hasDocument())) {
+			await chrome.offscreen.createDocument({
+				url: offscreenDocumentPath,
+				reasons: [chrome.offscreen.Reason.BLOBS],
+				justification: 'Build .zip downloads that continue after the popup closes',
+			});
+		}
+		return chrome.runtime.sendMessage({ target: 'zipJobs', type: 'start', request });
+	});
+}
+
+function closeIdleOffscreenDocument() {
+	return queueOffscreenDocumentTask(async () => {
+		if (!chrome.offscreen || !(await chrome.offscreen.hasDocument())) return;
+		const response = await chrome.runtime.sendMessage({ target: 'zipJobs', type: 'isIdle' });
+		if (response?.idle) await chrome.offscreen.closeDocument();
+	});
+}
+
+/**
+ * The zip is built in the offscreen document, but the download must start here so
  * `suggestNewFilename()` can name it when other extensions listen for
  * `onDeterminingFilename`.
  * @param {string} url
@@ -270,12 +341,23 @@ function buildFilename(
 
 function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
 	if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
+		forwardToOffscreenDocument(delta);
 		tasksByDownloadId.delete(delta.id);
 		const zipUrl = zipUrlsByDownloadId.get(delta.id);
 		if (zipUrl) zipFilenamesByUrl.delete(zipUrl);
 		zipUrlsByDownloadId.delete(delta.id);
 		removeFilenameListenerIfIdle();
 	}
+}
+
+/**
+ * The offscreen document has no `chrome.downloads`, and must keep the zip's blob
+ * alive until its download finishes.
+ * @param {chrome.downloads.DownloadDelta} delta
+ */
+async function forwardToOffscreenDocument(delta) {
+	if (!chrome.offscreen || !(await chrome.offscreen.hasDocument())) return;
+	chrome.runtime.sendMessage({ target: 'zipJobs', type: 'downloadChanged', delta }).catch(() => {});
 }
 
 function normalizeSlashes(/** @type {string} */ filename) {

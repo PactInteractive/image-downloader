@@ -1,5 +1,5 @@
 // @ts-check
-import html, { For, useRef, useSignal, useSignalEffect } from '../html.js';
+import html, { For, useEffect, useRef, useSignal, useSignalEffect } from '../html.js';
 
 import { arraysEqual, removeSpecialCharacters, setToInvertedCheckboxValue } from '../utils.js';
 import * as actions from './actions.js';
@@ -12,12 +12,14 @@ import { imageLabel } from './zip.js';
 export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup = false, ...props }) {
 	// Download
 	const downloadIsInProgress = useSignal(false);
-	const preparingZip = useSignal(false);
+	// The zip runs in the background, so another panel may have started it.
+	const zipIsPreparing = useSignal(false);
 	const downloadConfirmationIsShown = useSignal(false);
 	const downloadError = useSignal('');
 	const downloadFailures = useSignal(/** @type {string[]} */ ([]));
 	const cancelController = useRef(/** @type {AbortController | null} */ (null));
 	const previousSelection = useRef(/** @type {string[]} */ ([]));
+	const zipRevision = useRef(0);
 
 	useSignalEffect(() => {
 		const selection = selectedImages.value;
@@ -28,6 +30,27 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 		downloadError.value = '';
 		downloadFailures.value = [];
 	});
+
+	/** @param {import('../background/zipJobs.js').ZipJobState | undefined} state */
+	function showZipJob(state) {
+		if (!state || state.revision < zipRevision.current) return;
+		zipRevision.current = state.revision;
+		zipIsPreparing.value = state.status === 'preparing';
+
+		if (state.status === 'idle' || !arraysEqual(state.images, selectedImages.value)) return;
+		if (state.status === 'started') downloadFailures.value = state.failed;
+		else if (state.status === 'failed') downloadError.value = state.error;
+	}
+
+	useEffect(() => {
+		const showChangedZipJob = (/** @type {any} */ message) => {
+			if (message?.type === 'zipJobChanged') showZipJob(message.state);
+		};
+		chrome.runtime.onMessage.addListener(showChangedZipJob);
+		// Results of a job that finished while this panel was closed are stale.
+		actions.getZipJob().then((state) => state?.status === 'preparing' && showZipJob(state));
+		return () => chrome.runtime.onMessage.removeListener(showChangedZipJob);
+	}, []);
 
 	function maybeDownloadImages() {
 		if (downloadMode.value === 'zip') {
@@ -44,19 +67,13 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 		const images = selectedImages.value;
 		const controller = new AbortController();
 		cancelController.current = controller;
-		preparingZip.value = mode === 'zip';
 		downloadIsInProgress.value = true;
 		downloadError.value = '';
 		downloadFailures.value = [];
 
 		try {
 			if (mode === 'zip') {
-				const failures = await actions.downloadImagesAsZip(
-					images,
-					controller.signal,
-					() => (preparingZip.value = false)
-				);
-				if (arraysEqual(selectedImages.value, images)) downloadFailures.value = failures;
+				showZipJob(await actions.downloadImagesAsZip(images, controller.signal));
 			} else {
 				await actions.downloadImages(images);
 			}
@@ -66,14 +83,18 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 			}
 		} finally {
 			if (cancelController.current === controller) cancelController.current = null;
-			preparingZip.value = false;
 			downloadIsInProgress.value = false;
 		}
 	}
 
-	function cancelDownload() {
-		preparingZip.value = false;
+	function cancelZip() {
 		cancelController.current?.abort();
+		if (zipIsPreparing.value)
+			actions.cancelZip().then(
+				({ state }) => showZipJob(state),
+				() => {}
+			);
+		zipIsPreparing.value = false;
 	}
 
 	function selectDownloadMode(/** @type {'individual' | 'zip'} */ mode) {
@@ -147,8 +168,7 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 
 								<${DownloadButton}
 									class="col-span-1"
-									loading=${downloadIsInProgress.value}
-									preparing=${preparingZip.value}
+									loading=${downloadIsInProgress.value || zipIsPreparing.value}
 									selectedCount=${selectedImages.value.length}
 									selectedImages=${selectedImages.value}
 									mode=${downloadMode.value}
@@ -159,24 +179,17 @@ export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup =
 							</div>
 
 							${
-								downloadIsInProgress.value && preparingZip.value
+								zipIsPreparing.value || (downloadIsInProgress.value && downloadMode.value === 'zip')
 									? html`
 											<button
 												type="button"
 												class="mt-1 ml-auto block rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
 												title="Cancel preparing the .zip"
-												onClick=${cancelDownload}
+												onClick=${cancelZip}
 											>
 												Cancel
 											</button>
 										`
-									: null
-							}
-							${
-								downloadIsInProgress.value && !preparingZip.value && downloadMode.value === 'zip'
-									? html`<p role="status" class="mt-1 mb-0 text-xs text-slate-600 dark:text-slate-300">
-											Keep the extension open until the .zip finishes downloading.
-										</p>`
 									: null
 							}
 							${

@@ -161,7 +161,120 @@ describe('serviceWorker filename suggestions', () => {
 	});
 });
 
+describe('zip jobs in Chrome', () => {
+	let hasDocument: boolean;
+
+	beforeEach(() => {
+		hasDocument = false;
+		chrome.offscreen = {
+			Reason: { BLOBS: 'BLOBS' },
+			hasDocument: mock(async () => hasDocument),
+			createDocument: mock(async () => {
+				hasDocument = true;
+			}),
+			closeDocument: mock(async () => {
+				hasDocument = false;
+			}),
+		};
+		chrome.runtime.sendMessage = mock(async () => ({ state: { status: 'preparing', revision: 1 } }));
+	});
+
+	it('starts the zip in an offscreen document, which survives the popup closing', async () => {
+		const request = { images: ['https://example.com/a.png'], folder: '', fileBaseName: '', fallbackName: '' };
+
+		expect(await sendMessage({ type: 'startZip', request })).toEqual({ state: { status: 'preparing', revision: 1 } });
+		expect(chrome.offscreen.createDocument.mock.calls).toEqual([
+			[{ url: 'src/Offscreen/index.html', reasons: ['BLOBS'], justification: expect.any(String) }],
+		]);
+		expect(chrome.runtime.sendMessage.mock.calls).toEqual([[{ target: 'zipJobs', type: 'start', request }]]);
+	});
+
+	it('reuses an open offscreen document', async () => {
+		hasDocument = true;
+		await sendMessage({ type: 'startZip', request: {} });
+
+		expect(chrome.offscreen.createDocument).not.toHaveBeenCalled();
+	});
+
+	it('creates one offscreen document for zips started at the same time', async () => {
+		await Promise.all([sendMessage({ type: 'startZip', request: {} }), sendMessage({ type: 'startZip', request: {} })]);
+
+		expect(chrome.offscreen.createDocument).toHaveBeenCalledTimes(1);
+	});
+
+	it('forwards finished downloads to the offscreen document', async () => {
+		hasDocument = true;
+		const [listener] = [...chrome.downloads.onChanged.listeners];
+		listener({ id: 1, state: { current: 'in_progress' } });
+		listener({ id: 1, state: { current: 'complete' } });
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		expect(chrome.runtime.sendMessage.mock.calls).toEqual([
+			[{ target: 'zipJobs', type: 'downloadChanged', delta: { id: 1, state: { current: 'complete' } } }],
+		]);
+	});
+
+	it('does not forward downloads when no offscreen document is open', async () => {
+		const [listener] = [...chrome.downloads.onChanged.listeners];
+		listener({ id: 1, state: { current: 'complete' } });
+		await new Promise((resolve) => setTimeout(resolve, 0));
+
+		expect(chrome.runtime.sendMessage).not.toHaveBeenCalled();
+	});
+
+	it('creates one offscreen document even when the first is created before the second start checks', async () => {
+		let checks = 0;
+		chrome.offscreen.hasDocument = mock(() => {
+			const value = hasDocument;
+			checks += 1;
+			return new Promise((resolve) => setTimeout(() => resolve(value), checks * 10));
+		});
+
+		const starts = [sendMessage({ type: 'startZip', request: {} }), sendMessage({ type: 'startZip', request: {} })];
+		await Promise.all(starts);
+
+		expect(chrome.offscreen.createDocument).toHaveBeenCalledTimes(1);
+	});
+
+	it('closes the offscreen document when it is done', async () => {
+		hasDocument = true;
+		chrome.runtime.sendMessage = mock(async () => ({ idle: true }));
+		await sendMessage({ type: 'closeOffscreen' });
+
+		expect(chrome.runtime.sendMessage.mock.calls).toEqual([[{ target: 'zipJobs', type: 'isIdle' }]]);
+		expect(chrome.offscreen.closeDocument).toHaveBeenCalledTimes(1);
+	});
+
+	it('keeps the offscreen document open when a zip started after it asked to close', async () => {
+		hasDocument = true;
+		chrome.runtime.sendMessage = mock(async (message: any) =>
+			message.type === 'isIdle' ? { idle: false } : { state: { status: 'preparing', revision: 1 } }
+		);
+
+		await Promise.all([sendMessage({ type: 'startZip', request: {} }), sendMessage({ type: 'closeOffscreen' })]);
+
+		expect(chrome.runtime.sendMessage.mock.calls.map(([message]: any[]) => message.type)).toEqual(['start', 'isIdle']);
+		expect(chrome.offscreen.closeDocument).not.toHaveBeenCalled();
+	});
+
+	it('looks up and cancels downloads for the offscreen document, which has no chrome.downloads', async () => {
+		chrome.downloads.search = mock((_query: any, callback: (downloads: any[]) => void) =>
+			callback([{ id: 7, state: 'complete' }])
+		);
+		chrome.downloads.cancel = mock((_id: number, callback: () => void) => callback());
+
+		expect(await sendMessage({ type: 'findDownload', downloadId: 7 })).toEqual({ id: 7, state: 'complete' });
+		await sendMessage({ type: 'cancelDownload', downloadId: 7 });
+		expect(chrome.downloads.cancel.mock.calls[0][0]).toBe(7);
+	});
+});
+
 describe('Firefox', () => {
+	it('leaves startZip to the background page', () => {
+		const handleMessage = chrome.runtime.onMessage.addListener.mock.calls[0][0];
+		expect(handleMessage({ type: 'startZip', request: {} }, {}, () => {})).toBeUndefined();
+	});
+
 	describe('serviceWorker without onDeterminingFilename', () => {
 		beforeEach(() => {
 			chrome.downloads.onDeterminingFilename = undefined;

@@ -10,7 +10,6 @@ import { imageOrigins } from './zip.js';
  * @param {{
  *   class?: string,
  *   loading: boolean,
- *   preparing?: boolean,
  *   selectedCount: number,
  *   selectedImages: string[],
  *   mode: DownloadMode,
@@ -22,7 +21,6 @@ import { imageOrigins } from './zip.js';
 export function DownloadButton({
 	class: className = '',
 	loading,
-	preparing = false,
 	selectedCount,
 	selectedImages,
 	mode,
@@ -57,12 +55,11 @@ export function DownloadButton({
 		? 'Select some images to download them'
 		: loading
 			? mode === 'zip'
-				? 'Keep the extension open until the .zip finishes downloading'
+				? 'If you want, you can close the extension popup\nwhile the .zip is being prepared!'
 				: 'If you want, you can close the extension popup\nwhile the images are downloading!'
 			: mode === 'zip'
 				? 'Download the selected images as a .zip'
 				: 'Download the selected images as individual files';
-	const loadingLabel = mode === 'zip' && !preparing ? 'Downloading .zip' : 'Preparing download';
 
 	function positionMenu() {
 		const trigger = triggerRef.current;
@@ -147,7 +144,7 @@ export function DownloadButton({
 					${loading ? '•••' : selectedCount > 0 ? `Download (${selectedCount})` : 'Download'}
 				</span>
 				<span class="text-2xs leading-none text-sky-100"> ${mode === 'zip' ? 'as .zip' : 'as individual files'} </span>
-				${loading ? html`<span class="sr-only">${loadingLabel}</span>` : null}
+				${loading ? html`<span class="sr-only">Preparing download</span>` : null}
 			</button>
 
 			<button
