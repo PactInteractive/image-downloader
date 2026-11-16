@@ -146,6 +146,38 @@ it('keeps the images that load when some fail', async () => {
 	expect((globalThis.fetch as any).mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
 });
 
+it('does not time out an image whose body is still arriving', async () => {
+	consoleError = spyOn(console, 'error').mockImplementation(() => {});
+	const timeout = new AbortController();
+	const timeoutSpy = spyOn(AbortSignal, 'timeout').mockImplementation(() => timeout.signal);
+	let sendBody: () => void = () => {};
+	globalThis.fetch = mock(async (_url: any, options: any) => {
+		const body = new ReadableStream({
+			start(controller) {
+				controller.enqueue(new Uint8Array([1]));
+				sendBody = () => {
+					controller.enqueue(new Uint8Array([2]));
+					controller.close();
+				};
+				options.signal.addEventListener('abort', () => controller.error(options.signal.reason));
+			},
+		});
+		return new Response(body, { headers: { 'content-type': 'image/png' } });
+	}) as any;
+
+	try {
+		const result = fetchImageFiles(['https://example.com/large.png']);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		timeout.abort(new DOMException('timed out', 'TimeoutError'));
+		sendBody();
+
+		const { files } = await result;
+		expect([...files[0].data]).toEqual([1, 2]);
+	} finally {
+		timeoutSpy.mockRestore();
+	}
+});
+
 it('treats a markup response with status 200 as a failed image', async () => {
 	consoleError = spyOn(console, 'error').mockImplementation(() => {});
 	const challenge = 'https://example.com/challenge.png';

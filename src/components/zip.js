@@ -32,11 +32,16 @@ export async function fetchImageFiles(urls, signal, concurrency = 4) {
 		while (nextIndex < urls.length && !signal?.aborted) {
 			const index = nextIndex++;
 			const url = urls[index];
+			// Time out a host that doesn't answer, but not a large image that is still arriving.
+			const request = new AbortController();
+			const timeout = AbortSignal.timeout(30_000);
+			const abortOnTimeout = () => request.abort(timeout.reason);
+			timeout.addEventListener('abort', abortOnTimeout);
 			try {
 				const response = await fetch(url, {
 					credentials: 'include',
-					signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(30_000)]) : AbortSignal.timeout(30_000),
-				});
+					signal: signal ? AbortSignal.any([signal, request.signal]) : request.signal,
+				}).finally(() => timeout.removeEventListener('abort', abortOnTimeout));
 				if (!response.ok) {
 					throw new Error(`Could not read ${url} (${response.status})`);
 				}
