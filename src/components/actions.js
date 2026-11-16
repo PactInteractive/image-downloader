@@ -30,7 +30,7 @@ export const downloadImagesAsZip = async (
 
 	const origins = imageOrigins(imagesToDownload);
 	if (origins.length > 0 && chrome.permissions) {
-		const granted = await chrome.permissions.request({ origins });
+		const granted = await untilAborted(chrome.permissions.request({ origins }), signal);
 		if (!granted) {
 			throw new Error('Allow access to the image hosts to download them as a .zip.');
 		}
@@ -51,6 +51,23 @@ export const downloadImagesAsZip = async (
 	await downloadBlob(blob, filename, signal, onDownloadStarted);
 	return failed;
 };
+
+/**
+ * The permission prompt can't be closed from code, so stop waiting for it instead.
+ * @template T
+ * @param {Promise<T>} promise
+ * @param {AbortSignal | undefined} signal
+ * @returns {Promise<T>}
+ */
+function untilAborted(promise, signal) {
+	if (!signal) return promise;
+	return new Promise((resolve, reject) => {
+		const rejectWithReason = () => reject(signal.reason);
+		if (signal.aborted) return rejectWithReason();
+		signal.addEventListener('abort', rejectWithReason, { once: true });
+		promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', rejectWithReason));
+	});
+}
 
 /**
  * @param {Blob} blob

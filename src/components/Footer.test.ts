@@ -179,3 +179,18 @@ it('cancels a download that starts while the handoff is pending', async () => {
 	expect(button('Download (1)')?.tagName).toBe('BUTTON');
 	expect(root.querySelector('[role="alert"]')).toBeNull();
 });
+
+it('returns to the Download button as soon as the user cancels during the permission prompt', async () => {
+	chrome.permissions.request = mock(() => new Promise(() => {}));
+
+	render(h(Footer, {}), root);
+	button('Download (1)')?.click();
+	await new Promise((resolve) => setTimeout(resolve, 0));
+
+	button('Cancel')?.click();
+	await new Promise((resolve) => setTimeout(resolve, 0));
+
+	expect(root.textContent).not.toContain('Keep the extension open until the .zip finishes downloading.');
+	expect(button('Download (1)')?.tagName).toBe('BUTTON');
+	expect(root.querySelector('[role="alert"]')).toBeNull();
+});
