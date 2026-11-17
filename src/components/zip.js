@@ -179,10 +179,15 @@ function isConcreteHostname(hostname) {
 function entryName(file, index, count, newFileName) {
 	const original = originalFilename(file.url);
 	const extension = fileExtension(original, file.mime);
+	const suffix = extension ? `.${extension}` : '';
 
+	// Chrome adds the type's extension to a downloaded file that lacks one.
+	const originalHasExtension = original !== '' && fileExtension(original, undefined) !== '';
 	const name = newFileName
-		? `${newFileName}${`${index + 1}`.padStart(`${count}`.length, '0')}${extension ? `.${extension}` : ''}`
-		: original || `image${extension ? `.${extension}` : ''}`;
+		? `${newFileName}${`${index + 1}`.padStart(`${count}`.length, '0')}${suffix}`
+		: originalHasExtension
+			? original
+			: `${original.replace(/[. ]+$/, '') || 'image'}${suffix}`;
 
 	return safeEntryName(name);
 }

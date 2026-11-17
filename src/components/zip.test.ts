@@ -44,7 +44,7 @@ it('names entries like individual downloads and avoids collisions', () => {
 	expect(zipEntries(files, { new_file_name: '' }).map((entry) => entry.name)).toEqual([
 		'a.png',
 		'a (1).png',
-		'no-extension',
+		'no-extension.jpg',
 		'image.webp',
 	]);
 
@@ -112,7 +112,7 @@ it('ignores URL extensions that are not plain alphanumerics', () => {
 });
 
 it('renames __proto__ entries so zip creation succeeds', async () => {
-	const entries = zipEntries([{ url: 'https://example.com/__proto__', mime: 'image/png', data: new Uint8Array([1]) }], {
+	const entries = zipEntries([{ url: 'https://example.com/__proto__', mime: '', data: new Uint8Array([1]) }], {
 		new_file_name: '',
 	});
 
@@ -267,7 +267,7 @@ it('makes entry names safe to extract on Windows', () => {
 		'_CON .png',
 		'_NUL  .png',
 		'traversal.png',
-		'trailing',
+		'trailing.png',
 		'portrait.png',
 		'mark.png',
 		'arabic.png',
