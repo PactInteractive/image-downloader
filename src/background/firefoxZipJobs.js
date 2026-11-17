@@ -5,7 +5,13 @@ import { createZipJobs, handleZipJobMessages } from './zipJobs.js';
 
 const jobs = createZipJobs({
 	async download(url, filename) {
-		return chrome.downloads.download({ url, filename, conflictAction: 'uniquify' });
+		try {
+			return await chrome.downloads.download({ url, filename, conflictAction: 'uniquify' });
+		} catch (error) {
+			// Firefox rejects when the user closes the Save As dialog; Chrome reports it as USER_CANCELED.
+			if (error instanceof Error && error.message === 'Download canceled by the user') return undefined;
+			throw error;
+		}
 	},
 	findDownload: async (downloadId) => (await chrome.downloads.search({ id: downloadId }))[0],
 	cancelDownload: (downloadId) => chrome.downloads.cancel(downloadId),

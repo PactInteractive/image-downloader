@@ -75,3 +75,16 @@ it('keeps the background page awake while a zip is being prepared', async () => 
 	expect(chrome.runtime.getPlatformInfo).toHaveBeenCalled();
 	await sendMessage({ target: 'zipJobs', type: 'cancel' });
 });
+
+it('goes back to idle when the user closes the Save As dialog', async () => {
+	chrome.downloads.download = mock(async () => {
+		throw new Error('Download canceled by the user');
+	});
+	const request = { images: ['https://example.com/a.png'], folder: '', fileBaseName: 'name', fallbackName: '' };
+
+	await sendMessage({ type: 'startZip', request });
+	await waitFor(() => chrome.downloads.download.mock.calls.length > 0);
+
+	await waitFor(() => chrome.runtime.sendMessage.mock.calls.at(-1)[0].state.status !== 'preparing');
+	expect(chrome.runtime.sendMessage.mock.calls.at(-1)[0].state.status).toBe('idle');
+});

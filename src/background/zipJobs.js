@@ -24,7 +24,7 @@ import { errorMessage, normalizeSlashes } from '../utils.js';
 /**
  * What the page running the jobs needs from the extension; see `offscreen.js` and `firefoxZipJobs.js`.
  * @typedef {{
- *   download: (url: string, filename: string) => Promise<number>,
+ *   download: (url: string, filename: string) => Promise<number | undefined>,
  *   findDownload: (downloadId: number) => Promise<chrome.downloads.DownloadItem | undefined>,
  *   cancelDownload: (downloadId: number) => Promise<void>,
  *   publish: (state: ZipJobState) => void,
@@ -66,10 +66,13 @@ export function createZipJobs(host) {
 		const preparingState = setState({ status: 'preparing', images: request.images });
 		run(request, jobController.signal).then(
 			(started) => {
-				if (controller === jobController) controller = null;
+				const jobIsCurrent = controller === jobController;
+				if (jobIsCurrent) controller = null;
 				if (started) {
 					const startedState = setState({ status: 'started', images: request.images, failed: started.failed });
 					trackDownload(started.downloadId, started.url, request.images, startedState);
+				} else if (jobIsCurrent) {
+					setState({ status: 'idle' });
 				}
 				closePageIfIdle();
 			},
@@ -88,7 +91,7 @@ export function createZipJobs(host) {
 	 * @param {ZipRequest} request
 	 * @param {AbortSignal} signal
 	 * @returns {Promise<{ downloadId: number, url: string, failed: string[] } | undefined>}
-	 *   undefined when cancelled
+	 *   undefined when cancelled, or when the user closed the Save As dialog
 	 */
 	async function run(request, signal) {
 		let { files, failed } = await fetchImageFiles(request.images, signal);
@@ -110,6 +113,10 @@ export function createZipJobs(host) {
 		} catch (error) {
 			URL.revokeObjectURL(url);
 			throw error;
+		}
+		if (downloadId === undefined) {
+			URL.revokeObjectURL(url);
+			return undefined;
 		}
 		if (signal.aborted) {
 			try {
