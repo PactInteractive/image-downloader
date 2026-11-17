@@ -280,6 +280,13 @@ it('refuses a zip larger than a zip without ZIP64 can describe', async () => {
 	await expect(buildZip([{ name: 'a.png', data: huge }])).rejects.toThrow('4 GB');
 });
 
+it('counts the data descriptor fflate writes after each entry toward the 4 GB limit', async () => {
+	// Fits without the 16-byte data descriptor.
+	const almostHuge = { byteLength: 2 ** 32 - 1 - 76 - 2 * 'a.png'.length - 22 } as Uint8Array<ArrayBuffer>;
+
+	await expect(buildZip([{ name: 'a.png', data: almostHuge }])).rejects.toThrow('4 GB');
+});
+
 it('refuses more entries than a zip without ZIP64 can count', async () => {
 	const data = new Uint8Array([1]);
 	const files = Array.from({ length: 65_536 }, (_, index) => ({ name: `${index}.png`, data }));

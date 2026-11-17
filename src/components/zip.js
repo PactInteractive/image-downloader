@@ -20,8 +20,9 @@ export async function buildZip(files, signal) {
 		throw new Error('A .zip can hold at most 65,535 images. Select fewer images.');
 	}
 	const nameEncoder = new TextEncoder();
+	// Per entry: local header, data descriptor, central header, and the name in both headers; then the end record.
 	const zipSize = files.reduce(
-		(size, { name, data }) => size + data.byteLength + 76 + 2 * nameEncoder.encode(name).length,
+		(size, { name, data }) => size + data.byteLength + 30 + 16 + 46 + 2 * nameEncoder.encode(name).length,
 		22
 	);
 	if (zipSize > 0xffffffff) {
