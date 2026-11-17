@@ -27,7 +27,9 @@ export async function buildFirefox() {
 	await fs.copy(config.build, config.firefox.build);
 	const manifestPath = join(config.firefox.build, 'manifest.json');
 	const manifest = await fs.readJson(manifestPath);
-	await fs.writeJson(manifestPath, { ...manifest, ...config.firefox.manifest }, { spaces: '\t' });
+	// Firefox has no offscreen documents and warns about the unknown permission.
+	const permissions = manifest.permissions.filter((permission: string) => permission !== 'offscreen');
+	await fs.writeJson(manifestPath, { ...manifest, permissions, ...config.firefox.manifest }, { spaces: '\t' });
 }
 
 export async function buildCss() {

@@ -1,0 +1,309 @@
+import { afterEach, expect, it, mock, spyOn } from 'bun:test';
+import { unzipSync } from 'fflate';
+
+import { buildZip, fetchImageFiles, imageLabel, imageOrigins, zipEntries } from './zip.js';
+
+const realFetch = globalThis.fetch;
+let consoleError: ReturnType<typeof spyOn> | undefined;
+
+afterEach(() => {
+	globalThis.fetch = realFetch;
+	consoleError?.mockRestore();
+	consoleError = undefined;
+});
+
+it('packs files into a zip archive', async () => {
+	const blob = await buildZip([{ name: 'one.png', data: new Uint8Array([1, 2, 3]) }]);
+
+	expect(blob.type).toBe('application/zip');
+	const entries = unzipSync(new Uint8Array(await blob.arrayBuffer()));
+	expect(entries['one.png']).toEqual(new Uint8Array([1, 2, 3]));
+});
+
+it('stops building the zip when cancelled', async () => {
+	const controller = new AbortController();
+	const files = [
+		{ name: 'one.png', data: new Uint8Array([1]) },
+		{ name: 'two.png', data: new Uint8Array([2]) },
+	];
+
+	const blob = buildZip(files, controller.signal);
+	controller.abort(new DOMException('cancelled', 'AbortError'));
+
+	await expect(blob).rejects.toThrow('cancelled');
+});
+
+it('names entries like individual downloads and avoids collisions', () => {
+	const files = [
+		{ url: 'https://example.com/a.png', mime: 'image/png', data: new Uint8Array([1]) },
+		{ url: 'https://cdn.example.net/a.png', mime: 'image/png', data: new Uint8Array([2]) },
+		{ url: 'https://example.com/no-extension', mime: 'image/jpeg', data: new Uint8Array([3]) },
+		{ url: 'data:image/webp;base64,AAAA', mime: 'image/webp', data: new Uint8Array([4]) },
+	];
+
+	expect(zipEntries(files, { new_file_name: '' }).map((entry) => entry.name)).toEqual([
+		'a.png',
+		'a (1).png',
+		'no-extension.jpg',
+		'image.webp',
+	]);
+
+	expect(zipEntries(files, { new_file_name: 'photo' }).map((entry) => entry.name)).toEqual([
+		'photo1.png',
+		'photo2.png',
+		'photo3.jpg',
+		'photo4.webp',
+	]);
+});
+
+it('numbers entries by their selected position when a middle image fails', () => {
+	const files = [
+		{ url: 'https://example.com/a.png', mime: 'image/png', data: new Uint8Array([1]), index: 0 },
+		{ url: 'https://example.com/c.png', mime: 'image/png', data: new Uint8Array([2]), index: 2 },
+	];
+
+	expect(zipEntries(files, { new_file_name: 'photo', count: 3 }).map((entry) => entry.name)).toEqual([
+		'photo1.png',
+		'photo3.png',
+	]);
+});
+
+it('derives readable extensions from MIME types', () => {
+	const files = [
+		{ url: 'data:image/svg+xml;base64,AAAA', mime: 'image/svg+xml', data: new Uint8Array([1]) },
+		{ url: 'data:image/x-icon;base64,AAAA', mime: 'image/x-icon', data: new Uint8Array([2]) },
+		{ url: 'data:image/vnd.microsoft.icon;base64,AAAA', mime: 'image/vnd.microsoft.icon', data: new Uint8Array([3]) },
+		{ url: 'data:image/png;base64,AAAA', mime: 'image/png', data: new Uint8Array([4]) },
+	];
+
+	expect(zipEntries(files, { new_file_name: '' }).map((entry) => entry.name)).toEqual([
+		'image.svg',
+		'image.ico',
+		'image (1).ico',
+		'image.png',
+	]);
+});
+
+it('leaves the extension off when the MIME type does not name an image format', () => {
+	const files = [
+		{ url: 'https://example.com/img/1', mime: 'application/octet-stream', data: new Uint8Array([1]) },
+		{ url: 'https://example.com/img/2', mime: 'binary/octet-stream', data: new Uint8Array([2]) },
+	];
+
+	expect(zipEntries(files, { new_file_name: 'photo' }).map((entry) => entry.name)).toEqual(['photo1', 'photo2']);
+});
+
+it('falls back to the MIME extension when a URL filename ends with a dot', () => {
+	const files = [{ url: 'https://example.com/photo.', mime: 'image/png', data: new Uint8Array([1]) }];
+
+	expect(zipEntries(files, { new_file_name: 'photo' }).map((entry) => entry.name)).toEqual(['photo1.png']);
+});
+
+it('ignores URL extensions that are not plain alphanumerics', () => {
+	const files = [
+		{ url: 'https://example.com/photo.%20', mime: 'image/png', data: new Uint8Array([1]) },
+		{ url: 'https://example.com/photo.%3Fx', mime: 'image/jpeg', data: new Uint8Array([2]) },
+	];
+
+	expect(zipEntries(files, { new_file_name: 'photo' }).map((entry) => entry.name)).toEqual([
+		'photo1.png',
+		'photo2.jpg',
+	]);
+});
+
+it('renames __proto__ entries so zip creation succeeds', async () => {
+	const entries = zipEntries([{ url: 'https://example.com/__proto__', mime: '', data: new Uint8Array([1]) }], {
+		new_file_name: '',
+	});
+
+	expect(entries.map((entry) => entry.name)).toEqual(['___proto__']);
+
+	const blob = await buildZip(entries);
+	const unzipped = unzipSync(new Uint8Array(await blob.arrayBuffer()));
+	expect(unzipped['___proto__']).toEqual(new Uint8Array([1]));
+});
+
+it('turns image URLs into host permissions without ports or non-http schemes', () => {
+	expect(
+		imageOrigins([
+			'https://example.com:8443/a.png',
+			'http://localhost:3000/a.png',
+			'https://example.com/b.png',
+			'data:image/png;base64,AAAA',
+			'blob:https://example.net/id',
+		])
+	).toEqual(['https://example.com/*', 'http://localhost/*']);
+});
+
+it('skips hosts that match patterns would treat as wildcards or reject', () => {
+	expect(
+		imageOrigins([
+			'https://*/a.png',
+			'https://*.example.com/a.png',
+			'https://exa_mple.com/a.png',
+			'https://example.com./a.png',
+			'https://sub.example.com/a.png',
+		])
+	).toEqual(['https://sub.example.com/*']);
+});
+
+it('keeps the images that load when some fail', async () => {
+	consoleError = spyOn(console, 'error').mockImplementation(() => {});
+	globalThis.fetch = mock(async (url: any) => {
+		if (String(url).endsWith('missing.png')) return new Response('', { status: 404 });
+		if (String(url).endsWith('broken.png')) throw new Error('network error');
+		return new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } });
+	}) as any;
+
+	const { files, failed } = await fetchImageFiles([
+		'https://example.com/a.png',
+		'https://example.com/missing.png',
+		'https://example.com/broken.png',
+		'https://cdn.example.net/b.png',
+	]);
+
+	expect(files.map((file) => file.url)).toEqual(['https://example.com/a.png', 'https://cdn.example.net/b.png']);
+	expect(files.map((file) => file.index)).toEqual([0, 3]);
+	expect(failed).toEqual(['https://example.com/missing.png', 'https://example.com/broken.png']);
+	expect((globalThis.fetch as any).mock.calls[0][1].signal).toBeInstanceOf(AbortSignal);
+});
+
+it('retries without cookies an image that redirects to a host without access', async () => {
+	globalThis.fetch = mock(async (_url: any, options: any) => {
+		if (options.credentials === 'include') throw new TypeError('Failed to fetch');
+		return new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } });
+	}) as any;
+
+	const { files, failed } = await fetchImageFiles(['https://example.com/redirects-to-cdn']);
+
+	expect(files.map((file) => file.url)).toEqual(['https://example.com/redirects-to-cdn']);
+	expect(failed).toEqual([]);
+});
+
+it('does not time out an image whose body is still arriving', async () => {
+	consoleError = spyOn(console, 'error').mockImplementation(() => {});
+	const timeout = new AbortController();
+	const timeoutSpy = spyOn(AbortSignal, 'timeout').mockImplementation(() => timeout.signal);
+	let sendBody: () => void = () => {};
+	globalThis.fetch = mock(async (_url: any, options: any) => {
+		const body = new ReadableStream({
+			start(controller) {
+				controller.enqueue(new Uint8Array([1]));
+				sendBody = () => {
+					controller.enqueue(new Uint8Array([2]));
+					controller.close();
+				};
+				options.signal.addEventListener('abort', () => controller.error(options.signal.reason));
+			},
+		});
+		return new Response(body, { headers: { 'content-type': 'image/png' } });
+	}) as any;
+
+	try {
+		const result = fetchImageFiles(['https://example.com/large.png']);
+		await new Promise((resolve) => setTimeout(resolve, 0));
+		timeout.abort(new DOMException('timed out', 'TimeoutError'));
+		sendBody();
+
+		const { files } = await result;
+		expect([...files[0].data]).toEqual([1, 2]);
+	} finally {
+		timeoutSpy.mockRestore();
+	}
+});
+
+it('treats a markup response with status 200 as a failed image', async () => {
+	consoleError = spyOn(console, 'error').mockImplementation(() => {});
+	const challenge = 'https://example.com/challenge.png';
+	globalThis.fetch = mock(async (url: any) => {
+		if (String(url) === challenge) {
+			return new Response('<html>Just a moment...</html>', {
+				headers: { 'content-type': 'text/html; charset=UTF-8' },
+			});
+		}
+		return new Response(new Uint8Array([1]), { headers: { 'content-type': 'image/png' } });
+	}) as any;
+
+	const { files, failed } = await fetchImageFiles(['https://example.com/a.png', challenge]);
+
+	expect(files.map((file) => file.url)).toEqual(['https://example.com/a.png']);
+	expect(failed).toEqual([challenge]);
+});
+
+it('labels failed images with a filename or host', () => {
+	expect(imageLabel('https://example.com/path/photo.jpg?size=large')).toBe('photo.jpg');
+	expect(imageLabel('https://example.com/')).toBe('example.com');
+	expect(imageLabel('data:image/png;base64,AAAA')).toBe('Embedded image');
+	expect(imageLabel('not a url')).toBe('not a url');
+});
+
+it('fails only when no image can be fetched', async () => {
+	consoleError = spyOn(console, 'error').mockImplementation(() => {});
+	globalThis.fetch = mock(async () => new Response('', { status: 404 })) as any;
+
+	await expect(fetchImageFiles(['https://example.com/missing.png'])).rejects.toThrow(
+		'Could not download any of the selected images.'
+	);
+});
+
+it('makes entry names safe to extract on Windows', () => {
+	const files = [
+		{ url: 'https://example.com/photo%3F.png', mime: 'image/png', data: new Uint8Array([1]) },
+		{ url: 'https://example.com/name%3A.png', mime: 'image/png', data: new Uint8Array([2]) },
+		{ url: 'https://example.com/CON.png', mime: 'image/png', data: new Uint8Array([3]) },
+		{ url: 'https://example.com/CON%20.png', mime: 'image/png', data: new Uint8Array([4]) },
+		{ url: 'https://example.com/NUL%20%20.png', mime: 'image/png', data: new Uint8Array([5]) },
+		{ url: 'https://example.com/..%2Ftraversal.png', mime: 'image/png', data: new Uint8Array([6]) },
+		{ url: 'https://example.com/trailing.%20', mime: 'image/png', data: new Uint8Array([7]) },
+		{ url: 'https://example.com/portrait%E2%80%AE.png', mime: 'image/png', data: new Uint8Array([8]) },
+		{ url: 'https://example.com/mark%E2%80%8E.png', mime: 'image/png', data: new Uint8Array([9]) },
+		{ url: 'https://example.com/arabic%D8%9C.png', mime: 'image/png', data: new Uint8Array([10]) },
+	];
+
+	expect(zipEntries(files, { new_file_name: '' }).map((entry) => entry.name)).toEqual([
+		'photo.png',
+		'name.png',
+		'_CON.png',
+		'_CON .png',
+		'_NUL  .png',
+		'traversal.png',
+		'trailing.png',
+		'portrait.png',
+		'mark.png',
+		'arabic.png',
+	]);
+});
+
+it('refuses a zip larger than a zip without ZIP64 can describe', async () => {
+	const huge = { byteLength: 2 ** 32 } as Uint8Array<ArrayBuffer>;
+
+	await expect(buildZip([{ name: 'a.png', data: huge }])).rejects.toThrow('4 GB');
+});
+
+it('counts the data descriptor fflate writes after each entry toward the 4 GB limit', async () => {
+	// Fits without the 16-byte data descriptor.
+	const almostHuge = { byteLength: 2 ** 32 - 1 - 76 - 2 * 'a.png'.length - 22 } as Uint8Array<ArrayBuffer>;
+
+	await expect(buildZip([{ name: 'a.png', data: almostHuge }])).rejects.toThrow('4 GB');
+});
+
+it('refuses more entries than a zip without ZIP64 can count', async () => {
+	const data = new Uint8Array([1]);
+	const files = Array.from({ length: 65_536 }, (_, index) => ({ name: `${index}.png`, data }));
+
+	await expect(buildZip(files)).rejects.toThrow('65,535');
+});
+
+it('shortens entry names that file systems would refuse, keeping the extension', () => {
+	const long = '名'.repeat(100);
+	const [entry] = zipEntries(
+		[{ url: `https://example.com/${long}.png`, mime: 'image/png', data: new Uint8Array([1]) }],
+		{
+			new_file_name: '',
+		}
+	);
+
+	expect(new TextEncoder().encode(entry.name).length).toBeLessThanOrEqual(200);
+	expect(entry.name).toStartWith('名名');
+	expect(entry.name).toEndWith('.png');
+});

@@ -6,6 +6,7 @@ mockDOM();
 import {
 	allImages,
 	columns,
+	downloadMode,
 	filterMaxHeight,
 	filterMaxHeightEnabled,
 	filterMaxWidth,
@@ -74,6 +75,7 @@ beforeEach(() => {
 	columns.value = 2;
 	folderName.value = '';
 	newFileName.value = '';
+	downloadMode.value = 'individual';
 	setupMocks();
 });
 
@@ -96,6 +98,7 @@ describe('useOptions', () => {
 			expect(filterMaxHeight.value).toBe(3000);
 			expect(folderName.value).toBe('');
 			expect(newFileName.value).toBe('');
+			expect(downloadMode.value).toBe('individual');
 			expect(showDownloadConfirmation.value).toBe(true);
 			expect(selectedImages.value).toEqual([]);
 			expect(columns.value).toBe(2);
@@ -105,6 +108,12 @@ describe('useOptions', () => {
 			setupMocks({ columns: 4 });
 			await initialize();
 			expect(columns.value).toBe(4);
+		});
+
+		it('should load the last download mode from chrome.storage', async () => {
+			setupMocks({ download_mode: 'zip' });
+			await initialize();
+			expect(downloadMode.value).toBe('zip');
 		});
 
 		it('should migrate values from localStorage and clear it', async () => {
@@ -156,6 +165,15 @@ describe('useOptions', () => {
 
 			const stored = await chrome.storage.local.get(['open_mode']);
 			expect(stored.open_mode).toBe('popup');
+		});
+
+		it('should remember the last download mode', async () => {
+			await initialize();
+
+			downloadMode.value = 'zip';
+
+			const stored = await chrome.storage.local.get(['download_mode']);
+			expect(stored.download_mode).toBe('zip');
 		});
 	});
 

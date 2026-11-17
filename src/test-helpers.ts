@@ -18,7 +18,22 @@ export const createChromeEvent = () => {
 	};
 };
 
-export const mockChrome = (opts?: { storage?: Record<string, any> }) => {
+const storageArea = (store: Record<string, any>) => ({
+	get: async (keys: any) => {
+		if (keys === null || keys === undefined) return { ...store };
+		const result: Record<string, any> = {};
+		const ks = Array.isArray(keys) ? keys : typeof keys === 'string' ? [keys] : Object.keys(keys);
+		for (const key of ks) {
+			if (key in store) result[key] = store[key];
+		}
+		return result;
+	},
+	set: async (items: Record<string, any>) => {
+		Object.assign(store, items);
+	},
+});
+
+export const mockChrome = (opts?: { storage?: Record<string, any>; sessionStorage?: Record<string, any> }) => {
 	const store = opts?.storage ?? {};
 	const chrome = mockRecursivePartial<any>({
 		action: {
@@ -34,9 +49,7 @@ export const mockChrome = (opts?: { storage?: Record<string, any> }) => {
 			onInstalled: {
 				addListener: mock(),
 			},
-			onMessage: {
-				addListener: mock(),
-			},
+			onMessage: createChromeEvent(),
 			sendMessage: mock(),
 		},
 		tabs: {
@@ -49,20 +62,8 @@ export const mockChrome = (opts?: { storage?: Record<string, any> }) => {
 	});
 	chrome.storage = {
 		onChanged: createChromeEvent(),
-		local: {
-			get: async (keys: any) => {
-				if (keys === null || keys === undefined) return { ...store };
-				const result: Record<string, any> = {};
-				const ks = Array.isArray(keys) ? keys : typeof keys === 'string' ? [keys] : Object.keys(keys);
-				for (const key of ks) {
-					if (key in store) result[key] = store[key];
-				}
-				return result;
-			},
-			set: async (items: Record<string, any>) => {
-				Object.assign(store, items);
-			},
-		},
+		local: storageArea(store),
+		session: storageArea(opts?.sessionStorage ?? {}),
 	};
 	return chrome;
 };
@@ -76,4 +77,13 @@ export function mockDOM(options?: { localStorage?: boolean }) {
 	if (!win.SyntaxError) win.SyntaxError = SyntaxError;
 	if (options?.localStorage) (globalThis as any).localStorage = win.localStorage;
 	return win;
+}
+
+/** Waits for async work that takes an unknown number of macrotasks, such as building a zip. */
+export async function waitFor(condition: () => boolean, timeoutMs = 1000) {
+	const deadline = Date.now() + timeoutMs;
+	while (!condition()) {
+		if (Date.now() > deadline) throw new Error('waitFor timed out');
+		await new Promise((resolve) => setTimeout(resolve, 0));
+	}
 }

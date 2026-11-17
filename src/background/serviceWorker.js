@@ -1,4 +1,6 @@
 // @ts-check
+import { errorMessage, fileExtension, normalizeSlashes } from '../utils.js';
+
 // Handle updates
 chrome.runtime.onInstalled.addListener(async (details) => {
 	if (details.reason === 'install') {
@@ -44,18 +46,49 @@ if (chrome.sidePanel) {
 /** @typedef {{
  *   imagesToDownload: string[],
  *   options: any,
- *   indices: Map<number, number> // downloadId → original index
+ *   indices: Map<number, number>, // downloadId → original index
  * }} Task */
 
 /** @type {Map<number, Task>} */
 const tasksByDownloadId = new Map();
+
+// Keyed by the zip's blob URL, which is known before `downloads.download()` is
+// called: Chrome may ask for the filename before its callback gives us the id.
+/** @type {Map<string, string>} */
+const zipFilenamesByUrl = new Map();
+/** @type {Map<number, string>} */
+const zipUrlsByDownloadId = new Map();
+// The offscreen document has no `chrome.downloads`, and must keep a zip's blob alive until its download finishes.
+// Kept in session storage: Chrome may restart the worker while the zip downloads.
+const offscreenZipDownloadIdsKey = 'offscreenZipDownloadIds';
+
+/** @returns {Promise<number[]>} */
+async function offscreenZipDownloadIds() {
+	const { [offscreenZipDownloadIdsKey]: ids = [] } = await chrome.storage.session.get(offscreenZipDownloadIdsKey);
+	return /** @type {number[]} */ (ids);
+}
+
+// Not serialized with the delete: only one zip runs at a time, so a lost write needs one zip's
+// download to finish in the same moment the next one's starts.
+async function addOffscreenZipDownloadId(/** @type {number} */ downloadId) {
+	const ids = await offscreenZipDownloadIds();
+	await chrome.storage.session.set({ [offscreenZipDownloadIdsKey]: [...ids, downloadId] });
+}
+
+/** @returns {Promise<boolean>} whether the id was there */
+async function deleteOffscreenZipDownloadId(/** @type {number} */ downloadId) {
+	const ids = await offscreenZipDownloadIds();
+	if (!ids.includes(downloadId)) return false;
+	await chrome.storage.session.set({ [offscreenZipDownloadIdsKey]: ids.filter((id) => id !== downloadId) });
+	return true;
+}
 
 // Chromium ignores the `filename` passed to `downloads.download()` by other
 // extensions whenever any extension listens for `onDeterminingFilename`, so only
 // listen while Image Downloader is itself downloading.
 let activeBatchCount = 0;
 
-chrome.runtime.onMessage.addListener(startDownload);
+chrome.runtime.onMessage.addListener(handleMessage);
 chrome.downloads.onChanged.addListener(cleanupCompletedDownloadTasks);
 
 // Firefox has no `onDeterminingFilename`, but takes the filename in `downloads.download()`.
@@ -74,6 +107,7 @@ function removeFilenameListenerIfIdle() {
 		canSuggestFilename() &&
 		activeBatchCount === 0 &&
 		tasksByDownloadId.size === 0 &&
+		zipFilenamesByUrl.size === 0 &&
 		chrome.downloads.onDeterminingFilename.hasListener(suggestNewFilename)
 	) {
 		chrome.downloads.onDeterminingFilename.removeListener(suggestNewFilename);
@@ -83,11 +117,44 @@ function removeFilenameListenerIfIdle() {
 // NOTE: Don't directly use an `async` function as a listener for `onMessage`:
 // https://stackoverflow.com/a/56483156
 // https://developer.chrome.com/docs/extensions/reference/runtime/#event-onMessage
-function startDownload(
+function handleMessage(
 	/** @type {any} */ message,
 	/** @type {chrome.runtime.MessageSender} */ sender,
 	/** @type {(response?: any) => void} */ resolve
 ) {
+	// Firefox has no offscreen documents; `firefoxZipJobs.js` answers there.
+	if (message?.type === 'startZip' && chrome.offscreen) {
+		startZipInOffscreenDocument(message.request).then(resolve, (error) => resolve({ error: errorMessage(error) }));
+		return true;
+	}
+
+	if (message?.type === 'findDownload') {
+		// Wrapped, because an interrupted download's own `error` would read as a failed request.
+		chrome.downloads.search({ id: message.downloadId }, ([download]) => resolve({ download }));
+		return true;
+	}
+
+	if (message?.type === 'cancelDownload') {
+		chrome.downloads.cancel(message.downloadId, () => resolve());
+		return true;
+	}
+
+	if (message?.type === 'closeOffscreen') {
+		closeIdleOffscreenDocument().then(
+			() => resolve(),
+			() => resolve()
+		);
+		return true;
+	}
+
+	if (message?.type === 'downloadZip') {
+		downloadZip(message.url, message.filename).then(
+			(downloadId) => resolve({ downloadId }),
+			(error) => resolve({ error: errorMessage(error) })
+		);
+		return true;
+	}
+
 	if (!(message && message.type === 'downloadImages')) return;
 
 	downloadImages({
@@ -97,6 +164,83 @@ function startDownload(
 	}).then(resolve);
 
 	return true; // Keeps the message channel open until `resolve` is called
+}
+
+const offscreenDocumentPath = 'src/Offscreen/index.html';
+// Creating, starting and closing run one at a time, so a close requested by a
+// finished job can't land on a job that has started since.
+let offscreenDocumentTask = Promise.resolve();
+
+/**
+ * @template T
+ * @param {() => Promise<T>} task
+ * @returns {Promise<T>}
+ */
+function queueOffscreenDocumentTask(task) {
+	const result = offscreenDocumentTask.then(task);
+	offscreenDocumentTask = result.then(
+		() => {},
+		() => {}
+	);
+	return result;
+}
+
+/**
+ * The service worker can't create blob URLs, so the zip is built in an offscreen document.
+ * @param {any} request
+ */
+function startZipInOffscreenDocument(request) {
+	return queueOffscreenDocumentTask(async () => {
+		if (!(await chrome.offscreen.hasDocument())) {
+			await chrome.offscreen.createDocument({
+				url: offscreenDocumentPath,
+				reasons: [chrome.offscreen.Reason.BLOBS],
+				justification: 'Build .zip downloads that continue after the popup closes',
+			});
+		}
+		return chrome.runtime.sendMessage({ target: 'zipJobs', type: 'start', request });
+	});
+}
+
+function closeIdleOffscreenDocument() {
+	return queueOffscreenDocumentTask(async () => {
+		if (!chrome.offscreen || !(await chrome.offscreen.hasDocument())) return;
+		const response = await chrome.runtime.sendMessage({ target: 'zipJobs', type: 'isIdle' });
+		if (response?.idle) await chrome.offscreen.closeDocument();
+	});
+}
+
+/**
+ * The zip is built in the offscreen document, but the download must start here so
+ * `suggestNewFilename()` can name it when other extensions listen for
+ * `onDeterminingFilename`.
+ * @param {string} url
+ * @param {string} filename
+ * @returns {Promise<number>}
+ */
+async function downloadZip(url, filename) {
+	activeBatchCount += 1;
+	ensureFilenameListener();
+
+	try {
+		return await new Promise((resolve, reject) => {
+			/** @type {chrome.downloads.DownloadOptions} */
+			const options = canSuggestFilename() ? { url } : { url, filename, conflictAction: 'uniquify' };
+			if (canSuggestFilename()) zipFilenamesByUrl.set(url, filename);
+			chrome.downloads.download(options, (downloadId) => {
+				if (downloadId == null) {
+					zipFilenamesByUrl.delete(url);
+					reject(new Error(chrome.runtime.lastError?.message || 'Could not start the .zip download.'));
+				} else {
+					if (zipFilenamesByUrl.has(url)) zipUrlsByDownloadId.set(downloadId, url);
+					addOffscreenZipDownloadId(downloadId).then(() => resolve(downloadId), reject);
+				}
+			});
+		});
+	} finally {
+		activeBatchCount -= 1;
+		removeFilenameListenerIfIdle();
+	}
 }
 
 async function downloadImages(/** @type {Task} */ task) {
@@ -132,6 +276,15 @@ async function downloadImages(/** @type {Task} */ task) {
 // https://developer.chrome.com/docs/extensions/reference/downloads/#event-onDeterminingFilename
 /** @type {Parameters<typeof chrome.downloads.onDeterminingFilename.addListener>[0]} */
 function suggestNewFilename(item, suggest) {
+	const zipFilename = zipFilenamesByUrl.get(item.url);
+	if (zipFilename) {
+		suggest({ filename: zipFilename, conflictAction: 'uniquify' });
+		zipFilenamesByUrl.delete(item.url);
+		zipUrlsByDownloadId.delete(item.id);
+		removeFilenameListenerIfIdle();
+		return;
+	}
+
 	const task = tasksByDownloadId.get(item.id);
 	if (!task) {
 		// Bare `suggest()` means "use `item.filename`" and is not an override, so it
@@ -185,8 +338,7 @@ function buildFilename(
 		newFilename += `${task.options.folder_name}/`;
 	}
 
-	const regex = /(?:\.([^.]+))?$/;
-	const extension = regex.exec(originalFilename)?.[1] || mime?.split('/')?.[1]?.replace('jpeg', 'jpg');
+	const extension = fileExtension(originalFilename, mime);
 
 	if (task.options.new_file_name) {
 		const numberOfDigits = task.imagesToDownload.length.toString().length;
@@ -202,11 +354,13 @@ function buildFilename(
 
 function cleanupCompletedDownloadTasks(/** @type {chrome.downloads.DownloadDelta} */ delta) {
 	if (delta.state?.current === 'complete' || delta.state?.current === 'interrupted') {
+		deleteOffscreenZipDownloadId(delta.id).then((isZip) => {
+			if (isZip) chrome.runtime.sendMessage({ target: 'zipJobs', type: 'downloadChanged', delta }).catch(() => {});
+		});
 		tasksByDownloadId.delete(delta.id);
+		const zipUrl = zipUrlsByDownloadId.get(delta.id);
+		if (zipUrl) zipFilenamesByUrl.delete(zipUrl);
+		zipUrlsByDownloadId.delete(delta.id);
 		removeFilenameListenerIfIdle();
 	}
-}
-
-function normalizeSlashes(/** @type {string} */ filename) {
-	return filename.replace(/\\/g, '/').replace(/\/{2,}/g, '/');
 }

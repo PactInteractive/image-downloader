@@ -1,20 +1,61 @@
 // @ts-check
-import html, { useSignal } from '../html.js';
+import html, { For, useEffect, useRef, useSignal, useSignalEffect } from '../html.js';
 
-import { removeSpecialCharacters, setToInvertedCheckboxValue } from '../utils.js';
+import { arraysEqual, errorMessage, removeSpecialCharacters, setToInvertedCheckboxValue } from '../utils.js';
 import * as actions from './actions.js';
-import { folderName, newFileName, selectedImages, showDownloadConfirmation } from './data.js';
+import { downloadMode, folderName, newFileName, selectedImages, showDownloadConfirmation } from './data.js';
 import { DownloadButton } from './DownloadButton.js';
 import { DownloadConfirmation } from './DownloadConfirmation.js';
 import { useRunAfterUpdate } from './useRunAfterUpdate.js';
+import { imageLabel } from './zip.js';
 
-export function Footer(/** @type {Object} */ props) {
+export function Footer(/** @type {{ isPopup?: boolean } & Object} */ { isPopup = false, ...props }) {
 	// Download
 	const downloadIsInProgress = useSignal(false);
+	// The zip runs in the background, so another panel may have started it.
+	const zipIsPreparing = useSignal(false);
 	const downloadConfirmationIsShown = useSignal(false);
+	const downloadError = useSignal('');
+	const downloadFailures = useSignal(/** @type {string[]} */ ([]));
+	const cancelController = useRef(/** @type {AbortController | null} */ (null));
+	const previousSelection = useRef(/** @type {string[]} */ ([]));
+	const zipRevision = useRef(0);
+
+	useSignalEffect(() => {
+		const selection = selectedImages.value;
+		// Page reloads rewrite the same selection; only a content change makes the messages stale.
+		if (arraysEqual(selection, previousSelection.current)) return;
+
+		previousSelection.current = selection;
+		downloadError.value = '';
+		downloadFailures.value = [];
+	});
+
+	/** @param {import('../background/zipJobs.js').ZipJobState | undefined} state */
+	function showZipJob(state) {
+		if (!state || state.revision < zipRevision.current) return;
+		zipRevision.current = state.revision;
+		zipIsPreparing.value = state.status === 'preparing';
+
+		if (state.status === 'idle' || !arraysEqual(state.images, selectedImages.value)) return;
+		if (state.status === 'started') downloadFailures.value = state.failed;
+		else if (state.status === 'failed') downloadError.value = state.error;
+	}
+
+	useEffect(() => {
+		const showChangedZipJob = (/** @type {any} */ message) => {
+			if (message?.type === 'zipJobChanged') showZipJob(message.state);
+		};
+		chrome.runtime.onMessage.addListener(showChangedZipJob);
+		// Results of a job that finished while this panel was closed are stale.
+		actions.getZipJob().then((state) => state?.status === 'preparing' && showZipJob(state));
+		return () => chrome.runtime.onMessage.removeListener(showChangedZipJob);
+	}, []);
 
 	function maybeDownloadImages() {
-		if (showDownloadConfirmation.value && selectedImages.value.length > 1) {
+		if (downloadMode.value === 'zip') {
+			downloadImages();
+		} else if (showDownloadConfirmation.value && selectedImages.value.length > 1) {
 			downloadConfirmationIsShown.value = true;
 		} else {
 			downloadImages();
@@ -22,9 +63,49 @@ export function Footer(/** @type {Object} */ props) {
 	}
 
 	async function downloadImages() {
+		const mode = downloadMode.value;
+		const images = selectedImages.value;
+		const controller = new AbortController();
+		cancelController.current = controller;
 		downloadIsInProgress.value = true;
-		await actions.downloadImages(selectedImages.value);
-		downloadIsInProgress.value = false;
+		downloadError.value = '';
+		downloadFailures.value = [];
+
+		try {
+			if (mode === 'zip') {
+				showZipJob(await actions.downloadImagesAsZip(images, controller.signal));
+			} else {
+				await actions.downloadImages(images);
+			}
+		} catch (error) {
+			if (!controller.signal.aborted) {
+				downloadError.value = errorMessage(error);
+			}
+		} finally {
+			if (cancelController.current === controller) cancelController.current = null;
+			downloadIsInProgress.value = false;
+		}
+	}
+
+	function cancelZip() {
+		cancelController.current?.abort();
+		if (zipIsPreparing.value)
+			actions.cancelZip().then(
+				({ state }) => showZipJob(state),
+				() => {}
+			);
+		zipIsPreparing.value = false;
+	}
+
+	function selectDownloadMode(/** @type {import('./DownloadButton.js').DownloadMode} */ mode) {
+		downloadError.value = '';
+		downloadFailures.value = [];
+		downloadMode.value = mode;
+		if (mode === 'zip') {
+			downloadImages();
+		} else {
+			maybeDownloadImages();
+		}
 	}
 
 	const runAfterUpdate = useRunAfterUpdate();
@@ -87,10 +168,60 @@ export function Footer(/** @type {Object} */ props) {
 
 								<${DownloadButton}
 									class="col-span-1"
-									disabled=${selectedImages.value.length === 0}
-									loading=${downloadIsInProgress.value}
+									loading=${downloadIsInProgress.value || zipIsPreparing.value}
+									selectedCount=${selectedImages.value.length}
+									selectedImages=${selectedImages.value}
+									mode=${downloadMode.value}
+									isPopup=${isPopup}
 									onClick=${maybeDownloadImages}
+									onSelectMode=${selectDownloadMode}
 								/>
+							</div>
+
+							${
+								zipIsPreparing.value || (downloadIsInProgress.value && downloadMode.value === 'zip')
+									? html`
+											<button
+												type="button"
+												class="mt-1 ml-auto block rounded-lg border border-slate-300 bg-white px-2 py-1 text-xs text-slate-700 hover:bg-slate-50 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+												title="Cancel preparing the .zip"
+												onClick=${cancelZip}
+											>
+												Cancel
+											</button>
+										`
+									: null
+							}
+							${
+								downloadError.value
+									? html`<p role="alert" class="mt-1 mb-0 text-xs text-red-600 dark:text-red-400">
+											${downloadError.value}
+										</p>`
+									: null
+							}
+							<div role="status">
+								${
+									downloadFailures.value.length > 0
+										? html`
+												<details class="mt-1 text-xs text-amber-700 dark:text-amber-400">
+													<summary class="cursor-pointer">
+														${`${downloadFailures.value.length} image${
+															downloadFailures.value.length === 1 ? '' : 's'
+														} could not be included in the .zip`}
+													</summary>
+													<ul class="mt-1 mb-0 max-h-24 overflow-y-auto pl-4">
+														<${For} each=${downloadFailures.value}>
+															${(/** @type {string} */ url) => html`
+																<li class="truncate" title=${url.startsWith('data:') ? undefined : url}>
+																	${imageLabel(url)}
+																</li>
+															`}
+														<//>
+													</ul>
+												</details>
+											`
+										: null
+								}
 							</div>
 						`
 			}

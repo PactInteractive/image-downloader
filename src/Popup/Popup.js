@@ -2,4 +2,4 @@
 import { App } from '../components/App.js';
 import html, { render } from '../html.js';
 
-render(html`<${App} />`, /** @type {HTMLElement} */ (document.querySelector('main')));
+render(html`<${App} isPopup=${true} />`, /** @type {HTMLElement} */ (document.querySelector('main')));
