@@ -15,6 +15,19 @@ import { fileExtension, isTruthy, removeSpecialCharacters, unique } from '../uti
  * @returns {Promise<Blob>}
  */
 export async function buildZip(files, signal) {
+	// fflate can't write ZIP64, and silently truncates sizes, offsets and the entry count past these.
+	if (files.length > 0xffff) {
+		throw new Error('A .zip can hold at most 65,535 images. Select fewer images.');
+	}
+	const nameEncoder = new TextEncoder();
+	const zipSize = files.reduce(
+		(size, { name, data }) => size + data.byteLength + 76 + 2 * nameEncoder.encode(name).length,
+		22
+	);
+	if (zipSize > 0xffffffff) {
+		throw new Error('The .zip would be larger than 4 GB. Select fewer images.');
+	}
+
 	/** @type {Uint8Array<ArrayBuffer>[]} */
 	const chunks = [];
 	/** @type {Error | null} */

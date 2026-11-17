@@ -273,3 +273,16 @@ it('makes entry names safe to extract on Windows', () => {
 		'arabic.png',
 	]);
 });
+
+it('refuses a zip larger than a zip without ZIP64 can describe', async () => {
+	const huge = { byteLength: 2 ** 32 } as Uint8Array<ArrayBuffer>;
+
+	await expect(buildZip([{ name: 'a.png', data: huge }])).rejects.toThrow('4 GB');
+});
+
+it('refuses more entries than a zip without ZIP64 can count', async () => {
+	const data = new Uint8Array([1]);
+	const files = Array.from({ length: 65_536 }, (_, index) => ({ name: `${index}.png`, data }));
+
+	await expect(buildZip(files)).rejects.toThrow('65,535');
+});
