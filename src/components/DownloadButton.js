@@ -80,6 +80,7 @@ export function DownloadButton({
 	function selectMode(/** @type {DownloadMode} */ selectedMode) {
 		const menu = menuRef.current;
 		if (menu?.matches(':popover-open')) menu.hidePopover();
+		// Clicking the checked mode only closes the menu, so checking which mode is set can't start another download.
 		if (selectedMode === mode) return;
 		onSelectMode(selectedMode);
 	}
