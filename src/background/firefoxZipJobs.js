@@ -20,7 +20,8 @@ const jobs = createZipJobs({
 });
 
 // Firefox suspends an idle background page after 30s, even mid-fetch, which loses the job and
-// revokes the zip's blob; an extension API call resets that timer.
+// revokes the zip's blob; an extension API call that runs in the parent process resets that timer
+// (https://bugzilla.mozilla.org/show_bug.cgi?id=1844041).
 /** @type {ReturnType<typeof setInterval> | undefined} */
 let keepAwakeTimer;
 function keepAwakeWhileBusy() {
