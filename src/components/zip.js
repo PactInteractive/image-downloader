@@ -64,6 +64,7 @@ export async function fetchImageFiles(urls, signal, concurrency = 4) {
 			const index = nextIndex++;
 			const url = urls[index];
 			// Time out a host that doesn't answer, but not a large image that is still arriving.
+			// A body that stalls after the headers waits for the user to cancel.
 			const request = new AbortController();
 			const timeout = AbortSignal.timeout(30_000);
 			const abortOnTimeout = () => request.abort(timeout.reason);
@@ -164,6 +165,7 @@ export function imageOrigins(urls) {
 /**
  * Page content supplies these URLs, and match patterns treat `*` as a wildcard, so
  * a host like `*` or `*.example.com` would grant far more access than the image needs.
+ * Underscores and IPv6 hosts are left out too: one pattern a browser rejects fails the whole request.
  * @param {string} hostname
  */
 function isConcreteHostname(hostname) {

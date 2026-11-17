@@ -68,6 +68,8 @@ async function offscreenZipDownloadIds() {
 	return /** @type {number[]} */ (ids);
 }
 
+// Not serialized with the delete: only one zip runs at a time, so a lost write needs one zip's
+// download to finish in the same moment the next one's starts.
 async function addOffscreenZipDownloadId(/** @type {number} */ downloadId) {
 	const ids = await offscreenZipDownloadIds();
 	await chrome.storage.session.set({ [offscreenZipDownloadIdsKey]: [...ids, downloadId] });
