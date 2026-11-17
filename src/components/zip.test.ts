@@ -293,3 +293,17 @@ it('refuses more entries than a zip without ZIP64 can count', async () => {
 
 	await expect(buildZip(files)).rejects.toThrow('65,535');
 });
+
+it('shortens entry names that file systems would refuse, keeping the extension', () => {
+	const long = '名'.repeat(100);
+	const [entry] = zipEntries(
+		[{ url: `https://example.com/${long}.png`, mime: 'image/png', data: new Uint8Array([1]) }],
+		{
+			new_file_name: '',
+		}
+	);
+
+	expect(new TextEncoder().encode(entry.name).length).toBeLessThanOrEqual(200);
+	expect(entry.name).toStartWith('名名');
+	expect(entry.name).toEndWith('.png');
+});

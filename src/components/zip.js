@@ -19,7 +19,6 @@ export async function buildZip(files, signal) {
 	if (files.length > 0xffff) {
 		throw new Error('A .zip can hold at most 65,535 images. Select fewer images.');
 	}
-	const nameEncoder = new TextEncoder();
 	// Per entry: local header, data descriptor, central header, and the name in both headers; then the end record.
 	const zipSize = files.reduce(
 		(size, { name, data }) => size + data.byteLength + 30 + 16 + 46 + 2 * nameEncoder.encode(name).length,
@@ -224,16 +223,38 @@ export function safeEntryName(name) {
 	const parts = name
 		.split(/[\\/]+/)
 		.map((part) =>
-			removeSpecialCharacters(part)
-				.replace(/[\u0000-\u001f\u007f-\u009f\u061c\u200b\u200e\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g, '')
-				.replace(/[. ]+$/g, '')
+			removeSpecialCharacters(part).replace(
+				/[\u0000-\u001f\u007f-\u009f\u061c\u200b\u200e\u200f\u202a-\u202e\u2060\u2066-\u2069\ufeff]/g,
+				''
+			)
 		)
+		.map(shortenNamePart)
+		.map((part) => part.replace(/[. ]+$/g, ''))
 		.filter(Boolean)
 		.map((part) => (reservedWindowsName.test(part) ? `_${part}` : part));
 
 	const entry = parts.join('/') || 'image';
 	// JS unzippers such as fflate's `unzipSync` assign entries into a plain object; `__proto__` would change its prototype.
 	return entry.toLowerCase() === '__proto__' ? `_${entry}` : entry;
+}
+
+// File systems refuse names past 255 bytes; the rest leaves room for a " (1)" suffix.
+const maxNamePartBytes = 200;
+const nameEncoder = new TextEncoder();
+
+/** @param {string} part */
+function shortenNamePart(part) {
+	if (nameEncoder.encode(part).length <= maxNamePartBytes) return part;
+
+	const [, stem, extension = ''] = /^(.*?)(\.[a-z0-9]{1,16})?$/is.exec(part) ?? [, part];
+	let shortened = '';
+	let bytes = nameEncoder.encode(extension).length;
+	for (const character of stem) {
+		bytes += nameEncoder.encode(character).length;
+		if (bytes > maxNamePartBytes) break;
+		shortened += character;
+	}
+	return shortened + extension;
 }
 
 // Windows refuses to extract files with these names, even with an extension.
